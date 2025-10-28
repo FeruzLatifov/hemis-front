@@ -1,0 +1,42 @@
+{
+  "login": {
+    "title": "HEMIS Admin Panel",
+    "subtitle": "Higher Education Management Information System",
+    "poweredBy": "🤖 Powered by AI & Analytics",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "language": "Language",
+    "loginButton": "🔐 Sign In",
+    "loggingIn": "Authenticating...",
+    "welcomeBack": "Welcome back!",
+    "stats": {
+      "universities": "Universities",
+      "students": "Students",
+      "analytics": "AI Analytics",
+      "reports": "Reports"
+    },
+    "features": {
+      "realtime": "Real-time Analytics",
+      "ai": "AI Predictions",
+      "digital": "Digitalization",
+      "secure": "Secure System"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid username or password",
+      "userDisabled": "User account is disabled",
+      "noUniversity": "No university assigned",
+      "universityInactive": "University is inactive",
+      "networkError": "Network connection error",
+      "required": "This field is required",
+      "minLength": "Must be at least {{count}} characters"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "retry": "Retry"
+  }
+}

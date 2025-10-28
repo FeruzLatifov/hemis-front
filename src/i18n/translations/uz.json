@@ -1,0 +1,42 @@
+{
+  "login": {
+    "title": "HEMIS Admin Panel",
+    "subtitle": "Oliy Ta'lim Boshqaruv Axborot Tizimi",
+    "poweredBy": "🤖 Sun'iy Intellekt va Tahlillar asosida",
+    "username": "Foydalanuvchi nomi",
+    "usernamePlaceholder": "Login nomingizni kiriting",
+    "password": "Parol",
+    "passwordPlaceholder": "Parolingizni kiriting",
+    "language": "Til",
+    "loginButton": "🔐 Tizimga kirish",
+    "loggingIn": "Tekshirilmoqda...",
+    "welcomeBack": "Xush kelibsiz!",
+    "stats": {
+      "universities": "Universitetlar",
+      "students": "Talabalar",
+      "analytics": "AI-Tahlillar",
+      "reports": "Hisobotlar"
+    },
+    "features": {
+      "realtime": "Real-time Tahlillar",
+      "ai": "AI-Prognozlar",
+      "digital": "Raqamlashtirish",
+      "secure": "Xavfsiz Tizim"
+    },
+    "errors": {
+      "invalidCredentials": "Foydalanuvchi nomi yoki parol noto'g'ri",
+      "userDisabled": "Foydalanuvchi hisobi faol emas",
+      "noUniversity": "Universitet tayinlanmagan",
+      "universityInactive": "Universitet faol emas",
+      "networkError": "Internet bilan bog'lanishda xatolik",
+      "required": "Bu maydon to'ldirilishi shart",
+      "minLength": "Kamida {{count}} belgidan iborat bo'lishi kerak"
+    }
+  },
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik",
+    "success": "Muvaffaqiyatli",
+    "retry": "Qayta urinish"
+  }
+}
