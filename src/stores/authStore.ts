@@ -13,7 +13,7 @@ interface AuthStore extends AuthState {
   // Actions
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  refresh: () => Promise<void>;
   setLocale: (locale: 'uz' | 'ru' | 'en') => void;
   initialize: () => Promise<void>;
 }
@@ -79,7 +79,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       // Refresh token action
-      refreshToken: async () => {
+      refresh: async () => {
         const state = get();
         const { refreshToken } = state;
         if (!refreshToken) {
@@ -135,7 +135,7 @@ export const useAuthStore = create<AuthStore>()(
               });
             } else {
               // Token invalid, try refresh
-              await get().refreshToken();
+              await get().refresh();
             }
           } catch (error) {
             // Authentication failed, clear state

@@ -8,7 +8,7 @@ import { useAuthStore } from './stores/authStore'
 import './i18n/config'
 
 // Pages
-import Login from './pages/Login'
+import Login from './pages/LoginEnhanced'
 import Dashboard from './pages/dashboard/Dashboard'
 import Students from './pages/students/Students'
 import Teachers from './pages/teachers/Teachers'
