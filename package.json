@@ -38,6 +38,7 @@
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
     "i18next": "^25.6.0",
+    "i18next-http-backend": "^2.6.2",
     "lucide-react": "0.469.0",
     "react": "19.0.0",
     "react-countup": "6.5.3",

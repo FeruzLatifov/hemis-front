@@ -6,8 +6,9 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AuthState, AdminUser, University, Permission, LoginRequest } from '../types/auth.types';
+import type { AuthState, LoginRequest } from '../types/auth.types';
 import * as authApi from '../api/auth.api';
+import { isTokenExpired } from '../utils/token.util';
 
 interface AuthStore extends AuthState {
   // Actions
@@ -117,29 +118,45 @@ export const useAuthStore = create<AuthStore>()(
 
       // Initialize from localStorage
       initialize: async () => {
-        const token = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
+        // Zustand persist middleware already restored the state from localStorage
+        const currentState = get();
+        const { token, refreshToken, isAuthenticated } = currentState;
 
-        if (token && refreshToken) {
-          try {
-            // Validate token
-            const isValid = await authApi.validateToken();
-            if (isValid.valid) {
-              // Load current user
-              const user = await authApi.getCurrentUser();
-              set({
-                token,
-                refreshToken,
-                user,
-                isAuthenticated: true,
-              });
-            } else {
-              // Token invalid, try refresh
-              await get().refresh();
+        if (isAuthenticated && token) {
+          // ✅ BEST PRACTICE: Client-side token validation (no server call)
+          // Check if access token is expired
+          if (isTokenExpired(token)) {
+            console.log('Access token expired, attempting refresh...');
+
+            // Check if refresh token is also expired
+            if (isTokenExpired(refreshToken, 0)) {
+              // Both tokens expired - logout
+              console.warn('Refresh token also expired - logging out');
+              await get().logout();
+              return;
             }
-          } catch (error) {
-            // Authentication failed, clear state
-            get().logout();
+
+            // Try to refresh access token
+            try {
+              await get().refresh();
+              console.log('Token refreshed successfully');
+            } catch (error) {
+              console.error('Token refresh failed during initialization:', error);
+              await get().logout();
+              return;
+            }
+          }
+
+          // Optional: Load fresh user data in background (non-blocking)
+          // Only if user not already loaded
+          if (!currentState.user) {
+            try {
+              const user = await authApi.getCurrentUser();
+              set({ user });
+            } catch (error) {
+              // Ignore error - user will be loaded on next successful API call
+              console.debug('Could not load user during initialization:', error);
+            }
           }
         }
       },
@@ -147,9 +164,12 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({
+        token: state.token,
+        refreshToken: state.refreshToken,
         user: state.user,
         university: state.university,
         permissions: state.permissions,
+        isAuthenticated: state.isAuthenticated,
       }),
     }
   )

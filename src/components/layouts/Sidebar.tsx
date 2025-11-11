@@ -1,325 +1,412 @@
-import { useState } from 'react'
+/**
+ * Sidebar Component - Backend Integration
+ *
+ * Dynamic menu loaded from backend API with permission filtering
+ * Supports multilingual labels (uz/ru/en)
+ */
+
+import { useState, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import {
   GraduationCap,
-  TrendingUp,
-  BookOpen,
-  BarChart3,
-  Languages,
-  FileText,
-  Settings,
-  HelpCircle,
   ChevronLeft,
   ChevronDown,
   ChevronRight,
   Menu,
-  Building2,
-  School,
-  Users,
-  MapPin,
-  UserCheck,
-  Award,
-  DollarSign,
-  Calendar,
-  Clock,
-  Layers,
-  Lightbulb,
-  BookMarked,
-  ScrollText,
-  UserSquare2,
-  UsersRound,
-  Edit3,
-  Activity,
-  Microscope,
-  Copyright,
-  LayoutDashboard,
-  FolderOpen,
-  Sparkles,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { useRootMenuItems, useMenuLoading } from '../../stores/menuStore'
+import { getIcon } from '../../utils/iconMapper'
+import type { MenuItem as BackendMenuItem } from '../../api/menu.api'
+import hemisLogo from '../../assets/images/hemis-logo-new.png'
 
 interface SidebarProps {
   open: boolean
   setOpen: (open: boolean) => void
 }
 
-interface MenuItem {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  path?: string
-  badge?: string
-  submenu?: Array<{
-    label: string
-    items: Array<{
-      icon: React.ComponentType<{ className?: string }>
-      label: string
-      path: string
-      badge?: string
-    }>
-  }>
+/**
+ * Get label for menu item based on current language
+ * Supports 4 languages: uz (Latin), oz (Cyrillic), ru (Russian), en (English)
+ */
+const getMenuLabel = (item: BackendMenuItem, lang: string): string => {
+  switch (lang) {
+    case 'oz':
+      return item.labelOz || item.labelUz
+    case 'ru':
+      return item.labelRu || item.labelUz
+    case 'en':
+      return item.labelEn || item.labelUz
+    default:
+      return item.labelUz
+  }
 }
 
-const menuSections = [
-  {
-    title: 'ASOSIY',
-    items: [
-      { icon: LayoutDashboard, label: 'СТАТИСТИКА', path: '/dashboard', badge: 'Yangi' },
-    ],
-  },
-  {
-    title: 'MA\'LUMOTLAR',
-    items: [
-      {
-        icon: FolderOpen,
-        label: 'REESTRLAR',
-        submenu: [
-          {
-            label: "O'quv",
-            items: [
-              { icon: Building2, label: 'OTMlar', path: '/universities' },
-              { icon: School, label: 'Fakultetlar', path: '/faculties' },
-              { icon: Users, label: 'Kafedralar', path: '/departments' },
-              { icon: MapPin, label: "Ta'lim yo'nalishlari", path: '/directions' },
-              { icon: UserCheck, label: "O'qituvchilar", path: '/teachers' },
-              { icon: GraduationCap, label: 'Talabalar', path: '/students' },
-              { icon: Award, label: 'Talaba stipendiyalari', path: '/scholarships' },
-              { icon: DollarSign, label: 'OTM kvotalari', path: '/quotas' },
-              { icon: BookOpen, label: "O'qituvchi malaka oshirishlari", path: '/trainings' },
-              { icon: Calendar, label: "O'quv yillari", path: '/academic-years' },
-              { icon: Clock, label: 'Semestrlar', path: '/semesters' },
-              { icon: Layers, label: 'Kurslar', path: '/courses' },
-            ]
-          },
-          {
-            label: 'Ilmiy',
-            items: [
-              { icon: Lightbulb, label: 'Ilmiy loyihalar', path: '/projects' },
-              { icon: BookMarked, label: 'Ilmiy nashrlar', path: '/publications' },
-              { icon: ScrollText, label: 'Dissertasiya himoyalari', path: '/dissertations' },
-              { icon: UserSquare2, label: 'Doktorantura talabalari', path: '/phd-students' },
-              { icon: UsersRound, label: 'Loyiha ijrochilari', path: '/executors' },
-              { icon: Edit3, label: 'Nashr mualliflari', path: '/authors' },
-              { icon: Activity, label: 'Ilmiy faollik', path: '/research-activity' },
-              { icon: Microscope, label: 'Ilmiy ishlanmalar', path: '/developments' },
-              { icon: Copyright, label: 'Intellektual mulk obyektlari', path: '/intellectual-property' },
-            ]
+/**
+ * Recursive Menu Item Component
+ * Supports unlimited nesting levels
+ */
+interface MenuItemComponentProps {
+  item: BackendMenuItem
+  level: number
+  open: boolean
+  currentLang: string
+  location: ReturnType<typeof useLocation>
+  expandedMenus: Set<string>
+  toggleSubmenu: (itemId: string) => void
+  setOpen: (open: boolean) => void
+}
+
+function MenuItemComponent({
+  item,
+  level,
+  open,
+  currentLang,
+  location,
+  expandedMenus,
+  toggleSubmenu,
+  setOpen
+}: MenuItemComponentProps) {
+  const Icon = getIcon(item.icon)
+  const label = getMenuLabel(item, currentLang)
+  const hasChildren = item.items && item.items.length > 0
+  const isExpanded = expandedMenus.has(item.id)
+
+  if (hasChildren) {
+    const hasActiveChild = item.items!.some((child) =>
+      checkActiveInTree(child, location.pathname)
+    )
+
+    return (
+      <div key={item.id}>
+        <button
+          onClick={() => {
+            if (!open && level === 0) setOpen(true)
+            toggleSubmenu(item.id)
+          }}
+          className={cn(
+            'group relative flex w-full items-center gap-3 rounded-lg px-3 transition-all duration-200',
+            level === 0 ? 'py-2.5' : 'py-2 text-sm',
+            !open && level === 0 && 'justify-center'
+          )}
+          style={
+            hasActiveChild
+              ? {
+                  backgroundColor: level === 0 ? '#2F80ED' : '#EFF6FF',
+                  color: level === 0 ? '#FFFFFF' : '#2F80ED',
+                  boxShadow: level === 0 ? '0 1px 2px rgba(15, 23, 42, 0.04)' : 'none'
+                }
+              : { color: level === 0 ? '#1E2124' : '#6B7280' }
           }
-        ]
-      },
-    ],
-  },
-  {
-    title: 'TAHLIL',
-    items: [
-      { icon: TrendingUp, label: 'REYTING', path: '/rating' },
-      { icon: BarChart3, label: 'HISOBOTLAR', path: '/reports' },
-    ],
-  },
-  {
-    title: 'SOZLAMALAR',
-    items: [
-      { icon: BookOpen, label: 'KLASSIFIKATORLAR', path: '/classifiers' },
-      { icon: Languages, label: 'TARJIMALAR', path: '/translations' },
-      { icon: FileText, label: 'SHABLONLAR', path: '/templates' },
-      { icon: Settings, label: 'TIZIM', path: '/system' },
-    ],
-  },
-  {
-    title: '',
-    items: [{ icon: HelpCircle, label: 'YORDAM', path: '/help' }],
-  },
-]
+          onMouseEnter={(e) => {
+            if (!hasActiveChild) {
+              e.currentTarget.style.backgroundColor = level === 0 ? '#F5F6FA' : '#F5F6FA'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!hasActiveChild) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }
+          }}
+        >
+          <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
+          {open && (
+            <>
+              <span className="flex-1 font-medium text-left">{label}</span>
+              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </>
+          )}
+        </button>
 
-export default function Sidebar({ open, setOpen }: SidebarProps) {
-  const location = useLocation()
-  const [expandedMenus, setExpandedMenus] = useState<string[]>([])
-
-  const toggleSubmenu = (label: string) => {
-    setExpandedMenus((prev) =>
-      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
+        {open && isExpanded && (
+          <div className={cn('mt-1 space-y-1', level === 0 ? 'ml-3' : 'ml-4')}>
+            {item.items!
+              .filter((child) => child.visible !== false)
+              .sort((a, b) => (a.orderNum || a.order || 0) - (b.orderNum || b.order || 0))
+              .map((child) => (
+                <MenuItemComponent
+                  key={child.id}
+                  item={child}
+                  level={level + 1}
+                  open={open}
+                  currentLang={currentLang}
+                  location={location}
+                  expandedMenus={expandedMenus}
+                  toggleSubmenu={toggleSubmenu}
+                  setOpen={setOpen}
+                />
+              ))}
+          </div>
+        )}
+      </div>
     )
   }
 
-  const isSubmenuExpanded = (label: string) => expandedMenus.includes(label)
+  // Leaf node (no children)
+  const isActive = item.url ? location.pathname === item.url : false
+  return (
+    <Link
+      key={item.id}
+      to={item.url || '#'}
+      className={cn(
+        'group relative flex items-center gap-3 rounded-lg px-3 transition-all duration-200',
+        level === 0 ? 'py-2.5' : 'py-2 text-sm',
+        !open && level === 0 && 'justify-center'
+      )}
+      style={
+        isActive
+          ? {
+              backgroundColor: level === 0 ? '#2F80ED' : '#EFF6FF',
+              color: level === 0 ? '#FFFFFF' : '#2F80ED',
+              boxShadow: level === 0 ? '0 1px 2px rgba(15, 23, 42, 0.04)' : 'none'
+            }
+          : { color: level === 0 ? '#1E2124' : '#6B7280' }
+      }
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.backgroundColor = '#F5F6FA'
+          if (level > 0) {
+            e.currentTarget.style.color = '#1E2124'
+          }
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.backgroundColor = 'transparent'
+          e.currentTarget.style.color = level === 0 ? '#1E2124' : '#6B7280'
+        }
+      }}
+    >
+      <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : level === 0 ? 'h-5 w-5' : 'h-4 w-4')} />
+      {open && (
+        <span className="flex-1 font-medium">{label}</span>
+      )}
+    </Link>
+  )
+}
+
+/**
+ * Check if any item in tree is active
+ */
+function checkActiveInTree(item: BackendMenuItem, pathname: string): boolean {
+  if (item.url && pathname === item.url) {
+    return true
+  }
+  if (item.items && item.items.length > 0) {
+    return item.items.some((child) => checkActiveInTree(child, pathname))
+  }
+  return false
+}
+
+export default function Sidebar({ open, setOpen }: SidebarProps) {
+  const location = useLocation()
+  const { i18n } = useTranslation()
+  // Track expanded menus at each level for nested accordion behavior
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set())
+
+  // Get menu items from store
+  const rootMenuItems = useRootMenuItems()
+  const isLoading = useMenuLoading()
+
+  // Get current language
+  const currentLang = i18n.language || 'uz'
+
+  const toggleSubmenu = (itemId: string) => {
+    setExpandedMenus((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId)
+      } else {
+        newSet.add(itemId)
+      }
+      return newSet
+    })
+  }
+
+  // Sort menu items by orderNum
+  const sortedMenuItems = useMemo(() => {
+    return [...rootMenuItems]
+      .filter((item) => item.visible)
+      .sort((a, b) => a.orderNum - b.orderNum)
+  }, [rootMenuItems])
 
   return (
-    <aside className={cn(
-      'relative flex h-screen flex-col border-r transition-all duration-300 backdrop-blur-xl',
-      'bg-gradient-to-b from-slate-50/80 to-slate-100/80 dark:from-slate-900/80 dark:to-slate-800/80',
-      'border-slate-200/50 dark:border-slate-700/50',
-      open ? 'w-72' : 'w-20'
-    )}>
-      <div className="flex h-16 items-center justify-between px-4 shadow-lg backdrop-blur-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500">
+    <>
+      {/* Mobile Overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      <aside
+        className={cn(
+          'fixed md:relative flex h-screen flex-col border-r transition-all duration-300 z-40',
+          'md:translate-x-0',
+          open ? 'translate-x-0 w-72' : '-translate-x-full md:translate-x-0 md:w-20'
+        )}
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderColor: '#E5E7EB'
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex h-14 md:h-16 items-center justify-between px-3 md:px-4 border-b"
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderColor: '#E5E7EB',
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)'
+          }}
+        >
         {open ? (
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-              <div className="relative">
-                <GraduationCap className="h-6 w-6 text-white" />
-                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-yellow-300 animate-pulse" />
-              </div>
+          <div className="flex items-center gap-2.5 md:gap-3">
+            {/* Logo */}
+            <div
+              className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2"
+              style={{
+                backgroundColor: '#F5F6FA',
+                border: '1px solid #E5E7EB'
+              }}
+            >
+              <img
+                src={hemisLogo}
+                alt="HEMIS"
+                className="w-full h-full object-contain"
+              />
             </div>
+
+            {/* Title */}
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-white">HEMIS</span>
-              <span className="text-xs text-white/80">Ministry Portal</span>
+              <span className="text-base md:text-lg font-bold" style={{ color: '#1E2124' }}>
+                HEMIS
+              </span>
+              <span className="text-xs" style={{ color: '#6B7280' }}>
+                Ministry Portal
+              </span>
             </div>
           </div>
         ) : (
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-            <div className="relative">
-              <GraduationCap className="h-6 w-6 text-white" />
-              <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-yellow-300 animate-pulse" />
-            </div>
+          <div
+            className="mx-auto hidden md:flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2"
+            style={{
+              backgroundColor: '#F5F6FA',
+              border: '1px solid #E5E7EB'
+            }}
+          >
+            <img
+              src={hemisLogo}
+              alt="HEMIS"
+              className="w-full h-full object-contain"
+            />
           </div>
         )}
 
-        <Button
+        {/* Toggle Button */}
+        <button
           onClick={() => setOpen(!open)}
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-white hover:bg-white/20"
+          className="h-8 w-8 flex items-center justify-center rounded-lg transition-colors"
+          style={{
+            color: '#6B7280'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#F5F6FA'
+            e.currentTarget.style.color = '#2F80ED'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#6B7280'
+          }}
         >
           {open ? (
             <ChevronLeft className="h-5 w-5" />
           ) : (
             <Menu className="h-5 w-5" />
           )}
-        </Button>
+        </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-6">
-          {menuSections.map((section, sectionIndex) => (
-            <div key={sectionIndex}>
-              {section.title && open && (
-                <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {section.title}
-                </h3>
-              )}
-              <div className="space-y-1">
-                {section.items.map((item: MenuItem) => {
-                  if (item.submenu) {
-                    const isExpanded = isSubmenuExpanded(item.label)
-                    const hasActiveSubmenu = item.submenu.some((category) =>
-                      category.items.some((subItem) => location.pathname.startsWith(subItem.path))
-                    )
-
-                    return (
-                      <div key={item.label}>
-                        <button
-                          onClick={() => {
-                            if (!open) setOpen(true)
-                            toggleSubmenu(item.label)
-                          }}
-                          className={cn(
-                            'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200',
-                            hasActiveSubmenu
-                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
-                              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
-                            !open && 'justify-center'
-                          )}
-                        >
-                          <item.icon className={cn('h-5 w-5', !open && 'h-6 w-6')} />
-                          {open && (
-                            <>
-                              <span className="flex-1 font-medium text-left">{item.label}</span>
-                              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            </>
-                          )}
-                        </button>
-
-                        {open && isExpanded && (
-                          <div className="ml-3 mt-1 space-y-1">
-                            {item.submenu.map((category, categoryIndex) => (
-                              <div key={categoryIndex} className="space-y-1">
-                                <div className="px-3 py-1.5">
-                                  <span className="text-xs font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                                    {category.label}
-                                  </span>
-                                </div>
-                                {category.items.map((subItem) => {
-                                  const isActive = location.pathname === subItem.path
-                                  return (
-                                    <Link
-                                      key={subItem.path}
-                                      to={subItem.path}
-                                      className={cn(
-                                        'group relative flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 text-sm',
-                                        isActive
-                                          ? 'bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-100'
-                                          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
-                                      )}
-                                    >
-                                      <subItem.icon className="h-4 w-4" />
-                                      <span className="flex-1 font-medium">{subItem.label}</span>
-                                      {subItem.badge && (
-                                        <Badge variant="secondary" className="text-xs">
-                                          {subItem.badge}
-                                        </Badge>
-                                      )}
-                                    </Link>
-                                  )
-                                })}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  }
-
-                  const isActive = item.path ? location.pathname.startsWith(item.path) : false
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path!}
-                      className={cn(
-                        'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200',
-                        isActive
-                          ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
-                          : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
-                        !open && 'justify-center'
-                      )}
-                    >
-                      <item.icon className={cn('h-5 w-5', !open && 'h-6 w-6')} />
-                      {open && (
-                        <>
-                          <span className="flex-1 font-medium">{item.label}</span>
-                          {item.badge && (
-                            <Badge variant="secondary">{item.badge}</Badge>
-                          )}
-                        </>
-                      )}
-                    </Link>
-                  )
-                })}
-              </div>
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-2.5 md:px-3 py-3 md:py-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm" style={{ color: '#6B7280' }}>
+              Loading menu...
             </div>
-          ))}
-        </div>
-      </nav>
-
-      <div className="border-t border-slate-200/50 p-4 dark:border-slate-800/50">
-        {open ? (
-          <div className="flex items-center gap-3 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 px-3 py-2 dark:from-purple-950/30 dark:to-indigo-950/30">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600">
-              <GraduationCap className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium text-slate-900 dark:text-white">HEMIS Ministry</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Version 2.0.0</p>
+          </div>
+        ) : sortedMenuItems.length === 0 ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm" style={{ color: '#6B7280' }}>
+              No menu items available
             </div>
           </div>
         ) : (
-          <div className="flex justify-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600">
-              <GraduationCap className="h-4 w-4 text-white" />
+          <div className="space-y-1">
+            {sortedMenuItems.map((item) => (
+              <MenuItemComponent
+                key={item.id}
+                item={item}
+                level={0}
+                open={open}
+                currentLang={currentLang}
+                location={location}
+                expandedMenus={expandedMenus}
+                toggleSubmenu={toggleSubmenu}
+                setOpen={setOpen}
+              />
+            ))}
+          </div>
+        )}
+      </nav>
+
+      {/* Footer */}
+      <div
+        className="border-t p-3 md:p-4"
+        style={{
+          borderColor: '#E5E7EB'
+        }}
+      >
+        {open ? (
+          <div
+            className="flex items-center gap-2.5 md:gap-3 rounded-lg px-2.5 md:px-3 py-2"
+            style={{
+              backgroundColor: '#F5F6FA',
+              border: '1px solid #E5E7EB'
+            }}
+          >
+            <div
+              className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full"
+              style={{
+                backgroundColor: '#2F80ED'
+              }}
+            >
+              <GraduationCap className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: '#FFFFFF' }} />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-medium" style={{ color: '#1E2124' }}>
+                HEMIS Ministry
+              </p>
+              <p className="text-xs" style={{ color: '#6B7280' }}>
+                v2.0.0
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="hidden md:flex justify-center">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-full"
+              style={{
+                backgroundColor: '#2F80ED'
+              }}
+            >
+              <GraduationCap className="h-4 w-4" style={{ color: '#FFFFFF' }} />
             </div>
           </div>
         )}
       </div>
     </aside>
+    </>
   )
 }
-

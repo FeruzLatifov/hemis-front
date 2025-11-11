@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import CountUp from 'react-countup'
+import { cn } from '@/lib/utils'
 
 export default function Dashboard() {
   const stats = [
@@ -335,8 +336,4 @@ export default function Dashboard() {
       </div>
     </div>
   )
-}
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ')
 }

@@ -4,9 +4,9 @@
     "subtitle": "Higher Education Management Information System",
     "poweredBy": "🤖 Powered by AI & Analytics",
     "username": "Username",
-    "usernamePlaceholder": "Enter your username",
+    "usernamePlaceholder": "Login",
     "password": "Password",
-    "passwordPlaceholder": "Enter your password",
+    "passwordPlaceholder": "Password",
     "language": "Language",
     "loginButton": "🔐 Sign In",
     "loggingIn": "Authenticating...",
@@ -29,7 +29,9 @@
       "noUniversity": "No university assigned",
       "universityInactive": "University is inactive",
       "networkError": "Network connection error",
+      "backendDown": "Backend server is not available. Please try again later.",
       "required": "This field is required",
+      "requiredField": "{{field}} is required",
       "minLength": "Must be at least {{count}} characters"
     }
   },
@@ -38,5 +40,83 @@
     "error": "Error",
     "success": "Success",
     "retry": "Retry"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "login_button": "Sign In",
+    "password": "Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot password?",
+    "login_to_continue": "Please sign in to continue"
+  },
+  "page": {
+    "universities": {
+      "title": "Institutions (HEIs)",
+      "subtitle": "Higher Education Institutions Registry"
+    },
+    "university": {
+      "detail": {
+        "title": "Institution Details"
+      }
+    }
+  },
+  "table": {
+    "university": {
+      "code": "Code",
+      "name": "Name",
+      "tin": "TIN",
+      "address": "Address",
+      "region": "Region",
+      "ownership": "Ownership",
+      "orgType": "Organization Type",
+      "cadastre": "Cadastre",
+      "versionType": "Version Type",
+      "soatoRegion": "SOATO Region",
+      "urls": {
+        "university": "University URL",
+        "teacher": "Teacher URL",
+        "student": "Student URL"
+      },
+      "uzbmbUrl": "UZBMB URL",
+      "flags": {
+        "gpaEdit": "GPA Edit",
+        "accreditationEdit": "Accreditation Edit",
+        "addStudent": "Add Student",
+        "allowGrouping": "Allow Grouping",
+        "allowTransferOutside": "Allow External Transfer"
+      },
+      "contractCategory": "Contract Category",
+      "activityStatus": "Activity Status",
+      "belongsTo": "Belongs To",
+      "terrain": "Mahalla",
+      "mailAddress": "Mail Address",
+      "bankInfo": "Bank Details",
+      "accreditationInfo": "Accreditation Info"
+    }
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "export": "Export",
+    "search": "Search",
+    "filter": "Filter",
+    "apply": "Apply",
+    "clear": "Clear"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by code, name or TIN...",
+    "region": "Region",
+    "ownership": "Ownership",
+    "type": "Type"
+  },
+  "errors": {
+    "loadFailed": "Failed to load data"
+  },
+  "menu": {
+    "registry": {
+      "e_reestr": {
+        "university": "Institutions"
+      }
+    }
   }
 }

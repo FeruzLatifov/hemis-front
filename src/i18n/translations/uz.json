@@ -4,9 +4,9 @@
     "subtitle": "Oliy Ta'lim Boshqaruv Axborot Tizimi",
     "poweredBy": "🤖 Sun'iy Intellekt va Tahlillar asosida",
     "username": "Foydalanuvchi nomi",
-    "usernamePlaceholder": "Login nomingizni kiriting",
+    "usernamePlaceholder": "Login",
     "password": "Parol",
-    "passwordPlaceholder": "Parolingizni kiriting",
+    "passwordPlaceholder": "Parol",
     "language": "Til",
     "loginButton": "🔐 Tizimga kirish",
     "loggingIn": "Tekshirilmoqda...",
@@ -29,7 +29,9 @@
       "noUniversity": "Universitet tayinlanmagan",
       "universityInactive": "Universitet faol emas",
       "networkError": "Internet bilan bog'lanishda xatolik",
+      "backendDown": "Backend server ishlamayapti. Iltimos, keyinroq qayta urinib ko'ring.",
       "required": "Bu maydon to'ldirilishi shart",
+      "requiredField": "{{field}} maydoni to'ldirilishi shart",
       "minLength": "Kamida {{count}} belgidan iborat bo'lishi kerak"
     }
   },
@@ -38,5 +40,83 @@
     "error": "Xatolik",
     "success": "Muvaffaqiyatli",
     "retry": "Qayta urinish"
+  },
+  "auth": {
+    "login": "Kirish",
+    "logout": "Chiqish",
+    "login_button": "Tizimga kirish",
+    "password": "Parol",
+    "remember_me": "Eslab qolish",
+    "forgot_password": "Parolni unutdingizmi?",
+    "login_to_continue": "Davom etish uchun tizimga kiring"
+  },
+  "page": {
+    "universities": {
+      "title": "Muassasalar (OTMlar)",
+      "subtitle": "Oliy ta'lim muassasalari reestri"
+    },
+    "university": {
+      "detail": {
+        "title": "Muassasa ma'lumotlari"
+      }
+    }
+  },
+  "table": {
+    "university": {
+      "code": "Kod",
+      "name": "Nomi",
+      "tin": "INN",
+      "address": "Manzil",
+      "region": "Viloyat",
+      "ownership": "Mulkchilik",
+      "orgType": "Tashkiliy turi",
+      "cadastre": "Kadastr",
+      "versionType": "Versiya turi",
+      "soatoRegion": "SOATO Region",
+      "urls": {
+        "university": "OTM URL",
+        "teacher": "O'qituvchi URL",
+        "student": "Talaba URL"
+      },
+      "uzbmbUrl": "UZBMB URL",
+      "flags": {
+        "gpaEdit": "GPA tahrir",
+        "accreditationEdit": "Akkreditatsiya tahrir",
+        "addStudent": "Talaba qo'shish",
+        "allowGrouping": "Guruhlashga ruxsat",
+        "allowTransferOutside": "Tashqariga o'tkazishga ruxsat"
+      },
+      "contractCategory": "Kontrakt kategoriyasi",
+      "activityStatus": "Faollik statusi",
+      "belongsTo": "Tegishli",
+      "terrain": "Mahalla",
+      "mailAddress": "Pochta manzili",
+      "bankInfo": "Bank ma'lumotlari",
+      "accreditationInfo": "Akkreditatsiya ma'lumotlari"
+    }
+  },
+  "actions": {
+    "refresh": "Yangilash",
+    "export": "Export",
+    "search": "Qidirish",
+    "filter": "Filtr",
+    "apply": "Qo'llash",
+    "clear": "Tozalash"
+  },
+  "filters": {
+    "searchPlaceholder": "Kod, nom yoki INN bo'yicha qidirish...",
+    "region": "Viloyat",
+    "ownership": "Mulkchilik",
+    "type": "Turi"
+  },
+  "errors": {
+    "loadFailed": "Ma'lumotlarni yuklashda xatolik"
+  },
+  "menu": {
+    "registry": {
+      "e_reestr": {
+        "university": "Muassasalar"
+      }
+    }
   }
 }

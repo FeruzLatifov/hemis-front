@@ -5,15 +5,19 @@ import { Toaster } from 'sonner'
 import { ThemeProvider } from './components/theme-provider'
 import MainLayout from './components/layouts/MainLayout'
 import { useAuthStore } from './stores/authStore'
+import { useTokenRefresh } from './hooks/useTokenRefresh'
+import { useMenuInit } from './hooks/useMenuInit'
 import './i18n/config'
 
 // Pages
-import Login from './pages/LoginEnhanced'
+import Login from './pages/Login'
 import Dashboard from './pages/dashboard/Dashboard'
 import Students from './pages/students/Students'
 import Teachers from './pages/teachers/Teachers'
 import Universities from './pages/universities/Universities'
 import Reports from './pages/reports/Reports'
+import { TranslationsPage, TranslationFormPage } from './pages/admin/translations'
+import { UniversitiesPage } from './pages/registry/university'
 
 // Create QueryClient
 const queryClient = new QueryClient({
@@ -30,7 +34,10 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore()
 
-  if (!isAuthenticated) {
+  // Check localStorage directly for immediate access
+  const token = localStorage.getItem('accessToken')
+
+  if (!isAuthenticated && !token) {
     return <Navigate to="/login" replace />
   }
 
@@ -44,6 +51,18 @@ function App() {
   useEffect(() => {
     initialize()
   }, [initialize])
+
+  // ✅ BEST PRACTICE: Proactive token refresh
+  // Automatically refreshes token before it expires
+  // No server load on every F5, only when token is about to expire
+  // Only runs when user is authenticated
+  useTokenRefresh()
+
+  // ✅ BEST PRACTICE: Proactive menu loading
+  // Loads menu from backend on app startup (with 1-hour cache)
+  // Menu is permission-filtered by backend
+  // Only runs when user is authenticated (checked inside hook)
+  useMenuInit()
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -60,16 +79,24 @@ function App() {
               <Route path="students" element={<Students />} />
               <Route path="teachers" element={<Teachers />} />
               <Route path="universities" element={<Universities />} />
+              <Route path="registry">
+                <Route path="e-reestr">
+                  <Route path="university" element={<UniversitiesPage />} />
+                </Route>
+              </Route>
               <Route path="reports" element={<Reports />} />
+              <Route path="system">
+                <Route path="translation" element={<TranslationsPage />} />
+                <Route path="translation/create" element={<TranslationFormPage />} />
+                <Route path="translation/:id/edit" element={<TranslationFormPage />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
-
-            {/* 404 */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
 
         {/* Toast Notifications */}
-        <Toaster position="top-right" richColors closeButton />
+        <Toaster position="bottom-right" richColors closeButton />
       </ThemeProvider>
     </QueryClientProvider>
   )

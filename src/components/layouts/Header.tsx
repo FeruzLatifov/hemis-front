@@ -1,97 +1,245 @@
-import { Moon, Sun, Settings, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useTheme } from '@/components/theme-provider'
+/**
+ * Header Component
+ *
+ * Clean professional design - no gradients, no glass effects
+ * Matches LoginClean.tsx design system
+ */
+
+import { Settings, User, LogOut, Bell, Menu } from 'lucide-react'
+import { useAuthStore } from '../../stores/authStore'
+import { useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import LanguageSwitcher from '../common/LanguageSwitcher'
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void
 }
 
-export default function Header(_props: HeaderProps) {
-  const { theme, setTheme } = useTheme()
+export default function Header({ setSidebarOpen }: HeaderProps) {
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b px-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600">
-            <Settings className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-              TA'LIM BOSHQARUV TIZIMI
-            </h1>
-            <div className="flex items-center gap-2 text-xs text-cyan-600 dark:text-cyan-400">
-              <span>SYSTEM ONLINE</span>
-              <div className="h-2 w-2 rounded-full bg-emerald-400" />
-            </div>
-          </div>
-        </div>
-      </div>
+    <header
+      className="flex h-14 md:h-16 items-center justify-between md:justify-end border-b px-3 md:px-6"
+      style={{
+        backgroundColor: '#FFFFFF',
+        borderColor: '#E5E7EB',
+        boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)'
+      }}
+    >
+      {/* Left Side - Mobile Menu Button (only on mobile) */}
+      <button
+        type="button"
+        onClick={() => setSidebarOpen(true)}
+        className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border transition-colors"
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderColor: '#E5E7EB'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = '#2F80ED'
+          e.currentTarget.style.backgroundColor = '#F5F6FA'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = '#E5E7EB'
+          e.currentTarget.style.backgroundColor = '#FFFFFF'
+        }}
+      >
+        <Menu className="h-5 w-5" style={{ color: '#6B7280' }} />
+      </button>
 
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          className="rounded-lg"
+      {/* Right Side - Notifications and User Menu */}
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Notifications Button */}
+        <button
+          type="button"
+          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border transition-colors"
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderColor: '#E5E7EB'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#2F80ED'
+            e.currentTarget.style.backgroundColor = '#F5F6FA'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#E5E7EB'
+            e.currentTarget.style.backgroundColor = '#FFFFFF'
+          }}
         >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )}
-        </Button>
+          <Bell className="h-4 w-4 md:h-5 md:w-5" style={{ color: '#6B7280' }} />
+          {/* Notification Badge */}
+          <span
+            className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full text-xs font-semibold"
+            style={{
+              backgroundColor: '#EB5757',
+              color: '#FFFFFF'
+            }}
+          >
+            3
+          </span>
+        </button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 rounded-lg px-3 py-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-600">
-                <User className="h-4 w-4 text-white" />
+        {/* Language Switcher */}
+        <LanguageSwitcher />
+
+        {/* User Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 md:gap-3 rounded-lg border px-2 md:px-3 py-1.5 md:py-2 transition-colors"
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderColor: '#E5E7EB'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#2F80ED'
+              e.currentTarget.style.backgroundColor = '#F5F6FA'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#E5E7EB'
+              e.currentTarget.style.backgroundColor = '#FFFFFF'
+            }}
+          >
+            {/* Avatar */}
+            <div
+              className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full"
+              style={{
+                backgroundColor: '#2F80ED'
+              }}
+            >
+              <User className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: '#FFFFFF' }} />
+            </div>
+
+            {/* User Name */}
+            <span
+              className="hidden font-medium sm:block text-sm md:text-base"
+              style={{ color: '#1E2124' }}
+            >
+              {user?.username || 'Admin'}
+            </span>
+          </button>
+
+          {/* Dropdown Menu */}
+          {isDropdownOpen && (
+            <div
+              className="absolute top-full right-0 mt-2 w-64 rounded-lg border overflow-hidden"
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderColor: '#E5E7EB',
+                boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)',
+                zIndex: 50
+              }}
+            >
+              {/* User Info Header */}
+              <div
+                className="px-4 py-3 border-b"
+                style={{
+                  backgroundColor: '#F5F6FA',
+                  borderColor: '#E5E7EB'
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: '#2F80ED'
+                    }}
+                  >
+                    <User className="h-6 w-6" style={{ color: '#FFFFFF' }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: '#1E2124' }}>
+                      {user?.username || 'Administrator'}
+                    </p>
+                    <p className="text-xs" style={{ color: '#6B7280' }}>
+                      {user?.email || 'admin@hemis.uz'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <span className="hidden font-medium sm:block">ADMINISTRATOR</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
-            <div className="px-2 py-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-600">
-                  <User className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">Administrator</p>
-                  <p className="text-xs text-muted-foreground">admin@ministry.uz</p>
-                </div>
+
+              {/* Menu Items */}
+              <div className="py-1">
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-3 px-4 py-3 transition-colors"
+                  style={{ color: '#1E2124' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F5F6FA'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  <User className="h-4 w-4" style={{ color: '#6B7280' }} />
+                  <span className="text-sm font-medium">Profil</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-3 px-4 py-3 transition-colors"
+                  style={{ color: '#1E2124' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F5F6FA'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  <Settings className="h-4 w-4" style={{ color: '#6B7280' }} />
+                  <span className="text-sm font-medium">Sozlamalar</span>
+                </button>
+
+                <div
+                  className="my-1"
+                  style={{
+                    height: '1px',
+                    backgroundColor: '#E5E7EB'
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 px-4 py-3 transition-colors"
+                  style={{ color: '#EB5757' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FEF2F2'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="text-sm font-medium">Chiqish</span>
+                </button>
               </div>
             </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profil</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Sozlamalar</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" x2="9" y1="12" y2="12" />
-              </svg>
-              <span>Chiqish</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+        </div>
       </div>
     </header>
   )
 }
-

@@ -78,11 +78,10 @@ export interface TableColumn<T> {
   key: keyof T | string
   label: string
   sortable?: boolean
-  render?: (value: any, row: T) => React.ReactNode
+  render?: (value: T[keyof T] | undefined, row: T) => React.ReactNode
 }
 
 export interface FilterOption {
   label: string
   value: string | number
 }
-

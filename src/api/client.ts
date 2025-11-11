@@ -8,7 +8,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1/admin',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8081',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -24,10 +24,21 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add locale to header
+    // Add locale to header in BCP-47 format
     const locale = localStorage.getItem('locale') || 'uz';
+
+    // Normalize short codes to BCP-47 format for Accept-Language header
+    const localeMap: Record<string, string> = {
+      'uz': 'uz-UZ',
+      'oz': 'oz-UZ',
+      'ru': 'ru-RU',
+      'en': 'en-US'
+    };
+
+    const bcp47Locale = localeMap[locale] || locale;
+
     if (config.headers) {
-      config.headers['Accept-Language'] = locale;
+      config.headers['Accept-Language'] = bcp47Locale;
     }
 
     return config;
@@ -52,32 +63,55 @@ apiClient.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
-          // Call refresh endpoint
+          // Create form data for OAuth2 refresh grant
+          const formData = new URLSearchParams();
+          formData.append('grant_type', 'refresh_token');
+          formData.append('refresh_token', refreshToken);
+
+          // Call backend OAuth refresh endpoint
           const { data } = await axios.post(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1/admin'}/auth/refresh`,
-            { refreshToken }
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/app/rest/v2/oauth/token`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
+              },
+            }
           );
 
-          // Save new tokens
-          localStorage.setItem('accessToken', data.token);
-          localStorage.setItem('refreshToken', data.refreshToken);
+          // Save new tokens (OAuth format)
+          localStorage.setItem('accessToken', data.access_token);
+          localStorage.setItem('refreshToken', data.refresh_token);
 
           // Retry original request with new token
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${data.token}`;
+            originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
           }
           return apiClient(originalRequest);
         } catch (refreshError) {
-          // Refresh failed, logout user
+          // Refresh failed - clear all auth data
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          localStorage.removeItem('auth-storage');
+
+          // Force reload to login page (ProtectedRoute will handle redirect)
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+
           return Promise.reject(refreshError);
         }
       } else {
-        // No refresh token, redirect to login
-        window.location.href = '/login';
+        // No refresh token available
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('auth-storage');
+
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
     }
 

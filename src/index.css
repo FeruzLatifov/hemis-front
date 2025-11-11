@@ -48,6 +48,30 @@
   --color-ring: 224.3 76.3% 48%;
 }
 
+/* Professional OTM rang tizimi (like univer-front) */
+:root {
+  --app-bg: #F5F6FA;
+  --card-bg: #FFFFFF;
+  --primary: #2F80ED;
+  --primary-hover: #2666BE;
+  --text-primary: #1E2124;
+  --text-secondary: #6B7280;
+  --border-color-pro: #E5E7EB;
+  --success: #27AE60;
+  --warning: #F2C94C;
+  --danger: #EB5757;
+  --active-bg: rgba(47, 128, 237, 0.12);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.dark {
+  --app-bg: #111827;
+  --card-bg: #1F2937;
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --border-color-pro: #374151;
+}
+
 /* Custom Animations for Login Page */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -86,38 +110,33 @@
 }
 
 body {
-  background-color: rgb(248 250 252);
-  color: hsl(var(--color-foreground));
+  background-color: var(--app-bg);
+  color: var(--text-primary);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', "rlig" 1, "calt" 1;
 }
 
-.dark body {
-  background-color: rgb(2 6 23);
-}
-
-/* Custom Scrollbar */
+/* Custom Scrollbar - Clean Design */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(241 245 249);
-  border-radius: 9999px;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: rgb(30 41 59);
+  background: #F5F6FA;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, rgb(192 132 252), rgb(236 72 153));
-  border-radius: 9999px;
+  background: #E5E7EB;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, rgb(168 85 247), rgb(219 39 119));
+  background: #2F80ED;
 }
 
 /* Animations */
@@ -170,4 +189,60 @@ body {
 
 .dark *:focus-visible {
   ring-color: rgb(192 132 252);
+}
+
+/* Professional buttons */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+  background-color: #BFD5F5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Professional card */
+.card-professional {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color-pro);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Typography */
+.heading-page {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.text-caption {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
