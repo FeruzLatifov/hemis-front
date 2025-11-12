@@ -18,6 +18,7 @@ import Universities from './pages/universities/Universities'
 import Reports from './pages/reports/Reports'
 import { TranslationsPage, TranslationFormPage } from './pages/admin/translations'
 import { UniversitiesPage } from './pages/registry/university'
+import FacultiesPage from './pages/registry/faculty/FacultiesPage'
 
 // Create QueryClient
 const queryClient = new QueryClient({
@@ -83,6 +84,7 @@ function App() {
                 <Route path="e-reestr">
                   <Route path="university" element={<UniversitiesPage />} />
                 </Route>
+                <Route path="faculty" element={<FacultiesPage />} />
               </Route>
               <Route path="reports" element={<Reports />} />
               <Route path="system">

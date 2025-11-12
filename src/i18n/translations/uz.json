@@ -41,6 +41,14 @@
     "success": "Muvaffaqiyatli",
     "retry": "Qayta urinish"
   },
+  "empty": {
+    "noData": "Ma'lumotlar topilmadi",
+    "noFaculties": "Fakultetlar topilmadi"
+  },
+  "pagination": {
+    "rowsPerPage": "Sahifadagi qatorlar",
+    "of": "dan"
+  },
   "auth": {
     "login": "Kirish",
     "logout": "Chiqish",
@@ -98,25 +106,78 @@
   "actions": {
     "refresh": "Yangilash",
     "export": "Export",
+    "exportExcel": "Excel yuklab olish",
     "search": "Qidirish",
     "filter": "Filtr",
     "apply": "Qo'llash",
     "clear": "Tozalash"
   },
   "filters": {
+    "title": "Filtrlar",
     "searchPlaceholder": "Kod, nom yoki INN bo'yicha qidirish...",
     "region": "Viloyat",
     "ownership": "Mulkchilik",
-    "type": "Turi"
+    "type": "Turi",
+    "status": "Holat",
+    "statusActive": "Faol",
+    "statusInactive": "Nofaol"
   },
   "errors": {
-    "loadFailed": "Ma'lumotlarni yuklashda xatolik"
+    "loadFailed": "Ma'lumotlarni yuklashda xatolik",
+    "exportFailed": "Eksport qilishda xatolik"
   },
   "menu": {
     "registry": {
+      "faculty": "Fakultet",
       "e_reestr": {
-        "university": "Muassasalar"
+        "university": "Muassasalar",
+        "faculty": "Fakultet"
       }
     }
+  },
+  "table": {
+    "faculty": {
+      "universityName": "OTM nomi",
+      "code": "Kod",
+      "nameUz": "Nomi (o'zbekcha)",
+      "nameRu": "Nomi (ruscha)",
+      "status": "Holati",
+      "facultyCount": "Fakultetlar soni"
+    },
+    "university": {
+      "code": "Kod",
+      "name": "Nomi",
+      "tin": "INN",
+      "address": "Manzil",
+      "region": "Viloyat",
+      "ownership": "Mulkchilik",
+      "orgType": "Tashkiliy turi",
+      "cadastre": "Kadastr",
+      "versionType": "Versiya turi",
+      "soatoRegion": "SOATO Region",
+      "urls": {
+        "university": "OTM URL",
+        "teacher": "O'qituvchi URL",
+        "student": "Talaba URL"
+      },
+      "uzbmbUrl": "UZBMB URL",
+      "flags": {
+        "gpaEdit": "GPA tahrir",
+        "accreditationEdit": "Akkreditatsiya tahrir",
+        "addStudent": "Talaba qo'shish",
+        "allowGrouping": "Guruhlashga ruxsat",
+        "allowTransferOutside": "Tashqariga o'tkazishga ruxsat"
+      },
+      "contractCategory": "Kontrakt kategoriyasi",
+      "activityStatus": "Faollik statusi",
+      "belongsTo": "Tegishli",
+      "terrain": "Mahalla",
+      "mailAddress": "Pochta manzili",
+      "bankInfo": "Bank ma'lumotlari",
+      "accreditationInfo": "Akkreditatsiya ma'lumotlari"
+    }
+  },
+  "columns": {
+    "title": "Ustunlar"
   }
 }

@@ -59,7 +59,7 @@ export default function TranslationFormPage() {
       if (translation.translations && typeof translation.translations === 'object') {
         // Handle new DTO format: { "ru-RU": "text", "en-US": "text" }
         Object.entries(translation.translations).forEach(([lang, text]) => {
-          translations[lang] = text as string;
+          translations[lang] = String(text);
         });
       }
 
@@ -72,8 +72,9 @@ export default function TranslationFormPage() {
         messageEn: translations['en-US'] || '',
         active: translation.isActive,
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to load translation');
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || 'Failed to load translation');
       console.error('Error loading translation:', err);
     } finally {
       setLoadingData(false);
@@ -130,8 +131,9 @@ export default function TranslationFormPage() {
       setTimeout(() => {
         navigate('/system/translation');
       }, 500);
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to save translation';
+    } catch (err: unknown) {
+      const error = err as Error;
+      const errorMessage = error.message || 'Failed to save translation';
       setError(errorMessage);
       toast.error('❌ ' + errorMessage, {
         duration: 5000,
@@ -144,7 +146,7 @@ export default function TranslationFormPage() {
   };
 
   // Handle input change
-  const handleChange = (field: keyof TranslationUpdateRequest, value: any) => {
+  const handleChange = (field: keyof TranslationUpdateRequest, value: string | boolean) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,

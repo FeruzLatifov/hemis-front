@@ -100,12 +100,90 @@
   "errors": {
     "loadFailed": "Маълумотларни юклашда хатолик"
   },
+  "empty": {
+    "noData": "Маълумотлар топилмади",
+    "noFaculties": "Факультетлар топилмади"
+  },
+  "pagination": {
+    "rowsPerPage": "Саҳифадаги қаторлар",
+    "of": "дан"
+  },
   "menu": {
     "registry": {
+      "faculty": "Факультет",
       "e_reestr": {
-        "university": "Муассасалар"
+        "university": "Муассасалар",
+        "faculty": "Факультет"
       }
     }
+  },
+  "table": {
+    "faculty": {
+      "universityName": "ОТМ номи",
+      "code": "Код",
+      "nameUz": "Номи (ўзбекча)",
+      "nameRu": "Номи (русча)",
+      "status": "Ҳолати",
+      "facultyCount": "Факультетлар сони"
+    },
+    "university": {
+      "code": "Код",
+      "name": "Номи",
+      "tin": "ИНН",
+      "address": "Манзил",
+      "region": "Вилоят",
+      "ownership": "Мулкчилик",
+      "orgType": "Ташкилий тури",
+      "cadastre": "Кадастр",
+      "versionType": "Версия тури",
+      "soatoRegion": "СОАТО Реҷион",
+      "urls": {
+        "university": "ОТМ URL",
+        "teacher": "Ўқитувчи URL",
+        "student": "Талаба URL"
+      },
+      "uzbmbUrl": "УЗБМБ URL",
+      "flags": {
+        "gpaEdit": "ГПА таҳрир",
+        "accreditationEdit": "Аккредитация таҳрир",
+        "addStudent": "Талаба қўшиш",
+        "allowGrouping": "Гуруҳлашга рухсат",
+        "allowTransferOutside": "Ташқарига ўтказишга рухсат"
+      },
+      "contractCategory": "Контракт категорияси",
+      "activityStatus": "Фаоллик статуси",
+      "belongsTo": "Тегишли",
+      "terrain": "Маҳалла",
+      "mailAddress": "Почта манзили",
+      "bankInfo": "Банк маълумотлари",
+      "accreditationInfo": "Аккредитация маълумотлари"
+    }
+  },
+  "columns": {
+    "title": "Устунлар"
+  },
+  "actions": {
+    "refresh": "Янгилаш",
+    "export": "Экспорт",
+    "exportExcel": "Excel юклаб олиш",
+    "search": "Қидириш",
+    "filter": "Филтр",
+    "apply": "Қўллаш",
+    "clear": "Тозалаш"
+  },
+  "filters": {
+    "title": "Филтрлар",
+    "searchPlaceholder": "Код, ном ёки ИНН бўйича қидириш...",
+    "region": "Вилоят",
+    "ownership": "Мулкчилик",
+    "type": "Тури",
+    "status": "Ҳолат",
+    "statusActive": "Фаол",
+    "statusInactive": "Нофаол"
+  },
+  "errors": {
+    "loadFailed": "Маълумотларни юклашда хатолик",
+    "exportFailed": "Экспорт қилишда хатолик"
   }
 }
 

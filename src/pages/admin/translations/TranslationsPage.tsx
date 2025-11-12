@@ -62,8 +62,9 @@ export default function TranslationsPage() {
       setCurrentPage(response.currentPage ?? 0);
       setTotalItems(response.totalItems ?? 0);
       setTotalPages(response.totalPages ?? 0);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load translations');
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || 'Failed to load translations');
       console.error('Error loading translations:', err);
     } finally {
       setLoading(false);
@@ -72,14 +73,16 @@ export default function TranslationsPage() {
 
   useEffect(() => {
     loadTranslations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, categoryFilter, searchFilter, activeFilter]);
 
   const handleToggleActive = async (id: string) => {
     try {
       await toggleTranslationActive(id);
       loadTranslations();
-    } catch (err: any) {
-      alert('Failed to toggle active status: ' + err.message);
+    } catch (err: unknown) {
+      const error = err as Error;
+      alert('Failed to toggle active status: ' + error.message);
     }
   };
 
@@ -91,8 +94,9 @@ export default function TranslationsPage() {
         duration: 3000,
         position: 'bottom-right',
       });
-    } catch (err: any) {
-      toast.error('❌ Cache tozalashda xatolik: ' + err.message, {
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error('❌ Cache tozalashda xatolik: ' + error.message, {
         duration: 5000,
         position: 'bottom-right',
       });
@@ -107,8 +111,9 @@ export default function TranslationsPage() {
         duration: 4000,
         position: 'bottom-right',
       });
-    } catch (err: any) {
-      toast.error('❌ Properties yaratishda xatolik: ' + err.message, {
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error('❌ Properties yaratishda xatolik: ' + error.message, {
         duration: 5000,
         position: 'bottom-right',
       });

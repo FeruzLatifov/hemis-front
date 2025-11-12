@@ -228,7 +228,11 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
   const sortedMenuItems = useMemo(() => {
     return [...rootMenuItems]
       .filter((item) => item.visible)
-      .sort((a, b) => a.orderNum - b.orderNum)
+      .sort((a, b) => {
+        const aOrder = a.orderNum ?? 999;
+        const bOrder = b.orderNum ?? 999;
+        return aOrder - bOrder;
+      })
   }, [rootMenuItems])
 
   return (

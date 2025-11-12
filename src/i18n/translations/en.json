@@ -112,11 +112,89 @@
   "errors": {
     "loadFailed": "Failed to load data"
   },
+  "empty": {
+    "noData": "No data found",
+    "noFaculties": "No faculties found"
+  },
+  "pagination": {
+    "rowsPerPage": "Rows per page",
+    "of": "of"
+  },
   "menu": {
     "registry": {
+      "faculty": "Faculty",
       "e_reestr": {
-        "university": "Institutions"
+        "university": "Institutions",
+        "faculty": "Faculty"
       }
     }
+  },
+  "table": {
+    "faculty": {
+      "universityName": "University Name",
+      "code": "Code",
+      "nameUz": "Name (Uzbek)",
+      "nameRu": "Name (Russian)",
+      "status": "Status",
+      "facultyCount": "Faculty Count"
+    },
+    "university": {
+      "code": "Code",
+      "name": "Name",
+      "tin": "TIN",
+      "address": "Address",
+      "region": "Region",
+      "ownership": "Ownership",
+      "orgType": "Organization Type",
+      "cadastre": "Cadastre",
+      "versionType": "Version Type",
+      "soatoRegion": "SOATO Region",
+      "urls": {
+        "university": "University URL",
+        "teacher": "Teacher URL",
+        "student": "Student URL"
+      },
+      "uzbmbUrl": "UZBMB URL",
+      "flags": {
+        "gpaEdit": "GPA Edit",
+        "accreditationEdit": "Accreditation Edit",
+        "addStudent": "Add Student",
+        "allowGrouping": "Allow Grouping",
+        "allowTransferOutside": "Allow External Transfer"
+      },
+      "contractCategory": "Contract Category",
+      "activityStatus": "Activity Status",
+      "belongsTo": "Belongs To",
+      "terrain": "Mahalla",
+      "mailAddress": "Mail Address",
+      "bankInfo": "Bank Details",
+      "accreditationInfo": "Accreditation Info"
+    }
+  },
+  "columns": {
+    "title": "Columns"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "export": "Export",
+    "exportExcel": "Download Excel",
+    "search": "Search",
+    "filter": "Filter",
+    "apply": "Apply",
+    "clear": "Clear"
+  },
+  "filters": {
+    "title": "Filters",
+    "searchPlaceholder": "Search by code, name or TIN...",
+    "region": "Region",
+    "ownership": "Ownership",
+    "type": "Type",
+    "status": "Status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive"
+  },
+  "errors": {
+    "loadFailed": "Failed to load data",
+    "exportFailed": "Export failed"
   }
 }

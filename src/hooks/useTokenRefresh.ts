@@ -27,7 +27,7 @@ import { getTokenTimeToExpiry } from '../utils/token.util';
  */
 export function useTokenRefresh() {
   const { token, refreshToken, isAuthenticated, refresh, logout } = useAuthStore();
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Clear existing timer

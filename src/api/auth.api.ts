@@ -51,8 +51,10 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         id: data.user?.id || tokenPayload.sub || '',
         username: data.user?.username || tokenPayload.username || credentials.username,
         email: data.user?.email || tokenPayload.email || '',
-        fullName: data.user?.fullName || tokenPayload.full_name || tokenPayload.username || '',
-        locale: credentials.locale || data.user?.locale || 'uz-UZ',
+        name: data.user?.name || data.user?.fullName || tokenPayload.full_name || tokenPayload.username || '',
+        locale: credentials.locale || data.user?.locale || 'uz',
+        active: data.user?.active ?? true,
+        createdAt: data.user?.createdAt || new Date().toISOString(),
       },
       university: data.university || null,
       permissions: data.permissions || getTokenAuthorities(data.accessToken),
@@ -74,10 +76,12 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         const msg = i18n.t('login.errors.backendDown', { defaultValue: 'Backend server ishlamayapti' });
         throw new Error(msg);
       }
-      const errorMsg =
-        (error.response?.data as any)?.message ||
-        (error.response?.data as any)?.error ||
-        'Login failed';
+      interface ErrorResponse {
+        message?: string;
+        error?: string;
+      }
+      const errorData = error.response?.data as ErrorResponse;
+      const errorMsg = errorData?.message || errorData?.error || 'Login failed';
       throw new Error(errorMsg);
     }
 
@@ -120,8 +124,10 @@ export const refreshToken = async (request: RefreshTokenRequest): Promise<LoginR
         id: data.user?.id || tokenPayload.sub || '',
         username: data.user?.username || tokenPayload.username || '',
         email: data.user?.email || tokenPayload.email || '',
-        fullName: data.user?.fullName || tokenPayload.full_name || '',
-        locale: data.user?.locale || 'uz-UZ',
+        name: data.user?.name || data.user?.fullName || tokenPayload.full_name || '',
+        locale: data.user?.locale || 'uz',
+        active: data.user?.active ?? true,
+        createdAt: data.user?.createdAt || new Date().toISOString(),
       },
       university: data.university || null,
       permissions: data.permissions || getTokenAuthorities(data.accessToken),
@@ -182,8 +188,10 @@ export const getCurrentUser = async (): Promise<AdminUser> => {
       id: tokenPayload.sub || '',
       username: tokenPayload.username || '',
       email: tokenPayload.email || '',
-      fullName: tokenPayload.full_name || '',
+      name: tokenPayload.full_name || tokenPayload.username || '',
       locale: 'uz',
+      active: true,
+      createdAt: new Date().toISOString(),
     };
   }
 };

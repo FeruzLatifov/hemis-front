@@ -47,7 +47,7 @@ export interface LoginResponse {
   refreshToken: string;
   user: AdminUser;
   university: University;
-  permissions: Permission[];
+  permissions: string[]; // Changed: Backend returns string array
 }
 
 export interface RefreshTokenRequest {
@@ -59,7 +59,7 @@ export interface AuthState {
   refreshToken: string | null;
   user: AdminUser | null;
   university: University | null;
-  permissions: Permission[];
+  permissions: string[]; // Changed: String array for simplicity
   isAuthenticated: boolean;
 }
 

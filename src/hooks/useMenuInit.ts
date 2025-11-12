@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMenuStore, useIsMenuStale } from '../stores/menuStore';
+import { useMenuStore } from '../stores/menuStore';
 import { useAuthStore } from '../stores/authStore';
 
 // BCP-47 mapping for menu API
@@ -21,7 +21,6 @@ const shortToBcp47: Record<string, string> = {
 export const useMenuInit = () => {
   const { i18n } = useTranslation();
   const { fetchMenu, isLoading, error, menuItems, clearMenu } = useMenuStore();
-  const isStale = useIsMenuStale();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {

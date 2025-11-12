@@ -112,11 +112,89 @@
   "errors": {
     "loadFailed": "Ошибка загрузки данных"
   },
+  "empty": {
+    "noData": "Данные не найдены",
+    "noFaculties": "Факультеты не найдены"
+  },
+  "pagination": {
+    "rowsPerPage": "Строк на странице",
+    "of": "из"
+  },
   "menu": {
     "registry": {
+      "faculty": "Факультет",
       "e_reestr": {
-        "university": "Учреждения"
+        "university": "Учреждения",
+        "faculty": "Факультет"
       }
     }
+  },
+  "table": {
+    "faculty": {
+      "universityName": "Название ВУЗа",
+      "code": "Код",
+      "nameUz": "Название (узбекский)",
+      "nameRu": "Название (русский)",
+      "status": "Статус",
+      "facultyCount": "Количество факультетов"
+    },
+    "university": {
+      "code": "Код",
+      "name": "Название",
+      "tin": "ИНН",
+      "address": "Адрес",
+      "region": "Регион",
+      "ownership": "Форма собственности",
+      "orgType": "Организационная форма",
+      "cadastre": "Кадастр",
+      "versionType": "Тип версии",
+      "soatoRegion": "СОАТО Регион",
+      "urls": {
+        "university": "URL ВУЗа",
+        "teacher": "URL Преподавателей",
+        "student": "URL Студентов"
+      },
+      "uzbmbUrl": "УЗБМБ URL",
+      "flags": {
+        "gpaEdit": "Редактирование GPA",
+        "accreditationEdit": "Редактирование аккредитации",
+        "addStudent": "Добавление студентов",
+        "allowGrouping": "Разрешить группировку",
+        "allowTransferOutside": "Разрешить внешний перевод"
+      },
+      "contractCategory": "Категория контракта",
+      "activityStatus": "Статус активности",
+      "belongsTo": "Принадлежит",
+      "terrain": "Махалля",
+      "mailAddress": "Почтовый адрес",
+      "bankInfo": "Банковские реквизиты",
+      "accreditationInfo": "Информация об аккредитации"
+    }
+  },
+  "columns": {
+    "title": "Колонки"
+  },
+  "actions": {
+    "refresh": "Обновить",
+    "export": "Экспорт",
+    "exportExcel": "Скачать Excel",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "apply": "Применить",
+    "clear": "Очистить"
+  },
+  "filters": {
+    "title": "Фильтры",
+    "searchPlaceholder": "Поиск по коду, названию или ИНН...",
+    "region": "Регион",
+    "ownership": "Форма собственности",
+    "type": "Тип",
+    "status": "Статус",
+    "statusActive": "Активный",
+    "statusInactive": "Неактивный"
+  },
+  "errors": {
+    "loadFailed": "Ошибка загрузки данных",
+    "exportFailed": "Ошибка экспорта"
   }
 }

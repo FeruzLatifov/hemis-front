@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   useReactTable,
   getCoreRowModel,
@@ -25,7 +25,6 @@ import UniversityDetailDrawer from './UniversityDetailDrawer';
 
 export default function UniversitiesPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [universities, setUniversities] = useState<UniversityRow[]>([]);
@@ -135,6 +134,7 @@ export default function UniversitiesPage() {
     if (ownershipId) params.ownershipId = ownershipId;
     if (typeId) params.typeId = typeId;
     setSearchParams(params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, search, regionId, ownershipId, typeId]);
 
   const handleSearch = () => {

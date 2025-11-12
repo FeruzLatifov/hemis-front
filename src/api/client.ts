@@ -96,9 +96,10 @@ apiClient.interceptors.response.use(
           localStorage.removeItem('user');
           localStorage.removeItem('auth-storage');
 
-          // Force reload to login page (ProtectedRoute will handle redirect)
-          if (!window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
+          // Emit custom event instead of direct redirect
+          // ProtectedRoute will handle the redirect
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('auth:logout'));
           }
 
           return Promise.reject(refreshError);
@@ -109,8 +110,8 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('auth-storage');
 
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth:logout'));
         }
       }
     }

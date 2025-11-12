@@ -64,14 +64,15 @@ const LoginClean = () => {
       }, 500)
 
       return
-    } catch (err: any) {
-      console.error('[LoginClean] Login error:', err)
+    } catch (err: unknown) {
+      const error = err as Error & { code?: string; response?: unknown };
+      console.error('[LoginClean] Login error:', error)
       
       // Check if it's a network error (backend not reachable)
-      if (err.code === 'ERR_NETWORK' || 
-          err.code === 'ERR_CONNECTION_REFUSED' || 
-          err.message === 'Network Error' ||
-          !err.response) {
+      if (error.code === 'ERR_NETWORK' || 
+          error.code === 'ERR_CONNECTION_REFUSED' || 
+          error.message === 'Network Error' ||
+          !error.response) {
         console.log('[LoginClean] Network error detected - Backend server is not running')
         toast.error('❌ Backend server ishlamayapti. Iltimos, serverni ishga tushiring.', {
           duration: 8000,
@@ -82,10 +83,16 @@ const LoginClean = () => {
       }
 
       // Backend responded with an error
+      interface ErrorResponse {
+        message?: string;
+        error?: { message?: string };
+        error_description?: string;
+      }
+      const errorData = error.response as { data?: ErrorResponse } | undefined;
       const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error?.message ||
-        err.response?.data?.error_description ||
+        errorData?.data?.message ||
+        errorData?.data?.error?.message ||
+        errorData?.data?.error_description ||
         t('login.errors.invalidCredentials')
 
       console.log('[LoginClean] Backend error:', errorMessage)

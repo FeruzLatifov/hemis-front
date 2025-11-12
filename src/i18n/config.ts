@@ -25,9 +25,16 @@ const shortToBcp47: Record<string, string> = {
   'en': 'en-US'
 };
 
-// Get saved locale from localStorage (may be in BCP-47 or short format)
-const savedLocaleRaw = localStorage.getItem('locale') || 'uz';
-const savedLocale = bcp47ToShort[savedLocaleRaw] || savedLocaleRaw;
+// ✅ SSR/Test-safe: Get saved locale from localStorage
+const getSavedLocale = (): string => {
+  if (typeof window === 'undefined') {
+    return 'uz'; // Default for SSR/Node
+  }
+  const savedLocaleRaw = localStorage.getItem('locale') || 'uz';
+  return bcp47ToShort[savedLocaleRaw] || savedLocaleRaw;
+};
+
+const savedLocale = getSavedLocale();
 
 i18n
   .use(Backend)

@@ -12,35 +12,44 @@ export function ThemeProvider({
   defaultTheme = 'system',
   storageKey = 'ui-theme',
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  // ✅ SSR-safe: Get initial theme
+  const getInitialTheme = (): Theme => {
+    if (typeof window === 'undefined') {
+      return defaultTheme; // SSR default
+    }
+    return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+  };
+
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    const root = window.document.documentElement
+    // ✅ Only runs on client
+    const root = window.document.documentElement;
 
-    root.classList.remove('light', 'dark')
+    root.classList.remove('light', 'dark');
 
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
         .matches
         ? 'dark'
-        : 'light'
+        : 'light';
 
-      root.classList.add(systemTheme)
-      return
+      root.classList.add(systemTheme);
+      return;
     }
 
-    root.classList.add(theme)
-  }, [theme])
+    root.classList.add(theme);
+  }, [theme]);
 
   const value: ThemeProviderState = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setThemeState(theme)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(storageKey, theme);
+      }
+      setThemeState(theme);
     },
-  }
+  };
 
   return (
     <ThemeProviderContext.Provider value={value}>

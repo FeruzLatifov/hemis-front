@@ -44,8 +44,7 @@ export interface TranslationCreateRequest {
   active?: boolean;
 }
 
-export interface TranslationUpdateRequest extends TranslationCreateRequest {
-}
+export type TranslationUpdateRequest = TranslationCreateRequest;
 
 export interface TranslationStatistics {
   totalMessages: number;
@@ -92,7 +91,7 @@ export const getTranslations = async (params?: {
   const { data } = await apiClient.get('/api/v1/web/system/translation', { params });
 
   // Normalize various response shapes to TranslationListResponse
-  const normalize = (raw: any): TranslationListResponse => {
+  const normalize = (raw: unknown): TranslationListResponse => {
     // If backend returns array directly
     if (Array.isArray(raw)) {
       return {
@@ -106,16 +105,17 @@ export const getTranslations = async (params?: {
 
     // If wrapped in { data: ... }
     if (raw && typeof raw === 'object' && 'data' in raw) {
-      return normalize((raw as any).data);
+      return normalize((raw as Record<string, unknown>).data);
     }
 
     // Common paged shapes
-    const content: Translation[] = (raw?.content ?? raw?.items ?? []) as Translation[];
-    const totalItems: number = raw?.totalItems ?? raw?.total ?? content.length ?? 0;
-    const pageSize: number = raw?.pageSize ?? raw?.size ?? (content.length || 0);
-    const currentPage: number = raw?.currentPage ?? raw?.page ?? 0;
+    const rawObj = raw as Record<string, unknown>;
+    const content: Translation[] = (rawObj?.content ?? rawObj?.items ?? []) as Translation[];
+    const totalItems: number = (rawObj?.totalItems ?? rawObj?.total ?? content.length) as number;
+    const pageSize: number = (rawObj?.pageSize ?? rawObj?.size ?? content.length) as number;
+    const currentPage: number = (rawObj?.currentPage ?? rawObj?.page ?? 0) as number;
     const totalPages: number =
-      raw?.totalPages ?? (pageSize ? Math.max(1, Math.ceil(totalItems / pageSize)) : 1);
+      (rawObj?.totalPages ?? (pageSize ? Math.max(1, Math.ceil(totalItems / pageSize)) : 1)) as number;
 
     return {
       content,
