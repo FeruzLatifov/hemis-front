@@ -196,5 +196,74 @@ export const universitiesApi = {
     );
     return response.data.data;
   },
+  
+  /**
+   * Create new university
+   */
+  async createUniversity(data: Partial<UniversityRow>): Promise<UniversityRow> {
+    const response = await apiClient.post<{ success: boolean; data: any }>(
+      '/api/v1/web/registry/universities',
+      {
+        code: data.code,
+        name: data.name,
+        tin: data.tin,
+        ownership: data.ownershipCode,
+        soato: data.regionCode,
+        soatoRegion: data.soatoRegion,
+        universityType: data.universityTypeCode,
+        address: data.address,
+        cadastre: data.cadastre,
+        universityUrl: data.universityUrl,
+        studentUrl: data.studentUrl,
+        teacherUrl: data.teacherUrl,
+        uzbmbUrl: data.uzbmbUrl,
+        active: data.active ?? true,
+        gpaEdit: data.gpaEdit ?? false,
+        accreditationEdit: data.accreditationEdit ?? true,
+        addStudent: data.addStudent ?? false,
+        allowGrouping: data.allowGrouping ?? false,
+        allowTransferOutside: data.allowTransferOutside ?? true,
+      }
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Update existing university
+   */
+  async updateUniversity(code: string, data: Partial<UniversityRow>): Promise<UniversityRow> {
+    const response = await apiClient.put<{ success: boolean; data: any }>(
+      `/api/v1/web/registry/universities/${code}`,
+      {
+        code: data.code,
+        name: data.name,
+        tin: data.tin,
+        ownership: data.ownershipCode,
+        soato: data.regionCode,
+        soatoRegion: data.soatoRegion,
+        universityType: data.universityTypeCode,
+        address: data.address,
+        cadastre: data.cadastre,
+        universityUrl: data.universityUrl,
+        studentUrl: data.studentUrl,
+        teacherUrl: data.teacherUrl,
+        uzbmbUrl: data.uzbmbUrl,
+        active: data.active,
+        gpaEdit: data.gpaEdit,
+        accreditationEdit: data.accreditationEdit,
+        addStudent: data.addStudent,
+        allowGrouping: data.allowGrouping,
+        allowTransferOutside: data.allowTransferOutside,
+      }
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Delete university (soft delete)
+   */
+  async deleteUniversity(code: string): Promise<void> {
+    await apiClient.delete(`/api/v1/web/registry/universities/${code}`);
+  },
 };
 

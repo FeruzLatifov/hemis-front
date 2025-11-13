@@ -20,10 +20,24 @@ import {
   Eye,
   X,
   FilterX,
+  Plus,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import UniversityDetailDrawer from './UniversityDetailDrawer';
+import UniversityFormDialog from './UniversityFormDialog';
 import AdvancedFilter, { FilterProperty, FilterCondition } from '@/components/common/AdvancedFilter';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function UniversitiesPage() {
   const { t } = useTranslation();
@@ -85,6 +99,9 @@ export default function UniversitiesPage() {
   });
 
   const [selectedUniversity, setSelectedUniversity] = useState<string | null>(null);
+  const [showFormDialog, setShowFormDialog] = useState(false);
+  const [editingUniversity, setEditingUniversity] = useState<UniversityRow | null>(null);
+  const [deletingCode, setDeletingCode] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('universities-column-visibility', JSON.stringify(columnVisibility));
@@ -228,20 +245,84 @@ export default function UniversitiesPage() {
     setCurrentPage(0);
   };
 
+  const handleCreate = () => {
+    setEditingUniversity(null);
+    setShowFormDialog(true);
+  };
+
+  const handleEdit = (university: UniversityRow) => {
+    setEditingUniversity(university);
+    setShowFormDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingCode) return;
+    
+    try {
+      await universitiesApi.deleteUniversity(deletingCode);
+      toast.success('OTM muvaffaqiyatli o\'chirildi');
+      loadUniversities();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'OTM o\'chirilmadi');
+    } finally {
+      setDeletingCode(null);
+    }
+  };
+
+  const handleFormSuccess = () => {
+    loadUniversities();
+    setShowFormDialog(false);
+    setEditingUniversity(null);
+  };
+
   const columns: ColumnDef<UniversityRow>[] = [
     {
       id: 'actions',
-      header: '',
+      header: () => <div className="text-center">Amallar</div>,
       cell: ({ row }) => (
-        <button
-          onClick={() => setSelectedUniversity(row.original.code)}
-          className="p-1.5 hover:bg-blue-50 rounded transition"
-          title="Ko'rish"
-        >
-          <Eye className="w-4 h-4 text-blue-600" />
-        </button>
+        <div className="flex items-center justify-center gap-1.5">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedUniversity(row.original.code);
+            }}
+            className="group relative p-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-all duration-200 hover:shadow-md"
+            title="Ko'rish"
+          >
+            <Eye className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
+            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Ko'rish
+            </span>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(row.original);
+            }}
+            className="group relative p-2 rounded-lg bg-green-50 hover:bg-green-100 transition-all duration-200 hover:shadow-md"
+            title="Tahrirlash"
+          >
+            <Edit className="w-4 h-4 text-green-600 group-hover:scale-110 transition-transform" />
+            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Tahrirlash
+            </span>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeletingCode(row.original.code);
+            }}
+            className="group relative p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-all duration-200 hover:shadow-md"
+            title="O'chirish"
+          >
+            <Trash2 className="w-4 h-4 text-red-600 group-hover:scale-110 transition-transform" />
+            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              O'chirish
+            </span>
+          </button>
+        </div>
       ),
-      size: 50,
+      size: 140,
     },
     {
       accessorKey: 'code',
@@ -413,79 +494,96 @@ export default function UniversitiesPage() {
   });
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b flex-none">
-        <div className="px-6 py-2">
-          <div className="flex items-center justify-between mb-2">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header with gradient */}
+      <div className="bg-white shadow-lg border-b border-gray-200">
+        <div className="px-6 py-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {t('page.universities.title') || 'Muassasalar (OTMlar)'}
+              <h1 className="text-3xl font-bold text-black">
+                {t('page.universities.title') || 'Oliy Ta\'lim Muassasalari'}
               </h1>
+              <p className="text-gray-600 mt-2 flex items-center gap-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  {totalElements} ta universitet
+                </span>
+              </p>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => loadUniversities()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold transition-all shadow-sm text-sm"
-                disabled={loading}
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                {t('actions.refresh') || 'Yangilash'}
-              </button>
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold transition-all shadow-sm text-sm"
-              >
-                <Download className="w-4 h-4" />
-                {t('actions.export') || 'Export'}
-              </button>
-              <button
-                onClick={() => setShowColumnSettings(!showColumnSettings)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-semibold transition-all shadow-sm text-sm"
-              >
-                <Settings2 className="w-4 h-4" />
-                Ustunlar
-              </button>
-            </div>
+            <button
+              onClick={handleCreate}
+              className="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+              <span className="font-semibold">Yangi OTM Qo'shish</span>
+            </button>
+          </div>
+          {/* Action Buttons Row */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => loadUniversities()}
+              disabled={loading}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 font-medium transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              {t('actions.refresh') || 'Yangilash'}
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium transition-all shadow-md hover:shadow-lg"
+            >
+              <Download className="w-4 h-4" />
+              {t('actions.export') || 'Eksport'}
+            </button>
+            <button
+              onClick={() => setShowColumnSettings(!showColumnSettings)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 font-medium transition-all shadow-md hover:shadow-lg"
+            >
+              <Settings2 className="w-4 h-4" />
+              Ustunlar
+            </button>
           </div>
 
           {/* Search and Filters */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 mt-4 px-6 pb-4">
             <div className="flex-1 flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder={t('filters.searchPlaceholder') || 'Kod, nom yoki INN bo\'yicha qidirish...'}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white shadow-sm"
                 />
                 {searchInput && (
                   <button
                     onClick={handleClearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </button>
                 )}
               </div>
               <button
                 onClick={handleSearch}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 Qidirish
               </button>
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-semibold"
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${
+                regionId || ownershipId || typeId
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700'
+                  : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+              }`}
             >
-              <Filter className="w-4 h-4" />
-              Quick Filtr
+              <Filter className="w-5 h-5" />
+              Filtrlar
               {(regionId || ownershipId || typeId) && (
-                <span className="ml-1 px-1.5 py-0.5 bg-blue-500 text-white text-xs rounded-full">
+                <span className="ml-1 px-2 py-0.5 bg-white text-orange-600 rounded-full text-xs font-bold">
                   {[regionId, ownershipId, typeId].filter(Boolean).length}
                 </span>
               )}
@@ -674,44 +772,101 @@ export default function UniversitiesPage() {
         </div>
       </div>
 
-      {/* Pagination */}
-      <div className="bg-white border-t px-6 py-4 flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          Jami: <span className="font-semibold">{totalElements}</span> ta
+      {/* Modern Pagination */}
+      <div className="bg-white border-t-2 border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">
+            Jami:
+          </span>
+          <span className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md">
+            {totalElements} ta universitet
+          </span>
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
-            className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-white transition-all"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 text-gray-700" />
           </button>
-          <span className="text-sm text-gray-700">
-            Sahifa {currentPage + 1} / {totalPages}
-          </span>
+          
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border-2 border-gray-200">
+            <span className="text-sm font-medium text-gray-700">
+              Sahifa
+            </span>
+            <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-md font-bold text-sm shadow-sm">
+              {currentPage + 1}
+            </span>
+            <span className="text-sm text-gray-500">
+              / {totalPages}
+            </span>
+          </div>
+          
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={currentPage >= totalPages - 1}
-            className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-white transition-all"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5 text-gray-700" />
           </button>
+          
           <select
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
               setCurrentPage(0);
             }}
-            className="ml-4 px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+            className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-medium text-gray-700 hover:border-blue-400 transition-all cursor-pointer"
           >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
+            <option value={10}>10 ta</option>
+            <option value={20}>20 ta</option>
+            <option value={50}>50 ta</option>
+            <option value={100}>100 ta</option>
           </select>
         </div>
       </div>
+
+      {/* Form Dialog */}
+      <UniversityFormDialog
+        open={showFormDialog}
+        onOpenChange={setShowFormDialog}
+        university={editingUniversity}
+        onSuccess={handleFormSuccess}
+      />
+
+      {/* Modern Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingCode} onOpenChange={() => setDeletingCode(null)}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+              <Trash2 className="w-8 h-8 text-red-600" />
+            </div>
+            <AlertDialogTitle className="text-center text-2xl font-bold text-gray-900">
+              OTM o'chirish
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-gray-600 mt-3 text-base">
+              Haqiqatan ham bu oliy ta'lim muassasasini o'chirmoqchimisiz? 
+              <br />
+              <span className="font-semibold text-gray-900 mt-2 inline-block">
+                Bu amal qaytarilmaydi!
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3 sm:gap-3">
+            <AlertDialogCancel className="flex-1 py-3 rounded-lg border-2 border-gray-300 hover:bg-gray-50 font-semibold transition-all">
+              Bekor qilish
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Detail Drawer */}
       {selectedUniversity && (
