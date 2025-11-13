@@ -110,7 +110,9 @@
     "search": "Qidirish",
     "filter": "Filtr",
     "apply": "Qo'llash",
-    "clear": "Tozalash"
+    "clear": "Tozalash",
+    "view": "Ko'rish",
+    "close": "Yopish"
   },
   "filters": {
     "title": "Filtrlar",
@@ -136,8 +138,10 @@
     }
   },
   "table": {
+    "actions": "Amallar",
     "faculty": {
       "universityName": "OTM nomi",
+      "universityCode": "OTM kodi",
       "code": "Kod",
       "nameUz": "Nomi (o'zbekcha)",
       "nameRu": "Nomi (ruscha)",
@@ -179,5 +183,15 @@
   },
   "columns": {
     "title": "Ustunlar"
+  },
+  "details": {
+    "basicInfo": "Asosiy ma'lumotlar",
+    "auditInfo": "Audit ma'lumotlari",
+    "shortName": "Qisqa nomi",
+    "facultyType": "Fakultet turi",
+    "createdAt": "Yaratilgan",
+    "createdBy": "Yaratuvchi",
+    "updatedAt": "Yangilangan",
+    "updatedBy": "Yangilovchi"
   }
 }

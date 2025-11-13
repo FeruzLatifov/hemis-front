@@ -1,74 +1,142 @@
-import { Users, GraduationCap, Building2, Award, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, FlaskConical, Target, Sparkles, Star, Trophy, Calendar, DollarSign, Activity } from 'lucide-react'
+import { Users, GraduationCap, Building2, Award, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, FlaskConical, Target, Sparkles, Star, Trophy, Calendar, DollarSign, Activity, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import CountUp from 'react-countup'
 import { cn } from '@/lib/utils'
+import { useQuery } from '@tanstack/react-query'
+import { getDashboardStats } from '@/api/dashboard.api'
+import { formatDistanceToNow } from 'date-fns'
+import { uz } from 'date-fns/locale'
 
 export default function Dashboard() {
+  // Fetch real data from API
+  const { data: dashboardData, isLoading, error } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: getDashboardStats,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-red-600 text-lg mb-2">Ma'lumotlarni yuklashda xatolik</p>
+          <p className="text-sm text-slate-600">Iltimos, sahifani yangilang</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Prepare stats cards from API data
   const stats = [
     {
-      name: 'Jami Talabalar',
-      value: 453678,
-      change: 12.5,
-      trending: 'up',
+      name: 'Hozir O\'qimoqda',
+      value: dashboardData?.overview.activeStudents || 0,
+      change: 0,
+      trending: 'up' as const,
       icon: Users,
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-blue-50 dark:bg-blue-950/20',
       textColor: 'text-blue-600 dark:text-blue-400',
     },
     {
-      name: "Jami O'qituvchilar",
-      value: 45234,
-      change: 5.2,
-      trending: 'up',
-      icon: GraduationCap,
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50 dark:bg-purple-950/20',
-      textColor: 'text-purple-600 dark:text-purple-400',
-    },
-    {
-      name: 'Jami OTMlar',
-      value: 127,
-      change: 2,
-      trending: 'up',
-      icon: Building2,
+      name: 'Bitirganlar',
+      value: dashboardData?.overview.graduatedStudents || 0,
+      change: 0,
+      trending: 'up' as const,
+      icon: Award,
       color: 'from-green-500 to-emerald-500',
       bgColor: 'bg-green-50 dark:bg-green-950/20',
       textColor: 'text-green-600 dark:text-green-400',
     },
     {
-      name: 'Berilgan Diplomlar',
-      value: 89456,
-      change: 8.7,
-      trending: 'up',
-      icon: Award,
-      color: 'from-orange-500 to-yellow-500',
-      bgColor: 'bg-orange-50 dark:bg-orange-950/20',
-      textColor: 'text-orange-600 dark:text-orange-400',
+      name: 'Chetlashganlar',
+      value: dashboardData?.overview.expelledStudents || 0,
+      change: 0,
+      trending: 'down' as const,
+      icon: Users,
+      color: 'from-red-500 to-pink-500',
+      bgColor: 'bg-red-50 dark:bg-red-950/20',
+      textColor: 'text-red-600 dark:text-red-400',
+    },
+    {
+      name: "Jami O'qituvchilar",
+      value: dashboardData?.overview.totalTeachers || 0,
+      change: 0,
+      trending: 'up' as const,
+      icon: GraduationCap,
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-purple-50 dark:bg-purple-950/20',
+      textColor: 'text-purple-600 dark:text-purple-400',
     },
   ]
 
-  const topUniversities = [
-    { rank: 1, name: 'Toshkent Davlat Texnika Universiteti', students: 15420, rating: 98.5, change: 2.3 },
-    { rank: 2, name: 'O\'zbekiston Milliy Universiteti', students: 14850, rating: 97.8, change: 1.8 },
-    { rank: 3, name: 'Toshkent Axborot Texnologiyalari Universiteti', students: 12340, rating: 96.2, change: 3.1 },
-    { rank: 4, name: 'Samarqand Davlat Universiteti', students: 11200, rating: 95.4, change: -0.5 },
-    { rank: 5, name: 'Buxoro Davlat Universiteti', students: 9870, rating: 94.1, change: 1.2 },
+  const secondaryStats = [
+    {
+      name: 'Akademik Ta\'til',
+      value: dashboardData?.overview.academicLeaveStudents || 0,
+      icon: Calendar,
+      color: 'from-yellow-500 to-orange-500',
+    },
+    {
+      name: 'Bekor Qilingan',
+      value: dashboardData?.overview.cancelledStudents || 0,
+      icon: Users,
+      color: 'from-gray-500 to-slate-500',
+    },
+    {
+      name: 'Jami OTMlar',
+      value: dashboardData?.overview.totalUniversities || 0,
+      icon: Building2,
+      color: 'from-indigo-500 to-blue-500',
+    },
+    {
+      name: 'Berilgan Diplomlar',
+      value: dashboardData?.overview.totalDiplomas || 0,
+      icon: Award,
+      color: 'from-cyan-500 to-teal-500',
+    },
   ]
 
-  const recentActivities = [
-    { type: 'student', action: 'Yangi talaba qo\'shildi', name: 'Ahmadov Sardor', time: '5 daqiqa oldin', icon: Users, color: 'text-blue-600' },
-    { type: 'diploma', action: 'Diplom berildi', name: 'Karimova Nilufar', time: '23 daqiqa oldin', icon: Award, color: 'text-green-600' },
-    { type: 'teacher', action: 'O\'qituvchi tahrirlandi', name: 'Prof. Rahimov A.', time: '1 soat oldin', icon: GraduationCap, color: 'text-purple-600' },
-    { type: 'project', action: 'Ilmiy loyiha yaratildi', name: 'AI in Education', time: '2 soat oldin', icon: FlaskConical, color: 'text-orange-600' },
-  ]
+  // Map education types with icons
+  const educationTypeIcons: Record<string, any> = {
+    'Bakalavr': BookOpen,
+    'Magistr': Target,
+    'Ordinatura': Sparkles,
+  }
 
-  const educationTypes = [
-    { name: 'Bakalavr', count: 385240, percent: 85, color: 'bg-blue-500', icon: BookOpen },
-    { name: 'Magistr', count: 58320, percent: 13, color: 'bg-purple-500', icon: Target },
-    { name: 'PhD/DSc', count: 10118, percent: 2, color: 'bg-pink-500', icon: Sparkles },
-  ]
+  const educationTypeColors: Record<string, string> = {
+    'Bakalavr': 'bg-blue-500',
+    'Magistr': 'bg-purple-500',
+    'Ordinatura': 'bg-pink-500',
+  }
+
+  const totalStudents = dashboardData?.overview.activeStudents || 1  // Only active students for percentages
+  const educationTypes = dashboardData?.educationTypes.map(et => ({
+    name: et.name,
+    count: et.count,
+    percent: Math.round((et.count / totalStudents) * 100),
+    color: educationTypeColors[et.name] || 'bg-gray-500',
+    icon: educationTypeIcons[et.name] || BookOpen,
+  })) || []
+
+  const topUniversities = dashboardData?.topUniversities || []
+  const recentActivities = dashboardData?.recentActivities.map(activity => ({
+    ...activity,
+    icon: Users,
+    color: 'text-blue-600',
+    timeFormatted: activity.time ? formatDistanceToNow(new Date(activity.time), { addSuffix: true, locale: uz }) : 'noma\'lum',
+  })) || []
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -106,16 +174,8 @@ export default function Dashboard() {
             
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className={`flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${stat.color} text-white shadow-lg shadow-${stat.color}/50`}>
+                <div className={`flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${stat.color} text-white shadow-lg`}>
                   <stat.icon className="h-7 w-7" />
-                </div>
-                <div className={`flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium ${stat.trending === 'up' ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'}`}>
-                  {stat.trending === 'up' ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
-                  <span>{stat.change}%</span>
                 </div>
               </div>
             </CardHeader>
@@ -124,9 +184,30 @@ export default function Dashboard() {
               <p className="text-3xl font-bold text-slate-900 dark:text-white">
                 <CountUp end={stat.value} duration={2.5} separator="," />
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
-                o'tgan oyga nisbatan
-              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Secondary Stats */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {secondaryStats.map((stat, index) => (
+          <Card
+            key={stat.name}
+            className="border-0 shadow-md hover:shadow-lg transition-all duration-200"
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${stat.color} text-white shadow-md`}>
+                  <stat.icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">{stat.name}</p>
+                  <p className="text-xl font-bold text-slate-900 dark:text-white">
+                    <CountUp end={stat.value} duration={2} separator="," />
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -208,26 +289,12 @@ export default function Dashboard() {
                       <div className="flex items-center gap-4 mt-1">
                         <span className="text-sm text-slate-600 dark:text-slate-400">
                           <Users className="inline h-4 w-4 mr-1" />
-                          {uni.students.toLocaleString()} talaba
+                          {uni.studentCount.toLocaleString()} talaba
                         </span>
-                        <span className="flex items-center gap-1 text-sm">
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                          <span className="font-medium">{uni.rating}</span>
+                        <span className="text-xs text-slate-500">
+                          Grant: {uni.grantCount.toLocaleString()}
                         </span>
                       </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className={cn(
-                      'flex items-center gap-1 text-sm font-medium',
-                      uni.change > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                    )}>
-                      {uni.change > 0 ? (
-                        <TrendingUp className="h-4 w-4" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4" />
-                      )}
-                      <span>{Math.abs(uni.change)}%</span>
                     </div>
                   </div>
                 </div>
@@ -268,7 +335,7 @@ export default function Dashboard() {
                       {activity.name}
                     </p>
                   </div>
-                  <span className="text-xs text-slate-500 flex-shrink-0">{activity.time}</span>
+                  <span className="text-xs text-slate-500 flex-shrink-0">{activity.timeFormatted}</span>
                 </div>
               ))}
             </div>
@@ -289,7 +356,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Grant talabalar</p>
                   <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    <CountUp end={245830} duration={2} separator="," />
+                    <CountUp end={dashboardData?.overview.grantStudents || 0} duration={2} separator="," />
                   </p>
                 </div>
                 <DollarSign className="h-10 w-10 text-green-500" />
@@ -301,7 +368,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Kontrakt talabalar</p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    <CountUp end={207848} duration={2} separator="," />
+                    <CountUp end={dashboardData?.overview.contractStudents || 0} duration={2} separator="," />
                   </p>
                 </div>
                 <DollarSign className="h-10 w-10 text-orange-500" />
@@ -313,7 +380,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Ilmiy loyihalar</p>
                   <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
-                    <CountUp end={1247} duration={2} separator="," />
+                    <CountUp end={dashboardData?.overview.totalProjects || 0} duration={2} separator="," />
                   </p>
                 </div>
                 <FlaskConical className="h-10 w-10 text-cyan-500" />
@@ -325,7 +392,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400">Ilmiy nashrlar</p>
                   <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                    <CountUp end={8934} duration={2} separator="," />
+                    <CountUp end={dashboardData?.overview.totalPublications || 0} duration={2} separator="," />
                   </p>
                 </div>
                 <BookOpen className="h-10 w-10 text-pink-500" />

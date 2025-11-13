@@ -10,7 +10,7 @@
  * - i18n support (uz-UZ, oz-UZ, ru-RU, en-US)
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,7 +20,7 @@ import {
   ColumnDef,
   flexRender,
 } from '@tanstack/react-table';
-import { ChevronRight, ChevronDown, Download, RefreshCw } from 'lucide-react';
+import { ChevronRight, ChevronDown, Download, RefreshCw, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -34,6 +34,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { facultiesApi, FacultyGroupRow, FacultyRow, PageResponse } from '@/api/faculties.api';
+import FacultyDetailDrawer from './FacultyDetailDrawer';
 
 type TableRow = {
   type: 'group' | 'faculty';
@@ -48,6 +49,7 @@ export default function FacultiesPage() {
   const [status, setStatus] = useState<string>('all');
   const [page, setPage] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [selectedFacultyCode, setSelectedFacultyCode] = useState<string | null>(null);
 
   // Fetch university groups
   const { data: groupsData, isLoading, error, refetch } = useQuery({
@@ -79,12 +81,14 @@ export default function FacultiesPage() {
   const facultyPages: Record<string, number> = {};
 
   const facultyQueries = useQuery({
-    queryKey: ['faculties-by-university', expandedUniversities, facultyPages],
+    queryKey: ['faculties-by-university', expandedUniversities, facultyPages, search, status],
     queryFn: async () => {
       const results: Record<string, PageResponse<FacultyRow>> = {};
       for (const univCode of expandedUniversities) {
         const facultyPage = facultyPages[univCode] || 0;
         results[univCode] = await facultiesApi.getFacultiesByUniversity(univCode, {
+          q: search || undefined,
+          status: status === 'all' ? undefined : status === 'true',
           page: facultyPage,
           size: 50,
         });
@@ -94,17 +98,30 @@ export default function FacultiesPage() {
     enabled: expandedUniversities.length > 0,
   });
 
+  // Auto-expand all groups when searching to fetch child faculties by query
+  useEffect(() => {
+    if (!groupsData?.content) return;
+    const hasSearch = (search || '').trim().length > 0;
+    if (hasSearch) {
+      const allExpanded: Record<string, boolean> = {};
+      for (const g of groupsData.content) {
+        allExpanded[g.universityCode] = true;
+      }
+      setExpanded(allExpanded);
+    }
+  }, [groupsData, search]);
+
   const columns: ColumnDef<TableRow>[] = [
     {
       id: 'expander',
       header: () => null,
       cell: ({ row }) => {
         if (row.original.type === 'faculty') return null;
-        const isExpanded = expanded[row.original.data.universityId];
+        const isExpanded = expanded[row.original.data.universityCode];
         return (
           <button
             onClick={() => {
-              const code = row.original.data.universityId;
+              const code = row.original.data.universityCode;
               setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
             }}
             className="p-1"
@@ -145,7 +162,7 @@ export default function FacultiesPage() {
       cell: ({ row }) => {
         const data = row.original.data;
         return row.original.type === 'group' 
-          ? (data as FacultyGroupRow).universityId
+          ? (data as FacultyGroupRow).universityCode
           : (data as FacultyRow).code;
       },
     },
@@ -159,7 +176,7 @@ export default function FacultiesPage() {
             <div className="text-sm">
               <span className="font-medium">{data.facultyCount}</span>
               <span className="text-muted-foreground ml-1">
-                ({data.statusSummary})
+                ({t('filters.statusActive')}: {data.activeFacultyCount} / {t('filters.statusInactive')}: {data.inactiveFacultyCount})
               </span>
             </div>
           );
@@ -176,17 +193,41 @@ export default function FacultiesPage() {
           return (
             <span
               className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                data.active
+                data.status
                   ? 'bg-green-50 text-green-700'
                   : 'bg-gray-50 text-gray-600'
               }`}
             >
-              {data.active ? t('filters.statusActive') : t('filters.statusInactive')}
+              {data.status ? t('filters.statusActive') : t('filters.statusInactive')}
             </span>
           );
         }
         return null;
       },
+    },
+    {
+      id: 'actions',
+      header: t('table.actions'),
+      cell: ({ row }) => {
+        if (row.original.type === 'faculty') {
+          const data = row.original.data as FacultyRow;
+          return (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedFacultyCode(data.code);
+              }}
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              {t('actions.view')}
+            </Button>
+          );
+        }
+        return null;
+      },
+      size: 100,
     },
   ];
 
@@ -202,17 +243,27 @@ export default function FacultiesPage() {
       };
 
       // Add faculty children if expanded
-      if (expanded[group.universityId] && facultyQueries.data?.[group.universityId]) {
-        const facultiesData = facultyQueries.data[group.universityId];
+          if (expanded[group.universityCode] && facultyQueries.data?.[group.universityCode]) {
+            const facultiesData = facultyQueries.data[group.universityCode];
         row.subRows = facultiesData.content.map((faculty: FacultyRow) => ({
           type: 'faculty' as const,
           data: faculty,
         }));
       }
 
+      // When searching, show only groups that have matching child faculties
+      const hasSearch = (search || '').trim().length > 0;
+      if (hasSearch) {
+        if ((row.subRows?.length || 0) > 0) {
+          return row;
+        }
+        // Exclude groups without matching children
+        return null as unknown as TableRow;
+      }
+
       return row;
     });
-  }, [groupsData, expanded, facultyQueries.data]);
+  }, [groupsData, expanded, facultyQueries.data, search]);
 
   const table = useReactTable({
     data: tableData,
@@ -248,6 +299,7 @@ export default function FacultiesPage() {
   };
 
   return (
+    <>
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -387,5 +439,14 @@ export default function FacultiesPage() {
         )}
       </Card>
     </div>
+
+    {/* Faculty Detail Drawer */}
+    {selectedFacultyCode && (
+      <FacultyDetailDrawer
+        facultyCode={selectedFacultyCode}
+        onClose={() => setSelectedFacultyCode(null)}
+      />
+    )}
+    </>
   );
 }

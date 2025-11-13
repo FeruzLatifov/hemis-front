@@ -61,57 +61,6 @@
       }
     }
   },
-  "table": {
-    "university": {
-      "code": "Код",
-      "name": "Название",
-      "tin": "ИНН",
-      "address": "Адрес",
-      "region": "Регион",
-      "ownership": "Форма собственности",
-      "orgType": "Организационная форма",
-      "cadastre": "Кадастр",
-      "versionType": "Тип версии",
-      "soatoRegion": "СОАТО Регион",
-      "urls": {
-        "university": "URL ВУЗа",
-        "teacher": "URL Преподавателей",
-        "student": "URL Студентов"
-      },
-      "uzbmbUrl": "УЗБМБ URL",
-      "flags": {
-        "gpaEdit": "Редактирование GPA",
-        "accreditationEdit": "Редактирование аккредитации",
-        "addStudent": "Добавление студентов",
-        "allowGrouping": "Разрешить группировку",
-        "allowTransferOutside": "Разрешить внешний перевод"
-      },
-      "contractCategory": "Категория контракта",
-      "activityStatus": "Статус активности",
-      "belongsTo": "Принадлежит",
-      "terrain": "Махалля",
-      "mailAddress": "Почтовый адрес",
-      "bankInfo": "Банковские реквизиты",
-      "accreditationInfo": "Информация об аккредитации"
-    }
-  },
-  "actions": {
-    "refresh": "Обновить",
-    "export": "Экспорт",
-    "search": "Поиск",
-    "filter": "Фильтр",
-    "apply": "Применить",
-    "clear": "Очистить"
-  },
-  "filters": {
-    "searchPlaceholder": "Поиск по коду, названию или ИНН...",
-    "region": "Регион",
-    "ownership": "Форма собственности",
-    "type": "Тип"
-  },
-  "errors": {
-    "loadFailed": "Ошибка загрузки данных"
-  },
   "empty": {
     "noData": "Данные не найдены",
     "noFaculties": "Факультеты не найдены"
@@ -130,8 +79,10 @@
     }
   },
   "table": {
+    "actions": "Действия",
     "faculty": {
       "universityName": "Название ВУЗа",
+      "universityCode": "Код ВУЗа",
       "code": "Код",
       "nameUz": "Название (узбекский)",
       "nameRu": "Название (русский)",
@@ -181,7 +132,9 @@
     "search": "Поиск",
     "filter": "Фильтр",
     "apply": "Применить",
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "view": "Просмотр",
+    "close": "Закрыть"
   },
   "filters": {
     "title": "Фильтры",
@@ -196,5 +149,15 @@
   "errors": {
     "loadFailed": "Ошибка загрузки данных",
     "exportFailed": "Ошибка экспорта"
+  },
+  "details": {
+    "basicInfo": "Основная информация",
+    "auditInfo": "Аудит",
+    "shortName": "Краткое название",
+    "facultyType": "Тип факультета",
+    "createdAt": "Создано",
+    "createdBy": "Создал",
+    "updatedAt": "Обновлено",
+    "updatedBy": "Обновил"
   }
 }

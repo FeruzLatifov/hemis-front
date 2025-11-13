@@ -19,9 +19,11 @@ import {
   ChevronRight,
   Eye,
   X,
+  FilterX,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import UniversityDetailDrawer from './UniversityDetailDrawer';
+import AdvancedFilter, { FilterProperty, FilterCondition } from '@/components/common/AdvancedFilter';
 
 export default function UniversitiesPage() {
   const { t } = useTranslation();
@@ -38,9 +40,11 @@ export default function UniversitiesPage() {
   const [searchInput, setSearchInput] = useState(search);
 
   const [showFilters, setShowFilters] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [regionId, setRegionId] = useState(searchParams.get('regionId') || '');
   const [ownershipId, setOwnershipId] = useState(searchParams.get('ownershipId') || '');
   const [typeId, setTypeId] = useState(searchParams.get('typeId') || '');
+  const [advancedConditions, setAdvancedConditions] = useState<FilterCondition[]>([]);
 
   const [dictionaries, setDictionaries] = useState<{
     regions: Dictionary[];
@@ -177,6 +181,53 @@ export default function UniversitiesPage() {
     setShowFilters(false);
   };
 
+  const getDictName = (items: Dictionary[], code?: string) => {
+    if (!code) return undefined;
+    const found = items.find((i) => i.code === code);
+    return found?.name;
+  };
+
+  const filterProperties: FilterProperty[] = [
+    { key: 'code', label: t('table.university.code') || 'Kod', type: 'text' },
+    { key: 'name', label: t('table.university.name') || 'Nomi', type: 'text' },
+    { key: 'tin', label: t('table.university.tin') || 'INN', type: 'text' },
+    { key: 'address', label: t('table.university.address') || 'Manzil', type: 'text' },
+    { 
+      key: 'region', 
+      label: t('table.university.region') || 'Viloyat', 
+      type: 'select',
+      options: dictionaries.regions.map(r => ({ value: r.code, label: r.name }))
+    },
+    { 
+      key: 'ownership', 
+      label: t('table.university.ownership') || 'Mulkchilik', 
+      type: 'select',
+      options: dictionaries.ownerships.map(o => ({ value: o.code, label: o.name }))
+    },
+    { 
+      key: 'universityType', 
+      label: t('table.university.orgType') || 'Tashkiliy turi', 
+      type: 'select',
+      options: dictionaries.types.map(t => ({ value: t.code, label: t.name }))
+    },
+    { key: 'cadastre', label: t('table.university.cadastre') || 'Kadastr', type: 'text' },
+    { key: 'gpaEdit', label: t('table.university.flags.gpaEdit') || 'GPA tahrir', type: 'boolean' },
+    { key: 'active', label: 'Active', type: 'boolean' },
+  ];
+
+  const handleApplyAdvancedFilters = (conditions: FilterCondition[]) => {
+    setAdvancedConditions(conditions);
+    setCurrentPage(0);
+    setShowAdvancedFilters(false);
+    
+    toast.success(`${conditions.length} ta filter qo'llandi`);
+  };
+
+  const handleClearAdvancedFilters = () => {
+    setAdvancedConditions([]);
+    setCurrentPage(0);
+  };
+
   const columns: ColumnDef<UniversityRow>[] = [
     {
       id: 'actions',
@@ -211,35 +262,53 @@ export default function UniversitiesPage() {
     {
       accessorKey: 'tin',
       header: t('table.university.tin') || 'INN',
+      cell: ({ row }) => row.original.tin || '-',
     },
     {
       accessorKey: 'address',
       header: t('table.university.address') || 'Manzil',
       cell: ({ row }) => (
         <div className="max-w-xs truncate" title={row.original.address || ''}>
-          {row.original.address}
+          {row.original.address || '-'}
         </div>
       ),
     },
     {
       accessorKey: 'region',
       header: t('table.university.region') || 'Viloyat',
+      cell: ({ row }) => {
+        const code = row.original.regionCode || row.original.soatoRegion;
+        const name = getDictName(dictionaries.regions, code);
+        return name || row.original.region || '-';
+      },
     },
     {
       accessorKey: 'ownership',
       header: t('table.university.ownership') || 'Mulkchilik',
+      cell: ({ row }) => {
+        const code = row.original.ownershipCode || (row.original.ownership as string | undefined);
+        const name = getDictName(dictionaries.ownerships, code);
+        return name || row.original.ownership || '-';
+      },
     },
     {
       accessorKey: 'universityType',
       header: t('table.university.orgType') || 'Tashkiliy turi',
+      cell: ({ row }) => {
+        const code = row.original.universityTypeCode || (row.original.universityType as string | undefined);
+        const name = getDictName(dictionaries.types, code);
+        return name || row.original.universityType || '-';
+      },
     },
     {
       accessorKey: 'cadastre',
       header: t('table.university.cadastre') || 'Kadastr',
+      cell: ({ row }) => row.original.cadastre || '-',
     },
     {
       accessorKey: 'versionType',
       header: t('table.university.versionType') || 'Versiya turi',
+      cell: ({ row }) => row.original.versionType || '-',
     },
     {
       accessorKey: 'universityUrl',
@@ -250,23 +319,26 @@ export default function UniversitiesPage() {
             href={row.original.universityUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 hover:underline text-xs"
           >
             {row.original.universityUrl}
           </a>
-        ) : null,
+        ) : '-',
     },
     {
       accessorKey: 'teacherUrl',
       header: t('table.university.urls.teacher') || "O'qituvchi URL",
+      cell: ({ row }) => row.original.teacherUrl || '-',
     },
     {
       accessorKey: 'studentUrl',
       header: t('table.university.urls.student') || 'Talaba URL',
+      cell: ({ row }) => row.original.studentUrl || '-',
     },
     {
       accessorKey: 'uzbmbUrl',
       header: t('table.university.uzbmbUrl') || 'UZBMB URL',
+      cell: ({ row }) => row.original.uzbmbUrl || '-',
     },
     {
       accessorKey: 'gpaEdit',
@@ -296,30 +368,37 @@ export default function UniversitiesPage() {
     {
       accessorKey: 'contractCategory',
       header: t('table.university.contractCategory') || 'Kontrakt kategoriyasi',
+      cell: ({ row }) => row.original.contractCategory || '-',
     },
     {
       accessorKey: 'activityStatus',
       header: t('table.university.activityStatus') || 'Faollik statusi',
+      cell: ({ row }) => row.original.activityStatus || '-',
     },
     {
       accessorKey: 'belongsTo',
       header: t('table.university.belongsTo') || 'Tegishli',
+      cell: ({ row }) => row.original.belongsTo || '-',
     },
     {
       accessorKey: 'terrain',
       header: t('table.university.terrain') || 'Mahalla',
+      cell: ({ row }) => row.original.terrain || '-',
     },
     {
       accessorKey: 'mailAddress',
       header: t('table.university.mailAddress') || 'Pochta manzili',
+      cell: ({ row }) => row.original.mailAddress || '-',
     },
     {
       accessorKey: 'bankInfo',
       header: t('table.university.bankInfo') || 'Bank ma\'lumotlari',
+      cell: ({ row }) => row.original.bankInfo || '-',
     },
     {
       accessorKey: 'accreditationInfo',
       header: t('table.university.accreditationInfo') || 'Akkreditatsiya ma\'lumotlari',
+      cell: ({ row }) => row.original.accreditationInfo || '-',
     },
   ];
 
@@ -336,16 +415,13 @@ export default function UniversitiesPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
+      <div className="bg-white shadow-sm border-b flex-none">
+        <div className="px-6 py-2">
+          <div className="flex items-center justify-between mb-2">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900">
                 {t('page.universities.title') || 'Muassasalar (OTMlar)'}
               </h1>
-              <p className="text-sm text-gray-600 mt-0.5">
-                {t('page.universities.subtitle') || 'Oliy ta\'lim muassasalari reestri'}
-              </p>
             </div>
             <div className="flex gap-2">
               <button
@@ -407,19 +483,35 @@ export default function UniversitiesPage() {
               className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-semibold"
             >
               <Filter className="w-4 h-4" />
-              Filtr
+              Quick Filtr
               {(regionId || ownershipId || typeId) && (
                 <span className="ml-1 px-1.5 py-0.5 bg-blue-500 text-white text-xs rounded-full">
                   {[regionId, ownershipId, typeId].filter(Boolean).length}
                 </span>
               )}
             </button>
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold transition border ${
+                advancedConditions.length > 0
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300'
+              }`}
+            >
+              <Settings2 className="w-4 h-4" />
+              Qidiruv shartlari
+              {advancedConditions.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-white text-blue-600 text-xs rounded-full font-bold">
+                  {advancedConditions.length}
+                </span>
+              )}
+            </button>
           </div>
 
-          {/* Advanced Filters */}
+          {/* Quick Filters */}
           {showFilters && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-              <div className="grid grid-cols-3 gap-4">
+            <div className="mt-2 p-3 bg-gray-50 rounded border">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {t('filters.region') || 'Viloyat'}
@@ -496,52 +588,69 @@ export default function UniversitiesPage() {
               <div className="grid grid-cols-4 gap-3">
                 {table.getAllLeafColumns().map((column) => {
                   if (column.id === 'actions') return null;
-                  return (
-                    <label key={column.id} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={column.getIsVisible()}
-                        onChange={column.getToggleVisibilityHandler()}
-                        className="rounded"
-                      />
-                      <span>{column.columnDef.header?.toString() || column.id}</span>
-                    </label>
-                  );
+                    return (
+                      <label key={column.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input
+                          type="checkbox"
+                          checked={column.getIsVisible()}
+                          onChange={column.getToggleVisibilityHandler()}
+                          className="rounded cursor-pointer"
+                        />
+                        <span className="flex-1">{column.columnDef.header?.toString() || column.id}</span>
+                      </label>
+                    );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="mt-2 max-h-80 overflow-auto">
+              <AdvancedFilter
+                properties={filterProperties}
+                onApply={handleApplyAdvancedFilters}
+                onClear={handleClearAdvancedFilters}
+              />
             </div>
           )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto">
-        <div className="min-w-full inline-block align-middle">
-          <table className="min-w-full divide-y divide-gray-200">
+      <div className="flex-1 overflow-auto min-h-0">
+        <div className="min-w-full inline-block align-middle h-full">
+          <table className="min-w-full divide-y divide-gray-200 h-full">
             <thead className="bg-gray-100 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b-2 border-gray-300"
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    if (header.isPlaceholder || !header.column.getIsVisible()) {
+                      return null;
+                    }
+
+                    return (
+                      <th
+                        key={header.id}
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b-2 border-gray-300"
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={table.getVisibleLeafColumns().length} className="px-4 py-8 text-center text-gray-500">
                     Yuklanmoqda...
                   </td>
                 </tr>
               ) : universities.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={table.getVisibleLeafColumns().length} className="px-4 py-8 text-center text-gray-500">
                     Ma'lumotlar topilmadi
                   </td>
                 </tr>

@@ -80,12 +80,12 @@ function App() {
               <Route path="students" element={<Students />} />
               <Route path="teachers" element={<Teachers />} />
               <Route path="universities" element={<Universities />} />
-              <Route path="registry">
-                <Route path="e-reestr">
-                  <Route path="university" element={<UniversitiesPage />} />
-                </Route>
+            <Route path="registry">
+              <Route path="e-reestr">
+                <Route path="university" element={<UniversitiesPage />} />
                 <Route path="faculty" element={<FacultiesPage />} />
               </Route>
+            </Route>
               <Route path="reports" element={<Reports />} />
               <Route path="system">
                 <Route path="translation" element={<TranslationsPage />} />
