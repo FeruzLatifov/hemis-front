@@ -16,14 +16,19 @@ const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 /**
  * Login user - Web Login Endpoint
  *
- * Backend: POST /api/v1/web/auth/login
- * Format: JSON {username, password}
- * For: Web users (hemis-front)
+ * ✅ BEST PRACTICE IMPLEMENTATION:
+ * Step 1: POST /api/v1/web/auth/login → Get minimal JWT (only iss, sub, exp, iat)
+ * Step 2: GET /api/v1/web/auth/me → Get user info + permissions
+ *
+ * Benefits:
+ * - JWT size: ~230 bytes (minimal)
+ * - Permissions from backend, NOT JWT
+ * - Follows industry standards (Google, Facebook, Amazon)
  */
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
-    // Call new web login endpoint
-    const { data } = await axios.post(
+    // Step 1: Get JWT tokens (minimal)
+    const { data: loginData } = await axios.post(
       `${BACKEND_URL}/api/v1/web/auth/login`,
       {
         username: credentials.username,
@@ -36,37 +41,38 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
       }
     );
 
-    // Parse JWT token to extract user info
-    const tokenPayload = parseJWT(data.accessToken);
-
-    if (!tokenPayload) {
-      throw new Error('Failed to parse access token');
-    }
+    // Step 2: Get user info + permissions using JWT
+    const { data: userInfo } = await axios.get(
+      `${BACKEND_URL}/api/v1/web/auth/me`,
+      {
+        headers: {
+          'Authorization': `Bearer ${loginData.accessToken}`,
+        },
+      }
+    );
 
     // Transform backend response to frontend format
     const response: LoginResponse = {
-      token: data.accessToken,
-      refreshToken: data.refreshToken,
+      token: loginData.accessToken,
+      refreshToken: loginData.refreshToken,
       user: {
-        id: data.user?.id || tokenPayload.sub || '',
-        username: data.user?.username || tokenPayload.username || credentials.username,
-        email: data.user?.email || tokenPayload.email || '',
-        name: data.user?.name || data.user?.fullName || tokenPayload.full_name || tokenPayload.username || '',
-        locale: credentials.locale || data.user?.locale || 'uz',
-        active: data.user?.active ?? true,
-        createdAt: data.user?.createdAt || new Date().toISOString(),
+        id: userInfo.user.id,
+        username: userInfo.user.username,
+        email: userInfo.user.email || '',
+        name: userInfo.user.fullName || userInfo.user.username,
+        locale: (credentials.locale || userInfo.user.locale || 'uz') as 'uz' | 'ru' | 'en',
+        active: userInfo.user.active ?? true,
+        createdAt: new Date().toISOString(),
       },
-      university: data.university || null,
-      permissions: data.permissions || getTokenAuthorities(data.accessToken),
+      university: userInfo.university || null,
+      permissions: userInfo.permissions || [],
     };
 
     return response;
   } catch (error: unknown) {
     console.error('Login failed:', error);
 
-    // Transform error message
     if (axios.isAxiosError(error)) {
-      // Network/connection issue (backend likely down)
       if (
         error.code === 'ERR_NETWORK' ||
         error.message === 'Network Error' ||
@@ -74,15 +80,19 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         (error.request && (error.request.status === 0 || error.request.readyState === 4))
       ) {
         const msg = i18n.t('login.errors.backendDown', { defaultValue: 'Backend server ishlamayapti' });
-        throw new Error(msg);
+        error.message = msg || 'Backend server ishlamayapti';
+        throw error;
       }
+
       interface ErrorResponse {
         message?: string;
         error?: string;
       }
+
       const errorData = error.response?.data as ErrorResponse;
       const errorMsg = errorData?.message || errorData?.error || 'Login failed';
-      throw new Error(errorMsg);
+      error.message = errorMsg;
+      throw error;
     }
 
     throw error instanceof Error ? error : new Error('Login failed');
@@ -169,29 +179,32 @@ export const logout = async (): Promise<void> => {
 /**
  * Get current authenticated user
  *
- * Uses existing apiClient (with token interceptor)
+ * NEW: Uses /api/v1/web/auth/me (JWT minimal + permissions from backend)
  */
 export const getCurrentUser = async (): Promise<AdminUser> => {
   try {
-    const { data } = await apiClient.get<AdminUser>('/api/users/me');
-    return data;
-  } catch (error) {
-    // Fallback: Parse from token if API call fails
-    const token = localStorage.getItem('accessToken');
-    const tokenPayload = parseJWT(token);
+    // Call new /auth/me endpoint
+    const { data } = await axios.get(
+      `${BACKEND_URL}/api/v1/web/auth/me`,
+      {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      }
+    );
 
-    if (!tokenPayload) {
-      throw error;
-    }
-
+    // Transform backend response to frontend format
     return {
-      id: tokenPayload.sub || '',
-      username: tokenPayload.username || '',
-      email: tokenPayload.email || '',
-      name: tokenPayload.full_name || tokenPayload.username || '',
-      locale: 'uz',
-      active: true,
+      id: data.user.id,
+      username: data.user.username,
+      email: data.user.email || '',
+      name: data.user.fullName || data.user.username,
+      locale: (data.user.locale || 'uz') as 'uz' | 'ru' | 'en',
+      active: data.user.active ?? true,
       createdAt: new Date().toISOString(),
     };
+  } catch (error) {
+    console.error('Failed to get current user:', error);
+    throw error;
   }
 };

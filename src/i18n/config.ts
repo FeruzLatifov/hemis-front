@@ -34,6 +34,15 @@ const getSavedLocale = (): string => {
   return bcp47ToShort[savedLocaleRaw] || savedLocaleRaw;
 };
 
+const LOCAL_TRANSLATIONS = {
+  uz,
+  ru,
+  en,
+  oz,
+} as const;
+
+type SupportedLang = keyof typeof LOCAL_TRANSLATIONS;
+
 const savedLocale = getSavedLocale();
 
 i18n
@@ -41,12 +50,10 @@ i18n
   .use(initReactI18next)
   .init({
     // Local resources as fallback (works offline / when backend down)
-    resources: {
-      uz: { translation: uz },
-      ru: { translation: ru },
-      en: { translation: en },
-      oz: { translation: oz },
-    },
+    resources: Object.entries(LOCAL_TRANSLATIONS).reduce((acc, [key, value]) => {
+      acc[key as SupportedLang] = { translation: value };
+      return acc;
+    }, {} as Record<SupportedLang, { translation: typeof uz }>),
     lng: savedLocale,
     fallbackLng: 'uz',
     supportedLngs: ['uz', 'ru', 'en', 'oz'],
@@ -59,23 +66,41 @@ i18n
 
       // Custom request function
       request: async (_options: unknown, url: string, _payload: unknown, callback: (error: Error | null, response: { status: number; data: string | null }) => void) => {
+        const lang = (url as SupportedLang) || 'uz';
+        const fallbackTranslation = LOCAL_TRANSLATIONS[lang] ?? LOCAL_TRANSLATIONS.uz;
+
+        const serveFallback = (reason: string, error?: unknown) => {
+          if (error) {
+            console.warn(`[i18n] ${reason}. Falling back to bundled translations for ${lang}.`, error);
+          } else {
+            console.warn(`[i18n] ${reason}. Falling back to bundled translations for ${lang}.`);
+          }
+          callback(null, {
+            status: 200,
+            data: JSON.stringify(fallbackTranslation),
+          });
+        };
+
+        if (typeof navigator !== 'undefined' && 'onLine' in navigator && !navigator.onLine) {
+          serveFallback('Browser offline detected');
+          return;
+        }
+
         try {
-          const lang = url as 'uz' | 'oz' | 'ru' | 'en';
           const translations = await getTranslationsByLanguage(lang);
           callback(null, {
             status: 200,
             data: JSON.stringify(translations),
           });
         } catch (error: unknown) {
-          console.error('Failed to load translations:', error);
-          const normalizedError = error instanceof Error ? error : new Error('Failed to load translations');
-          const status = axios.isAxiosError(error)
-            ? error.response?.status ?? 500
-            : 500;
-          callback(normalizedError, {
-            status,
-            data: null,
-          });
+          console.error('Failed to load translations from backend:', error);
+          if (axios.isAxiosError(error) && error.response?.status === 401) {
+            // During login we might not have auth headers yet; fallback immediately
+            serveFallback('Unauthorized while fetching translations', error);
+            return;
+          }
+
+          serveFallback('Backend translations unavailable', error);
         }
       },
     },
@@ -92,7 +117,7 @@ i18n
 
     // React specific
     react: {
-      useSuspense: true,
+      useSuspense: false,
     },
   });
 

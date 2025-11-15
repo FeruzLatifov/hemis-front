@@ -2,9 +2,12 @@
  * API Client Configuration
  *
  * Axios instance with interceptors for JWT authentication
+ * Includes Sentry integration for error tracking
  */
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { captureError, addBreadcrumb } from '@/lib/sentry';
+import { toast } from 'sonner';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -48,13 +51,32 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle token refresh
+// Response interceptor - Handle token refresh and errors
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
+  async (error: AxiosError<any>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+
+    // ⭐ Extract backend Event ID from error response (if exists)
+    const eventId = error.response?.data?.eventId;
+    const errorCode = error.response?.data?.errorCode;
+    const errorMessage = error.response?.data?.message || error.message;
+
+    // ⭐ Add breadcrumb for Sentry
+    addBreadcrumb({
+      category: 'api',
+      message: `API Error: ${error.response?.status} ${originalRequest.url}`,
+      level: 'error',
+      data: {
+        url: originalRequest.url,
+        method: originalRequest.method,
+        status: error.response?.status,
+        eventId,
+        errorCode,
+      },
+    });
 
     // If 401 and not already retried, try to refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -114,6 +136,48 @@ apiClient.interceptors.response.use(
           window.dispatchEvent(new CustomEvent('auth:logout'));
         }
       }
+    }
+
+    // ⭐ Handle 500 errors (Internal Server Error)
+    if (error.response?.status === 500) {
+      // Capture to Sentry (frontend) if enabled
+      captureError(new Error(errorMessage), {
+        tags: {
+          error_code: errorCode || 'INTERNAL_ERROR',
+          backend_event_id: eventId || 'none',
+        },
+        extra: {
+          url: originalRequest.url,
+          method: originalRequest.method,
+          status: error.response.status,
+          backend_event_id: eventId,
+        },
+        level: 'error',
+      });
+
+      // ⭐ Show toast notification (same as univer-front)
+      // Event ID ko'rsatiladi agar mavjud bo'lsa
+      const toastDescription = eventId
+        ? `Event ID: ${eventId.substring(0, 12)}...\n${errorMessage || "Iltimos, qaytadan urinib ko'ring."}`
+        : errorMessage || "Iltimos, qaytadan urinib ko'ring.";
+
+      toast.error('Serverda xatolik yuz berdi', {
+        description: toastDescription,
+        duration: 5000,
+      });
+    }
+
+    // ⭐ Handle 400/404 errors
+    if (error.response?.status === 400 || error.response?.status === 404) {
+      addBreadcrumb({
+        category: 'api',
+        message: `Client Error: ${error.response.status} - ${errorMessage}`,
+        level: 'warning',
+        data: {
+          url: originalRequest.url,
+          errorCode,
+        },
+      });
     }
 
     return Promise.reject(error);

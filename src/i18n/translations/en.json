@@ -23,6 +23,7 @@
       "digital": "Digitalization",
       "secure": "Secure System"
     },
+    "copyright": "© 2025 HEMIS. All rights reserved.",
     "errors": {
       "invalidCredentials": "Invalid username or password",
       "userDisabled": "User account is disabled",

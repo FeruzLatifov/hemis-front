@@ -4,6 +4,7 @@
  * Backend endpoints: /api/v1/web/translations
  */
 
+import axios from 'axios';
 import apiClient from './client';
 
 // =====================================================
@@ -82,6 +83,21 @@ export interface CategoriesResponse {
  * @param lang Language code ('uz', 'oz', 'ru', 'en')
  * @returns Translation map (key → value)
  */
+const publicTranslationClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8081',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+publicTranslationClient.interceptors.request.use((config) => {
+  if (config.headers) {
+    config.headers.Authorization = undefined;
+  }
+  return config;
+});
+
 export const getTranslationsByLanguage = async (lang: 'uz' | 'oz' | 'ru' | 'en'): Promise<TranslationMap> => {
   // Map short language codes to BCP-47 full locale codes
   const localeMap: Record<string, string> = {
@@ -94,7 +110,7 @@ export const getTranslationsByLanguage = async (lang: 'uz' | 'oz' | 'ru' | 'en')
   const locale = localeMap[lang] || 'uz-UZ';
 
   // Use backend i18n API endpoint
-  const response = await apiClient.get<TranslationMapResponse>(`/api/v1/web/i18n/messages?lang=${locale}`);
+  const response = await publicTranslationClient.get<TranslationMapResponse>(`/api/v1/web/i18n/messages?lang=${locale}`);
   return response.data.data;
 };
 

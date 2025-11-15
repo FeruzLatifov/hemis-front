@@ -97,7 +97,7 @@ function App() {
           </Routes>
         </BrowserRouter>
 
-        {/* Toast Notifications */}
+        {/* Toast Notifications (same as univer-front) */}
         <Toaster position="bottom-right" richColors closeButton />
       </ThemeProvider>
     </QueryClientProvider>
