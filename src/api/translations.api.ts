@@ -176,7 +176,9 @@ export const clearTranslationCache = async (): Promise<{ message: string }> => {
  * Export translations to properties format
  */
 export const exportTranslations = async (language: string): Promise<ExportResponse> => {
-  const response = await apiClient.post('/api/v1/web/system/translation/export', { language });
+  const response = await apiClient.post('/api/v1/web/system/translation/export', undefined, {
+    params: { language },
+  });
   return response.data;
 };
 

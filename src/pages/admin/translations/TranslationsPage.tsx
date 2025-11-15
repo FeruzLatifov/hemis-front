@@ -90,6 +90,7 @@ export default function TranslationsPage() {
     try {
       const result = await clearTranslationCache();
       setShowClearCacheModal(false);
+      await loadTranslations();
       toast.success(result.message || 'Cache muvaffaqiyatli tozalandi', {
         duration: 3000,
         position: 'bottom-right',
@@ -107,6 +108,7 @@ export default function TranslationsPage() {
     try {
       const result = await regeneratePropertiesFiles();
       setShowRegenerateModal(false);
+      await loadTranslations();
       toast.success(`✓ ${result.totalFiles} ta fayl yaratildi (${result.totalTranslations} tarjima)`, {
         duration: 4000,
         position: 'bottom-right',
