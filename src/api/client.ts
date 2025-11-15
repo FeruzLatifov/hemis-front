@@ -16,16 +16,14 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // ✅ CRITICAL: Enable cookies (HTTPOnly)
 });
 
-// Request interceptor - Add JWT token and locale
+// Request interceptor - Add locale header (token in HTTPOnly cookie)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add access token to header
-    const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // ✅ NO NEED to add Authorization header - token is in HTTPOnly cookie
+    // Backend reads cookie automatically via Spring Security
 
     // Add locale to header in BCP-47 format
     const locale = localStorage.getItem('locale') || 'uz';
@@ -82,59 +80,28 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        try {
-          // Create form data for OAuth2 refresh grant
-          const formData = new URLSearchParams();
-          formData.append('grant_type', 'refresh_token');
-          formData.append('refresh_token', refreshToken);
-
-          // Call backend OAuth refresh endpoint
-          const { data } = await axios.post(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/app/rest/v2/oauth/token`,
-            formData,
-            {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
-              },
-            }
-          );
-
-          // Save new tokens (OAuth format)
-          localStorage.setItem('accessToken', data.access_token);
-          localStorage.setItem('refreshToken', data.refresh_token);
-
-          // Retry original request with new token
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+      try {
+        // ✅ Call refresh endpoint (refreshToken is in HTTPOnly cookie)
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/v1/web/auth/refresh`,
+          {}, // Empty body - refreshToken is in cookie
+          {
+            withCredentials: true, // ✅ Send cookies
           }
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed - clear all auth data
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          localStorage.removeItem('auth-storage');
+        );
 
-          // Emit custom event instead of direct redirect
-          // ProtectedRoute will handle the redirect
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('auth:logout'));
-          }
+        // ✅ New tokens are automatically set in cookies by backend
+        // No need to save to localStorage
 
-          return Promise.reject(refreshError);
-        }
-      } else {
-        // No refresh token available
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('auth-storage');
-
+        // Retry original request (token in cookie)
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - logout
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('auth:logout'));
         }
+
+        return Promise.reject(refreshError);
       }
     }
 

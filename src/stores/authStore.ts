@@ -8,7 +8,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthState, LoginRequest } from '../types/auth.types';
 import * as authApi from '../api/auth.api';
-import { isTokenExpired } from '../utils/token.util';
 
 interface AuthStore extends AuthState {
   // Actions
@@ -35,15 +34,14 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const response = await authApi.login(credentials);
 
-          // Save tokens to localStorage
-          localStorage.setItem('accessToken', response.token);
-          localStorage.setItem('refreshToken', response.refreshToken);
+          // ✅ NO localStorage for tokens - they are in HTTPOnly cookies
+          // Only save user info and permissions for UI
           localStorage.setItem('locale', credentials.locale || 'uz');
 
           // Update store
           set({
-            token: response.token,
-            refreshToken: response.refreshToken,
+            token: null, // Not stored in frontend anymore
+            refreshToken: null, // Not stored in frontend anymore
             user: response.user,
             university: response.university,
             permissions: response.permissions,
@@ -62,10 +60,8 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error) {
           console.error('Logout error:', error);
         } finally {
-          // Clear tokens from localStorage
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
+          // ✅ NO tokens in localStorage to clear - they're in HTTPOnly cookies
+          // Backend clears cookies automatically
 
           // Clear store
           set({
@@ -81,23 +77,17 @@ export const useAuthStore = create<AuthStore>()(
 
       // Refresh token action
       refresh: async () => {
-        const state = get();
-        const { refreshToken } = state;
-        if (!refreshToken) {
-          throw new Error('No refresh token available');
-        }
-
+        // ✅ refreshToken is in HTTPOnly cookie - no need to check
         try {
-          const response = await authApi.refreshToken({ refreshToken });
+          await authApi.refreshToken({ refreshToken: '' });
 
-          // Save new tokens
-          localStorage.setItem('accessToken', response.token);
-          localStorage.setItem('refreshToken', response.refreshToken);
+          // ✅ New tokens are set in cookies by backend
+          // No localStorage updates needed
 
-          // Update store
+          // Update store (tokens not stored in frontend)
           set({
-            token: response.token,
-            refreshToken: response.refreshToken,
+            token: null,
+            refreshToken: null,
           });
         } catch (error) {
           // Refresh failed, logout
@@ -120,42 +110,21 @@ export const useAuthStore = create<AuthStore>()(
       initialize: async () => {
         // Zustand persist middleware already restored the state from localStorage
         const currentState = get();
-        const { token, refreshToken, isAuthenticated } = currentState;
+        const { isAuthenticated } = currentState;
 
-        if (isAuthenticated && token) {
-          // ✅ BEST PRACTICE: Client-side token validation (no server call)
-          // Check if access token is expired
-          if (isTokenExpired(token)) {
-            console.log('Access token expired, attempting refresh...');
-
-            // Check if refresh token is also expired
-            if (isTokenExpired(refreshToken, 0)) {
-              // Both tokens expired - logout
-              console.warn('Refresh token also expired - logging out');
-              await get().logout();
-              return;
-            }
-
-            // Try to refresh access token
-            try {
-              await get().refresh();
-              console.log('Token refreshed successfully');
-            } catch (error) {
-              console.error('Token refresh failed during initialization:', error);
-              await get().logout();
-              return;
-            }
-          }
+        if (isAuthenticated) {
+          // ✅ Token is in HTTPOnly cookie - browser manages expiration
+          // Just check if we have user data
 
           // Optional: Load fresh user data in background (non-blocking)
-          // Only if user not already loaded
           if (!currentState.user) {
             try {
               const user = await authApi.getCurrentUser();
               set({ user });
             } catch (error) {
-              // Ignore error - user will be loaded on next successful API call
+              // Token might be expired - logout
               console.debug('Could not load user during initialization:', error);
+              await get().logout();
             }
           }
         }

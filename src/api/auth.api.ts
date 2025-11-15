@@ -27,7 +27,7 @@ const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
  */
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
-    // Step 1: Get JWT tokens (minimal)
+    // Step 1: Get JWT tokens (minimal) - tokens set in HTTPOnly cookies
     const { data: loginData } = await axios.post(
       `${BACKEND_URL}/api/v1/web/auth/login`,
       {
@@ -38,23 +38,22 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         headers: {
           'Content-Type': 'application/json',
         },
+        withCredentials: true, // ✅ CRITICAL: Enable cookies (HTTPOnly)
       }
     );
 
-    // Step 2: Get user info + permissions using JWT
+    // Step 2: Get user info + permissions using cookie token
     const { data: userInfo } = await axios.get(
       `${BACKEND_URL}/api/v1/web/auth/me`,
       {
-        headers: {
-          'Authorization': `Bearer ${loginData.accessToken}`,
-        },
+        withCredentials: true, // ✅ Send cookies
       }
     );
 
     // Transform backend response to frontend format
     const response: LoginResponse = {
-      token: loginData.accessToken,
-      refreshToken: loginData.refreshToken,
+      token: loginData.accessToken, // For backward compatibility (not stored)
+      refreshToken: loginData.refreshToken, // For backward compatibility (not stored)
       user: {
         id: userInfo.user.id,
         username: userInfo.user.username,
@@ -103,44 +102,36 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
  * Refresh access token
  *
  * Backend: POST /api/v1/web/auth/refresh
- * Format: JSON {refreshToken}
+ * ✅ refreshToken is in HTTPOnly cookie - no need to send in body
  */
 export const refreshToken = async (request: RefreshTokenRequest): Promise<LoginResponse> => {
   try {
     const { data } = await axios.post(
       `${BACKEND_URL}/api/v1/web/auth/refresh`,
-      {
-        refreshToken: request.refreshToken,
-      },
+      {}, // Empty body - refreshToken in cookie
       {
         headers: {
           'Content-Type': 'application/json',
         },
+        withCredentials: true, // ✅ Send cookies
       }
     );
-
-    // Parse new token
-    const tokenPayload = parseJWT(data.accessToken);
-
-    if (!tokenPayload) {
-      throw new Error('Failed to parse refreshed access token');
-    }
 
     // Transform response
     return {
       token: data.accessToken,
       refreshToken: data.refreshToken,
       user: {
-        id: data.user?.id || tokenPayload.sub || '',
-        username: data.user?.username || tokenPayload.username || '',
-        email: data.user?.email || tokenPayload.email || '',
-        name: data.user?.name || data.user?.fullName || tokenPayload.full_name || '',
+        id: data.user?.id || '',
+        username: data.user?.username || '',
+        email: data.user?.email || '',
+        name: data.user?.name || data.user?.fullName || '',
         locale: data.user?.locale || 'uz',
         active: data.user?.active ?? true,
         createdAt: data.user?.createdAt || new Date().toISOString(),
       },
       university: data.university || null,
-      permissions: data.permissions || getTokenAuthorities(data.accessToken),
+      permissions: data.permissions || [],
     };
   } catch (error) {
     console.error('Token refresh failed:', error);
@@ -152,19 +143,19 @@ export const refreshToken = async (request: RefreshTokenRequest): Promise<LoginR
  * Logout user
  *
  * Backend: POST /api/v1/web/auth/logout
- * Also clears client-side storage
+ * ✅ Clears HTTPOnly cookies on backend
  */
 export const logout = async (): Promise<void> => {
   try {
-    // Call backend logout endpoint (optional - JWT is stateless)
+    // Call backend logout endpoint - clears cookies
     await axios.post(
       `${BACKEND_URL}/api/v1/web/auth/logout`,
       {},
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
+        withCredentials: true, // ✅ Send cookies
       }
     );
   } catch (error) {
@@ -180,16 +171,15 @@ export const logout = async (): Promise<void> => {
  * Get current authenticated user
  *
  * NEW: Uses /api/v1/web/auth/me (JWT minimal + permissions from backend)
+ * ✅ Token is in HTTPOnly cookie
  */
 export const getCurrentUser = async (): Promise<AdminUser> => {
   try {
-    // Call new /auth/me endpoint
+    // Call new /auth/me endpoint - token in cookie
     const { data } = await axios.get(
       `${BACKEND_URL}/api/v1/web/auth/me`,
       {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
+        withCredentials: true, // ✅ Send cookies
       }
     );
 

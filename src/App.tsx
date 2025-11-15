@@ -35,10 +35,9 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore()
 
-  // Check localStorage directly for immediate access
-  const token = localStorage.getItem('accessToken')
-
-  if (!isAuthenticated && !token) {
+  // ✅ Token is in HTTPOnly cookie - backend validates
+  // Frontend only checks if user is authenticated in Zustand
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
 

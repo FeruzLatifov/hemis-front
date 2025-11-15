@@ -4,6 +4,8 @@
  * Type definitions for authentication API
  */
 
+import type { RoleCode } from './role.types';
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -34,6 +36,7 @@ export interface AdminUser {
   active: boolean;
   createdAt: string;
   updatedAt?: string;
+  roles?: RoleCode[]; // User's assigned roles
 }
 
 export interface Permission {
@@ -47,7 +50,7 @@ export interface LoginResponse {
   refreshToken: string;
   user: AdminUser;
   university: University;
-  permissions: string[]; // Changed: Backend returns string array
+  permissions: string[]; // Permission strings (e.g., "students:read")
 }
 
 export interface RefreshTokenRequest {
@@ -59,7 +62,7 @@ export interface AuthState {
   refreshToken: string | null;
   user: AdminUser | null;
   university: University | null;
-  permissions: string[]; // Changed: String array for simplicity
+  permissions: string[]; // Permission strings
   isAuthenticated: boolean;
 }
 
