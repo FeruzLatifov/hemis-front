@@ -66,6 +66,6 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   return response.data;
 };
 
-export default {
-  getDashboardStats,
+export const dashboardApi = {
+  getStats: getDashboardStats,
 };

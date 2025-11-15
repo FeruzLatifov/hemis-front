@@ -5,13 +5,11 @@
  * Uses /api/v1/web/auth endpoints for web users
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import apiClient from './client';
 import type { LoginRequest, LoginResponse, RefreshTokenRequest, AdminUser } from '../types/auth.types';
 import { parseJWT, getTokenAuthorities } from '../utils/jwt.util';
 import i18n from '../i18n/config';
-
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 
 /**
  * Login user - Web Login Endpoint
@@ -28,27 +26,16 @@ const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
     // Step 1: Get JWT tokens (minimal) - tokens set in HTTPOnly cookies
-    const { data: loginData } = await axios.post(
-      `${BACKEND_URL}/api/v1/web/auth/login`,
+    const { data: loginData } = await apiClient.post(
+      '/api/v1/web/auth/login',
       {
         username: credentials.username,
         password: credentials.password,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true, // ✅ CRITICAL: Enable cookies (HTTPOnly)
       }
     );
-
-    // Step 2: Get user info + permissions using cookie token
-    const { data: userInfo } = await axios.get(
-      `${BACKEND_URL}/api/v1/web/auth/me`,
-      {
-        withCredentials: true, // ✅ Send cookies
-      }
-    );
+    
+    // Step 2: Get user info + permissions (token sent via cookie)
+    const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me');
 
     // Transform backend response to frontend format
     const response: LoginResponse = {
@@ -106,15 +93,9 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
  */
 export const refreshToken = async (request: RefreshTokenRequest): Promise<LoginResponse> => {
   try {
-    const { data } = await axios.post(
-      `${BACKEND_URL}/api/v1/web/auth/refresh`,
-      {}, // Empty body - refreshToken in cookie
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true, // ✅ Send cookies
-      }
+    const { data } = await apiClient.post(
+      '/api/v1/web/auth/refresh',
+      {} // Empty body - refreshToken in cookie
     );
 
     // Transform response
@@ -148,16 +129,7 @@ export const refreshToken = async (request: RefreshTokenRequest): Promise<LoginR
 export const logout = async (): Promise<void> => {
   try {
     // Call backend logout endpoint - clears cookies
-    await axios.post(
-      `${BACKEND_URL}/api/v1/web/auth/logout`,
-      {},
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true, // ✅ Send cookies
-      }
-    );
+    await apiClient.post('/api/v1/web/auth/logout');
   } catch (error) {
     // Ignore errors - client-side cleanup will happen anyway
     console.warn('Backend logout call failed (ignored):', error);
@@ -176,12 +148,7 @@ export const logout = async (): Promise<void> => {
 export const getCurrentUser = async (): Promise<AdminUser> => {
   try {
     // Call new /auth/me endpoint - token in cookie
-    const { data } = await axios.get(
-      `${BACKEND_URL}/api/v1/web/auth/me`,
-      {
-        withCredentials: true, // ✅ Send cookies
-      }
-    );
+    const { data } = await apiClient.get('/api/v1/web/auth/me');
 
     // Transform backend response to frontend format
     return {

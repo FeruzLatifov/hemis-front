@@ -23,7 +23,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // ✅ NO NEED to add Authorization header - token is in HTTPOnly cookie
-    // Backend reads cookie automatically via Spring Security
+    // Backend reads cookie automatically via CookieJwtAuthenticationFilter
 
     // Add locale to header in BCP-47 format
     const locale = localStorage.getItem('locale') || 'uz';
