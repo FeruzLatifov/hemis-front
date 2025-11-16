@@ -521,21 +521,18 @@ export default function UniversitiesPage() {
       {/* Header Card - stat-ministry style */}
       <div className="p-3">
         <div className="rounded-lg p-4 bg-white shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-gray-900">Muassasalar ro'yxati</h1>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                  <Building2 className="w-4 h-4" />
-                  {totalElements} ta OTM
-                </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-medium bg-green-50 text-green-700 border border-green-200">
-                  <TrendingUp className="w-4 h-4" />
-                  {totalPages} sahifa
-                </div>
-              </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleCreate}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Qo'shish
+              </button>
               <button
                 onClick={handleExport}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
@@ -691,13 +688,6 @@ export default function UniversitiesPage() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleCreate}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Qo'shish
-              </button>
               <button
                 onClick={() => setShowColumnSettings(!showColumnSettings)}
                 className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
