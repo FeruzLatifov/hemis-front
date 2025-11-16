@@ -23,12 +23,11 @@ import {
   Plus,
   Edit,
   Trash2,
-  TrendingUp,
-  Building2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import UniversityDetailDrawer from './UniversityDetailDrawer';
 import UniversityFormDialog from './UniversityFormDialog';
+import { CustomTagFilter } from '@/components/filters/CustomTagFilter';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -611,7 +610,7 @@ export default function UniversitiesPage() {
                       <button
                         key={filter.key}
                         onClick={() => handleAddHorizontalFilter(filter.key)}
-                        className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         + {filter.label}
                       </button>
@@ -627,29 +626,38 @@ export default function UniversitiesPage() {
                       const filterData = availableHorizontalFilters.find(f => f.key === filter.key);
                       if (!filterData) return null;
                       
+                      // Text type filters (future: need input popover)
+                      if (filterData.type === 'text') {
+                        return (
+                          <div key={filter.key} className="flex items-center gap-2 rounded-lg bg-gray-200 p-2">
+                            <span className="text-sm font-medium text-gray-700">
+                              {filter.label}
+                              {filter.textValue && (
+                                <span className="ml-1 px-1.5 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                                  ✓
+                                </span>
+                              )}
+                            </span>
+                            <button
+                              onClick={() => handleRemoveHorizontalFilter(filter.key)}
+                              className="cursor-pointer rounded-full bg-red-50 p-1 text-red-500 hover:bg-red-100 transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      }
+                      
+                      // Select/Boolean type filters with CustomTagFilter
                       return (
-                        <div key={filter.key} className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
-                          <span className="text-sm font-medium text-gray-700">
-                            {filter.label}
-                            {filterData.type === 'text' && filter.textValue && (
-                              <span className="ml-1 px-1.5 py-0.5 bg-green-600 text-white text-xs rounded-full">
-                                ✓
-                              </span>
-                            )}
-                            {(!filterData.type || filterData.type === 'select' || filterData.type === 'boolean') && 
-                             filter.selectedCodes && filter.selectedCodes.length > 0 && (
-                              <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">
-                                {filter.selectedCodes.length}
-                              </span>
-                            )}
-                          </span>
-                          <button
-                            onClick={() => handleRemoveHorizontalFilter(filter.key)}
-                            className="p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
-                          >
-                            <X className="w-3 h-3 text-red-600" />
-                          </button>
-                        </div>
+                        <CustomTagFilter
+                          key={filter.key}
+                          label={filter.label}
+                          data={filterData.data}
+                          value={filter.selectedCodes}
+                          onChange={(codes) => handleUpdateHorizontalFilter(filter.key, codes)}
+                          onClose={() => handleRemoveHorizontalFilter(filter.key)}
+                        />
                       );
                     })}
                   </div>
