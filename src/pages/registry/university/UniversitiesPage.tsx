@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import UniversityDetailDrawer from './UniversityDetailDrawer';
 import UniversityFormDialog from './UniversityFormDialog';
 import { CustomTagFilter } from '@/components/filters/CustomTagFilter';
+import { SearchScopeSelector } from '@/components/filters/SearchScopeSelector';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -569,42 +570,16 @@ export default function UniversitiesPage() {
                   </span>
                 )}
               </button>
-              {/* Search Scope + Input - O'ng tomonda */}
-              <div className="flex items-center gap-2">
-                {/* Search Scope Selector */}
-                <select
-                  value={searchScope}
-                  onChange={(e) => setSearchScope(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  {searchScopes.map((scope) => (
-                    <option key={scope.value} value={scope.value}>
-                      {scope.label}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Search Input */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder={`${searchScopes.find(s => s.value === searchScope)?.label} bo'yicha qidirish...`}
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="w-80 pl-10 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  {searchInput && (
-                    <button
-                      onClick={handleClearSearch}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
+              {/* Modern Search Scope Selector */}
+              <SearchScopeSelector
+                value={searchScope}
+                onChange={setSearchScope}
+                scopes={searchScopes}
+                searchValue={searchInput}
+                onSearchChange={setSearchInput}
+                onSearch={handleSearch}
+                onClear={handleClearSearch}
+              />
             </div>
           </div>
 
