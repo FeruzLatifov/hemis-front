@@ -28,7 +28,6 @@ import { useTranslation } from 'react-i18next';
 import UniversityDetailDrawer from './UniversityDetailDrawer';
 import UniversityFormDialog from './UniversityFormDialog';
 import { CustomTagFilter } from '@/components/filters/CustomTagFilter';
-import { CustomTextFilter } from '@/components/filters/CustomTextFilter';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +60,7 @@ export default function UniversitiesPage() {
   const [pageSize, setPageSize] = useState(Number(searchParams.get('size')) || 20);
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const [searchInput, setSearchInput] = useState(search);
+  const [searchScope, setSearchScope] = useState(searchParams.get('scope') || 'all');
 
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
 
@@ -115,12 +115,24 @@ export default function UniversitiesPage() {
   const loadUniversities = async () => {
     try {
       setLoading(true);
-      const data = await universitiesApi.getUniversities({
+      
+      // Build search params based on scope
+      const params: any = {
         page: currentPage,
         size: pageSize,
-        q: search || undefined,
         sort: 'name,asc',
-      });
+      };
+
+      // Add search based on scope
+      if (search) {
+        if (searchScope === 'all') {
+          params.q = search; // Global search
+        } else {
+          params[searchScope] = search; // Field-specific search
+        }
+      }
+
+      const data = await universitiesApi.getUniversities(params);
 
       setUniversities(data.content);
       setTotalElements(data.totalElements);
@@ -153,9 +165,10 @@ export default function UniversitiesPage() {
     if (currentPage > 0) params.page = String(currentPage);
     if (pageSize !== 20) params.size = String(pageSize);
     if (search) params.q = search;
+    if (searchScope !== 'all') params.scope = searchScope;
     setSearchParams(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, pageSize, search]);
+  }, [currentPage, pageSize, search, searchScope]);
 
   const handleSearch = () => {
     setSearch(searchInput);
@@ -229,41 +242,11 @@ export default function UniversitiesPage() {
     setEditingUniversity(null);
   };
 
-  // Available horizontal filters - AdvancedFilterdan barcha propertylar
+  // Available horizontal filters - Faqat classifier va boolean filters
   const availableHorizontalFilters = [
     { key: 'region', label: 'Viloyat', data: dictionaries.regions },
     { key: 'ownership', label: 'Mulkchilik', data: dictionaries.ownerships },
     { key: 'type', label: 'Universitet turi', data: dictionaries.types },
-    { 
-      key: 'code', 
-      label: 'Kod', 
-      data: [], // Text input uchun
-      type: 'text' as const
-    },
-    { 
-      key: 'name', 
-      label: 'Nomi', 
-      data: [],
-      type: 'text' as const
-    },
-    { 
-      key: 'tin', 
-      label: 'INN', 
-      data: [],
-      type: 'text' as const
-    },
-    { 
-      key: 'address', 
-      label: 'Manzil', 
-      data: [],
-      type: 'text' as const
-    },
-    { 
-      key: 'cadastre', 
-      label: 'Kadastr', 
-      data: [],
-      type: 'text' as const
-    },
     { 
       key: 'gpaEdit', 
       label: 'GPA tahrir', 
@@ -282,6 +265,16 @@ export default function UniversitiesPage() {
       ],
       type: 'boolean' as const
     },
+  ];
+
+  // Search scope options
+  const searchScopes = [
+    { value: 'all', label: 'Hamma' },
+    { value: 'code', label: 'Kod' },
+    { value: 'name', label: 'Nomi' },
+    { value: 'tin', label: 'INN' },
+    { value: 'address', label: 'Manzil' },
+    { value: 'cadastre', label: 'Kadastr' },
   ];
 
   const handleAddHorizontalFilter = (filterKey: string) => {
@@ -304,12 +297,6 @@ export default function UniversitiesPage() {
   const handleUpdateHorizontalFilter = (filterKey: string, codes: string[]) => {
     setHorizontalFilters(horizontalFilters.map(f => 
       f.key === filterKey ? { ...f, selectedCodes: codes } : f
-    ));
-  };
-
-  const handleUpdateTextFilter = (filterKey: string, text: string) => {
-    setHorizontalFilters(horizontalFilters.map(f => 
-      f.key === filterKey ? { ...f, textValue: text } : f
     ));
   };
 
@@ -582,25 +569,41 @@ export default function UniversitiesPage() {
                   </span>
                 )}
               </button>
-              {/* Search Input - O'ng tomonda */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Kod, nom yoki INN bo'yicha qidirish..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-96 pl-10 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                {searchInput && (
-                  <button
-                    onClick={handleClearSearch}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+              {/* Search Scope + Input - O'ng tomonda */}
+              <div className="flex items-center gap-2">
+                {/* Search Scope Selector */}
+                <select
+                  value={searchScope}
+                  onChange={(e) => setSearchScope(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  {searchScopes.map((scope) => (
+                    <option key={scope.value} value={scope.value}>
+                      {scope.label}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder={`${searchScopes.find(s => s.value === searchScope)?.label} bo'yicha qidirish...`}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-80 pl-10 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {searchInput && (
+                    <button
+                      onClick={handleClearSearch}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -633,21 +636,7 @@ export default function UniversitiesPage() {
                       const filterData = availableHorizontalFilters.find(f => f.key === filter.key);
                       if (!filterData) return null;
                       
-                      // Text type filters with CustomTextFilter
-                      if (filterData.type === 'text') {
-                        return (
-                          <CustomTextFilter
-                            key={filter.key}
-                            label={filter.label}
-                            value={filter.textValue}
-                            onChange={(text) => handleUpdateTextFilter(filter.key, text)}
-                            onClose={() => handleRemoveHorizontalFilter(filter.key)}
-                            placeholder={`${filter.label} kiriting...`}
-                          />
-                        );
-                      }
-                      
-                      // Select/Boolean type filters with CustomTagFilter
+                      // All filters now use CustomTagFilter (no text type anymore)
                       return (
                         <CustomTagFilter
                           key={filter.key}
