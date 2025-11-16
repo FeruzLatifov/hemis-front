@@ -4,12 +4,14 @@ import { X, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface UniversityDetailDrawerProps {
-  universityId: string;
+  code: string | null;
+  open: boolean;
   onClose: () => void;
 }
 
 export default function UniversityDetailDrawer({
-  universityId,
+  code,
+  open,
   onClose,
 }: UniversityDetailDrawerProps) {
   const { t } = useTranslation();
@@ -18,11 +20,13 @@ export default function UniversityDetailDrawer({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!code || !open) return;
+
     const loadUniversity = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await universitiesApi.getUniversity(universityId);
+        const data = await universitiesApi.getUniversity(code);
         setUniversity(data);
       } catch (err) {
         console.error('Error loading university:', err);
@@ -33,7 +37,9 @@ export default function UniversityDetailDrawer({
     };
 
     loadUniversity();
-  }, [universityId]);
+  }, [code, open]);
+
+  if (!open) return null;
 
   return (
     <div
