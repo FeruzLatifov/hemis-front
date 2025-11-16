@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import UniversityDetailDrawer from './UniversityDetailDrawer';
 import UniversityFormDialog from './UniversityFormDialog';
 import { CustomTagFilter } from '@/components/filters/CustomTagFilter';
+import { CustomTextFilter } from '@/components/filters/CustomTextFilter';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -303,6 +304,12 @@ export default function UniversitiesPage() {
   const handleUpdateHorizontalFilter = (filterKey: string, codes: string[]) => {
     setHorizontalFilters(horizontalFilters.map(f => 
       f.key === filterKey ? { ...f, selectedCodes: codes } : f
+    ));
+  };
+
+  const handleUpdateTextFilter = (filterKey: string, text: string) => {
+    setHorizontalFilters(horizontalFilters.map(f => 
+      f.key === filterKey ? { ...f, textValue: text } : f
     ));
   };
 
@@ -626,25 +633,17 @@ export default function UniversitiesPage() {
                       const filterData = availableHorizontalFilters.find(f => f.key === filter.key);
                       if (!filterData) return null;
                       
-                      // Text type filters (future: need input popover)
+                      // Text type filters with CustomTextFilter
                       if (filterData.type === 'text') {
                         return (
-                          <div key={filter.key} className="flex items-center gap-2 rounded-lg bg-gray-200 p-2">
-                            <span className="text-sm font-medium text-gray-700">
-                              {filter.label}
-                              {filter.textValue && (
-                                <span className="ml-1 px-1.5 py-0.5 bg-green-600 text-white text-xs rounded-full">
-                                  ✓
-                                </span>
-                              )}
-                            </span>
-                            <button
-                              onClick={() => handleRemoveHorizontalFilter(filter.key)}
-                              className="cursor-pointer rounded-full bg-red-50 p-1 text-red-500 hover:bg-red-100 transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
+                          <CustomTextFilter
+                            key={filter.key}
+                            label={filter.label}
+                            value={filter.textValue}
+                            onChange={(text) => handleUpdateTextFilter(filter.key, text)}
+                            onClose={() => handleRemoveHorizontalFilter(filter.key)}
+                            placeholder={`${filter.label} kiriting...`}
+                          />
                         );
                       }
                       
