@@ -38,7 +38,8 @@ export const useMenuInit = () => {
     const bcp47Locale = shortToBcp47[currentLang] || 'uz-UZ';
     fetchMenu(bcp47Locale);
 
-  }, [isAuthenticated, fetchMenu, clearMenu, i18n.language]);
+    // Note: i18n.language NOT in deps - languageChanged listener handles lang switches
+  }, [isAuthenticated, fetchMenu, clearMenu, i18n]);
 
   // Listen for language changes and refetch menu in background
   useEffect(() => {

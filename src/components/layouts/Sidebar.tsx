@@ -227,7 +227,8 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
   // Sort menu items by orderNum
   const sortedMenuItems = useMemo(() => {
     return [...rootMenuItems]
-      .filter((item) => item.visible)
+      // Treat undefined as visible (consistent with child filter)
+      .filter((item) => item.visible !== false)
       .sort((a, b) => {
         const aOrder = a.orderNum ?? 999;
         const bOrder = b.orderNum ?? 999;

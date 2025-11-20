@@ -79,15 +79,16 @@ export const useAuthStore = create<AuthStore>()(
       refresh: async () => {
         // ✅ refreshToken is in HTTPOnly cookie - no need to check
         try {
-          await authApi.refreshToken({ refreshToken: '' });
+          const response = await authApi.refreshToken();
 
           // ✅ New tokens are set in cookies by backend
-          // No localStorage updates needed
-
-          // Update store (tokens not stored in frontend)
+          // Update user info and permissions from response
           set({
-            token: null,
-            refreshToken: null,
+            token: null, // Not stored in frontend
+            refreshToken: null, // Not stored in frontend
+            user: response.user,
+            university: response.university,
+            permissions: response.permissions,
           });
         } catch (error) {
           // Refresh failed, logout

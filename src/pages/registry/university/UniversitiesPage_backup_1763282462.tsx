@@ -97,7 +97,7 @@ export default function UniversitiesPage() {
     { value: 'cadastre', label: 'Kadastr' },
   ];
 
-  // Available filters
+  // Available filters (dynamic from API)
   const availableHorizontalFilters = [
     { key: 'region', label: 'Viloyat', data: dictionaries.regions },
     { key: 'ownership', label: 'Mulkchilik', data: dictionaries.ownerships },
@@ -133,6 +133,7 @@ export default function UniversitiesPage() {
         sort: 'name,asc',
       };
 
+      // Apply search based on scope
       if (search) {
         if (searchScope === 'all') {
           params.q = search;
@@ -140,6 +141,13 @@ export default function UniversitiesPage() {
           params[searchScope] = search;
         }
       }
+
+      // Apply horizontal filters
+      horizontalFilters.forEach((filter) => {
+        if (filter.selectedCodes.length > 0) {
+          params[`${filter.key}Codes`] = filter.selectedCodes.join(',');
+        }
+      });
 
       const data = await universitiesApi.getUniversities(params);
 
@@ -170,13 +178,14 @@ export default function UniversitiesPage() {
   useEffect(() => {
     loadUniversities();
 
+    // Update URL params
     const params: Record<string, string> = {};
     if (currentPage > 0) params.page = String(currentPage);
     if (pageSize !== 20) params.size = String(pageSize);
     if (search) params.q = search;
     if (searchScope !== 'all') params.scope = searchScope;
     setSearchParams(params);
-  }, [currentPage, pageSize, search, searchScope]);
+  }, [currentPage, pageSize, search, searchScope, horizontalFilters]);
 
   useEffect(() => {
     localStorage.setItem('universities-column-visibility', JSON.stringify(columnVisibility));
@@ -201,7 +210,25 @@ export default function UniversitiesPage() {
 
   const handleExport = async () => {
     try {
-      await universitiesApi.exportUniversities({});
+      const exportParams: any = {};
+      
+      // Apply search
+      if (search) {
+        if (searchScope === 'all') {
+          exportParams.q = search;
+        } else {
+          exportParams[searchScope] = search;
+        }
+      }
+
+      // Apply filters
+      horizontalFilters.forEach((filter) => {
+        if (filter.selectedCodes.length > 0) {
+          exportParams[`${filter.key}Codes`] = filter.selectedCodes.join(',');
+        }
+      });
+
+      await universitiesApi.exportUniversities(exportParams);
       toast.success('Excel fayl yuklanmoqda...');
     } catch (error) {
       toast.error('Eksport qilishda xatolik');
@@ -214,6 +241,7 @@ export default function UniversitiesPage() {
     setSearch('');
     setSearchScope('all');
     setCurrentPage(0);
+    toast.success('Barcha filterlar tozalandi');
   };
 
   const handleAddHorizontalFilter = (filterKey: string) => {
@@ -263,11 +291,6 @@ export default function UniversitiesPage() {
     setShowFormDialog(false);
     setEditingUniversity(null);
     loadUniversities();
-  };
-
-  const handleFormCancel = () => {
-    setShowFormDialog(false);
-    setEditingUniversity(null);
   };
 
   // Table columns
@@ -381,31 +404,36 @@ export default function UniversitiesPage() {
   });
 
   return (
-    <div className="p-3">
-      {/* Container - stat-ministry style */}
-      <div className="bg-white rounded-lg p-3">
+    <div className="p-4">
+      {/* Main Container */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="text-xl font-bold text-gray-800">Muassasalar ro'yxati</h3>
-          <div className="flex items-center gap-2">
-            {/* Filter Toggle */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">Muassasalar ro'yxati</h1>
+          </div>
+
+          {/* Action Bar */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Filter Toggle - LEFT */}
             <button
               onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                showFiltersPanel
-                  ? 'bg-blue-600 text-white'
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                showFiltersPanel || horizontalFilters.length > 0
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
               <Filter className="w-4 h-4" />
+              Filter
               {horizontalFilters.length > 0 && (
-                <span className="px-1.5 py-0.5 text-xs font-bold bg-white text-blue-600 rounded-full">
+                <span className="px-2 py-0.5 text-xs font-bold bg-white text-blue-600 rounded-full min-w-[20px] text-center">
                   {horizontalFilters.length}
                 </span>
               )}
             </button>
 
-            {/* Search Scope Selector */}
+            {/* Search with Scope */}
             <SearchScopeSelector
               value={searchScope}
               onChange={setSearchScope}
@@ -415,6 +443,19 @@ export default function UniversitiesPage() {
               onSearch={handleSearch}
               onClear={handleClearSearch}
             />
+
+            <div className="flex-1" />
+
+            {/* Refresh Button */}
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Ma'lumotlarni yangilash"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Yangilash
+            </button>
 
             {/* Add Button */}
             <button
@@ -434,7 +475,7 @@ export default function UniversitiesPage() {
               Excel
             </button>
 
-            {/* Column Settings Popover */}
+            {/* Column Settings */}
             <ColumnSettingsPopover
               columns={table.getAllLeafColumns()
                 .filter(col => col.id !== 'actions')
@@ -454,28 +495,32 @@ export default function UniversitiesPage() {
           </div>
         </div>
 
-        {/* Filters Panel - stat-ministry style */}
+        {/* Filters Panel */}
         {showFiltersPanel && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            {/* Add Filter Buttons */}
-            <div className="flex flex-wrap gap-2 mb-3">
-              {availableHorizontalFilters
-                .filter((f) => !horizontalFilters.find((hf) => hf.key === f.key))
-                .map((filter) => (
-                  <button
-                    key={filter.key}
-                    onClick={() => handleAddHorizontalFilter(filter.key)}
-                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    + {filter.label}
-                  </button>
-                ))}
+          <div className="p-4 bg-gray-50 border-b border-gray-200">
+            {/* Available Filters */}
+            <div className="mb-3">
+              <p className="text-sm font-medium text-gray-700 mb-2">Filterlarni tanlang:</p>
+              <div className="flex flex-wrap gap-2">
+                {availableHorizontalFilters
+                  .filter((f) => !horizontalFilters.find((hf) => hf.key === f.key))
+                  .map((filter) => (
+                    <button
+                      key={filter.key}
+                      onClick={() => handleAddHorizontalFilter(filter.key)}
+                      className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      + {filter.label}
+                    </button>
+                  ))}
+              </div>
             </div>
 
             {/* Active Filters */}
             {horizontalFilters.length > 0 && (
               <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="flex flex-wrap gap-2">
+                <p className="text-sm font-medium text-gray-700 mb-3">Tanlangan filterlar:</p>
+                <div className="flex flex-wrap gap-2 mb-3">
                   {horizontalFilters.map((filter) => {
                     const filterData = availableHorizontalFilters.find(
                       (f) => f.key === filter.key
@@ -494,108 +539,111 @@ export default function UniversitiesPage() {
                     );
                   })}
                 </div>
-              </div>
-            )}
 
-            {/* Clear Filters & Refresh */}
-            {(horizontalFilters.length > 0 || search) && (
-              <div className="mt-3 flex justify-end gap-2">
-                <button
-                  onClick={handleClearFilters}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <FilterX className="w-4 h-4" />
-                  Tozalash
-                </button>
-                
-                <button
-                  onClick={handleRefresh}
-                  disabled={loading}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                  Yangilash
-                </button>
+                {/* Clear Button */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleClearFilters}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <FilterX className="w-4 h-4" />
+                    Tozalash
+                  </button>
+                </div>
               </div>
             )}
           </div>
         )}
 
         {/* Table Info */}
-        <div className="flex items-center justify-between px-1 py-2 text-sm text-gray-600">
-          <div>
-            Jami: <span className="font-semibold">{totalElements}</span> ta
+        <div className="px-4 py-3 flex items-center justify-between text-sm border-b border-gray-200 bg-gray-50">
+          <div className="text-gray-600">
+            Jami: <span className="font-semibold text-gray-900">{totalElements}</span> ta ma'lumot
           </div>
-          <div>
-            Sahifa: <span className="font-semibold">{currentPage + 1}</span> /{' '}
-            <span className="font-semibold">{totalPages || 1}</span>
+          <div className="text-gray-600">
+            Sahifa: <span className="font-semibold text-gray-900">{currentPage + 1}</span> /{' '}
+            <span className="font-semibold text-gray-900">{totalPages || 1}</span>
           </div>
         </div>
 
         {/* Table */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200"
-                        style={{ width: header.getSize() }}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-100 border-b border-gray-200">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                      style={{ width: header.getSize() }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-4 py-12 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+                      <span className="text-sm text-gray-600">Yuklanmoqda...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : universities.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-4 py-12 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Filter className="w-8 h-8 text-gray-400" />
+                      <span className="text-sm text-gray-600">Ma'lumot topilmadi</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr 
+                    key={row.id} 
+                    className="hover:bg-blue-50 transition-colors cursor-pointer"
+                    onClick={() => setSelectedUniversity(row.original.code)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap"
+                        onClick={(e) => {
+                          // Prevent row click when clicking action buttons
+                          if (cell.column.id === 'actions') {
+                            e.stopPropagation();
+                          }
+                        }}
                       >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
                     ))}
                   </tr>
-                ))}
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {loading ? (
-                  <tr>
-                    <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                      Yuklanmoqda...
-                    </td>
-                  </tr>
-                ) : universities.length === 0 ? (
-                  <tr>
-                    <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                      Ma'lumot topilmadi
-                    </td>
-                  </tr>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap"
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-4 px-1">
+        <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 bg-gray-50">
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-700">Sahifada:</label>
+            <label className="text-sm text-gray-700 font-medium">Sahifada:</label>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setCurrentPage(0);
               }}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -610,19 +658,19 @@ export default function UniversitiesPage() {
               disabled={currentPage === 0}
               className="p-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <span className="px-3 py-1.5 text-sm text-gray-700">
+            <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg">
               {currentPage + 1} / {totalPages || 1}
             </span>
 
             <button
               onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
-              disabled={currentPage >= totalPages - 1}
+              disabled={currentPage >= totalPages - 1 || totalPages === 0}
               className="p-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -635,12 +683,17 @@ export default function UniversitiesPage() {
         onClose={() => setSelectedUniversity(null)}
       />
 
-      {/* Form Dialog */}
+      // Form Dialog
       <UniversityFormDialog
         open={showFormDialog}
+        onOpenChange={(open) => {
+          setShowFormDialog(open);
+          if (!open) {
+            setEditingUniversity(null);
+          }
+        }}
         university={editingUniversity}
         onSuccess={handleFormSuccess}
-        onCancel={handleFormCancel}
       />
 
       {/* Delete Confirmation */}

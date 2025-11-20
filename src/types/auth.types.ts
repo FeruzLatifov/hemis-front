@@ -46,10 +46,10 @@ export interface Permission {
 }
 
 export interface LoginResponse {
-  token: string;
-  refreshToken: string;
+  token: string | null; // ✅ HTTPOnly cookies - token not in response body
+  refreshToken: string | null; // ✅ HTTPOnly cookies - token not in response body
   user: AdminUser;
-  university: University;
+  university: University | null; // System admins might not have university
   permissions: string[]; // Permission strings (e.g., "students:read")
 }
 

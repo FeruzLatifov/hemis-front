@@ -5,10 +5,9 @@
  * Uses /api/v1/web/auth endpoints for web users
  */
 
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import apiClient from './client';
-import type { LoginRequest, LoginResponse, RefreshTokenRequest, AdminUser } from '../types/auth.types';
-import { parseJWT, getTokenAuthorities } from '../utils/jwt.util';
+import type { LoginRequest, LoginResponse, AdminUser } from '../types/auth.types';
 import i18n from '../i18n/config';
 
 /**
@@ -33,14 +32,15 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         password: credentials.password,
       }
     );
-    
+
     // Step 2: Get user info + permissions (token sent via cookie)
     const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me');
 
     // Transform backend response to frontend format
     const response: LoginResponse = {
-      token: loginData.accessToken, // For backward compatibility (not stored)
-      refreshToken: loginData.refreshToken, // For backward compatibility (not stored)
+      // ✅ SECURITY: Tokens are null in response body (stored in HTTPOnly cookies only)
+      token: loginData.accessToken || null, // Backend returns null (Fix #5)
+      refreshToken: loginData.refreshToken || null, // Backend returns null (Fix #5)
       user: {
         id: userInfo.user.id,
         username: userInfo.user.username,
@@ -90,29 +90,36 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
  *
  * Backend: POST /api/v1/web/auth/refresh
  * ✅ refreshToken is in HTTPOnly cookie - no need to send in body
+ * ✅ New tokens are also in HTTPOnly cookies (not in response body)
  */
-export const refreshToken = async (request: RefreshTokenRequest): Promise<LoginResponse> => {
+export const refreshToken = async (): Promise<LoginResponse> => {
   try {
     const { data } = await apiClient.post(
       '/api/v1/web/auth/refresh',
       {} // Empty body - refreshToken in cookie
     );
 
+    // Backend response: { success: true, message: "..." }
+    // No user info returned, tokens are in cookies
+    // We need to call /auth/me to get fresh user data
+    const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me');
+
     // Transform response
     return {
-      token: data.accessToken,
-      refreshToken: data.refreshToken,
+      // ✅ SECURITY: Tokens are null in response body (stored in HTTPOnly cookies only)
+      token: data.accessToken || null, // Backend returns null (Fix #5)
+      refreshToken: data.refreshToken || null, // Backend returns null (Fix #5)
       user: {
-        id: data.user?.id || '',
-        username: data.user?.username || '',
-        email: data.user?.email || '',
-        name: data.user?.name || data.user?.fullName || '',
-        locale: data.user?.locale || 'uz',
-        active: data.user?.active ?? true,
-        createdAt: data.user?.createdAt || new Date().toISOString(),
+        id: userInfo.user.id,
+        username: userInfo.user.username,
+        email: userInfo.user.email || '',
+        name: userInfo.user.fullName || userInfo.user.username,
+        locale: userInfo.user.locale || 'uz',
+        active: userInfo.user.active ?? true,
+        createdAt: new Date().toISOString(),
       },
-      university: data.university || null,
-      permissions: data.permissions || [],
+      university: userInfo.university || null,
+      permissions: userInfo.permissions || [],
     };
   } catch (error) {
     console.error('Token refresh failed:', error);

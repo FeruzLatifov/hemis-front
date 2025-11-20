@@ -82,7 +82,7 @@ apiClient.interceptors.response.use(
 
       try {
         // ✅ Call refresh endpoint (refreshToken is in HTTPOnly cookie)
-        const { data } = await axios.post(
+        await axios.post(
           `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/v1/web/auth/refresh`,
           {}, // Empty body - refreshToken is in cookie
           {
@@ -91,6 +91,7 @@ apiClient.interceptors.response.use(
         );
 
         // ✅ New tokens are automatically set in cookies by backend
+        // Backend response: { success: true, message: "..." } (no tokens in body)
         // No need to save to localStorage
 
         // Retry original request (token in cookie)

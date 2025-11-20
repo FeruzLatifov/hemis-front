@@ -109,11 +109,9 @@ i18n
       escapeValue: false, // React already escapes
     },
 
-    // Cache translations
-    cache: {
-      enabled: true,
-      expirationTime: 60 * 60 * 1000, // 1 hour
-    },
+    // Note: No i18next cache plugin registered (e.g., i18next-localstorage-backend)
+    // Translations are fetched fresh on reload but fallback to bundled JSON immediately
+    // Backend caching (Redis + Caffeine) handles server-side performance
 
     // React specific
     react: {
@@ -124,8 +122,11 @@ i18n
 // Add language change listener to sync with localStorage in BCP-47 format
 i18n.on('languageChanged', (lng) => {
   const bcp47Locale = shortToBcp47[lng] || lng;
-  localStorage.setItem('locale', bcp47Locale);
-  console.log(`Language changed to ${lng}, saved as ${bcp47Locale} in localStorage`);
+  // SSR-safe: Only access localStorage in browser
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('locale', bcp47Locale);
+    console.log(`Language changed to ${lng}, saved as ${bcp47Locale} in localStorage`);
+  }
 });
 
 export default i18n;
