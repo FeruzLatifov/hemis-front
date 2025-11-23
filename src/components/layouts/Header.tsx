@@ -5,11 +5,13 @@
  * Matches LoginClean.tsx design system
  */
 
-import { Settings, User, LogOut, Bell, Menu } from 'lucide-react'
+import { Settings, User, LogOut, Bell, Menu, RefreshCw } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
+import { toast } from 'sonner'
 import LanguageSwitcher from '../common/LanguageSwitcher'
+import apiClient from '../../api/client'
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void
@@ -19,6 +21,7 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isClearingCache, setIsClearingCache] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -36,6 +39,33 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
+  }
+
+  const handleClearCache = async () => {
+    setIsClearingCache(true)
+    try {
+      const response = await apiClient.post('/api/v1/web/auth/cache/clear')
+      if (response.data?.success) {
+        toast.success('Cache tozalandi', {
+          description: 'Permissions va tarjimalar yangilandi. Sahifa qayta yuklanmoqda...',
+          duration: 2000,
+        })
+        // Reload page after short delay to fetch fresh data
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+      } else {
+        toast.error('Xatolik', {
+          description: response.data?.message || 'Cache tozalashda xatolik yuz berdi',
+        })
+      }
+    } catch (error: any) {
+      toast.error('Xatolik', {
+        description: error.response?.data?.message || 'Cache tozalashda xatolik yuz berdi',
+      })
+    } finally {
+      setIsClearingCache(false)
+    }
   }
 
   return (
@@ -102,6 +132,34 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 
         {/* Language Switcher */}
         <LanguageSwitcher />
+
+        {/* Cache Clear Button */}
+        <button
+          type="button"
+          onClick={handleClearCache}
+          disabled={isClearingCache}
+          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border transition-colors disabled:opacity-50"
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderColor: '#E5E7EB'
+          }}
+          onMouseEnter={(e) => {
+            if (!isClearingCache) {
+              e.currentTarget.style.borderColor = '#27AE60'
+              e.currentTarget.style.backgroundColor = '#F0FDF4'
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#E5E7EB'
+            e.currentTarget.style.backgroundColor = '#FFFFFF'
+          }}
+          title="Cache tozalash (tarjimalar, permissionlar)"
+        >
+          <RefreshCw
+            className={`h-4 w-4 md:h-5 md:w-5 ${isClearingCache ? 'animate-spin' : ''}`}
+            style={{ color: isClearingCache ? '#27AE60' : '#6B7280' }}
+          />
+        </button>
 
         {/* User Dropdown */}
         <div className="relative" ref={dropdownRef}>
