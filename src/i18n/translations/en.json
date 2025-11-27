@@ -31,6 +31,7 @@
       "universityInactive": "University is inactive",
       "networkError": "Network connection error",
       "backendDown": "Backend server is not available. Please try again later.",
+      "tooManyAttempts": "Too many attempts. Please try again later.",
       "required": "This field is required",
       "requiredField": "{{field}} is required",
       "minLength": "Must be at least {{count}} characters"

@@ -148,11 +148,24 @@ const Login = () => {
       console.error('[LoginClean] Login error:', err)
 
       const status = getErrorStatus(err, 0)
+
+      // Rate limit (429) - juda ko'p urinish
+      if (status === 429) {
+        const errorData = (err as { response?: { data?: { errorDescription?: string } } })?.response?.data
+        const msg = errorData?.errorDescription || t('login.errors.tooManyAttempts') || 'Juda ko\'p urinish. Keyinroq qayta urinib ko\'ring.'
+        console.log('[LoginClean] Rate limit exceeded (429)')
+        toast.error(msg, {
+          duration: 8000,
+          position: 'bottom-right',
+        })
+        return
+      }
+
       const backendUnavailable = isNetworkError(err) || status === 0 || status >= 500
 
       if (backendUnavailable) {
         console.log('[LoginClean] Backend unavailable or network error detected')
-        toast.error('❌ Backend server ishlamayapti. Iltimos, serverni ishga tushiring.', {
+        toast.error(t('login.errors.backendDown') || 'Backend server ishlamayapti. Iltimos, serverni ishga tushiring.', {
           duration: 8000,
           position: 'bottom-right',
         })

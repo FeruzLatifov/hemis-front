@@ -31,6 +31,7 @@
       "universityInactive": "Universitet faol emas",
       "networkError": "Internet bilan bog'lanishda xatolik",
       "backendDown": "Backend server ishlamayapti. Iltimos, keyinroq qayta urinib ko'ring.",
+      "tooManyAttempts": "Juda ko'p urinish. Keyinroq qayta urinib ko'ring.",
       "required": "Bu maydon to'ldirilishi shart",
       "requiredField": "{{field}} maydoni to'ldirilishi shart",
       "minLength": "Kamida {{count}} belgidan iborat bo'lishi kerak"
