@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import LanguageSwitcher from '../common/LanguageSwitcher'
 import apiClient from '../../api/client'
+import { extractApiErrorMessage } from '../../utils/error.util'
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void
@@ -55,14 +56,13 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           window.location.reload()
         }, 1500)
       } else {
-        toast.error('Xatolik', {
-          description: response.data?.message || 'Cache tozalashda xatolik yuz berdi',
-        })
+        // ⭐ Backend-driven i18n: Use backend's localized message
+        toast.error(response.data?.message || 'Cache tozalashda xatolik yuz berdi')
       }
-    } catch (error: any) {
-      toast.error('Xatolik', {
-        description: error.response?.data?.message || 'Cache tozalashda xatolik yuz berdi',
-      })
+    } catch (error: unknown) {
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      const errorMessage = extractApiErrorMessage(error, 'Cache tozalashda xatolik yuz berdi')
+      toast.error(errorMessage)
     } finally {
       setIsClearingCache(false)
     }

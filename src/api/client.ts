@@ -78,6 +78,16 @@ apiClient.interceptors.response.use(
 
     // If 401 and not already retried, try to refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // ⭐ Skip refresh attempt for auth endpoints (login, refresh, logout)
+      // These endpoints don't need token refresh - they handle auth themselves
+      const authEndpoints = ['/auth/login', '/auth/refresh', '/auth/logout'];
+      const isAuthEndpoint = authEndpoints.some(ep => originalRequest.url?.includes(ep));
+
+      if (isAuthEndpoint) {
+        // Don't try to refresh for auth endpoints - just return the error
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
@@ -97,12 +107,15 @@ apiClient.interceptors.response.use(
         // Retry original request (token in cookie)
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - logout
+        // Refresh failed - logout silently
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('auth:logout'));
         }
 
-        return Promise.reject(refreshError);
+        // ⭐ Return original error, not refreshError
+        // This prevents "Refresh token talab qilinadi" message from being shown
+        // Instead, the original 401 error message will be shown (or user redirected to login)
+        return Promise.reject(error);
       }
     }
 
@@ -123,13 +136,14 @@ apiClient.interceptors.response.use(
         level: 'error',
       });
 
-      // ⭐ Show toast notification (same as univer-front)
-      // Event ID ko'rsatiladi agar mavjud bo'lsa
+      // ⭐ Backend-driven i18n: Show backend's localized error message
+      // Backend returns localized message based on Accept-Language header
       const toastDescription = eventId
-        ? `Event ID: ${eventId.substring(0, 12)}...\n${errorMessage || "Iltimos, qaytadan urinib ko'ring."}`
-        : errorMessage || "Iltimos, qaytadan urinib ko'ring.";
+        ? `Event ID: ${eventId.substring(0, 12)}...`
+        : undefined;
 
-      toast.error('Serverda xatolik yuz berdi', {
+      // errorMessage is already localized by backend
+      toast.error(errorMessage, {
         description: toastDescription,
         duration: 5000,
       });

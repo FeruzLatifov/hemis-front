@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table';
 import { universitiesApi, UniversityRow, Dictionary } from '@/api/universities.api';
 import { toast } from 'sonner';
+import { extractApiErrorMessage } from '@/utils/error.util';
 import {
   Filter,
   Download,
@@ -148,7 +149,8 @@ export default function UniversitiesPage() {
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error loading universities:', error);
-      toast.error(t('errors.loadFailed') || "Ma'lumotlarni yuklashda xatolik");
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(error, t('errors.loadFailed') || "Ma'lumotlarni yuklashda xatolik"));
     } finally {
       setLoading(false);
     }
@@ -204,7 +206,8 @@ export default function UniversitiesPage() {
       await universitiesApi.exportUniversities({});
       toast.success('Excel fayl yuklanmoqda...');
     } catch (error) {
-      toast.error('Eksport qilishda xatolik');
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(error, 'Eksport qilishda xatolik'));
     }
   };
 
@@ -248,7 +251,8 @@ export default function UniversitiesPage() {
       toast.success(t('success.deleted') || "Muvaffaqiyatli o'chirildi");
       loadUniversities();
     } catch (error) {
-      toast.error(t('errors.deleteFailed') || "O'chirishda xatolik");
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(error, t('errors.deleteFailed') || "O'chirishda xatolik"));
     } finally {
       setDeleteConfirm({ show: false, code: null });
     }

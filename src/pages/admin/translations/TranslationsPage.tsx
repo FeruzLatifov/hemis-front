@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Search, Filter, Trash2, FileCode, Edit } from 'lucide-react';
 import { toast } from 'sonner';
+import { extractApiErrorMessage } from '@/utils/error.util';
 
 export default function TranslationsPage() {
   const navigate = useNavigate();
@@ -96,8 +97,8 @@ export default function TranslationsPage() {
         position: 'bottom-right',
       });
     } catch (err: unknown) {
-      const error = err as Error;
-      toast.error('❌ Cache tozalashda xatolik: ' + error.message, {
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(err, 'Cache tozalashda xatolik'), {
         duration: 5000,
         position: 'bottom-right',
       });
@@ -109,13 +110,13 @@ export default function TranslationsPage() {
       const result = await regeneratePropertiesFiles();
       setShowRegenerateModal(false);
       await loadTranslations();
-      toast.success(`✓ ${result.totalFiles} ta fayl yaratildi (${result.totalTranslations} tarjima)`, {
+      toast.success(`${result.totalFiles} ta fayl yaratildi (${result.totalTranslations} tarjima)`, {
         duration: 4000,
         position: 'bottom-right',
       });
     } catch (err: unknown) {
-      const error = err as Error;
-      toast.error('❌ Properties yaratishda xatolik: ' + error.message, {
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(err, 'Properties yaratishda xatolik'), {
         duration: 5000,
         position: 'bottom-right',
       });

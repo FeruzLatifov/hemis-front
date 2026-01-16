@@ -59,6 +59,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     console.error('Login failed:', error);
 
     if (axios.isAxiosError(error)) {
+      // Network error - backend is unreachable (only case where we use frontend i18n)
       if (
         error.code === 'ERR_NETWORK' ||
         error.message === 'Network Error' ||
@@ -70,14 +71,18 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         throw error;
       }
 
+      // ⭐ Backend-driven i18n: Use backend's localized message directly
+      // Backend returns localized message based on Accept-Language header
       interface ErrorResponse {
-        message?: string;
+        message?: string;  // ← Localized message from backend (PRIMARY)
         error?: string;
+        errorCode?: string;
+        eventId?: string;
       }
 
       const errorData = error.response?.data as ErrorResponse;
-      const errorMsg = errorData?.message || errorData?.error || 'Login failed';
-      error.message = errorMsg;
+      // Priority: backend's message field (already localized)
+      error.message = errorData?.message || errorData?.error || 'Login failed';
       throw error;
     }
 

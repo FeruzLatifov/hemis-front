@@ -13,6 +13,7 @@ import {
   updateTranslation,
   TranslationUpdateRequest,
 } from '../../../api/translations.api';
+import { extractApiErrorMessage } from '@/utils/error.util';
 
 interface FormErrors {
   category?: string;
@@ -132,10 +133,10 @@ export default function TranslationFormPage() {
         navigate('/system/translation');
       }, 500);
     } catch (err: unknown) {
-      const error = err as Error;
-      const errorMessage = error.message || 'Failed to save translation';
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      const errorMessage = extractApiErrorMessage(err, 'Tarjimani saqlashda xatolik');
       setError(errorMessage);
-      toast.error('❌ ' + errorMessage, {
+      toast.error(errorMessage, {
         duration: 5000,
         position: 'bottom-right',
       });

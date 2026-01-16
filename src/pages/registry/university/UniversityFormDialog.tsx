@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { universitiesApi, UniversityRow, Dictionary } from '@/api/universities.api';
 import { toast } from 'sonner';
+import { extractApiErrorMessage } from '@/utils/error.util';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -100,7 +101,8 @@ export default function UniversityFormDialog({
         const data = await universitiesApi.getDictionaries();
         setDictionaries(data);
       } catch (error) {
-        toast.error('Lug\'atlar yuklanmadi');
+        // ⭐ Backend-driven i18n: Use backend's localized message
+        toast.error(extractApiErrorMessage(error, 'Lug\'atlar yuklanmadi'));
       }
     };
     if (open) {
@@ -173,11 +175,9 @@ export default function UniversityFormDialog({
 
       onSuccess();
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || 
-        (isEdit ? 'OTM yangilanmadi' : 'OTM yaratilmadi')
-      );
+    } catch (error: unknown) {
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(error, isEdit ? 'OTM yangilanmadi' : 'OTM yaratilmadi'));
     }
   };
 

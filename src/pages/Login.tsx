@@ -145,44 +145,31 @@ const Login = () => {
       navigate('/dashboard', { replace: true })
       return
     } catch (err: unknown) {
-      console.error('[LoginClean] Login error:', err)
+      console.error('[Login] Error:', err)
 
       const status = getErrorStatus(err, 0)
 
-      // Rate limit (429) - juda ko'p urinish
-      if (status === 429) {
-        const errorData = (err as { response?: { data?: { errorDescription?: string } } })?.response?.data
-        const msg = errorData?.errorDescription || t('login.errors.tooManyAttempts') || 'Juda ko\'p urinish. Keyinroq qayta urinib ko\'ring.'
-        console.log('[LoginClean] Rate limit exceeded (429)')
-        toast.error(msg, {
+      // Network error - backend is unreachable
+      // Only use frontend translations for network errors (backend can't respond)
+      if (isNetworkError(err) || status === 0) {
+        console.log('[Login] Network error - backend unreachable')
+        toast.error(t('login.errors.backendDown') || 'Backend server ishlamayapti', {
           duration: 8000,
           position: 'bottom-right',
         })
         return
       }
 
-      const backendUnavailable = isNetworkError(err) || status === 0 || status >= 500
+      // ⭐ Backend-driven i18n: Use backend error message directly
+      // Backend returns localized message based on Accept-Language header
+      // Priority: backend message → fallback (only for truly unexpected cases)
+      const backendMessage = extractApiErrorMessage(err, 'Xatolik yuz berdi')
 
-      if (backendUnavailable) {
-        console.log('[LoginClean] Backend unavailable or network error detected')
-        toast.error(t('login.errors.backendDown') || 'Backend server ishlamayapti. Iltimos, serverni ishga tushiring.', {
-          duration: 8000,
-          position: 'bottom-right',
-        })
-        return
-      }
+      console.log('[Login] Backend error (status=%d): %s', status, backendMessage)
 
-      const errorMessage =
-        status === 401
-          ? t('login.errors.invalidCredentials') || 'Login yoki parol noto\'g\'ri'
-          : extractApiErrorMessage(
-              err,
-              t('login.errors.invalidCredentials')
-            )
-
-      console.log('[LoginClean] Backend error (status):', status, errorMessage)
-      toast.error(errorMessage, {
-        duration: 5000,
+      // Show backend's localized error message directly
+      toast.error(backendMessage, {
+        duration: status === 429 ? 8000 : 5000, // Rate limit gets longer duration
         position: 'bottom-right',
       })
     } finally {

@@ -34,6 +34,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { facultiesApi, FacultyGroupRow, FacultyRow, PageResponse } from '@/api/faculties.api';
+import { extractApiErrorMessage } from '@/utils/error.util';
 import FacultyDetailDrawer from './FacultyDetailDrawer';
 
 type TableRow = {
@@ -290,8 +291,9 @@ export default function FacultiesPage() {
         duration: 3000,
         position: 'bottom-right',
       });
-    } catch {
-      toast.error(t('errors.exportFailed'), {
+    } catch (error) {
+      // ⭐ Backend-driven i18n: Use backend's localized message
+      toast.error(extractApiErrorMessage(error, t('errors.exportFailed')), {
         duration: 5000,
         position: 'bottom-right',
       });
