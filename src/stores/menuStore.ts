@@ -55,12 +55,6 @@ export const useMenuStore = create<MenuState>()(
         try {
           const response = await getUserMenu(locale);
 
-          console.log('✅ Menu fetched from backend:', {
-            count: response.menu?.length || 0,
-            hasVisible: response.menu?.[0]?.visible !== undefined,
-            firstItem: response.menu?.[0]
-          });
-
           set({
             menuItems: response.menu,
             permissions: response.permissions,
@@ -70,7 +64,6 @@ export const useMenuStore = create<MenuState>()(
             version: MENU_SCHEMA_VERSION,
           });
         } catch (error: unknown) {
-          console.error('Failed to fetch menu:', error);
           set({
             error: extractApiErrorMessage(error, 'Failed to fetch menu'),
             isLoading: false,

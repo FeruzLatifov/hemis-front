@@ -13,6 +13,7 @@
 import * as Sentry from '@sentry/react';
 import { AlertCircle, Home, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import i18n from '@/i18n/config';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ErrorFallbackProps {
@@ -43,9 +44,9 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
           <div className="flex items-center gap-3">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <div>
-              <CardTitle>Xatolik yuz berdi</CardTitle>
+              <CardTitle>{i18n.t('An unexpected error occurred')}</CardTitle>
               <CardDescription>
-                Dasturda kutilmagan xatolik yuz berdi. Iltimos, sahifani yangilang yoki bosh sahifaga qayting.
+                {i18n.t('An unexpected error occurred in the application. Please refresh the page or go to the home page.')}
               </CardDescription>
             </div>
           </div>
@@ -54,17 +55,17 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
         <CardContent className="space-y-4">
           {/* Error Message */}
           <div className="rounded-md bg-red-50 p-3">
-            <p className="text-sm font-medium text-red-800">Xatolik:</p>
+            <p className="text-sm font-medium text-red-800">{i18n.t('Error details')}:</p>
             <p className="mt-1 text-sm text-red-700">{error.message}</p>
           </div>
 
           {/* Event ID for Support */}
           {eventId && (
             <div className="rounded-md bg-blue-50 p-3">
-              <p className="text-sm font-medium text-blue-800">Event ID (qo'llab-quvvatlash uchun):</p>
+              <p className="text-sm font-medium text-blue-800">{i18n.t('Event ID (for support)')}:</p>
               <p className="mt-1 font-mono text-sm text-blue-700">{eventId}</p>
               <p className="mt-2 text-xs text-blue-600">
-                Bu ID'ni texnik yordam xizmatiga yuborishingiz mumkin.
+                {i18n.t('Send this ID to the support team')}
               </p>
             </div>
           )}
@@ -73,7 +74,7 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
           {import.meta.env.DEV && (
             <details className="rounded-md bg-gray-100 p-3">
               <summary className="cursor-pointer text-sm font-medium text-gray-700">
-                Texnik ma'lumot (faqat development)
+                {i18n.t('Technical details (development only)')}
               </summary>
               <pre className="mt-2 overflow-auto text-xs text-gray-600">{error.stack}</pre>
             </details>
@@ -83,11 +84,11 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
         <CardFooter className="flex gap-3">
           <Button onClick={handleReload} variant="default" className="flex-1">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Sahifani yangilash
+            {i18n.t('Refresh page')}
           </Button>
           <Button onClick={handleGoHome} variant="outline" className="flex-1">
             <Home className="mr-2 h-4 w-4" />
-            Bosh sahifa
+            {i18n.t('Home page')}
           </Button>
         </CardFooter>
       </Card>

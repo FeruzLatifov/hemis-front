@@ -63,19 +63,13 @@ export default function FacultiesPage() {
           page,
           size: 20,
         });
-        console.log('Faculty groups loaded:', result);
         return result;
       } catch (err) {
-        console.error('Failed to load faculty groups:', err);
         throw err;
       }
     },
   });
 
-  // Show error in console
-  if (error) {
-    console.error('Faculty groups error:', error);
-  }
 
   // Fetch faculties for expanded universities
   const expandedUniversities = Object.keys(expanded).filter((key) => expanded[key]);
@@ -139,7 +133,7 @@ export default function FacultiesPage() {
     },
     {
       accessorKey: 'name',
-      header: t('table.faculty.universityName'),
+      header: t('University name'),
       cell: ({ row }) => {
         const data = row.original.data;
         if (row.original.type === 'group') {
@@ -159,7 +153,7 @@ export default function FacultiesPage() {
     },
     {
       accessorKey: 'code',
-      header: t('table.faculty.code'),
+      header: t('Code'),
       cell: ({ row }) => {
         const data = row.original.data;
         return row.original.type === 'group' 
@@ -169,7 +163,7 @@ export default function FacultiesPage() {
     },
     {
       accessorKey: 'count',
-      header: t('table.faculty.facultyCount'),
+      header: t('Faculty count'),
       cell: ({ row }) => {
         if (row.original.type === 'group') {
           const data = row.original.data as FacultyGroupRow;
@@ -177,7 +171,7 @@ export default function FacultiesPage() {
             <div className="text-sm">
               <span className="font-medium">{data.facultyCount}</span>
               <span className="text-muted-foreground ml-1">
-                ({t('filters.statusActive')}: {data.activeFacultyCount} / {t('filters.statusInactive')}: {data.inactiveFacultyCount})
+                ({t('Active')}: {data.activeFacultyCount} / {t('Inactive')}: {data.inactiveFacultyCount})
               </span>
             </div>
           );
@@ -187,7 +181,7 @@ export default function FacultiesPage() {
     },
     {
       accessorKey: 'status',
-      header: t('table.faculty.status'),
+      header: t('Status'),
       cell: ({ row }) => {
         if (row.original.type === 'faculty') {
           const data = row.original.data as FacultyRow;
@@ -199,7 +193,7 @@ export default function FacultiesPage() {
                   : 'bg-gray-50 text-gray-600'
               }`}
             >
-              {data.status ? t('filters.statusActive') : t('filters.statusInactive')}
+              {data.status ? t('Active') : t('Inactive')}
             </span>
           );
         }
@@ -208,7 +202,7 @@ export default function FacultiesPage() {
     },
     {
       id: 'actions',
-      header: t('table.actions'),
+      header: t('Actions'),
       cell: ({ row }) => {
         if (row.original.type === 'faculty') {
           const data = row.original.data as FacultyRow;
@@ -222,7 +216,7 @@ export default function FacultiesPage() {
               }}
             >
               <Eye className="h-4 w-4 mr-1" />
-              {t('actions.view')}
+              {t('View')}
             </Button>
           );
         }
@@ -287,13 +281,13 @@ export default function FacultiesPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success(t('actions.exportExcel'), {
+      toast.success(t('Download Excel'), {
         duration: 3000,
         position: 'bottom-right',
       });
     } catch (error) {
       // ⭐ Backend-driven i18n: Use backend's localized message
-      toast.error(extractApiErrorMessage(error, t('errors.exportFailed')), {
+      toast.error(extractApiErrorMessage(error, t('Export failed')), {
         duration: 5000,
         position: 'bottom-right',
       });
@@ -306,8 +300,8 @@ export default function FacultiesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('menu.registry.faculty')}</h1>
-          <p className="text-muted-foreground">{t('filters.title')}</p>
+          <h1 className="text-3xl font-bold">{t('Faculties')}</h1>
+          <p className="text-muted-foreground">{t('Filters')}</p>
         </div>
       </div>
 
@@ -315,7 +309,7 @@ export default function FacultiesPage() {
       <Card className="p-4">
         <div className="flex flex-wrap gap-4">
           <Input
-            placeholder={t('filters.searchPlaceholder')}
+            placeholder={t('Search...')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -325,21 +319,21 @@ export default function FacultiesPage() {
           />
           <Select value={status} onValueChange={setStatus}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t('filters.status')} />
+              <SelectValue placeholder={t('Status')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('filters.status')}</SelectItem>
-              <SelectItem value="true">{t('filters.statusActive')}</SelectItem>
-              <SelectItem value="false">{t('filters.statusInactive')}</SelectItem>
+              <SelectItem value="all">{t('Status')}</SelectItem>
+              <SelectItem value="true">{t('Active')}</SelectItem>
+              <SelectItem value="false">{t('Inactive')}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            {t('actions.refresh')}
+            {t('Refresh')}
           </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
-            {t('actions.export')}
+            {t('Export')}
           </Button>
         </div>
       </Card>
@@ -373,13 +367,13 @@ export default function FacultiesPage() {
               ) : error ? (
                 <tr>
                   <td colSpan={columns.length} className="px-4 py-8 text-center text-red-500">
-                    {t('errors.loadFailed')}: {error instanceof Error ? error.message : 'Unknown error'}
+                    {t('Failed to load data')}: {error instanceof Error ? error.message : 'Unknown error'}
                   </td>
                 </tr>
               ) : table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="px-4 py-8 text-center text-muted-foreground">
-                    {t('empty.noData')}
+                    {t('No data found')}
                   </td>
                 </tr>
               ) : (
@@ -417,7 +411,7 @@ export default function FacultiesPage() {
         {groupsData && groupsData.totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t">
             <div className="text-sm text-muted-foreground">
-              {t('pagination.of')} {groupsData.totalElements} {t('pagination.rowsPerPage')}
+              {t('of')} {groupsData.totalElements} {t('Rows per page')}
             </div>
             <div className="flex gap-2">
               <Button

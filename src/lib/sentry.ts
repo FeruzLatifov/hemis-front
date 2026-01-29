@@ -24,14 +24,12 @@ export function initSentry() {
   const enabled = import.meta.env.VITE_SENTRY_ENABLED === 'true';
 
   if (!enabled) {
-    console.log('🔕 Sentry is disabled (VITE_SENTRY_ENABLED not set to true)');
     return;
   }
 
   const dsn = import.meta.env.VITE_SENTRY_DSN;
 
   if (!dsn) {
-    console.warn('⚠️ Sentry DSN not configured. Set VITE_SENTRY_DSN in .env');
     return;
   }
 
@@ -101,10 +99,6 @@ export function initSentry() {
     },
   });
 
-  console.log('✅ Sentry initialized:', {
-    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
-    tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || '0.2'),
-  });
 }
 
 /**
@@ -122,7 +116,7 @@ export function setUserContext(user: {
   id: string;
   username?: string;
   email?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) {
   Sentry.setUser({
     id: user.id,
@@ -150,7 +144,7 @@ export function clearUserContext() {
  */
 export function captureError(error: Error, context?: {
   tags?: Record<string, string>;
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
   level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
 }) {
   Sentry.captureException(error, {
@@ -184,7 +178,7 @@ export function addBreadcrumb(breadcrumb: {
   category?: string;
   message: string;
   level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }) {
   Sentry.addBreadcrumb(breadcrumb);
 }

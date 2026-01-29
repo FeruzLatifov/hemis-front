@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTranslation } from 'react-i18next'
 
 const teachers = [
   { id: 1, code: 'TC2024001', fullName: 'Prof. Rahimov Anvar Shavkatovich', pinfl: '12345678901234', university: 'TDTU', department: 'Dasturiy injiniring', position: 'Professor', degree: 'Fan doktori', rank: 'Professor', experience: 25, publications: 45, projects: 12 },
@@ -36,6 +37,7 @@ const teachers = [
 ]
 
 export default function Teachers() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
 
   const getDegreeColor = (degree: string | null) => {
@@ -50,20 +52,20 @@ export default function Teachers() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent dark:from-purple-400 dark:via-pink-400 dark:to-orange-400">
-            O'qituvchilar
+            {t('Teachers')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Professor-o'qituvchilar ro'yxati va ilmiy faoliyat monitoring
+            {t('Teacher list and monitoring')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
-            Export
+            {t('Export')}
           </Button>
           <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
             <Plus className="h-4 w-4" />
-            Yangi o'qituvchi
+            {t('New teacher')}
           </Button>
         </div>
       </div>
@@ -72,25 +74,25 @@ export default function Teachers() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
         <Card className="border-0 shadow-md bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Jami</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Total')}</p>
             <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">45,234</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-md bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20">
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Professorlar</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Professors')}</p>
             <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">3,456</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Dotsentlar</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Associate professors')}</p>
             <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">8,923</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Fan doktori</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Doctor of science')}</p>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">2,145</p>
           </CardContent>
         </Card>
@@ -107,7 +109,7 @@ export default function Teachers() {
         <CardHeader className="pb-4">
           <CardTitle className="text-lg flex items-center gap-2">
             <Filter className="h-5 w-5 text-purple-600" />
-            Qidiruv va filtrlash
+            {t('Search and filter')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -116,7 +118,7 @@ export default function Teachers() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="FIO, PINFL, kafedra bo'yicha qidirish..."
+                  placeholder={t('Search by full name, PINFL, department...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -129,7 +131,7 @@ export default function Teachers() {
                 <SelectValue placeholder="Ilmiy daraja" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Barchasi</SelectItem>
+                <SelectItem value="all">{t('All')}</SelectItem>
                 <SelectItem value="dsc">Fan doktori (DSc)</SelectItem>
                 <SelectItem value="phd">Fan nomzodi (PhD)</SelectItem>
                 <SelectItem value="none">Ilmiy daraja yo'q</SelectItem>
@@ -141,7 +143,7 @@ export default function Teachers() {
                 <SelectValue placeholder="Ilmiy unvon" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Barchasi</SelectItem>
+                <SelectItem value="all">{t('All')}</SelectItem>
                 <SelectItem value="professor">Professor</SelectItem>
                 <SelectItem value="docent">Dotsent</SelectItem>
                 <SelectItem value="none">Unvon yo'q</SelectItem>
@@ -156,8 +158,8 @@ export default function Teachers() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>O'qituvchilar ro'yxati</CardTitle>
-              <CardDescription>{teachers.length} ta o'qituvchi topildi</CardDescription>
+              <CardTitle>{t('Teacher list')}</CardTitle>
+              <CardDescription>{teachers.length} {t('teachers found')}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -166,17 +168,17 @@ export default function Teachers() {
             <Table>
               <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
                 <TableRow>
-                  <TableHead>Kod</TableHead>
-                  <TableHead>FIO</TableHead>
-                  <TableHead>OTM</TableHead>
-                  <TableHead>Kafedra</TableHead>
-                  <TableHead>Lavozim</TableHead>
-                  <TableHead>Ilmiy daraja</TableHead>
-                  <TableHead>Ilmiy unvon</TableHead>
-                  <TableHead>Tajriba</TableHead>
-                  <TableHead>Nashrlar</TableHead>
-                  <TableHead>Loyihalar</TableHead>
-                  <TableHead className="text-right">Amallar</TableHead>
+                  <TableHead>{t('Code')}</TableHead>
+                  <TableHead>{t('Full name')}</TableHead>
+                  <TableHead>{t('Universities')}</TableHead>
+                  <TableHead>{t('Department')}</TableHead>
+                  <TableHead>{t('Position')}</TableHead>
+                  <TableHead>{t('Academic degree')}</TableHead>
+                  <TableHead>{t('Academic title')}</TableHead>
+                  <TableHead>{t('Experience')}</TableHead>
+                  <TableHead>{t('Publications')}</TableHead>
+                  <TableHead>{t('Projects')}</TableHead>
+                  <TableHead className="text-right">{t('Actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -224,7 +226,7 @@ export default function Teachers() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="font-medium">{teacher.experience} yil</span>
+                      <span className="font-medium">{teacher.experience} {t('years')}</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
@@ -248,16 +250,16 @@ export default function Teachers() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>
                             <Eye className="mr-2 h-4 w-4" />
-                            Ko'rish
+                            {t('View')}
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Edit className="mr-2 h-4 w-4" />
-                            Tahrirlash
+                            {t('Edit')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600">
                             <Trash2 className="mr-2 h-4 w-4" />
-                            O'chirish
+                            {t('Delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -273,13 +275,13 @@ export default function Teachers() {
               1-5 dan 45,234 ta o'qituvchi ko'rsatilmoqda
             </p>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled>Oldingi</Button>
+              <Button variant="outline" size="sm" disabled>{t('Previous')}</Button>
               <Button variant="outline" size="sm" className="bg-purple-600 text-white">1</Button>
               <Button variant="outline" size="sm">2</Button>
               <Button variant="outline" size="sm">3</Button>
               <span className="px-2">...</span>
               <Button variant="outline" size="sm">9,047</Button>
-              <Button variant="outline" size="sm">Keyingi</Button>
+              <Button variant="outline" size="sm">{t('Next')}</Button>
             </div>
           </div>
         </CardContent>

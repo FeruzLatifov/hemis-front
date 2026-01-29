@@ -247,3 +247,144 @@ body {
   font-weight: 400;
   color: var(--text-secondary);
 }
+
+/* Sidebar Menu Items */
+.sidebar-menu-item {
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.sidebar-menu-item:hover {
+  background-color: var(--app-bg);
+}
+
+.sidebar-menu-item--active {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-menu-item--active:hover {
+  background-color: var(--primary);
+}
+
+.sidebar-menu-item-child {
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.sidebar-menu-item-child:hover {
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+}
+
+.sidebar-menu-item-child--active {
+  background-color: #EFF6FF;
+  color: var(--primary);
+}
+
+.sidebar-menu-item-child--active:hover {
+  background-color: #EFF6FF;
+}
+
+/* Layout components */
+.layout-bg {
+  background-color: var(--app-bg);
+}
+
+.card-white {
+  background-color: var(--card-bg);
+  border-color: var(--border-color-pro);
+}
+
+.text-color-primary {
+  color: var(--text-primary);
+}
+
+.text-color-secondary {
+  color: var(--text-secondary);
+}
+
+.border-color-light {
+  border-color: var(--border-color-pro);
+}
+
+/* Interactive elements */
+.interactive-hover {
+  transition: all 0.2s;
+}
+
+.interactive-hover:hover {
+  background-color: var(--app-bg);
+  border-color: var(--primary);
+}
+
+/* Header button styles */
+.header-btn {
+  background-color: var(--card-bg);
+  border-color: var(--border-color-pro);
+  transition: all 0.2s;
+}
+
+.header-btn:hover {
+  background-color: var(--app-bg);
+  border-color: var(--primary);
+}
+
+.header-btn-success:hover {
+  background-color: #F0FDF4;
+  border-color: var(--success);
+}
+
+.header-btn-danger:hover {
+  background-color: #FEF2F2;
+}
+
+/* Dropdown menu item */
+.dropdown-item {
+  color: var(--text-primary);
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: var(--app-bg);
+}
+
+.dropdown-item-danger {
+  color: var(--danger);
+}
+
+.dropdown-item-danger:hover {
+  background-color: #FEF2F2;
+}
+
+/* Badge styles */
+.badge-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+/* Avatar styles */
+.avatar-primary {
+  background-color: var(--primary);
+}
+
+/* Language switcher */
+.lang-item {
+  color: var(--text-primary);
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.lang-item:hover {
+  background-color: var(--app-bg);
+}
+
+.lang-item--active {
+  background-color: #EFF6FF;
+  color: var(--primary);
+}
+
+.lang-item--active:hover {
+  background-color: #EFF6FF;
+}

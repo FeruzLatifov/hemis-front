@@ -9,6 +9,17 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { captureError, addBreadcrumb } from '@/lib/sentry';
 import { toast } from 'sonner';
 
+/**
+ * Standard API error response structure from backend
+ */
+interface ApiErrorResponse {
+  success: false;
+  message: string;
+  errorCode?: string;
+  eventId?: string;
+  timestamp?: string;
+}
+
 // Create axios instance
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8081',
@@ -52,7 +63,7 @@ apiClient.interceptors.request.use(
 // Response interceptor - Handle token refresh and errors
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<any>) => {
+  async (error: AxiosError<ApiErrorResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };

@@ -57,44 +57,21 @@ export default function LanguageSwitcher() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border transition-colors"
-        style={{
-          backgroundColor: '#FFFFFF',
-          borderColor: '#E5E7EB'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = '#2F80ED'
-          e.currentTarget.style.backgroundColor = '#F5F6FA'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = '#E5E7EB'
-          e.currentTarget.style.backgroundColor = '#FFFFFF'
-        }}
+        className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn"
         title={currentLanguage.nativeName}
       >
-        <Languages className="h-4 w-4 md:h-5 md:w-5" style={{ color: '#6B7280' }} />
+        <Languages className="h-4 w-4 md:h-5 md:w-5 text-color-secondary" />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute top-full right-0 mt-2 w-56 rounded-lg border overflow-hidden"
-          style={{
-            backgroundColor: '#FFFFFF',
-            borderColor: '#E5E7EB',
-            boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)',
-            zIndex: 50
-          }}
+          className="absolute top-full right-0 mt-2 w-56 rounded-lg border overflow-hidden card-white z-50"
+          style={{ boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)' }}
         >
           {/* Header */}
-          <div
-            className="px-4 py-2 border-b"
-            style={{
-              backgroundColor: '#F5F6FA',
-              borderColor: '#E5E7EB'
-            }}
-          >
-            <p className="text-xs font-semibold" style={{ color: '#6B7280' }}>
+          <div className="px-4 py-2 border-b layout-bg border-color-light">
+            <p className="text-xs font-semibold text-color-secondary">
               Select Language / Tilni tanlang
             </p>
           </div>
@@ -109,34 +86,22 @@ export default function LanguageSwitcher() {
                   key={language.code}
                   type="button"
                   onClick={() => handleLanguageChange(language.code)}
-                  className="flex w-full items-center justify-between px-4 py-3 transition-colors"
-                  style={{
-                    backgroundColor: isActive ? '#EFF6FF' : 'transparent',
-                    color: isActive ? '#2F80ED' : '#1E2124'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = '#F5F6FA'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
+                  className={`flex w-full items-center justify-between px-4 py-3 ${
+                    isActive ? 'lang-item--active' : 'lang-item'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-lg">{language.flag}</span>
                     <div className="text-left">
                       <p className="text-sm font-medium">{language.nativeName}</p>
-                      <p className="text-xs" style={{ color: '#6B7280' }}>
+                      <p className="text-xs text-color-secondary">
                         {language.name}
                       </p>
                     </div>
                   </div>
 
                   {isActive && (
-                    <Check className="h-4 w-4" style={{ color: '#2F80ED' }} />
+                    <Check className="h-4 w-4 text-[var(--primary)]" />
                   )}
                 </button>
               )
@@ -144,15 +109,9 @@ export default function LanguageSwitcher() {
           </div>
 
           {/* Footer Info */}
-          <div
-            className="px-4 py-2 border-t"
-            style={{
-              backgroundColor: '#F5F6FA',
-              borderColor: '#E5E7EB'
-            }}
-          >
-            <p className="text-xs" style={{ color: '#6B7280' }}>
-              Current: <span className="font-medium" style={{ color: '#1E2124' }}>{currentLanguage.nativeName}</span>
+          <div className="px-4 py-2 border-t layout-bg border-color-light">
+            <p className="text-xs text-color-secondary">
+              Current: <span className="font-medium text-color-primary">{currentLanguage.nativeName}</span>
             </p>
           </div>
         </div>

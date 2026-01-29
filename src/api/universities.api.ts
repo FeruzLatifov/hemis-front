@@ -1,5 +1,75 @@
 import apiClient from './client';
 
+/**
+ * Backend DTO - handles both snake_case and camelCase field names
+ * from legacy CUBA and modern Spring Boot endpoints
+ */
+interface UniversityBackendDTO {
+  code: string;
+  name: string;
+  tin?: string;
+  address?: string;
+  cadastre?: string;
+  active?: boolean;
+
+  // Region/SOATO (multiple naming conventions)
+  _soato_region?: string;
+  soatoRegion?: string;
+  _soato?: string;
+  soato?: string;
+  region?: string;
+
+  // Ownership
+  _ownership?: string;
+  ownership?: string;
+
+  // University type
+  _university_type?: string;
+  universityType?: string;
+
+  // URLs (snake_case and camelCase)
+  university_url?: string;
+  universityUrl?: string;
+  teacher_url?: string;
+  teacherUrl?: string;
+  student_url?: string;
+  studentUrl?: string;
+  uzbmb_url?: string;
+  uzbmbUrl?: string;
+
+  // Flags
+  gpa_edit?: boolean;
+  gpaEdit?: boolean;
+  accreditation_edit?: boolean;
+  accreditationEdit?: boolean;
+  add_student?: boolean;
+  addStudent?: boolean;
+  allow_grouping?: boolean;
+  allowGrouping?: boolean;
+  allow_transfer_outside?: boolean;
+  allowTransferOutside?: boolean;
+
+  // Other fields
+  _version_type?: string;
+  versionType?: string;
+  _terrain?: string;
+  terrain?: string;
+  mail_address?: string;
+  mailAddress?: string;
+  bank_info?: string;
+  bankInfo?: string;
+  accreditation_info?: string;
+  accreditationInfo?: string;
+  _university_contract_category?: string;
+  contractCategory?: string;
+  _university_activity_status?: string;
+  activityStatus?: string;
+  _university_belongs_to?: string;
+  belongsTo?: string;
+  _parent_university?: string;
+  parentUniversity?: string;
+}
+
 export interface UniversityRow {
   code: string;
   name: string;
@@ -68,13 +138,13 @@ export interface Dictionaries {
 
 export const universitiesApi = {
   async getUniversities(params: UniversitiesParams = {}): Promise<PagedResponse<UniversityRow>> {
-    const response = await apiClient.get<{ success: boolean; data: PagedResponse<any> }>(
+    const response = await apiClient.get<{ success: boolean; data: PagedResponse<UniversityBackendDTO> }>(
       '/api/v1/web/registry/universities',
       { params }
     );
     const page = response.data.data;
 
-    const adapt = (dto: any): UniversityRow => ({
+    const adapt = (dto: UniversityBackendDTO): UniversityRow => ({
       code: dto.code,
       name: dto.name,
       tin: dto.tin,
@@ -124,7 +194,7 @@ export const universitiesApi = {
   },
 
   async getUniversity(id: string): Promise<UniversityDetail> {
-    const response = await apiClient.get<{ success: boolean; data: any }>(
+    const response = await apiClient.get<{ success: boolean; data: UniversityBackendDTO }>(
       `/api/v1/web/registry/universities/${id}`
     );
     const dto = response.data.data;
@@ -201,7 +271,7 @@ export const universitiesApi = {
    * Create new university
    */
   async createUniversity(data: Partial<UniversityRow>): Promise<UniversityRow> {
-    const response = await apiClient.post<{ success: boolean; data: any }>(
+    const response = await apiClient.post<{ success: boolean; data: UniversityBackendDTO }>(
       '/api/v1/web/registry/universities',
       {
         code: data.code,
@@ -232,7 +302,7 @@ export const universitiesApi = {
    * Update existing university
    */
   async updateUniversity(code: string, data: Partial<UniversityRow>): Promise<UniversityRow> {
-    const response = await apiClient.put<{ success: boolean; data: any }>(
+    const response = await apiClient.put<{ success: boolean; data: UniversityBackendDTO }>(
       `/api/v1/web/registry/universities/${code}`,
       {
         code: data.code,

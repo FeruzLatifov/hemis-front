@@ -88,27 +88,15 @@ function MenuItemComponent({
           className={cn(
             'group relative flex w-full items-center gap-3 rounded-lg px-3 transition-all duration-200',
             level === 0 ? 'py-2.5' : 'py-2 text-sm',
-            !open && level === 0 && 'justify-center'
+            !open && level === 0 && 'justify-center',
+            level === 0
+              ? hasActiveChild
+                ? 'sidebar-menu-item--active'
+                : 'sidebar-menu-item'
+              : hasActiveChild
+                ? 'sidebar-menu-item-child--active'
+                : 'sidebar-menu-item-child'
           )}
-          style={
-            hasActiveChild
-              ? {
-                  backgroundColor: level === 0 ? '#2F80ED' : '#EFF6FF',
-                  color: level === 0 ? '#FFFFFF' : '#2F80ED',
-                  boxShadow: level === 0 ? '0 1px 2px rgba(15, 23, 42, 0.04)' : 'none'
-                }
-              : { color: level === 0 ? '#1E2124' : '#6B7280' }
-          }
-          onMouseEnter={(e) => {
-            if (!hasActiveChild) {
-              e.currentTarget.style.backgroundColor = level === 0 ? '#F5F6FA' : '#F5F6FA'
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!hasActiveChild) {
-              e.currentTarget.style.backgroundColor = 'transparent'
-            }
-          }}
         >
           <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
           {open && (
@@ -152,31 +140,15 @@ function MenuItemComponent({
       className={cn(
         'group relative flex items-center gap-3 rounded-lg px-3 transition-all duration-200',
         level === 0 ? 'py-2.5' : 'py-2 text-sm',
-        !open && level === 0 && 'justify-center'
+        !open && level === 0 && 'justify-center',
+        level === 0
+          ? isActive
+            ? 'sidebar-menu-item--active'
+            : 'sidebar-menu-item'
+          : isActive
+            ? 'sidebar-menu-item-child--active'
+            : 'sidebar-menu-item-child'
       )}
-      style={
-        isActive
-          ? {
-              backgroundColor: level === 0 ? '#2F80ED' : '#EFF6FF',
-              color: level === 0 ? '#FFFFFF' : '#2F80ED',
-              boxShadow: level === 0 ? '0 1px 2px rgba(15, 23, 42, 0.04)' : 'none'
-            }
-          : { color: level === 0 ? '#1E2124' : '#6B7280' }
-      }
-      onMouseEnter={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.backgroundColor = '#F5F6FA'
-          if (level > 0) {
-            e.currentTarget.style.color = '#1E2124'
-          }
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.color = level === 0 ? '#1E2124' : '#6B7280'
-        }
-      }}
     >
       <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : level === 0 ? 'h-5 w-5' : 'h-4 w-4')} />
       {open && (
@@ -248,34 +220,20 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed md:relative flex h-screen flex-col border-r transition-all duration-300 z-40',
+          'fixed md:relative flex h-screen flex-col border-r transition-all duration-300 z-40 card-white',
           'md:translate-x-0',
           open ? 'translate-x-0 w-72' : '-translate-x-full md:translate-x-0 md:w-20'
         )}
-        style={{
-          backgroundColor: '#FFFFFF',
-          borderColor: '#E5E7EB'
-        }}
       >
         {/* Header */}
         <div
-          className="flex h-14 md:h-16 items-center justify-between px-3 md:px-4 border-b"
-          style={{
-            backgroundColor: '#FFFFFF',
-            borderColor: '#E5E7EB',
-            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)'
-          }}
+          className="flex h-14 md:h-16 items-center justify-between px-3 md:px-4 border-b card-white"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
         >
         {open ? (
           <div className="flex items-center gap-2.5 md:gap-3">
             {/* Logo */}
-            <div
-              className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2"
-              style={{
-                backgroundColor: '#F5F6FA',
-                border: '1px solid #E5E7EB'
-              }}
-            >
+            <div className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2 layout-bg border border-color-light">
               <img
                 src={hemisLogo}
                 alt="HEMIS"
@@ -285,22 +243,16 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
 
             {/* Title */}
             <div className="flex flex-col">
-              <span className="text-base md:text-lg font-bold" style={{ color: '#1E2124' }}>
+              <span className="text-base md:text-lg font-bold text-color-primary">
                 HEMIS
               </span>
-              <span className="text-xs" style={{ color: '#6B7280' }}>
+              <span className="text-xs text-color-secondary">
                 Ministry Portal
               </span>
             </div>
           </div>
         ) : (
-          <div
-            className="mx-auto hidden md:flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2"
-            style={{
-              backgroundColor: '#F5F6FA',
-              border: '1px solid #E5E7EB'
-            }}
-          >
+          <div className="mx-auto hidden md:flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2 layout-bg border border-color-light">
             <img
               src={hemisLogo}
               alt="HEMIS"
@@ -312,18 +264,9 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         {/* Toggle Button */}
         <button
           onClick={() => setOpen(!open)}
-          className="h-8 w-8 flex items-center justify-center rounded-lg transition-colors"
-          style={{
-            color: '#6B7280'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#F5F6FA'
-            e.currentTarget.style.color = '#2F80ED'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#6B7280'
-          }}
+          className="h-8 w-8 flex items-center justify-center rounded-lg transition-colors text-color-secondary hover:layout-bg hover:text-[var(--primary)]"
+          aria-label={open ? 'Menyuni yopish' : 'Menyuni ochish'}
+          aria-expanded={open}
         >
           {open ? (
             <ChevronLeft className="h-5 w-5" />
@@ -337,13 +280,13 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       <nav className="flex-1 overflow-y-auto px-2.5 md:px-3 py-3 md:py-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-sm" style={{ color: '#6B7280' }}>
+            <div className="text-sm text-color-secondary">
               Loading menu...
             </div>
           </div>
         ) : sortedMenuItems.length === 0 ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-sm" style={{ color: '#6B7280' }}>
+            <div className="text-sm text-color-secondary">
               No menu items available
             </div>
           </div>
@@ -367,46 +310,25 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div
-        className="border-t p-3 md:p-4"
-        style={{
-          borderColor: '#E5E7EB'
-        }}
-      >
+      <div className="border-t p-3 md:p-4 border-color-light">
         {open ? (
-          <div
-            className="flex items-center gap-2.5 md:gap-3 rounded-lg px-2.5 md:px-3 py-2"
-            style={{
-              backgroundColor: '#F5F6FA',
-              border: '1px solid #E5E7EB'
-            }}
-          >
-            <div
-              className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: '#2F80ED'
-              }}
-            >
-              <GraduationCap className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: '#FFFFFF' }} />
+          <div className="flex items-center gap-2.5 md:gap-3 rounded-lg px-2.5 md:px-3 py-2 layout-bg border border-color-light">
+            <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-[var(--primary)]">
+              <GraduationCap className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-medium" style={{ color: '#1E2124' }}>
+              <p className="text-xs font-medium text-color-primary">
                 HEMIS Ministry
               </p>
-              <p className="text-xs" style={{ color: '#6B7280' }}>
+              <p className="text-xs text-color-secondary">
                 v2.0.0
               </p>
             </div>
           </div>
         ) : (
           <div className="hidden md:flex justify-center">
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: '#2F80ED'
-              }}
-            >
-              <GraduationCap className="h-4 w-4" style={{ color: '#FFFFFF' }} />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)]">
+              <GraduationCap className="h-4 w-4 text-white" />
             </div>
           </div>
         )}

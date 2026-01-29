@@ -28,9 +28,8 @@ export default function UniversityDetailDrawer({
         setError(null);
         const data = await universitiesApi.getUniversity(code);
         setUniversity(data);
-      } catch (err) {
-        console.error('Error loading university:', err);
-        setError('Ma\'lumotlarni yuklashda xatolik');
+      } catch {
+        setError(t('Failed to load data'));
       } finally {
         setLoading(false);
       }
@@ -53,14 +52,14 @@ export default function UniversityDetailDrawer({
         className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header - Gradient */}
-        <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-6 py-5 flex items-center justify-between">
+        {/* Header */}
+        <div className="bg-[var(--primary)] px-6 py-5 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">
-              {t('page.university.detail.title') || 'Muassasa ma\'lumotlari'}
+              {t('Institution details')}
             </h2>
             <p className="text-blue-100 text-sm mt-0.5">
-              {loading ? 'Yuklanmoqda...' : university?.name}
+              {loading ? t('Loading...') : university?.name}
             </p>
           </div>
           <button
@@ -72,11 +71,11 @@ export default function UniversityDetailDrawer({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6 bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex-1 overflow-auto p-6 layout-bg">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-blue-600">
               <Loader2 className="w-10 h-10 animate-spin" />
-              <span className="text-sm font-medium">Ma'lumotlar yuklanmoqda</span>
+              <span className="text-sm font-medium">{t('Data is loading')}</span>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-full text-center gap-3">
@@ -88,24 +87,24 @@ export default function UniversityDetailDrawer({
                 onClick={onClose}
                 className="mt-2 px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
               >
-                Yopish
+                {t('Close')}
               </button>
             </div>
           ) : university ? (
             <div className="space-y-6">
               {/* Basic Info - Gradient Card */}
-              <div className="bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+              <div className="bg-blue-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
                 <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
-                  <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
+                  <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
                   {university.name}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white/70 rounded-lg p-3 backdrop-blur-sm">
-                    <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">Kod</span>
+                    <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">{t('Code')}</span>
                     <p className="text-lg font-bold text-blue-900 mt-1">{university.code}</p>
                   </div>
                   <div className="bg-white/70 rounded-lg p-3 backdrop-blur-sm">
-                    <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">INN</span>
+                    <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">{t('INN')}</span>
                     <p className="text-lg font-bold text-blue-900 mt-1">{university.tin || '—'}</p>
                   </div>
                 </div>
@@ -114,32 +113,32 @@ export default function UniversityDetailDrawer({
               {/* Location */}
               <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition">
                 <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
-                  Manzil va joylashuv
+                  <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                  {t('Address and location')}
                 </h4>
                 <div className="space-y-3">
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Viloyat:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Region')}:</span>
                     <p className="text-gray-900">{university.region || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Manzil:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Address')}:</span>
                     <p className="text-gray-900">{university.address || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Pochta manzili:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Mail address')}:</span>
                     <p className="text-gray-900">{university.mailAddress || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">SOATO Region:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('SOATO Region')}:</span>
                     <p className="text-gray-900">{university.soatoRegion || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Mahalla:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Neighborhood')}:</span>
                     <p className="text-gray-900">{university.terrain || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Kadastr:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Cadastre')}:</span>
                     <p className="text-gray-900">{university.cadastre || '—'}</p>
                   </div>
                 </div>
@@ -148,37 +147,37 @@ export default function UniversityDetailDrawer({
               {/* Organization Info */}
               <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition">
                 <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full"></div>
-                  Tashkiliy ma'lumotlar
+                  <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                  {t('Organizational info')}
                 </h4>
                 <div className="space-y-3">
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Mulkchilik:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Ownership')}:</span>
                     <p className="text-gray-900">{university.ownership || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Universitet turi:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('University type')}:</span>
                     <p className="text-gray-900">{university.universityType || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Versiya turi:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Version type')}:</span>
                     <p className="text-gray-900">{university.versionType || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Kontrakt kategoriyasi:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Contract category')}:</span>
                     <p className="text-gray-900">{university.contractCategory || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Faollik statusi:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Activity status')}:</span>
                     <p className="text-gray-900">{university.activityStatus || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Tegishli:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('Belongs to')}:</span>
                     <p className="text-gray-900">{university.belongsTo || '—'}</p>
                   </div>
                   {university.parentUniversity && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Asosiy universitet:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('Main university')}:</span>
                       <p className="text-gray-900">{university.parentUniversity}</p>
                     </div>
                   )}
@@ -188,13 +187,13 @@ export default function UniversityDetailDrawer({
               {/* URLs */}
               <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition">
                 <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-orange-500 to-amber-500 rounded-full"></div>
-                  Veb-saytlar
+                  <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
+                  {t('Websites')}
                 </h4>
                 <div className="space-y-3">
                   {university.universityUrl && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">OTM sayti:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('HEI website')}:</span>
                       <p>
                         <a
                           href={university.universityUrl}
@@ -210,7 +209,7 @@ export default function UniversityDetailDrawer({
                   )}
                   {university.teacherUrl && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">O'qituvchilar portali:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('Teachers portal')}:</span>
                       <p>
                         <a
                           href={university.teacherUrl}
@@ -226,7 +225,7 @@ export default function UniversityDetailDrawer({
                   )}
                   {university.studentUrl && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Talabalar portali:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('Students portal')}:</span>
                       <p>
                         <a
                           href={university.studentUrl}
@@ -242,7 +241,7 @@ export default function UniversityDetailDrawer({
                   )}
                   {university.uzbmbUrl && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">UZBMB portali:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('UZBMB portal')}:</span>
                       <p>
                         <a
                           href={university.uzbmbUrl}
@@ -260,10 +259,10 @@ export default function UniversityDetailDrawer({
               </div>
 
               {/* Flags & Settings */}
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border-2 border-indigo-200 shadow-sm">
+              <div className="bg-indigo-50 rounded-xl p-5 border-2 border-indigo-200 shadow-sm">
                 <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
-                  Sozlamalar
+                  <div className="w-1 h-6 bg-indigo-500 rounded-full"></div>
+                  {t('Settings')}
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2 backdrop-blur-sm">
@@ -274,7 +273,7 @@ export default function UniversityDetailDrawer({
                     >
                       {university.gpaEdit && <span className="text-white text-xs font-bold">✓</span>}
                     </div>
-                    <span className="text-sm font-medium">GPA tahrir</span>
+                    <span className="text-sm font-medium">{t('GPA edit')}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2 backdrop-blur-sm">
                     <div
@@ -284,7 +283,7 @@ export default function UniversityDetailDrawer({
                     >
                       {university.accreditationEdit && <span className="text-white text-xs font-bold">✓</span>}
                     </div>
-                    <span className="text-sm font-medium">Akkreditatsiya tahrir</span>
+                    <span className="text-sm font-medium">{t('Accreditation edit')}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2 backdrop-blur-sm">
                     <div
@@ -294,7 +293,7 @@ export default function UniversityDetailDrawer({
                     >
                       {university.addStudent && <span className="text-white text-xs font-bold">✓</span>}
                     </div>
-                    <span className="text-sm font-medium">Talaba qo'shish</span>
+                    <span className="text-sm font-medium">{t('Add student')}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2 backdrop-blur-sm">
                     <div
@@ -304,7 +303,7 @@ export default function UniversityDetailDrawer({
                     >
                       {university.allowGrouping && <span className="text-white text-xs font-bold">✓</span>}
                     </div>
-                    <span className="text-sm font-medium">Guruhlashga ruxsat</span>
+                    <span className="text-sm font-medium">{t('Allow grouping')}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2 backdrop-blur-sm">
                     <div
@@ -314,7 +313,7 @@ export default function UniversityDetailDrawer({
                     >
                       {university.allowTransferOutside && <span className="text-white text-xs font-bold">✓</span>}
                     </div>
-                    <span className="text-sm font-medium">Tashqariga o'tkazish</span>
+                    <span className="text-sm font-medium">{t('External transfer')}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2 backdrop-blur-sm">
                     <div
@@ -325,7 +324,7 @@ export default function UniversityDetailDrawer({
                       {university.active && <span className="text-white text-xs font-bold">✓</span>}
                       {!university.active && <span className="text-white text-xs font-bold">✗</span>}
                     </div>
-                    <span className="text-sm font-medium">{university.active ? 'Faol' : 'Nofaol'}</span>
+                    <span className="text-sm font-medium">{university.active ? t('Active') : t('Inactive')}</span>
                   </div>
                 </div>
               </div>
@@ -333,19 +332,19 @@ export default function UniversityDetailDrawer({
               {/* Financial & Other Info */}
               <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition">
                 <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-full"></div>
-                  Qo'shimcha ma'lumotlar
+                  <div className="w-1 h-6 bg-teal-500 rounded-full"></div>
+                  {t('Additional info')}
                 </h4>
                 <div className="space-y-3">
                   {university.bankInfo && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Bank ma'lumotlari:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('Bank info')}:</span>
                       <p className="text-gray-900 whitespace-pre-wrap">{university.bankInfo}</p>
                     </div>
                   )}
                   {university.accreditationInfo && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Akkreditatsiya:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('Accreditation')}:</span>
                       <p className="text-gray-900 whitespace-pre-wrap">{university.accreditationInfo}</p>
                     </div>
                   )}
@@ -359,9 +358,9 @@ export default function UniversityDetailDrawer({
         <div className="border-t bg-gray-50 px-6 py-4 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 font-medium shadow-lg transition"
+            className="px-6 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-hover)] font-medium shadow-lg transition"
           >
-            Yopish
+            {t('Close')}
           </button>
         </div>
       </div>

@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "yarn sync:translations && tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
@@ -19,7 +20,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "sync:translations": "node scripts/sync-translations.js"
   },
   "dependencies": {
     "@hookform/resolvers": "3.10.0",
@@ -38,7 +40,7 @@
     "@sentry/react": "^8.55.0",
     "@tanstack/react-query": "5.90.17",
     "@tanstack/react-table": "8.21.3",
-    "axios": "1.13.2",
+    "axios": "^1.13.4",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
@@ -51,7 +53,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "7.71.1",
     "react-i18next": "^16.5.3",
-    "react-router-dom": "7.12.0",
+    "react-router-dom": "^7.13.0",
     "recharts": "2.15.4",
     "sonner": "1.7.4",
     "tailwind-merge": "2.6.0",

@@ -48,7 +48,6 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: true,
           });
         } catch (error) {
-          console.error('Login failed:', error);
           throw error;
         }
       },
@@ -57,8 +56,8 @@ export const useAuthStore = create<AuthStore>()(
       logout: async () => {
         try {
           await authApi.logout();
-        } catch (error) {
-          console.error('Logout error:', error);
+        } catch {
+          // Ignore logout errors
         } finally {
           // ✅ NO tokens in localStorage to clear - they're in HTTPOnly cookies
           // Backend clears cookies automatically

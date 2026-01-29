@@ -35,8 +35,7 @@ export const parseJWT = (token: string | null): JWTPayload | null => {
     );
 
     return JSON.parse(jsonPayload) as JWTPayload;
-  } catch (error) {
-    console.error('Failed to parse JWT:', error);
+  } catch {
     return null;
   }
 };

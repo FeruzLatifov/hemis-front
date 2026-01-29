@@ -24,7 +24,7 @@ export interface StatisticsRequest {
 }
 
 export interface StatisticsResponse {
-  content: Record<string, any>[];
+  content: Record<string, unknown>[];
   totalElements: number;
   totalPages: number;
   currentPage: number;

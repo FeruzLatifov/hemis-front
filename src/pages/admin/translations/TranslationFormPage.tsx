@@ -5,15 +5,19 @@
  * Path: /system/translation/:id/edit
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { AlertTriangle } from 'lucide-react';
 import {
   getTranslationById,
   updateTranslation,
+  searchByMessageText,
   TranslationUpdateRequest,
+  Translation,
 } from '../../../api/translations.api';
 import { extractApiErrorMessage } from '@/utils/error.util';
+import { useTranslation } from 'react-i18next';
 
 interface FormErrors {
   category?: string;
@@ -22,6 +26,7 @@ interface FormErrors {
 }
 
 export default function TranslationFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -40,6 +45,8 @@ export default function TranslationFormPage() {
   const [loadingData, setLoadingData] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [error, setError] = useState<string | null>(null);
+  const [similarTranslations, setSimilarTranslations] = useState<Translation[]>([]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load existing translation
   useEffect(() => {
@@ -76,28 +83,53 @@ export default function TranslationFormPage() {
     } catch (err: unknown) {
       const error = err as Error;
       setError(error.message || 'Failed to load translation');
-      console.error('Error loading translation:', err);
     } finally {
       setLoadingData(false);
     }
   };
+
+  // Check for similar translations (debounced)
+  const checkSimilar = useCallback((text: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!text || text.trim().length < 3) {
+      setSimilarTranslations([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const results = await searchByMessageText(text);
+        // Filter out the current translation being edited
+        const filtered = results.filter((t) => t.id !== id);
+        setSimilarTranslations(filtered);
+      } catch {
+        // Silently ignore search errors
+      }
+    }, 600);
+  }, [id]);
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   // Validation
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
     if (!formData.category.trim()) {
-      newErrors.category = 'Kategoriya majburiy';
+      newErrors.category = t('Category is required');
     }
 
     if (!formData.messageKey.trim()) {
-      newErrors.messageKey = 'Kalit majburiy';
+      newErrors.messageKey = t('Key is required');
     } else if (!/^[a-z0-9_.]+$/i.test(formData.messageKey)) {
-      newErrors.messageKey = 'Kalit faqat harf, raqam, nuqta va pastki chiziqdan iborat bo\'lishi kerak';
+      newErrors.messageKey = t('Key must contain only letters, numbers, dots and underscores');
     }
 
     if (!formData.messageUz.trim()) {
-      newErrors.messageUz = 'O\'zbek (lotin) majburiy';
+      newErrors.messageUz = t('Uzbek (Latin) is required');
     }
 
     setErrors(newErrors);
@@ -123,7 +155,7 @@ export default function TranslationFormPage() {
 
       await updateTranslation(id, formData);
       
-      toast.success('✓ Tarjima muvaffaqiyatli yangilandi!', {
+      toast.success(t('Translation successfully updated'), {
         duration: 3000,
         position: 'bottom-right',
       });
@@ -134,13 +166,12 @@ export default function TranslationFormPage() {
       }, 500);
     } catch (err: unknown) {
       // ⭐ Backend-driven i18n: Use backend's localized message
-      const errorMessage = extractApiErrorMessage(err, 'Tarjimani saqlashda xatolik');
+      const errorMessage = extractApiErrorMessage(err, t('Error saving translation'));
       setError(errorMessage);
       toast.error(errorMessage, {
         duration: 5000,
         position: 'bottom-right',
       });
-      console.error('Error saving translation:', err);
     } finally {
       setLoading(false);
     }
@@ -160,6 +191,11 @@ export default function TranslationFormPage() {
         [field]: undefined,
       }));
     }
+
+    // Check for similar translations when message text changes
+    if (field === 'messageUz' && typeof value === 'string') {
+      checkSimilar(value);
+    }
   };
 
   // Handle cancel
@@ -172,7 +208,7 @@ export default function TranslationFormPage() {
       <div className="p-6">
         <div className="text-center py-12">
           <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p className="text-gray-600 font-medium">Yuklanmoqda...</p>
+          <p className="text-gray-600 font-medium">{t('Loading...')}</p>
         </div>
       </div>
     );
@@ -182,14 +218,14 @@ export default function TranslationFormPage() {
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Tarjimani tahrirlash</h1>
-        <p className="text-gray-600">Mavjud tarjimani yangilang</p>
+        <h1 className="text-2xl font-bold mb-2">{t('Edit translation')}</h1>
+        <p className="text-gray-600">{t('Update existing translation')}</p>
       </div>
 
       {/* Error Alert */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          <strong>Xato:</strong> {error}
+          <strong>{t('Error')}:</strong> {error}
         </div>
       )}
 
@@ -201,7 +237,7 @@ export default function TranslationFormPage() {
             {/* Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kategoriya <span className="text-red-500">*</span>
+                {t('Category')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -220,7 +256,7 @@ export default function TranslationFormPage() {
             {/* Message Key */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kalit <span className="text-red-500">*</span>
+                {t('Key')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -232,7 +268,7 @@ export default function TranslationFormPage() {
                 disabled
               />
               <p className="mt-1 text-xs text-gray-500">
-                ⚠️ Kalitni o'zgartirish mumkin emas
+                ⚠️ {t('Key cannot be changed')}
               </p>
             </div>
           </div>
@@ -242,7 +278,7 @@ export default function TranslationFormPage() {
 
           {/* Translations Section */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Tarjimalar</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('Translations section')}</h2>
 
             {/* Uzbek (Latin) - Required */}
             <div className="mb-6">
@@ -263,6 +299,35 @@ export default function TranslationFormPage() {
               />
               {errors.messageUz && (
                 <p className="mt-1 text-sm text-red-600">{errors.messageUz}</p>
+              )}
+
+              {/* Similar translations warning */}
+              {similarTranslations.length > 0 && (
+                <div className="mt-3 p-3 rounded-lg border" style={{ backgroundColor: '#FFFBEB', borderColor: '#F59E0B' }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm font-semibold text-yellow-800">
+                      {t('Similar translations found')} ({similarTranslations.length})
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {similarTranslations.slice(0, 5).map((t) => (
+                      <div key={t.id} className="flex items-center gap-2 text-xs">
+                        <span className="px-1.5 py-0.5 rounded font-bold text-white" style={{ backgroundColor: 'var(--primary)', fontSize: '10px' }}>
+                          {t.category}
+                        </span>
+                        <span className="font-mono font-medium text-yellow-900">{t.messageKey}</span>
+                        <span className="text-yellow-700">= "{t.message}"</span>
+                      </div>
+                    ))}
+                    {similarTranslations.length > 5 && (
+                      <p className="text-xs text-yellow-700">...{t('and more')} {similarTranslations.length - 5}</p>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-yellow-700">
+                    {t('If existing translation fits your needs, use it instead of adding new')}
+                  </p>
+                </div>
               )}
             </div>
 
@@ -326,11 +391,11 @@ export default function TranslationFormPage() {
                 disabled={loading}
               />
               <span className="text-sm font-medium text-gray-700">
-                Aktiv (foydalanish uchun tayyor)
+                {t('Active (ready for use)')}
               </span>
             </label>
             <p className="mt-1 ml-8 text-xs text-gray-500">
-              Agar faol emas bo'lsa, frontend tarjimani ko'rmaydi
+              {t('If inactive, frontend will not see this translation')}
             </p>
           </div>
         </div>
@@ -343,21 +408,21 @@ export default function TranslationFormPage() {
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
             disabled={loading}
           >
-            Bekor qilish
+            {t('Cancel')}
           </button>
           <button
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
-            {loading ? 'Saqlanmoqda...' : 'Yangilash'}
+            {loading ? t('Saving...') : t('Update')}
           </button>
         </div>
       </form>
 
       {/* Help Section */}
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h3 className="text-sm font-semibold text-blue-900 mb-2">💡 Yordam</h3>
+        <h3 className="text-sm font-semibold text-blue-900 mb-2">{t('Help section')}</h3>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• <strong>Kategoriya:</strong> Tarjimalar guruhlanishi uchun (menu, button, label...)</li>
           <li>• <strong>Kalit:</strong> Kodda ishlatiladi, o'zgartirish mumkin emas</li>

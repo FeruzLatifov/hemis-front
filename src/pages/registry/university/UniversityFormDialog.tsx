@@ -14,21 +14,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Building2, MapPin, Globe, Settings, Info, Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Zod validation schema
 const universitySchema = z.object({
-  code: z.string().min(1, 'Kod majburiy').trim(),
-  name: z.string().min(1, 'Nom majburiy').trim(),
+  code: z.string().min(1, { message: 'Code is required' }).trim(),
+  name: z.string().min(1, { message: 'Name is required' }).trim(),
   tin: z.string().optional(),
-  ownershipCode: z.string().min(1, 'Mulkchilik turi majburiy'),
-  universityTypeCode: z.string().min(1, 'OTM turi majburiy'),
+  ownershipCode: z.string().min(1, { message: 'Ownership type is required' }),
+  universityTypeCode: z.string().min(1, { message: 'HEI type is required' }),
   regionCode: z.string().optional(),
   address: z.string().optional(),
   cadastre: z.string().optional(),
-  universityUrl: z.string().url('Noto\'g\'ri URL').optional().or(z.literal('')),
-  studentUrl: z.string().url('Noto\'g\'ri URL').optional().or(z.literal('')),
-  teacherUrl: z.string().url('Noto\'g\'ri URL').optional().or(z.literal('')),
-  uzbmbUrl: z.string().url('Noto\'g\'ri URL').optional().or(z.literal('')),
+  universityUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  studentUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  teacherUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  uzbmbUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
   mailAddress: z.string().optional(),
   bankInfo: z.string().optional(),
   accreditationInfo: z.string().optional(),
@@ -56,6 +57,7 @@ export default function UniversityFormDialog({
   university,
   onSuccess,
 }: UniversityFormDialogProps) {
+  const { t } = useTranslation();
   const [dictionaries, setDictionaries] = useState<{
     regions: Dictionary[];
     ownerships: Dictionary[];
@@ -102,7 +104,7 @@ export default function UniversityFormDialog({
         setDictionaries(data);
       } catch (error) {
         // ⭐ Backend-driven i18n: Use backend's localized message
-        toast.error(extractApiErrorMessage(error, 'Lug\'atlar yuklanmadi'));
+        toast.error(extractApiErrorMessage(error, t('Failed to load dictionaries')));
       }
     };
     if (open) {
@@ -167,34 +169,34 @@ export default function UniversityFormDialog({
     try {
       if (isEdit) {
         await universitiesApi.updateUniversity(university.code, data);
-        toast.success('OTM muvaffaqiyatli yangilandi');
+        toast.success(t('University successfully updated'));
       } else {
         await universitiesApi.createUniversity(data);
-        toast.success('OTM muvaffaqiyatli yaratildi');
+        toast.success(t('University successfully created'));
       }
 
       onSuccess();
       onOpenChange(false);
     } catch (error: unknown) {
       // ⭐ Backend-driven i18n: Use backend's localized message
-      toast.error(extractApiErrorMessage(error, isEdit ? 'OTM yangilanmadi' : 'OTM yaratilmadi'));
+      toast.error(extractApiErrorMessage(error, isEdit ? t('Failed to update university') : t('Failed to create university')));
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="px-6 py-5 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+        <DialogHeader className="px-6 py-5 border-b bg-blue-50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Building2 className="w-6 h-6 text-blue-600" />
             </div>
             <div>
               <DialogTitle className="text-2xl font-bold">
-                {isEdit ? 'OTM tahrirlash' : 'Yangi OTM qo\'shish'}
+                {isEdit ? t('Edit HEI') : t('Add new HEI')}
               </DialogTitle>
               <p className="text-sm text-gray-600 mt-1">
-                {isEdit ? 'Ma\'lumotlarni yangilang' : 'Yangi universitet ma\'lumotlarini kiriting'}
+                {isEdit ? t('Update data') : t('Enter new university data')}
               </p>
             </div>
           </div>
@@ -205,23 +207,23 @@ export default function UniversityFormDialog({
             <TabsList className="mx-6 mt-4 grid grid-cols-5 gap-1">
               <TabsTrigger value="basic" className="flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
-                Asosiy
+                {t('Basic')}
               </TabsTrigger>
               <TabsTrigger value="location" className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Manzil
+                {t('Address')}
               </TabsTrigger>
               <TabsTrigger value="urls" className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />
-                Havolalar
+                {t('Links')}
               </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
-                Sozlamalar
+                {t('Settings')}
               </TabsTrigger>
               <TabsTrigger value="additional" className="flex items-center gap-2">
                 <Info className="w-4 h-4" />
-                Qo'shimcha
+                {t('Additional')}
               </TabsTrigger>
             </TabsList>
 
@@ -231,7 +233,7 @@ export default function UniversityFormDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="code">
-                      Kod <span className="text-red-500">*</span>
+                      {t('Code')} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="code"
@@ -241,11 +243,11 @@ export default function UniversityFormDialog({
                       className={errors.code ? 'border-red-500' : ''}
                     />
                     {errors.code && (
-                      <p className="text-sm text-red-500">{errors.code.message}</p>
+                      <p className="text-sm text-red-500">{t(errors.code.message!)}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="tin">INN</Label>
+                    <Label htmlFor="tin">{t('INN')}</Label>
                     <Input
                       id="tin"
                       {...form.register('tin')}
@@ -256,30 +258,30 @@ export default function UniversityFormDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="name">
-                    Nomi <span className="text-red-500">*</span>
+                    {t('Name')} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="name"
                     {...form.register('name')}
-                    placeholder="OTM to'liq nomi"
+                    placeholder={t('Full name of HEI')}
                     className={errors.name ? 'border-red-500' : ''}
                   />
                   {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name.message}</p>
+                    <p className="text-sm text-red-500">{t(errors.name.message!)}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>
-                      Mulkchilik turi <span className="text-red-500">*</span>
+                      {t('Ownership type')} <span className="text-red-500">*</span>
                     </Label>
                     <Select
                       value={watch('ownershipCode')}
                       onValueChange={(value) => setValue('ownershipCode', value)}
                     >
                       <SelectTrigger className={errors.ownershipCode ? 'border-red-500' : ''}>
-                        <SelectValue placeholder="Tanlang" />
+                        <SelectValue placeholder={t('Select')} />
                       </SelectTrigger>
                       <SelectContent>
                         {dictionaries.ownerships.map((item) => (
@@ -290,19 +292,19 @@ export default function UniversityFormDialog({
                       </SelectContent>
                     </Select>
                     {errors.ownershipCode && (
-                      <p className="text-sm text-red-500">{errors.ownershipCode.message}</p>
+                      <p className="text-sm text-red-500">{t(errors.ownershipCode.message!)}</p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Label>
-                      OTM turi <span className="text-red-500">*</span>
+                      {t('HEI type')} <span className="text-red-500">*</span>
                     </Label>
                     <Select
                       value={watch('universityTypeCode')}
                       onValueChange={(value) => setValue('universityTypeCode', value)}
                     >
                       <SelectTrigger className={errors.universityTypeCode ? 'border-red-500' : ''}>
-                        <SelectValue placeholder="Tanlang" />
+                        <SelectValue placeholder={t('Select')} />
                       </SelectTrigger>
                       <SelectContent>
                         {dictionaries.types.map((item) => (
@@ -313,7 +315,7 @@ export default function UniversityFormDialog({
                       </SelectContent>
                     </Select>
                     {errors.universityTypeCode && (
-                      <p className="text-sm text-red-500">{errors.universityTypeCode.message}</p>
+                      <p className="text-sm text-red-500">{t(errors.universityTypeCode.message!)}</p>
                     )}
                   </div>
                 </div>
@@ -322,13 +324,13 @@ export default function UniversityFormDialog({
               {/* Location Tab */}
               <TabsContent value="location" className="space-y-4 mt-0">
                 <div className="space-y-2">
-                  <Label>Hudud</Label>
+                  <Label>{t('Region')}</Label>
                   <Select
                     value={watch('regionCode')}
                     onValueChange={(value) => setValue('regionCode', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Tanlang" />
+                      <SelectValue placeholder={t('Select')} />
                     </SelectTrigger>
                     <SelectContent>
                       {dictionaries.regions.map((item) => (
@@ -341,31 +343,31 @@ export default function UniversityFormDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Manzil</Label>
+                  <Label htmlFor="address">{t('Address')}</Label>
                   <Textarea
                     id="address"
                     {...form.register('address')}
-                    placeholder="To'liq manzil"
+                    placeholder={t('Full address')}
                     rows={3}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="mailAddress">Pochta manzili</Label>
+                  <Label htmlFor="mailAddress">{t('Mail address')}</Label>
                   <Textarea
                     id="mailAddress"
                     {...form.register('mailAddress')}
-                    placeholder="Pochta manzili"
+                    placeholder={t('Mail address')}
                     rows={2}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cadastre">Kadastr raqami</Label>
+                  <Label htmlFor="cadastre">{t('Cadastre number')}</Label>
                   <Input
                     id="cadastre"
                     {...form.register('cadastre')}
-                    placeholder="Kadastr raqami"
+                    placeholder={t('Cadastre number')}
                   />
                 </div>
               </TabsContent>
@@ -373,7 +375,7 @@ export default function UniversityFormDialog({
               {/* URLs Tab */}
               <TabsContent value="urls" className="space-y-4 mt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="universityUrl">Rasmiy veb-sayt</Label>
+                  <Label htmlFor="universityUrl">{t('Official website')}</Label>
                   <Input
                     id="universityUrl"
                     {...form.register('universityUrl')}
@@ -382,12 +384,12 @@ export default function UniversityFormDialog({
                     className={errors.universityUrl ? 'border-red-500' : ''}
                   />
                   {errors.universityUrl && (
-                    <p className="text-sm text-red-500">{errors.universityUrl.message}</p>
+                    <p className="text-sm text-red-500">{t(errors.universityUrl.message!)}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="studentUrl">Talabalar portali</Label>
+                  <Label htmlFor="studentUrl">{t('Students portal')}</Label>
                   <Input
                     id="studentUrl"
                     {...form.register('studentUrl')}
@@ -396,12 +398,12 @@ export default function UniversityFormDialog({
                     className={errors.studentUrl ? 'border-red-500' : ''}
                   />
                   {errors.studentUrl && (
-                    <p className="text-sm text-red-500">{errors.studentUrl.message}</p>
+                    <p className="text-sm text-red-500">{t(errors.studentUrl.message!)}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="teacherUrl">O'qituvchilar portali</Label>
+                  <Label htmlFor="teacherUrl">{t('Teachers portal')}</Label>
                   <Input
                     id="teacherUrl"
                     {...form.register('teacherUrl')}
@@ -410,7 +412,7 @@ export default function UniversityFormDialog({
                     className={errors.teacherUrl ? 'border-red-500' : ''}
                   />
                   {errors.teacherUrl && (
-                    <p className="text-sm text-red-500">{errors.teacherUrl.message}</p>
+                    <p className="text-sm text-red-500">{t(errors.teacherUrl.message!)}</p>
                   )}
                 </div>
 
@@ -424,7 +426,7 @@ export default function UniversityFormDialog({
                     className={errors.uzbmbUrl ? 'border-red-500' : ''}
                   />
                   {errors.uzbmbUrl && (
-                    <p className="text-sm text-red-500">{errors.uzbmbUrl.message}</p>
+                    <p className="text-sm text-red-500">{t(errors.uzbmbUrl.message!)}</p>
                   )}
                 </div>
               </TabsContent>
@@ -432,12 +434,12 @@ export default function UniversityFormDialog({
               {/* Settings Tab */}
               <TabsContent value="settings" className="space-y-3 mt-0">
                 {[
-                  { key: 'active' as const, label: 'Faol' },
-                  { key: 'gpaEdit' as const, label: 'GPA tahrirlash' },
-                  { key: 'accreditationEdit' as const, label: 'Akkreditatsiya tahrirlash' },
-                  { key: 'addStudent' as const, label: 'Talaba qo\'shish' },
-                  { key: 'allowGrouping' as const, label: 'Guruhlash ruxsati' },
-                  { key: 'allowTransferOutside' as const, label: 'Tashqi o\'tkazmalarga ruxsat' },
+                  { key: 'active' as const, label: t('Active') },
+                  { key: 'gpaEdit' as const, label: t('GPA editing') },
+                  { key: 'accreditationEdit' as const, label: t('Accreditation editing') },
+                  { key: 'addStudent' as const, label: t('Add student') },
+                  { key: 'allowGrouping' as const, label: t('Allow grouping') },
+                  { key: 'allowTransferOutside' as const, label: t('Allow external transfer') },
                 ].map((setting) => (
                   <div
                     key={setting.key}
@@ -461,21 +463,21 @@ export default function UniversityFormDialog({
               {/* Additional Tab */}
               <TabsContent value="additional" className="space-y-4 mt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="bankInfo">Bank ma'lumotlari</Label>
+                  <Label htmlFor="bankInfo">{t('Bank info')}</Label>
                   <Textarea
                     id="bankInfo"
                     {...form.register('bankInfo')}
-                    placeholder="Bank rekvizitlari"
+                    placeholder={t('Bank details')}
                     rows={3}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="accreditationInfo">Akkreditatsiya ma'lumotlari</Label>
+                  <Label htmlFor="accreditationInfo">{t('Accreditation info')}</Label>
                   <Textarea
                     id="accreditationInfo"
                     {...form.register('accreditationInfo')}
-                    placeholder="Akkreditatsiya haqida ma'lumot"
+                    placeholder={t('Accreditation details')}
                     rows={3}
                   />
                 </div>
@@ -491,22 +493,22 @@ export default function UniversityFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Bekor qilish
+              {t('Cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-blue-700"
+              className="bg-[var(--primary)] hover:bg-[var(--primary-hover)]"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Saqlanmoqda...
+                  {t('Saving...')}
                 </>
               ) : (
                 <>
                   <Save className="w-5 h-5 mr-2" />
-                  {isEdit ? 'Saqlash' : 'Yaratish'}
+                  {isEdit ? t('Save') : t('Create')}
                 </>
               )}
             </Button>

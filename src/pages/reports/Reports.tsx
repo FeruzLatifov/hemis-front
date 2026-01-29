@@ -2,6 +2,7 @@ import { BarChart3, FileText, Download, Calendar, TrendingUp, Users, Building2, 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useTranslation } from 'react-i18next'
 
 const reportCategories = [
   {
@@ -55,25 +56,26 @@ const reportCategories = [
 ]
 
 export default function Reports() {
+  const { t } = useTranslation()
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 via-yellow-600 to-amber-600 bg-clip-text text-transparent dark:from-orange-400 dark:via-yellow-400 dark:to-amber-400">
-            Hisobotlar
+            {t('Reports')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Turli hisobotlar, tahlillar va statistik ma'lumotlar
+            {t('Reports subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2">
             <Calendar className="h-4 w-4" />
-            O'quv yilini tanlash
+            {t('Select academic year')}
           </Button>
           <Button className="gap-2 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700">
             <Download className="h-4 w-4" />
-            Barcha hisobotlar
+            {t('All reports')}
           </Button>
         </div>
       </div>
@@ -84,7 +86,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Umumiy hisobotlar</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('General reports')}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">156</p>
               </div>
               <FileText className="h-10 w-10 text-blue-500 opacity-50" />
@@ -96,7 +98,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Oy hisobotlari</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Monthly reports')}</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">24</p>
               </div>
               <Calendar className="h-10 w-10 text-green-500 opacity-50" />
@@ -108,7 +110,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Yuklab olindi</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Downloaded')}</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">3,456</p>
               </div>
               <Download className="h-10 w-10 text-purple-500 opacity-50" />
@@ -120,7 +122,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Oxirgi yangilanish</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Last update')}</p>
                 <p className="text-lg font-bold text-orange-600 dark:text-orange-400">Bugun, 08:00</p>
               </div>
               <TrendingUp className="h-10 w-10 text-orange-500 opacity-50" />
@@ -145,7 +147,7 @@ export default function Reports() {
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-lg">{category.name}</CardTitle>
-                  <CardDescription>{category.reports.length} ta hisobot</CardDescription>
+                  <CardDescription>{category.reports.length} {t('reports')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -166,7 +168,7 @@ export default function Reports() {
                     </Badge>
                     <Button size="sm" variant="outline">
                       <BarChart3 className="mr-2 h-4 w-4" />
-                      Ko'rish
+                      {t('View')}
                     </Button>
                   </div>
                 </div>

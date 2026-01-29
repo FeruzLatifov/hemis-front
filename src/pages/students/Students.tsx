@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTranslation } from 'react-i18next'
 
 // Mock data
 const students = [
@@ -37,6 +38,7 @@ const students = [
 ]
 
 export default function Students() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterUniversity, setFilterUniversity] = useState('all')
   const [filterEducationType, setFilterEducationType] = useState('all')
@@ -45,11 +47,11 @@ export default function Students() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400"><CheckCircle className="mr-1 h-3 w-3" />Faol</Badge>
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400"><CheckCircle className="mr-1 h-3 w-3" />{t('Active')}</Badge>
       case 'inactive':
-        return <Badge className="bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400"><XCircle className="mr-1 h-3 w-3" />Nofaol</Badge>
+        return <Badge className="bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400"><XCircle className="mr-1 h-3 w-3" />{t('Inactive')}</Badge>
       case 'vacation':
-        return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400"><Clock className="mr-1 h-3 w-3" />Ta'til</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400"><Clock className="mr-1 h-3 w-3" />{t('On leave')}</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -75,24 +77,24 @@ export default function Students() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-purple-400 dark:to-pink-400">
-            Talabalar
+            {t('Students')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Barcha talabalar ro'yxati va boshqaruv tizimi
+            {t('Student list and management')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2">
             <Upload className="h-4 w-4" />
-            Import
+            {t('Import')}
           </Button>
           <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
-            Export
+            {t('Export')}
           </Button>
           <Button className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
             <Plus className="h-4 w-4" />
-            Yangi talaba
+            {t('New student')}
           </Button>
         </div>
       </div>
@@ -103,7 +105,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Jami</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Total')}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">453,678</p>
               </div>
               <Users className="h-10 w-10 text-blue-500 opacity-50" />
@@ -115,7 +117,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Grantlilar</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Grant recipients')}</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">245,830</p>
               </div>
               <GraduationCap className="h-10 w-10 text-green-500 opacity-50" />
@@ -127,7 +129,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Kontraktlar</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Contract students')}</p>
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">207,848</p>
               </div>
               <span className="text-4xl opacity-50">💰</span>
@@ -139,7 +141,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Bitiruvchilar</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('Graduates')}</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">89,456</p>
               </div>
               <Award className="h-10 w-10 text-purple-500 opacity-50" />
@@ -153,7 +155,7 @@ export default function Students() {
         <CardHeader className="pb-4">
           <CardTitle className="text-lg flex items-center gap-2">
             <Filter className="h-5 w-5 text-purple-600" />
-            Qidiruv va filtrlash
+            {t('Search and filter')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -162,7 +164,7 @@ export default function Students() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="FIO, kod, PINFL bo'yicha qidirish..."
+                  placeholder={t('Search by full name, code, PINFL...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -175,7 +177,7 @@ export default function Students() {
                 <SelectValue placeholder="Universitet" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Barcha OTMlar</SelectItem>
+                <SelectItem value="all">{t('All HEIs')}</SelectItem>
                 <SelectItem value="tdtu">TDTU</SelectItem>
                 <SelectItem value="ozmu">O'zMU</SelectItem>
                 <SelectItem value="tatu">TATU</SelectItem>
@@ -188,9 +190,9 @@ export default function Students() {
                 <SelectValue placeholder="Ta'lim turi" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Barchasi</SelectItem>
-                <SelectItem value="bachelor">Bakalavr</SelectItem>
-                <SelectItem value="master">Magistr</SelectItem>
+                <SelectItem value="all">{t('All')}</SelectItem>
+                <SelectItem value="bachelor">{t('Bachelor')}</SelectItem>
+                <SelectItem value="master">{t('Master')}</SelectItem>
                 <SelectItem value="phd">PhD/DSc</SelectItem>
               </SelectContent>
             </Select>
@@ -200,7 +202,7 @@ export default function Students() {
                 <SelectValue placeholder="To'lov shakli" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Barchasi</SelectItem>
+                <SelectItem value="all">{t('All')}</SelectItem>
                 <SelectItem value="grant">Grant</SelectItem>
                 <SelectItem value="contract">Kontrakt</SelectItem>
               </SelectContent>
@@ -214,12 +216,12 @@ export default function Students() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Talabalar ro'yxati</CardTitle>
-              <CardDescription>{students.length} ta talaba topildi</CardDescription>
+              <CardTitle>{t('Student list')}</CardTitle>
+              <CardDescription>{students.length} {t('students found')}</CardDescription>
             </div>
             <Button variant="outline" size="sm" className="gap-2">
               <Filter className="h-4 w-4" />
-              Ustunlarni sozlash
+              {t('Configure columns')}
             </Button>
           </div>
         </CardHeader>
@@ -231,16 +233,16 @@ export default function Students() {
                   <TableHead className="w-12">
                     <input type="checkbox" className="rounded" />
                   </TableHead>
-                  <TableHead>Kod</TableHead>
-                  <TableHead>FIO</TableHead>
+                  <TableHead>{t('Code')}</TableHead>
+                  <TableHead>{t('Full name')}</TableHead>
                   <TableHead>PINFL</TableHead>
-                  <TableHead>Universitet</TableHead>
-                  <TableHead>Mutaxassislik</TableHead>
-                  <TableHead>Kurs</TableHead>
-                  <TableHead>Ta'lim turi</TableHead>
-                  <TableHead>To'lov</TableHead>
-                  <TableHead>Holat</TableHead>
-                  <TableHead className="text-right">Amallar</TableHead>
+                  <TableHead>{t('Universities')}</TableHead>
+                  <TableHead>{t('Specialty')}</TableHead>
+                  <TableHead>{t('Course')}</TableHead>
+                  <TableHead>{t('Education type')}</TableHead>
+                  <TableHead>{t('Payment')}</TableHead>
+                  <TableHead>{t('Status')}</TableHead>
+                  <TableHead className="text-right">{t('Actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -298,16 +300,16 @@ export default function Students() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>
                             <Eye className="mr-2 h-4 w-4" />
-                            Ko'rish
+                            {t('View')}
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Edit className="mr-2 h-4 w-4" />
-                            Tahrirlash
+                            {t('Edit')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600">
                             <Trash2 className="mr-2 h-4 w-4" />
-                            O'chirish
+                            {t('Delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -324,13 +326,13 @@ export default function Students() {
               1-5 dan 453,678 ta talaba ko'rsatilmoqda
             </p>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled>Oldingi</Button>
+              <Button variant="outline" size="sm" disabled>{t('Previous')}</Button>
               <Button variant="outline" size="sm" className="bg-purple-600 text-white hover:bg-purple-700">1</Button>
               <Button variant="outline" size="sm">2</Button>
               <Button variant="outline" size="sm">3</Button>
               <span className="px-2">...</span>
               <Button variant="outline" size="sm">90,736</Button>
-              <Button variant="outline" size="sm">Keyingi</Button>
+              <Button variant="outline" size="sm">{t('Next')}</Button>
             </div>
           </div>
         </CardContent>

@@ -7,7 +7,19 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
-import { universitiesApi, UniversityRow, Dictionary } from '@/api/universities.api';
+import { universitiesApi, UniversityRow, Dictionary, UniversitiesParams } from '@/api/universities.api';
+
+/**
+ * Extended params type for university search including all scope fields
+ */
+interface UniversitySearchParams extends UniversitiesParams {
+  code?: string;
+  name?: string;
+  tin?: string;
+  address?: string;
+  cadastre?: string;
+  [key: string]: string | number | undefined;
+}
 import { toast } from 'sonner';
 import { extractApiErrorMessage } from '@/utils/error.util';
 import {
@@ -128,7 +140,7 @@ export default function UniversitiesPage() {
     try {
       setLoading(true);
 
-      const params: any = {
+      const params: UniversitySearchParams = {
         page: currentPage,
         size: pageSize,
         sort: 'name,asc',
@@ -148,9 +160,8 @@ export default function UniversitiesPage() {
       setTotalElements(data.totalElements);
       setTotalPages(data.totalPages);
     } catch (error) {
-      console.error('Error loading universities:', error);
       // ⭐ Backend-driven i18n: Use backend's localized message
-      toast.error(extractApiErrorMessage(error, t('errors.loadFailed') || "Ma'lumotlarni yuklashda xatolik"));
+      toast.error(extractApiErrorMessage(error, t('Failed to load data')));
     } finally {
       setLoading(false);
     }
@@ -160,8 +171,8 @@ export default function UniversitiesPage() {
     try {
       const data = await universitiesApi.getDictionaries();
       setDictionaries(data);
-    } catch (error) {
-      console.error('Error loading dictionaries:', error);
+    } catch {
+      // Dictionaries load silently - error handling not critical
     }
   };
 
@@ -248,11 +259,11 @@ export default function UniversitiesPage() {
   const handleDelete = async (code: string) => {
     try {
       await universitiesApi.deleteUniversity(code);
-      toast.success(t('success.deleted') || "Muvaffaqiyatli o'chirildi");
+      toast.success(t('Successfully deleted'));
       loadUniversities();
     } catch (error) {
       // ⭐ Backend-driven i18n: Use backend's localized message
-      toast.error(extractApiErrorMessage(error, t('errors.deleteFailed') || "O'chirishda xatolik"));
+      toast.error(extractApiErrorMessage(error, t('Failed to delete')));
     } finally {
       setDeleteConfirm({ show: false, code: null });
     }

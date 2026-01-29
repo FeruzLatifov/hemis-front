@@ -56,8 +56,6 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
 
     return response;
   } catch (error: unknown) {
-    console.error('Login failed:', error);
-
     if (axios.isAxiosError(error)) {
       // Network error - backend is unreachable (only case where we use frontend i18n)
       if (
@@ -66,7 +64,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         !error.response ||
         (error.request && (error.request.status === 0 || error.request.readyState === 4))
       ) {
-        const msg = i18n.t('login.errors.backendDown', { defaultValue: 'Backend server ishlamayapti' });
+        const msg = i18n.t('Backend server is not available', { defaultValue: 'Backend server ishlamayapti' });
         error.message = msg || 'Backend server ishlamayapti';
         throw error;
       }
@@ -127,7 +125,6 @@ export const refreshToken = async (): Promise<LoginResponse> => {
       permissions: userInfo.permissions || [],
     };
   } catch (error) {
-    console.error('Token refresh failed:', error);
     throw error;
   }
 };
@@ -142,9 +139,8 @@ export const logout = async (): Promise<void> => {
   try {
     // Call backend logout endpoint - clears cookies
     await apiClient.post('/api/v1/web/auth/logout');
-  } catch (error) {
+  } catch {
     // Ignore errors - client-side cleanup will happen anyway
-    console.warn('Backend logout call failed (ignored):', error);
   }
 
   // Clear client storage happens in authStore
@@ -173,7 +169,6 @@ export const getCurrentUser = async (): Promise<AdminUser> => {
       createdAt: new Date().toISOString(),
     };
   } catch (error) {
-    console.error('Failed to get current user:', error);
     throw error;
   }
 };

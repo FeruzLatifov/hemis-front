@@ -55,8 +55,10 @@ i18n
       return acc;
     }, {} as Record<SupportedLang, { translation: typeof uz }>),
     lng: savedLocale,
-    fallbackLng: 'uz',
+    fallbackLng: 'en',
     supportedLngs: ['uz', 'ru', 'en', 'oz'],
+    keySeparator: false,
+    nsSeparator: false,
 
     // Backend configuration
     backend: {
@@ -69,12 +71,7 @@ i18n
         const lang = (url as SupportedLang) || 'uz';
         const fallbackTranslation = LOCAL_TRANSLATIONS[lang] ?? LOCAL_TRANSLATIONS.uz;
 
-        const serveFallback = (reason: string, error?: unknown) => {
-          if (error) {
-            console.warn(`[i18n] ${reason}. Falling back to bundled translations for ${lang}.`, error);
-          } else {
-            console.warn(`[i18n] ${reason}. Falling back to bundled translations for ${lang}.`);
-          }
+        const serveFallback = (_reason: string, _error?: unknown) => {
           callback(null, {
             status: 200,
             data: JSON.stringify(fallbackTranslation),
@@ -93,7 +90,6 @@ i18n
             data: JSON.stringify(translations),
           });
         } catch (error: unknown) {
-          console.error('Failed to load translations from backend:', error);
           if (axios.isAxiosError(error) && error.response?.status === 401) {
             // During login we might not have auth headers yet; fallback immediately
             serveFallback('Unauthorized while fetching translations', error);
@@ -125,7 +121,6 @@ i18n.on('languageChanged', (lng) => {
   // SSR-safe: Only access localStorage in browser
   if (typeof window !== 'undefined') {
     localStorage.setItem('locale', bcp47Locale);
-    console.log(`Language changed to ${lng}, saved as ${bcp47Locale} in localStorage`);
   }
 });
 

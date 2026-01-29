@@ -12,7 +12,10 @@ import {
   toggleTranslationActive,
   clearTranslationCache,
   regeneratePropertiesFiles,
+  downloadAllTranslationsAsJson,
+  findDuplicateMessages,
   Translation,
+  DuplicateGroup,
 } from '../../../api/translations.api';
 import {
   Dialog,
@@ -22,7 +25,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Search, Filter, Trash2, FileCode, Edit } from 'lucide-react';
+import { Search, Filter, Trash2, FileCode, Edit, Download, Copy, AlertTriangle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { extractApiErrorMessage } from '@/utils/error.util';
 
@@ -43,6 +46,9 @@ export default function TranslationsPage() {
 
   const [showClearCacheModal, setShowClearCacheModal] = useState(false);
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
+  const [showDuplicates, setShowDuplicates] = useState(false);
+  const [duplicates, setDuplicates] = useState<DuplicateGroup[]>([]);
+  const [loadingDuplicates, setLoadingDuplicates] = useState(false);
 
   const loadTranslations = async () => {
     try {
@@ -66,7 +72,6 @@ export default function TranslationsPage() {
     } catch (err: unknown) {
       const error = err as Error;
       setError(error.message || 'Failed to load translations');
-      console.error('Error loading translations:', err);
     } finally {
       setLoading(false);
     }
@@ -84,6 +89,24 @@ export default function TranslationsPage() {
     } catch (err: unknown) {
       const error = err as Error;
       alert('Failed to toggle active status: ' + error.message);
+    }
+  };
+
+  const handleFindDuplicates = async () => {
+    try {
+      setLoadingDuplicates(true);
+      const result = await findDuplicateMessages();
+      setDuplicates(result);
+      setShowDuplicates(true);
+      if (result.length === 0) {
+        toast.success('Dublikat tarjimalar topilmadi', { duration: 3000 });
+      } else {
+        toast.warning(`${result.length} ta dublikat guruh topildi`, { duration: 3000 });
+      }
+    } catch (err) {
+      toast.error(extractApiErrorMessage(err, 'Dublikatlarni tekshirishda xatolik'), { duration: 5000 });
+    } finally {
+      setLoadingDuplicates(false);
     }
   };
 
@@ -139,6 +162,34 @@ export default function TranslationsPage() {
               </p>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={handleFindDuplicates}
+                disabled={loadingDuplicates}
+                className="flex items-center gap-1.5 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold transition-all shadow-sm text-sm disabled:opacity-50"
+              >
+                <Copy className={`w-4 h-4 ${loadingDuplicates ? 'animate-pulse' : ''}`} />
+                {loadingDuplicates ? 'Tekshirilmoqda...' : 'Dublikatlarni topish'}
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    toast.info('JSON fayllar yuklanmoqda...', { duration: 2000 });
+                    const result = await downloadAllTranslationsAsJson();
+                    toast.success(`${result.downloaded.length} ta JSON fayl yuklandi: ${result.downloaded.join(', ')}`, {
+                      duration: 4000,
+                      position: 'bottom-right',
+                    });
+                  } catch (err) {
+                    toast.error(extractApiErrorMessage(err, 'JSON yuklashda xatolik'), {
+                      duration: 5000,
+                    });
+                  }
+                }}
+                className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold transition-all shadow-sm text-sm"
+              >
+                <Download className="w-4 h-4" />
+                JSON yuklab olish
+              </button>
               <button
                 onClick={() => setShowClearCacheModal(true)}
                 className="flex items-center gap-1.5 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold transition-all shadow-sm text-sm"
@@ -237,6 +288,68 @@ export default function TranslationsPage() {
         </div>
       </div>
 
+      {/* Duplicates Panel */}
+      {showDuplicates && duplicates.length > 0 && (
+        <div className="px-6 pt-4">
+          <div className="rounded-lg border overflow-hidden" style={{
+            borderColor: 'var(--warning)',
+            backgroundColor: '#FFFBEB',
+          }}>
+            {/* Panel Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--warning)', backgroundColor: '#FEF3C7' }}>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" style={{ color: 'var(--warning)' }} />
+                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  {duplicates.length} ta dublikat guruh topildi
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  — bir xil matnli, turli kalitli tarjimalar
+                </span>
+              </div>
+              <button
+                onClick={() => setShowDuplicates(false)}
+                className="p-1 rounded hover:bg-yellow-200 transition-colors"
+                aria-label="Yopish"
+              >
+                <X className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+              </button>
+            </div>
+
+            {/* Duplicate Groups */}
+            <div className="max-h-80 overflow-auto divide-y" style={{ borderColor: '#FDE68A' }}>
+              {duplicates.map((group, gi) => (
+                <div key={gi} className="px-4 py-3">
+                  <div className="text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Matn: <span className="font-mono" style={{ color: 'var(--text-primary)' }}>"{group.message}"</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {group.entries.map((entry) => (
+                      <button
+                        key={entry.id}
+                        onClick={() => navigate(`/system/translation/${entry.id}/edit`)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                        style={{
+                          borderColor: 'var(--border-color-pro)',
+                          backgroundColor: 'var(--card-bg)',
+                          color: 'var(--text-primary)',
+                        }}
+                        title={`Kategoriya: ${entry.category}`}
+                      >
+                        <span className="px-1.5 py-0.5 rounded text-xs font-bold text-white" style={{ backgroundColor: 'var(--primary)' }}>
+                          {entry.category}
+                        </span>
+                        <span className="font-mono">{entry.messageKey}</span>
+                        <Edit className="w-3 h-3" style={{ color: 'var(--text-secondary)' }} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Table Container with Scrollable Body */}
       <div className="flex-1 overflow-hidden px-6 py-4">
         <div className="h-full flex flex-col rounded-lg shadow-lg border overflow-hidden" style={{ 
@@ -264,9 +377,9 @@ export default function TranslationsPage() {
               <div className="flex-1 overflow-auto">
                 <table className="w-full">
                   {/* Sticky Table Header */}
-                  <thead className="sticky top-0 z-10" style={{ 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  <thead className="sticky top-0 z-10" style={{
+                    backgroundColor: 'var(--primary)',
+                    boxShadow: 'var(--shadow-sm)'
                   }}>
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wide">Kategoriya</th>

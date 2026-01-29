@@ -189,3 +189,111 @@ export const regeneratePropertiesFiles = async (): Promise<RegenerateResponse> =
   const response = await apiClient.post('/api/v1/web/system/translation/properties/regenerate');
   return response.data;
 };
+
+/**
+ * Find duplicate translations (same message text, different keys)
+ * Fetches all translations and groups by identical message values
+ */
+export interface DuplicateGroup {
+  message: string;
+  entries: Pick<Translation, 'id' | 'category' | 'messageKey' | 'message' | 'isActive'>[];
+}
+
+export const findDuplicateMessages = async (): Promise<DuplicateGroup[]> => {
+  // Fetch all translations in one large batch
+  const response = await getTranslations({ size: 5000, sortBy: 'messageKey', sortDir: 'ASC' });
+  const all = response.content;
+
+  // Group by normalized message text (trimmed, lowercased)
+  const groups = new Map<string, typeof all>();
+  for (const t of all) {
+    const key = t.message.trim().toLowerCase();
+    if (!key) continue;
+    const group = groups.get(key) || [];
+    group.push(t);
+    groups.set(key, group);
+  }
+
+  // Return only groups with 2+ entries (actual duplicates)
+  const duplicates: DuplicateGroup[] = [];
+  for (const [, entries] of groups) {
+    if (entries.length >= 2) {
+      duplicates.push({
+        message: entries[0].message,
+        entries: entries.map(({ id, category, messageKey, message, isActive }) => ({
+          id, category, messageKey, message, isActive,
+        })),
+      });
+    }
+  }
+
+  // Sort by number of duplicates (most first)
+  duplicates.sort((a, b) => b.entries.length - a.entries.length);
+  return duplicates;
+};
+
+/**
+ * Search translations by message text (for duplicate detection during editing)
+ */
+export const searchByMessageText = async (text: string): Promise<Translation[]> => {
+  if (!text || text.trim().length < 3) return [];
+  const response = await getTranslations({ search: text.trim(), size: 10 });
+  return response.content;
+};
+
+/**
+ * Download translations as JSON file for a specific language
+ * This generates a file that can be used in frontend i18n
+ */
+export const downloadTranslationsAsJson = async (language: string): Promise<void> => {
+  const translations = await exportTranslations(language);
+
+  // Convert flat keys to nested object (e.g., "login.title" -> { login: { title: ... } })
+  const nested: Record<string, unknown> = {};
+
+  Object.entries(translations).forEach(([key, value]) => {
+    const parts = key.split('.');
+    let current: Record<string, unknown> = nested;
+
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!(parts[i] in current)) {
+        current[parts[i]] = {};
+      }
+      current = current[parts[i]] as Record<string, unknown>;
+    }
+
+    current[parts[parts.length - 1]] = value;
+  });
+
+  // Create and download file
+  const blob = new Blob([JSON.stringify(nested, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${language}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Download all language translations as separate JSON files
+ */
+export const downloadAllTranslationsAsJson = async (): Promise<{ downloaded: string[] }> => {
+  const languages = ['uz', 'oz', 'ru', 'en'];
+  const downloaded: string[] = [];
+
+  for (const lang of languages) {
+    try {
+      await downloadTranslationsAsJson(lang);
+      downloaded.push(lang);
+      // Small delay between downloads
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.warn(`Failed to download ${lang}.json:`, error);
+    }
+  }
+
+  return { downloaded };
+};

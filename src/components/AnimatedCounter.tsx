@@ -26,10 +26,14 @@ const AnimatedCounter = ({
   const [count, setCount] = useState(0);
 
   useEffect(() => {
+    let animationFrameId: number;
+    let isMounted = true;
     const startTime = Date.now();
     const startValue = 0;
 
     const animate = () => {
+      if (!isMounted) return;
+
       const now = Date.now();
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
@@ -41,11 +45,19 @@ const AnimatedCounter = ({
       setCount(current);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
     };
 
     animate();
+
+    // Cleanup: cancel animation frame on unmount
+    return () => {
+      isMounted = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [end, duration]);
 
   const formatNumber = (num: number): string => {

@@ -45,8 +45,7 @@ export function useTokenRefresh() {
 
     if (ttl <= 0) {
       // Token already expired - try to refresh immediately
-      refresh().catch((error) => {
-        console.error('Token refresh failed:', error);
+      refresh().catch(() => {
         logout();
       });
       return;
@@ -58,15 +57,10 @@ export function useTokenRefresh() {
     const refreshAt = Math.max(ttl - bufferSeconds, ttl * 0.8);
     const refreshInMs = refreshAt * 1000;
 
-    console.log(`🔄 Token refresh scheduled in ${Math.floor(refreshAt / 60)} minutes`);
-
     refreshTimerRef.current = setTimeout(async () => {
-      console.log('🔄 Proactively refreshing token...');
       try {
         await refresh();
-        console.log('✅ Token refreshed successfully');
-      } catch (error) {
-        console.error('❌ Token refresh failed:', error);
+      } catch {
         // Don't logout immediately - axios interceptor will handle it
       }
     }, refreshInMs);

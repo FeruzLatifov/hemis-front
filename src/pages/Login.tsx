@@ -87,18 +87,11 @@ const Login = () => {
     const trimmedValue = value.trim()
 
     if (!trimmedValue) {
-      return (
-        t('login.errors.requiredField', { field: label }) ||
-        t('login.errors.required') ||
-        'This field is required'
-      )
+      return t('{{field}} is required', { field: label })
     }
 
     if (trimmedValue.length < minLength) {
-      return (
-        t('login.errors.minLength', { count: minLength }) ||
-        `Must be at least ${minLength} characters`
-      )
+      return t('Must be at least {{count}} characters', { count: minLength })
     }
 
     return ''
@@ -110,12 +103,12 @@ const Login = () => {
     const usernameValidation = validateField(
       username,
       3,
-      t('login.username') || 'Username'
+      t('Username')
     )
     const passwordValidation = validateField(
       password,
       6,
-      t('login.password') || 'Password'
+      t('Password')
     )
 
     setUsernameError(usernameValidation)
@@ -137,7 +130,7 @@ const Login = () => {
         locale: currentLang,
       })
 
-      toast.success(t('login.success') || 'Tizimga muvaffaqiyatli kirdingiz', {
+      toast.success(t('Welcome back!'), {
         duration: 2000,
         position: 'bottom-right',
       })
@@ -145,15 +138,12 @@ const Login = () => {
       navigate('/dashboard', { replace: true })
       return
     } catch (err: unknown) {
-      console.error('[Login] Error:', err)
-
       const status = getErrorStatus(err, 0)
 
       // Network error - backend is unreachable
       // Only use frontend translations for network errors (backend can't respond)
       if (isNetworkError(err) || status === 0) {
-        console.log('[Login] Network error - backend unreachable')
-        toast.error(t('login.errors.backendDown') || 'Backend server ishlamayapti', {
+        toast.error(t('Backend server is not available'), {
           duration: 8000,
           position: 'bottom-right',
         })
@@ -163,9 +153,7 @@ const Login = () => {
       // ⭐ Backend-driven i18n: Use backend error message directly
       // Backend returns localized message based on Accept-Language header
       // Priority: backend message → fallback (only for truly unexpected cases)
-      const backendMessage = extractApiErrorMessage(err, 'Xatolik yuz berdi')
-
-      console.log('[Login] Backend error (status=%d): %s', status, backendMessage)
+      const backendMessage = extractApiErrorMessage(err, t('Something went wrong'))
 
       // Show backend's localized error message directly
       toast.error(backendMessage, {
@@ -264,7 +252,7 @@ const Login = () => {
                 </div>
 
                 <h1 className="heading-page mb-2">HEMIS</h1>
-                <p className="text-caption">{t('login.subtitle')}</p>
+                <p className="text-caption">{t('Higher Education Management Information System')}</p>
               </div>
 
               {/* Login Form */}
@@ -282,7 +270,7 @@ const Login = () => {
                             validateField(
                               e.target.value,
                               3,
-                              t('login.username') || 'Username'
+                              t('Username')
                             )
                           )
                         }
@@ -292,12 +280,12 @@ const Login = () => {
                           validateField(
                             e.target.value,
                             3,
-                            t('login.username') || 'Username'
+                            t('Username')
                           )
                         )
                       }
                       aria-invalid={!!usernameError}
-                      placeholder={t('login.usernamePlaceholder')}
+                      placeholder={t('Login')}
                       className="w-full border rounded-md px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-1"
                       style={{
                         ...INPUT_STYLE,
@@ -329,7 +317,7 @@ const Login = () => {
                             validateField(
                               e.target.value,
                               6,
-                              t('login.password') || 'Password'
+                              t('Password')
                             )
                           )
                         }
@@ -339,12 +327,12 @@ const Login = () => {
                           validateField(
                             e.target.value,
                             6,
-                            t('login.password') || 'Password'
+                            t('Password')
                           )
                         )
                       }
                       aria-invalid={!!passwordError}
-                      placeholder={t('login.passwordPlaceholder')}
+                      placeholder={t('Password')}
                       className="w-full border rounded-md px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-1"
                       style={{
                         ...INPUT_STYLE,
@@ -378,10 +366,10 @@ const Login = () => {
                   {isLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>{t('common.loading')}</span>
+                      <span>{t('Loading...')}</span>
                     </>
                   ) : (
-                    <span>{t('auth.login_button')}</span>
+                    <span>{t('Sign in')}</span>
                   )}
                 </button>
               </form>
@@ -389,7 +377,7 @@ const Login = () => {
               {/* Footer */}
               <div className="mt-6 text-center">
                 <p className="text-xs text-caption">
-                  {t('login.copyright') || '© 2025 HEMIS. All rights reserved.'}
+                  {t('2025 HEMIS. All rights reserved.')}
                 </p>
               </div>
             </div>

@@ -70,32 +70,17 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 
   return (
     <header
-      className="flex h-14 md:h-16 items-center justify-between md:justify-end border-b px-3 md:px-6"
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderColor: '#E5E7EB',
-        boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)'
-      }}
+      className="flex h-14 md:h-16 items-center justify-between md:justify-end border-b px-3 md:px-6 card-white"
+      style={{ boxShadow: 'var(--shadow-sm)' }}
     >
       {/* Left Side - Mobile Menu Button (only on mobile) */}
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
-        className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border transition-colors"
-        style={{
-          backgroundColor: '#FFFFFF',
-          borderColor: '#E5E7EB'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = '#2F80ED'
-          e.currentTarget.style.backgroundColor = '#F5F6FA'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = '#E5E7EB'
-          e.currentTarget.style.backgroundColor = '#FFFFFF'
-        }}
+        className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border header-btn"
+        aria-label="Menyuni ochish"
       >
-        <Menu className="h-5 w-5" style={{ color: '#6B7280' }} />
+        <Menu className="h-5 w-5 text-color-secondary" />
       </button>
 
       {/* Right Side - Notifications and User Menu */}
@@ -103,29 +88,12 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
         {/* Notifications Button */}
         <button
           type="button"
-          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border transition-colors"
-          style={{
-            backgroundColor: '#FFFFFF',
-            borderColor: '#E5E7EB'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#2F80ED'
-            e.currentTarget.style.backgroundColor = '#F5F6FA'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#E5E7EB'
-            e.currentTarget.style.backgroundColor = '#FFFFFF'
-          }}
+          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn"
+          aria-label="Bildirishnomalar (3 ta yangi)"
         >
-          <Bell className="h-4 w-4 md:h-5 md:w-5" style={{ color: '#6B7280' }} />
+          <Bell className="h-4 w-4 md:h-5 md:w-5 text-color-secondary" aria-hidden="true" />
           {/* Notification Badge */}
-          <span
-            className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full text-xs font-semibold"
-            style={{
-              backgroundColor: '#EB5757',
-              color: '#FFFFFF'
-            }}
-          >
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full text-xs font-semibold badge-danger" aria-hidden="true">
             3
           </span>
         </button>
@@ -138,26 +106,12 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           type="button"
           onClick={handleClearCache}
           disabled={isClearingCache}
-          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border transition-colors disabled:opacity-50"
-          style={{
-            backgroundColor: '#FFFFFF',
-            borderColor: '#E5E7EB'
-          }}
-          onMouseEnter={(e) => {
-            if (!isClearingCache) {
-              e.currentTarget.style.borderColor = '#27AE60'
-              e.currentTarget.style.backgroundColor = '#F0FDF4'
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#E5E7EB'
-            e.currentTarget.style.backgroundColor = '#FFFFFF'
-          }}
+          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn header-btn-success disabled:opacity-50"
           title="Cache tozalash (tarjimalar, permissionlar)"
+          aria-label="Cache tozalash"
         >
           <RefreshCw
-            className={`h-4 w-4 md:h-5 md:w-5 ${isClearingCache ? 'animate-spin' : ''}`}
-            style={{ color: isClearingCache ? '#27AE60' : '#6B7280' }}
+            className={`h-4 w-4 md:h-5 md:w-5 ${isClearingCache ? 'animate-spin text-[var(--success)]' : 'text-color-secondary'}`}
           />
         </button>
 
@@ -166,35 +120,18 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 md:gap-3 rounded-lg border px-2 md:px-3 py-1.5 md:py-2 transition-colors"
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderColor: '#E5E7EB'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#2F80ED'
-              e.currentTarget.style.backgroundColor = '#F5F6FA'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#E5E7EB'
-              e.currentTarget.style.backgroundColor = '#FFFFFF'
-            }}
+            className="flex items-center gap-2 md:gap-3 rounded-lg border px-2 md:px-3 py-1.5 md:py-2 header-btn"
+            aria-label="Foydalanuvchi menyusi"
+            aria-expanded={isDropdownOpen}
+            aria-haspopup="true"
           >
             {/* Avatar */}
-            <div
-              className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: '#2F80ED'
-              }}
-            >
-              <User className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: '#FFFFFF' }} />
+            <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full avatar-primary">
+              <User className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
             </div>
 
             {/* User Name */}
-            <span
-              className="hidden font-medium sm:block text-sm md:text-base"
-              style={{ color: '#1E2124' }}
-            >
+            <span className="hidden font-medium sm:block text-sm md:text-base text-color-primary">
               {user?.username || 'Admin'}
             </span>
           </button>
@@ -202,36 +139,22 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           {/* Dropdown Menu */}
           {isDropdownOpen && (
             <div
-              className="absolute top-full right-0 mt-2 w-64 rounded-lg border overflow-hidden"
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E5E7EB',
-                boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)',
-                zIndex: 50
-              }}
+              className="absolute top-full right-0 mt-2 w-64 rounded-lg border overflow-hidden card-white z-50"
+              style={{ boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)' }}
+              role="menu"
+              aria-label="Foydalanuvchi menyusi"
             >
               {/* User Info Header */}
-              <div
-                className="px-4 py-3 border-b"
-                style={{
-                  backgroundColor: '#F5F6FA',
-                  borderColor: '#E5E7EB'
-                }}
-              >
+              <div className="px-4 py-3 border-b layout-bg border-color-light">
                 <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-full"
-                    style={{
-                      backgroundColor: '#2F80ED'
-                    }}
-                  >
-                    <User className="h-6 w-6" style={{ color: '#FFFFFF' }} />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full avatar-primary">
+                    <User className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold" style={{ color: '#1E2124' }}>
+                    <p className="text-sm font-semibold text-color-primary">
                       {user?.username || 'Administrator'}
                     </p>
-                    <p className="text-xs" style={{ color: '#6B7280' }}>
+                    <p className="text-xs text-color-secondary">
                       {user?.email || 'admin@hemis.uz'}
                     </p>
                   </div>
@@ -239,58 +162,34 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
               </div>
 
               {/* Menu Items */}
-              <div className="py-1">
+              <div className="py-1" role="none">
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 transition-colors"
-                  style={{ color: '#1E2124' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#F5F6FA'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
+                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item"
+                  role="menuitem"
                 >
-                  <User className="h-4 w-4" style={{ color: '#6B7280' }} />
+                  <User className="h-4 w-4 text-color-secondary" aria-hidden="true" />
                   <span className="text-sm font-medium">Profil</span>
                 </button>
 
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 transition-colors"
-                  style={{ color: '#1E2124' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#F5F6FA'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
+                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item"
+                  role="menuitem"
                 >
-                  <Settings className="h-4 w-4" style={{ color: '#6B7280' }} />
+                  <Settings className="h-4 w-4 text-color-secondary" aria-hidden="true" />
                   <span className="text-sm font-medium">Sozlamalar</span>
                 </button>
 
-                <div
-                  className="my-1"
-                  style={{
-                    height: '1px',
-                    backgroundColor: '#E5E7EB'
-                  }}
-                />
+                <div className="my-1 h-px bg-[var(--border-color-pro)]" role="separator" />
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-3 px-4 py-3 transition-colors"
-                  style={{ color: '#EB5757' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#FEF2F2'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
+                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item-danger"
+                  role="menuitem"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
                   <span className="text-sm font-medium">Chiqish</span>
                 </button>
               </div>

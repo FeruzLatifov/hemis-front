@@ -45,7 +45,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
                 {isLoading ? <Skeleton className="h-6 w-48" /> : faculty?.nameUz}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {isLoading ? <Skeleton className="h-4 w-32 mt-1" /> : `${t('table.faculty.code')}: ${faculty?.code}`}
+                {isLoading ? <Skeleton className="h-4 w-32 mt-1" /> : `${t('Code')}: ${faculty?.code}`}
               </p>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
           ) : error ? (
             <Card className="p-6 border-red-200 bg-red-50">
               <p className="text-red-600">
-                {t('errors.loadFailed')}: {error instanceof Error ? error.message : 'Unknown error'}
+                {t('Failed to load data')}: {error instanceof Error ? error.message : 'Unknown error'}
               </p>
             </Card>
           ) : faculty ? (
@@ -79,11 +79,11 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
                   <div className="flex items-center gap-2">
                     <Info className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium text-muted-foreground">
-                      {t('table.faculty.status')}
+                      {t('Status')}
                     </span>
                   </div>
                   <Badge variant={faculty.status ? 'default' : 'secondary'}>
-                    {faculty.status ? t('filters.statusActive') : t('filters.statusInactive')}
+                    {faculty.status ? t('Active') : t('Inactive')}
                   </Badge>
                 </div>
               </Card>
@@ -91,13 +91,13 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
               {/* Basic Information */}
               <Card className="p-4 space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t('details.basicInfo')}
+                  {t('Basic information')}
                 </h3>
                 
                 <div>
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1">
                     <Code className="h-4 w-4" />
-                    {t('table.faculty.code')}
+                    {t('Code')}
                   </label>
                   <p className="text-base font-medium">{faculty.code}</p>
                 </div>
@@ -105,16 +105,16 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
                 <div>
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1">
                     <Building2 className="h-4 w-4" />
-                    {t('table.faculty.universityName')}
+                    {t('University name')}
                   </label>
                   <p className="text-base font-medium">{faculty.universityName}</p>
-                  <p className="text-sm text-muted-foreground">{t('table.faculty.universityCode')}: {faculty.universityCode}</p>
+                  <p className="text-sm text-muted-foreground">{t('University code')}: {faculty.universityCode}</p>
                 </div>
 
                 {faculty.shortName && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground mb-1">
-                      {t('details.shortName')}
+                      {t('Short name')}
                     </label>
                     <p className="text-base">{faculty.shortName}</p>
                   </div>
@@ -123,7 +123,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
                 {faculty.departmentType && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground mb-1">
-                      {t('details.facultyType')}
+                      {t('Faculty type')}
                     </label>
                     <p className="text-base">{faculty.departmentTypeName || faculty.departmentType}</p>
                   </div>
@@ -133,14 +133,14 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
               {/* Audit Information */}
               <Card className="p-4 space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t('details.auditInfo')}
+                  {t('Audit information')}
                 </h3>
 
                 {faculty.createdAt && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1">
                       <Calendar className="h-4 w-4" />
-                      {t('details.createdAt')}
+                      {t('Created at')}
                     </label>
                     <p className="text-base">{formatDate(faculty.createdAt)}</p>
                     {faculty.createdBy && (
@@ -156,7 +156,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
                   <div>
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1">
                       <Calendar className="h-4 w-4" />
-                      {t('details.updatedAt')}
+                      {t('Updated at')}
                     </label>
                     <p className="text-base">{formatDate(faculty.updatedAt)}</p>
                     {faculty.updatedBy && (
@@ -175,7 +175,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
         {/* Footer */}
         <div className="sticky bottom-0 bg-background border-t px-6 py-4">
           <Button onClick={onClose} className="w-full">
-            {t('actions.close')}
+            {t('Close')}
           </Button>
         </div>
       </div>

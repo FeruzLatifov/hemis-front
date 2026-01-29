@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { universitiesApi, type UniversitiesParams, type UniversityRow } from '@/api/universities.api'
 import { queryKeys } from '@/lib/queryKeys'
 import { toast } from 'sonner'
+import i18n from '@/i18n/config'
 
 /**
  * Hook to fetch paginated list of universities
@@ -46,10 +47,10 @@ export function useCreateUniversity() {
     onSuccess: () => {
       // Invalidate and refetch universities list
       queryClient.invalidateQueries({ queryKey: queryKeys.universities.all })
-      toast.success('Universitet muvaffaqiyatli yaratildi')
+      toast.success(i18n.t('University successfully created'))
     },
     onError: (error: Error) => {
-      toast.error(`Xatolik: ${error.message}`)
+      toast.error(`${i18n.t('Error')}: ${error.message}`)
     },
   })
 }
@@ -69,10 +70,10 @@ export function useUpdateUniversity() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.universities.byId(Number(variables.code)),
       })
-      toast.success('Universitet muvaffaqiyatli yangilandi')
+      toast.success(i18n.t('University successfully updated'))
     },
     onError: (error: Error) => {
-      toast.error(`Xatolik: ${error.message}`)
+      toast.error(`${i18n.t('Error')}: ${error.message}`)
     },
   })
 }
@@ -88,10 +89,10 @@ export function useDeleteUniversity() {
     onSuccess: () => {
       // Invalidate universities list
       queryClient.invalidateQueries({ queryKey: queryKeys.universities.all })
-      toast.success('Universitet muvaffaqiyatli o\'chirildi')
+      toast.success(i18n.t('University successfully deleted'))
     },
     onError: (error: Error) => {
-      toast.error(`Xatolik: ${error.message}`)
+      toast.error(`${i18n.t('Error')}: ${error.message}`)
     },
   })
 }

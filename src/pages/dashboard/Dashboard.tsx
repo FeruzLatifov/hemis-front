@@ -1,4 +1,4 @@
-import { Users, GraduationCap, Building2, Award, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, FlaskConical, Target, Sparkles, Star, Trophy, Calendar, DollarSign, Activity, Loader2 } from 'lucide-react'
+import { Users, GraduationCap, Building2, Award, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, FlaskConical, Target, Sparkles, Star, Trophy, Calendar, DollarSign, Activity, Loader2, type LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,8 +8,10 @@ import { useQuery } from '@tanstack/react-query'
 import { getDashboardStats } from '@/api/dashboard.api'
 import { formatDistanceToNow } from 'date-fns'
 import { uz } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   // Fetch real data from API
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['dashboardStats'],
@@ -30,52 +32,52 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <p className="text-red-600 text-lg mb-2">Ma'lumotlarni yuklashda xatolik</p>
-          <p className="text-sm text-slate-600">Iltimos, sahifani yangilang</p>
+          <p className="text-red-600 text-lg mb-2">{t('Failed to load data')}</p>
+          <p className="text-sm text-slate-600">{t('Please refresh the page')}</p>
         </div>
       </div>
     )
   }
 
-  // Prepare stats cards from API data
+  // Prepare stats cards from API data (flat colors, no gradients)
   const stats = [
     {
-      name: 'Hozir O\'qimoqda',
+      name: t('Currently studying'),
       value: dashboardData?.overview.activeStudents || 0,
       change: 0,
       trending: 'up' as const,
       icon: Users,
-      color: 'from-blue-500 to-cyan-500',
+      color: 'bg-blue-500',
       bgColor: 'bg-blue-50 dark:bg-blue-950/20',
       textColor: 'text-blue-600 dark:text-blue-400',
     },
     {
-      name: 'Bitirganlar',
+      name: t('Graduates'),
       value: dashboardData?.overview.graduatedStudents || 0,
       change: 0,
       trending: 'up' as const,
       icon: Award,
-      color: 'from-green-500 to-emerald-500',
+      color: 'bg-green-500',
       bgColor: 'bg-green-50 dark:bg-green-950/20',
       textColor: 'text-green-600 dark:text-green-400',
     },
     {
-      name: 'Chetlashganlar',
+      name: t('Expelled'),
       value: dashboardData?.overview.expelledStudents || 0,
       change: 0,
       trending: 'down' as const,
       icon: Users,
-      color: 'from-red-500 to-pink-500',
+      color: 'bg-red-500',
       bgColor: 'bg-red-50 dark:bg-red-950/20',
       textColor: 'text-red-600 dark:text-red-400',
     },
     {
-      name: "Jami O'qituvchilar",
+      name: t('Total Teachers'),
       value: dashboardData?.overview.totalTeachers || 0,
       change: 0,
       trending: 'up' as const,
       icon: GraduationCap,
-      color: 'from-purple-500 to-pink-500',
+      color: 'bg-purple-500',
       bgColor: 'bg-purple-50 dark:bg-purple-950/20',
       textColor: 'text-purple-600 dark:text-purple-400',
     },
@@ -83,33 +85,33 @@ export default function Dashboard() {
 
   const secondaryStats = [
     {
-      name: 'Akademik Ta\'til',
+      name: t('Academic Leave'),
       value: dashboardData?.overview.academicLeaveStudents || 0,
       icon: Calendar,
-      color: 'from-yellow-500 to-orange-500',
+      color: 'bg-yellow-500',
     },
     {
-      name: 'Bekor Qilingan',
+      name: t('Cancelled'),
       value: dashboardData?.overview.cancelledStudents || 0,
       icon: Users,
-      color: 'from-gray-500 to-slate-500',
+      color: 'bg-gray-500',
     },
     {
-      name: 'Jami OTMlar',
+      name: t('Total HEIs'),
       value: dashboardData?.overview.totalUniversities || 0,
       icon: Building2,
-      color: 'from-indigo-500 to-blue-500',
+      color: 'bg-indigo-500',
     },
     {
-      name: 'Berilgan Diplomlar',
+      name: t('Issued Diplomas'),
       value: dashboardData?.overview.totalDiplomas || 0,
       icon: Award,
-      color: 'from-cyan-500 to-teal-500',
+      color: 'bg-cyan-500',
     },
   ]
 
   // Map education types with icons
-  const educationTypeIcons: Record<string, any> = {
+  const educationTypeIcons: Record<string, LucideIcon> = {
     'Bakalavr': BookOpen,
     'Magistr': Target,
     'Ordinatura': Sparkles,
@@ -135,7 +137,7 @@ export default function Dashboard() {
     ...activity,
     icon: Users,
     color: 'text-blue-600',
-    timeFormatted: activity.time ? formatDistanceToNow(new Date(activity.time), { addSuffix: true, locale: uz }) : 'noma\'lum',
+    timeFormatted: activity.time ? formatDistanceToNow(new Date(activity.time), { addSuffix: true, locale: uz }) : t('unknown'),
   })) || []
 
   return (
@@ -143,21 +145,21 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-cyan-400 dark:via-purple-400 dark:to-pink-400">
-            СТАТИСТИКА
+          <h1 className="text-4xl font-bold text-[var(--primary)] dark:text-blue-400">
+            {t('STATISTICS')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            O'zbekiston Respublikasi Oliy Ta'lim Vazirligi - Oliy ta'lim tizimi monitoring va tahlil
+            {t('Monitoring and analysis of higher education system of the Republic of Uzbekistan')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="px-3 py-1.5 text-sm">
             <Calendar className="mr-2 h-4 w-4" />
-            2024/2025 o'quv yili
+            2024/2025 {t('academic year')}
           </Badge>
-          <Button variant="default" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button variant="default" className="bg-[var(--primary)] hover:bg-[var(--primary-hover)]">
             <ArrowUpRight className="mr-2 h-4 w-4" />
-            Hisobot olish
+            {t('Get report')}
           </Button>
         </div>
       </div>
@@ -170,11 +172,11 @@ export default function Dashboard() {
             className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className={`absolute right-0 top-0 h-32 w-32 -translate-y-16 translate-x-16 rounded-full bg-gradient-to-br ${stat.color} opacity-10 blur-3xl group-hover:scale-150 transition-transform duration-700`}></div>
-            
+            <div className={`absolute right-0 top-0 h-32 w-32 -translate-y-16 translate-x-16 rounded-full ${stat.color} opacity-10 blur-3xl group-hover:scale-150 transition-transform duration-700`}></div>
+
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className={`flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${stat.color} text-white shadow-lg`}>
+                <div className={`flex h-14 w-14 items-center justify-center rounded-xl ${stat.color} text-white shadow-lg`}>
                   <stat.icon className="h-7 w-7" />
                 </div>
               </div>
@@ -198,7 +200,7 @@ export default function Dashboard() {
           >
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${stat.color} text-white shadow-md`}>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color} text-white shadow-md`}>
                   <stat.icon className="h-6 w-6" />
                 </div>
                 <div>
@@ -219,12 +221,12 @@ export default function Dashboard() {
         <Card className="lg:col-span-1 border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
                 <BookOpen className="h-5 w-5" />
               </div>
-              Ta'lim turlari
+              {t('Education types')}
             </CardTitle>
-            <CardDescription>Ta'lim bosqichlari bo'yicha taqsimlash</CardDescription>
+            <CardDescription>{t('Distribution by education levels')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {educationTypes.map((type) => (
@@ -237,7 +239,7 @@ export default function Dashboard() {
                     <div>
                       <p className="font-medium text-slate-900 dark:text-white">{type.name}</p>
                       <p className="text-sm text-slate-500">
-                        <CountUp end={type.count} duration={2} separator="," /> talaba
+                        <CountUp end={type.count} duration={2} separator="," /> {t('student')}
                       </p>
                     </div>
                   </div>
@@ -258,12 +260,12 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500 text-white">
                 <Trophy className="h-5 w-5" />
               </div>
-              TOP Universitetlar
+              {t('TOP Universities')}
             </CardTitle>
-            <CardDescription>Reyting bo'yicha eng yaxshi 5 ta OTM</CardDescription>
+            <CardDescription>{t('Top 5 by rating')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -275,10 +277,10 @@ export default function Dashboard() {
                   <div className="flex items-center gap-4 flex-1">
                     <div className={cn(
                       'flex h-12 w-12 items-center justify-center rounded-lg font-bold text-white shadow-lg',
-                      uni.rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
-                      uni.rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-400' :
-                      uni.rank === 3 ? 'bg-gradient-to-br from-amber-600 to-amber-700' :
-                      'bg-gradient-to-br from-slate-400 to-slate-500'
+                      uni.rank === 1 ? 'bg-yellow-500' :
+                      uni.rank === 2 ? 'bg-gray-400' :
+                      uni.rank === 3 ? 'bg-amber-600' :
+                      'bg-slate-500'
                     )}>
                       {uni.rank === 1 ? <Trophy className="h-6 w-6" /> : `#${uni.rank}`}
                     </div>
@@ -289,10 +291,10 @@ export default function Dashboard() {
                       <div className="flex items-center gap-4 mt-1">
                         <span className="text-sm text-slate-600 dark:text-slate-400">
                           <Users className="inline h-4 w-4 mr-1" />
-                          {uni.studentCount.toLocaleString()} talaba
+                          {uni.studentCount.toLocaleString()} {t('student')}
                         </span>
                         <span className="text-xs text-slate-500">
-                          Grant: {uni.grantCount.toLocaleString()}
+                          {t('Grant:')} {uni.grantCount.toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -310,12 +312,12 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500 text-white">
                 <Activity className="h-5 w-5" />
               </div>
-              So'nggi faoliyat
+              {t('Recent activity')}
             </CardTitle>
-            <CardDescription>Oxirgi 24 soatdagi o'zgarishlar</CardDescription>
+            <CardDescription>{t('Changes in last 24 hours')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -343,18 +345,18 @@ export default function Dashboard() {
         </Card>
 
         {/* Quick Stats */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+        <Card className="border-0 shadow-lg bg-purple-50 dark:bg-purple-950/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              Tezkor ma'lumotlar
+              {t('Quick info')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border-2 border-purple-200 dark:border-purple-800 bg-white dark:bg-slate-900 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Grant talabalar</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{t('Grant students')}</p>
                   <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                     <CountUp end={dashboardData?.overview.grantStudents || 0} duration={2} separator="," />
                   </p>
@@ -366,7 +368,7 @@ export default function Dashboard() {
             <div className="rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Kontrakt talabalar</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{t('Contract students')}</p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     <CountUp end={dashboardData?.overview.contractStudents || 0} duration={2} separator="," />
                   </p>
@@ -378,7 +380,7 @@ export default function Dashboard() {
             <div className="rounded-lg border-2 border-cyan-200 dark:border-cyan-800 bg-white dark:bg-slate-900 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Ilmiy loyihalar</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{t('Scientific projects')}</p>
                   <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
                     <CountUp end={dashboardData?.overview.totalProjects || 0} duration={2} separator="," />
                   </p>
@@ -390,7 +392,7 @@ export default function Dashboard() {
             <div className="rounded-lg border-2 border-pink-200 dark:border-pink-800 bg-white dark:bg-slate-900 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Ilmiy nashrlar</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{t('Scientific publications')}</p>
                   <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">
                     <CountUp end={dashboardData?.overview.totalPublications || 0} duration={2} separator="," />
                   </p>

@@ -26,14 +26,12 @@ export const useMenuInit = () => {
   useEffect(() => {
     // Clear menu when user logs out
     if (!isAuthenticated) {
-      console.log('User logged out, clearing menu cache');
       clearMenu();
       return;
     }
 
     // ALWAYS fetch menu on new session/login
     // This ensures fresh data after login
-    console.log('🔄 Fetching fresh menu from backend on login...');
     const currentLang = i18n.language || 'uz';
     const bcp47Locale = shortToBcp47[currentLang] || 'uz-UZ';
     fetchMenu(bcp47Locale);
@@ -48,7 +46,6 @@ export const useMenuInit = () => {
     }
 
     const handleLanguageChange = (lng: string) => {
-      console.log(`🌐 Language changed to ${lng}, refetching menu in background...`);
       const bcp47Locale = shortToBcp47[lng] || 'uz-UZ';
 
       // Fetch menu silently in background (no loading UI)
