@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -11,6 +10,9 @@ import {
   EyeOff,
   Globe,
   ChevronDown,
+  Building2,
+  Users,
+  BookOpen,
 } from 'lucide-react'
 import { extractApiErrorMessage, getErrorStatus, isNetworkError } from '@/utils/error.util'
 
@@ -25,17 +27,8 @@ const SUPPORTED_LANGUAGES: Array<{ code: SupportedLang; name: string }> = [
   { code: 'en', name: 'English' },
 ]
 
-const INPUT_STYLE: CSSProperties = {
-  borderColor: 'var(--border-color-pro)',
-  backgroundColor: 'var(--card-bg)',
-  color: 'var(--text-primary)',
-}
-
 const resolveLanguage = (lang?: string | null): SupportedLang => {
-  if (!lang) {
-    return DEFAULT_LANGUAGE
-  }
-
+  if (!lang) return DEFAULT_LANGUAGE
   return SUPPORTED_LANGUAGES.some(({ code }) => code === lang)
     ? (lang as SupportedLang)
     : DEFAULT_LANGUAGE
@@ -74,90 +67,43 @@ const Login = () => {
       setIsLangDropdownOpen(false)
       return
     }
-
     setCurrentLang(lang)
     setIsLangDropdownOpen(false)
   }
 
-  const validateField = (
-    value: string,
-    minLength: number,
-    label: string
-  ) => {
-    const trimmedValue = value.trim()
-
-    if (!trimmedValue) {
-      return t('{{field}} is required', { field: label })
-    }
-
-    if (trimmedValue.length < minLength) {
-      return t('Must be at least {{count}} characters', { count: minLength })
-    }
-
+  const validateField = (value: string, minLength: number, label: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return t('{{field}} is required', { field: label })
+    if (trimmed.length < minLength) return t('Must be at least {{count}} characters', { count: minLength })
     return ''
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const usernameValidation = validateField(
-      username,
-      3,
-      t('Username')
-    )
-    const passwordValidation = validateField(
-      password,
-      6,
-      t('Password')
-    )
-
-    setUsernameError(usernameValidation)
-    setPasswordError(passwordValidation)
-
-    if (usernameValidation || passwordValidation) {
-      return
-    }
+    const uErr = validateField(username, 3, t('Username'))
+    const pErr = validateField(password, 6, t('Password'))
+    setUsernameError(uErr)
+    setPasswordError(pErr)
+    if (uErr || pErr) return
 
     setIsLoading(true)
-
     try {
-      const trimmedUsername = username.trim()
-      const trimmedPassword = password.trim()
-
       await login({
-        username: trimmedUsername,
-        password: trimmedPassword,
+        username: username.trim(),
+        password: password.trim(),
         locale: currentLang,
       })
-
-      toast.success(t('Welcome back!'), {
-        duration: 2000,
-        position: 'bottom-right',
-      })
-
+      toast.success(t('Welcome back!'), { duration: 2000, position: 'bottom-right' })
       navigate('/dashboard', { replace: true })
-      return
     } catch (err: unknown) {
       const status = getErrorStatus(err, 0)
-
-      // Network error - backend is unreachable
-      // Only use frontend translations for network errors (backend can't respond)
       if (isNetworkError(err) || status === 0) {
-        toast.error(t('Backend server is not available'), {
-          duration: 8000,
-          position: 'bottom-right',
-        })
+        toast.error(t('Backend server is not available'), { duration: 8000, position: 'bottom-right' })
         return
       }
-
-      // ⭐ Backend-driven i18n: Use backend error message directly
-      // Backend returns localized message based on Accept-Language header
-      // Priority: backend message → fallback (only for truly unexpected cases)
-      const backendMessage = extractApiErrorMessage(err, t('Something went wrong'))
-
-      // Show backend's localized error message directly
-      toast.error(backendMessage, {
-        duration: status === 429 ? 8000 : 5000, // Rate limit gets longer duration
+      toast.error(extractApiErrorMessage(err, t('Something went wrong')), {
+        duration: status === 429 ? 8000 : 5000,
         position: 'bottom-right',
       })
     } finally {
@@ -166,222 +112,268 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--app-bg)' }}>
-      {/* Top Right Language Selector */}
-      <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
-            style={{
-              backgroundColor: 'var(--card-bg)',
-              borderWidth: '1px',
-              borderColor: 'var(--border-color-pro)',
-              boxShadow: 'var(--shadow-sm)'
-            }}
-            disabled={isLoading}
-          >
-            <Globe className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-              {SUPPORTED_LANGUAGES.find(l => l.code === currentLang)?.name}
-            </span>
-            <ChevronDown
-              className={`w-4 h-4 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
-              style={{ color: 'var(--text-secondary)' }}
-            />
-          </button>
+    <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden">
 
-          {isLangDropdownOpen && (
+      {/* ═══════ CHAP PANEL ═══════ */}
+      <div
+        className="relative flex flex-col items-center justify-center px-8 py-14 lg:py-0 lg:w-[52%] shrink-0 overflow-hidden"
+        style={{ backgroundColor: '#1B3A6B' }}
+      >
+        {/* 4 ta nozik geometrik shakl - faqat texture uchun */}
+        <div
+          className="login-geo"
+          style={{ width: 240, height: 240, top: -50, right: -50, animation: 'geo-drift 16s ease-in-out infinite' }}
+        />
+        <div
+          className="login-geo login-geo--ring"
+          style={{ width: 160, height: 160, bottom: 60, left: -40, animation: 'geo-drift 18s ease-in-out infinite 5s' }}
+        />
+        <div
+          className="login-geo"
+          style={{ width: 60, height: 60, top: '25%', left: '10%', animation: 'geo-drift 12s ease-in-out infinite 3s' }}
+        />
+        <div
+          className="login-geo login-geo--ring"
+          style={{ width: 90, height: 90, bottom: '20%', right: '8%', animation: 'geo-drift 14s ease-in-out infinite 7s' }}
+        />
+
+        {/* Kontent */}
+        <div className="relative z-10 flex flex-col items-center text-center">
+
+          {/* Logotip - katta, oq doira ichida, rasmiy ko'rinish */}
+          <div
+            className="login-stagger mb-10"
+            style={{ animationDelay: '0s' }}
+          >
+            <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-white flex items-center justify-center p-5 mx-auto shadow-lg">
+              <img src={hemisLogo} alt="HEMIS" className="w-full h-full object-contain" />
+            </div>
+          </div>
+
+          {/* Sarlavha */}
+          <h1
+            className="login-stagger font-display text-2xl lg:text-3xl font-bold text-white mb-4"
+            style={{ animationDelay: '0.1s', letterSpacing: '0.06em' }}
+          >
+            HEMIS
+          </h1>
+
+          {/* Tavsif */}
+          <p
+            className="login-stagger text-sm lg:text-[15px] leading-relaxed mb-12 max-w-[280px]"
+            style={{ color: 'rgba(255,255,255,0.55)', animationDelay: '0.2s' }}
+          >
+            {t('Higher Education Management Information System')}
+          </p>
+
+          {/* Statistika - faqat desktop, oddiy va toza */}
+          <div className="hidden lg:flex flex-col gap-4 mb-12">
             <div
-              className="absolute top-full right-0 mt-2 w-48 rounded-lg overflow-hidden"
+              className="login-stagger flex items-center gap-3"
+              style={{ animationDelay: '0.3s' }}
+            >
+              <Building2 className="w-[18px] h-[18px] shrink-0" style={{ color: '#7CB342' }} />
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                {t('226+ higher education institutions')}
+              </span>
+            </div>
+            <div
+              className="login-stagger flex items-center gap-3"
+              style={{ animationDelay: '0.4s' }}
+            >
+              <Users className="w-[18px] h-[18px] shrink-0" style={{ color: '#7CB342' }} />
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                {t('1,000,000+ users')}
+              </span>
+            </div>
+            <div
+              className="login-stagger flex items-center gap-3"
+              style={{ animationDelay: '0.5s' }}
+            >
+              <BookOpen className="w-[18px] h-[18px] shrink-0" style={{ color: '#7CB342' }} />
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                {t('4 management modules')}
+              </span>
+            </div>
+          </div>
+
+          {/* Vazirliq nomi */}
+          <p
+            className="login-stagger hidden lg:block text-xs max-w-[260px] leading-relaxed"
+            style={{ color: 'rgba(255,255,255,0.3)', animationDelay: '0.6s' }}
+          >
+            {t('Ministry of Higher Education, Science and Innovations')}
+          </p>
+        </div>
+      </div>
+
+      {/* ═══════ O'NG PANEL ═══════ */}
+      <div
+        className="relative flex flex-1 flex-col items-center justify-center px-6 py-12 lg:py-0"
+        style={{ backgroundColor: 'var(--app-bg)' }}
+      >
+        {/* Til tanlash */}
+        <div className="absolute top-5 right-5 z-20">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
               style={{
                 backgroundColor: 'var(--card-bg)',
                 borderWidth: '1px',
                 borderColor: 'var(--border-color-pro)',
-                boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)'
+                boxShadow: 'var(--shadow-sm)',
               }}
+              disabled={isLoading}
             >
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  type="button"
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className="w-full flex items-center gap-3 px-4 py-3 transition-colors"
-                  style={{
-                    backgroundColor: currentLang === lang.code ? 'var(--primary)' : 'var(--card-bg)',
-                    color: currentLang === lang.code ? 'white' : 'var(--text-primary)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (currentLang !== lang.code) {
-                      e.currentTarget.style.backgroundColor = 'var(--active-bg)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (currentLang !== lang.code) {
-                      e.currentTarget.style.backgroundColor = 'var(--card-bg)'
-                    }
-                  }}
-                  disabled={isLoading}
-                >
-                  <span className="text-sm font-medium">{lang.name}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              <Globe className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                {SUPPORTED_LANGUAGES.find(l => l.code === currentLang)?.name}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
+                style={{ color: 'var(--text-secondary)' }}
+              />
+            </button>
 
-      {/* Main Container */}
-      <div className="container mx-auto px-4 w-full">
-        <div className="max-w-md mx-auto w-full">
-          <div className="w-full">
-            <div className="card-professional p-8">
-              {/* Logo and Title */}
-              <div className="text-center mb-6">
-                <div className="flex justify-center mb-4">
-                  <div
-                    className="w-16 h-16 rounded-lg flex items-center justify-center border p-2"
+            {isLangDropdownOpen && (
+              <div
+                className="absolute top-full right-0 mt-1.5 w-44 rounded-lg overflow-hidden"
+                style={{
+                  backgroundColor: 'var(--card-bg)',
+                  borderWidth: '1px',
+                  borderColor: 'var(--border-color-pro)',
+                  boxShadow: '0 4px 16px rgba(15, 23, 42, 0.12)',
+                }}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className="w-full flex items-center px-4 py-2.5 transition-colors"
                     style={{
-                      borderColor: 'var(--primary)',
-                      backgroundColor: 'white'
+                      backgroundColor: currentLang === lang.code ? '#1B3A6B' : 'var(--card-bg)',
+                      color: currentLang === lang.code ? 'white' : 'var(--text-primary)',
                     }}
+                    onMouseEnter={(e) => {
+                      if (currentLang !== lang.code) e.currentTarget.style.backgroundColor = 'var(--active-bg)'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentLang !== lang.code) e.currentTarget.style.backgroundColor = 'var(--card-bg)'
+                    }}
+                    disabled={isLoading}
                   >
-                    <img src={hemisLogo} alt="HEMIS" className="w-full h-full object-contain" />
-                  </div>
-                </div>
+                    <span className="text-sm font-medium">{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
-                <h1 className="heading-page mb-2">HEMIS</h1>
-                <p className="text-caption">{t('Higher Education Management Information System')}</p>
+        {/* Login form */}
+        <div className="w-full max-w-[400px] animate-slide-up">
+          <div className="login-form-card">
+            {/* Heading */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold font-display mb-1.5" style={{ color: 'var(--text-primary)' }}>
+                {t('Sign in to system')}
+              </h2>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                {t('Enter your credentials to continue')}
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Username */}
+              <div>
+                <label htmlFor="login-username" className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                  {t('Username')}
+                </label>
+                <div className="relative">
+                  <input
+                    id="login-username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value)
+                      if (usernameError) setUsernameError(validateField(e.target.value, 3, t('Username')))
+                    }}
+                    onBlur={(e) => setUsernameError(validateField(e.target.value, 3, t('Username')))}
+                    aria-invalid={!!usernameError}
+                    placeholder={t('Login')}
+                    className="login-input"
+                    style={{ paddingRight: 40 }}
+                    required
+                    disabled={isLoading}
+                  />
+                  <User
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+                    style={{ color: 'var(--text-secondary)', opacity: 0.4 }}
+                  />
+                </div>
+                {usernameError && <p className="mt-1.5 text-xs text-red-500">{usernameError}</p>}
               </div>
 
-              {/* Login Form */}
-              <form onSubmit={handleLogin} className="space-y-4">
-                {/* Username Input */}
-                <div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => {
-                        setUsername(e.target.value)
-                        if (usernameError) {
-                          setUsernameError(
-                            validateField(
-                              e.target.value,
-                              3,
-                              t('Username')
-                            )
-                          )
-                        }
-                      }}
-                      onBlur={(e) =>
-                        setUsernameError(
-                          validateField(
-                            e.target.value,
-                            3,
-                            t('Username')
-                          )
-                        )
-                      }
-                      aria-invalid={!!usernameError}
-                      placeholder={t('Login')}
-                      className="w-full border rounded-md px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-1"
-                      style={{
-                        ...INPUT_STYLE,
-                        '--tw-ring-color': 'var(--primary)'
-                      } as CSSProperties}
-                      required
-                      disabled={isLoading}
-                    />
-                    <User
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                      style={{ color: 'var(--text-secondary)' }}
-                    />
-                  </div>
-                  {usernameError && (
-                    <p className="mt-1 text-xs text-red-500">{usernameError}</p>
-                  )}
+              {/* Password */}
+              <div>
+                <label htmlFor="login-password" className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                  {t('Password')}
+                </label>
+                <div className="relative">
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      if (passwordError) setPasswordError(validateField(e.target.value, 6, t('Password')))
+                    }}
+                    onBlur={(e) => setPasswordError(validateField(e.target.value, 6, t('Password')))}
+                    aria-invalid={!!passwordError}
+                    placeholder={t('Password')}
+                    className="login-input"
+                    style={{ paddingRight: 40 }}
+                    required
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                    style={{ color: 'var(--text-secondary)', opacity: 0.4 }}
+                    disabled={isLoading}
+                    aria-label={showPassword ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
+                  >
+                    {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+                  </button>
                 </div>
+                {passwordError && <p className="mt-1.5 text-xs text-red-500">{passwordError}</p>}
+              </div>
 
-                {/* Password Input */}
-                <div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value)
-                        if (passwordError) {
-                          setPasswordError(
-                            validateField(
-                              e.target.value,
-                              6,
-                              t('Password')
-                            )
-                          )
-                        }
-                      }}
-                      onBlur={(e) =>
-                        setPasswordError(
-                          validateField(
-                            e.target.value,
-                            6,
-                            t('Password')
-                          )
-                        )
-                      }
-                      aria-invalid={!!passwordError}
-                      placeholder={t('Password')}
-                      className="w-full border rounded-md px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-1"
-                      style={{
-                        ...INPUT_STYLE,
-                        '--tw-ring-color': 'var(--primary)'
-                      } as CSSProperties}
-                      required
-                      disabled={isLoading}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                      style={{ color: 'var(--text-secondary)' }}
-                      disabled={isLoading}
-                      aria-label={showPassword ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {passwordError && (
-                    <p className="mt-1 text-xs text-red-500">{passwordError}</p>
-                  )}
-                </div>
-
-                {/* Login Button */}
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="btn-primary w-full flex items-center justify-center gap-2"
-                >
+              {/* Submit */}
+              <div className="pt-1">
+                <button type="submit" disabled={isLoading} className="login-submit-btn">
                   {isLoading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>{t('Loading...')}</span>
                     </>
                   ) : (
                     <span>{t('Sign in')}</span>
                   )}
                 </button>
-              </form>
-
-              {/* Footer */}
-              <div className="mt-6 text-center">
-                <p className="text-xs text-caption">
-                  {t('2025 HEMIS. All rights reserved.')}
-                </p>
               </div>
-            </div>
+            </form>
           </div>
+
+          {/* Footer */}
+          <p className="mt-6 text-center text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
+            &copy; {t('2025 HEMIS. All rights reserved.')}
+          </p>
         </div>
       </div>
     </div>

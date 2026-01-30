@@ -9,7 +9,7 @@ import type { RoleCode } from './role.types';
 export interface LoginRequest {
   username: string;
   password: string;
-  locale?: 'uz' | 'ru' | 'en';
+  locale?: 'uz' | 'oz' | 'ru' | 'en';
 }
 
 export interface MultilingualString {
