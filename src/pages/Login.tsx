@@ -91,7 +91,7 @@ const Login = () => {
     try {
       await login({
         username: username.trim(),
-        password: password.trim(),
+        password,
         locale: currentLang,
       })
       toast.success(t('Welcome back!'), { duration: 2000, position: 'bottom-right' })
@@ -117,34 +117,67 @@ const Login = () => {
       {/* ═══════ CHAP PANEL ═══════ */}
       <div
         className="relative flex flex-col items-center justify-center px-8 py-14 lg:py-0 lg:w-[52%] shrink-0 overflow-hidden"
-        style={{ backgroundColor: '#1B3A6B' }}
+        style={{ backgroundColor: '#0F1E36' }}
       >
-        {/* 4 ta nozik geometrik shakl - faqat texture uchun */}
+        {/* ——— Animated Blobs ——— */}
+        {/* Blob 1: katta navy — yuqori-o'ng */}
         <div
-          className="login-geo"
-          style={{ width: 240, height: 240, top: -50, right: -50, animation: 'geo-drift 16s ease-in-out infinite' }}
+          className="login-blob"
+          style={{
+            width: 380,
+            height: 380,
+            background: '#2B5EA7',
+            opacity: 0.3,
+            top: '-5%',
+            right: '-8%',
+            animation: 'blob-drift-1 22s ease-in-out infinite',
+          }}
         />
+        {/* Blob 2: yashil — pastki-chap (logotip rangi) */}
         <div
-          className="login-geo login-geo--ring"
-          style={{ width: 160, height: 160, bottom: 60, left: -40, animation: 'geo-drift 18s ease-in-out infinite 5s' }}
+          className="login-blob"
+          style={{
+            width: 300,
+            height: 300,
+            background: '#3D8B2F',
+            opacity: 0.2,
+            bottom: '5%',
+            left: '-5%',
+            animation: 'blob-drift-2 26s ease-in-out infinite',
+          }}
         />
+        {/* Blob 3: och navy — markaz */}
         <div
-          className="login-geo"
-          style={{ width: 60, height: 60, top: '25%', left: '10%', animation: 'geo-drift 12s ease-in-out infinite 3s' }}
+          className="login-blob"
+          style={{
+            width: 260,
+            height: 260,
+            background: '#1E5090',
+            opacity: 0.25,
+            top: '45%',
+            left: '55%',
+            animation: 'blob-drift-3 18s ease-in-out infinite',
+          }}
         />
+        {/* Blob 4: kichik yashil aksent — yuqori-chap */}
         <div
-          className="login-geo login-geo--ring"
-          style={{ width: 90, height: 90, bottom: '20%', right: '8%', animation: 'geo-drift 14s ease-in-out infinite 7s' }}
+          className="login-blob"
+          style={{
+            width: 160,
+            height: 160,
+            background: '#5A9E35',
+            opacity: 0.15,
+            top: '20%',
+            left: '15%',
+            animation: 'blob-drift-1 30s ease-in-out infinite 8s',
+          }}
         />
 
         {/* Kontent */}
         <div className="relative z-10 flex flex-col items-center text-center">
 
-          {/* Logotip - katta, oq doira ichida, rasmiy ko'rinish */}
-          <div
-            className="login-stagger mb-10"
-            style={{ animationDelay: '0s' }}
-          >
+          {/* Logotip — oq doira, rasmiy muhr */}
+          <div className="login-stagger mb-10" style={{ animationDelay: '0s' }}>
             <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-white flex items-center justify-center p-5 mx-auto shadow-lg">
               <img src={hemisLogo} alt="HEMIS" className="w-full h-full object-contain" />
             </div>
@@ -166,30 +199,21 @@ const Login = () => {
             {t('Higher Education Management Information System')}
           </p>
 
-          {/* Statistika - faqat desktop, oddiy va toza */}
+          {/* Statistika — faqat desktop */}
           <div className="hidden lg:flex flex-col gap-4 mb-12">
-            <div
-              className="login-stagger flex items-center gap-3"
-              style={{ animationDelay: '0.3s' }}
-            >
+            <div className="login-stagger flex items-center gap-3" style={{ animationDelay: '0.3s' }}>
               <Building2 className="w-[18px] h-[18px] shrink-0" style={{ color: '#7CB342' }} />
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 {t('226+ higher education institutions')}
               </span>
             </div>
-            <div
-              className="login-stagger flex items-center gap-3"
-              style={{ animationDelay: '0.4s' }}
-            >
+            <div className="login-stagger flex items-center gap-3" style={{ animationDelay: '0.4s' }}>
               <Users className="w-[18px] h-[18px] shrink-0" style={{ color: '#7CB342' }} />
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 {t('1,000,000+ users')}
               </span>
             </div>
-            <div
-              className="login-stagger flex items-center gap-3"
-              style={{ animationDelay: '0.5s' }}
-            >
+            <div className="login-stagger flex items-center gap-3" style={{ animationDelay: '0.5s' }}>
               <BookOpen className="w-[18px] h-[18px] shrink-0" style={{ color: '#7CB342' }} />
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 {t('4 management modules')}
@@ -276,7 +300,6 @@ const Login = () => {
         {/* Login form */}
         <div className="w-full max-w-[400px] animate-slide-up">
           <div className="login-form-card">
-            {/* Heading */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold font-display mb-1.5" style={{ color: 'var(--text-primary)' }}>
                 {t('Sign in to system')}
@@ -286,9 +309,7 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleLogin} className="space-y-5">
-              {/* Username */}
               <div>
                 <label htmlFor="login-username" className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   {t('Username')}
@@ -307,6 +328,7 @@ const Login = () => {
                     placeholder={t('Login')}
                     className="login-input"
                     style={{ paddingRight: 40 }}
+                    autoComplete="username"
                     required
                     disabled={isLoading}
                   />
@@ -318,7 +340,6 @@ const Login = () => {
                 {usernameError && <p className="mt-1.5 text-xs text-red-500">{usernameError}</p>}
               </div>
 
-              {/* Password */}
               <div>
                 <label htmlFor="login-password" className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   {t('Password')}
@@ -337,6 +358,7 @@ const Login = () => {
                     placeholder={t('Password')}
                     className="login-input"
                     style={{ paddingRight: 40 }}
+                    autoComplete="current-password"
                     required
                     disabled={isLoading}
                   />
@@ -354,7 +376,6 @@ const Login = () => {
                 {passwordError && <p className="mt-1.5 text-xs text-red-500">{passwordError}</p>}
               </div>
 
-              {/* Submit */}
               <div className="pt-1">
                 <button type="submit" disabled={isLoading} className="login-submit-btn">
                   {isLoading ? (
@@ -370,7 +391,6 @@ const Login = () => {
             </form>
           </div>
 
-          {/* Footer */}
           <p className="mt-6 text-center text-xs" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
             &copy; {t('2025 HEMIS. All rights reserved.')}
           </p>

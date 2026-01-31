@@ -97,22 +97,28 @@
   animation: slideUp 0.6s ease-out forwards;
 }
 
-/* Login Page */
-@keyframes geo-drift {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(8px, -12px); }
+/* Login Page — animated blobs */
+@keyframes blob-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -70px) scale(1.12); }
+  66% { transform: translate(-30px, 40px) scale(0.92); }
+}
+@keyframes blob-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-60px, 40px) scale(1.08); }
+  66% { transform: translate(40px, -50px) scale(1.15); }
+}
+@keyframes blob-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(35px, 50px) scale(1.1); }
 }
 
-.login-geo {
+.login-blob {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.045);
   border-radius: 50%;
   pointer-events: none;
   will-change: transform;
-}
-.login-geo--ring {
-  background-color: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.06);
+  filter: blur(70px);
 }
 
 .login-stagger {
