@@ -3,6 +3,7 @@
  *
  * Dynamic menu loaded from backend API with permission filtering
  * Supports multilingual labels (uz/ru/en)
+ * Features: Favorites section, system separator, command palette hint
  */
 
 import { useState, useMemo } from 'react'
@@ -15,10 +16,13 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
+  Star,
 } from 'lucide-react'
 import { useRootMenuItems, useMenuLoading } from '../../stores/menuStore'
+import { useFavoritesStore, useFavoritesList } from '../../stores/favoritesStore'
 import { getIcon } from '../../utils/iconMapper'
 import type { MenuItem as BackendMenuItem } from '../../api/menu.api'
+import { flattenMenuTree } from '../../api/menu.api'
 import hemisLogo from '../../assets/images/hemis-logo-new.png'
 
 interface SidebarProps {
@@ -56,6 +60,7 @@ interface MenuItemComponentProps {
   expandedMenus: Set<string>
   toggleSubmenu: (itemId: string) => void
   setOpen: (open: boolean) => void
+  showFavoriteStar?: boolean
 }
 
 function MenuItemComponent({
@@ -66,12 +71,14 @@ function MenuItemComponent({
   location,
   expandedMenus,
   toggleSubmenu,
-  setOpen
+  setOpen,
+  showFavoriteStar = false,
 }: MenuItemComponentProps) {
   const Icon = getIcon(item.icon)
   const label = getMenuLabel(item, currentLang)
   const hasChildren = item.items && item.items.length > 0
   const isExpanded = expandedMenus.has(item.id)
+  const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore()
 
   if (hasChildren) {
     const hasActiveChild = item.items!.some((child) =>
@@ -80,32 +87,34 @@ function MenuItemComponent({
 
     return (
       <div key={item.id}>
-        <button
-          onClick={() => {
-            if (!open && level === 0) setOpen(true)
-            toggleSubmenu(item.id)
-          }}
-          className={cn(
-            'group relative flex w-full items-center gap-3 rounded-lg px-3 transition-all duration-200',
-            level === 0 ? 'py-2.5' : 'py-2 text-sm',
-            !open && level === 0 && 'justify-center',
-            level === 0
-              ? hasActiveChild
-                ? 'sidebar-menu-item--active'
-                : 'sidebar-menu-item'
-              : hasActiveChild
-                ? 'sidebar-menu-item-child--active'
-                : 'sidebar-menu-item-child'
-          )}
-        >
-          <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
-          {open && (
-            <>
-              <span className="flex-1 font-medium text-left">{label}</span>
-              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            </>
-          )}
-        </button>
+        <div className="group relative">
+          <button
+            onClick={() => {
+              if (!open && level === 0) setOpen(true)
+              toggleSubmenu(item.id)
+            }}
+            className={cn(
+              'relative flex w-full items-center gap-3 rounded-lg px-3 transition-all duration-200',
+              level === 0 ? 'py-2.5' : 'py-2 text-sm',
+              !open && level === 0 && 'justify-center',
+              level === 0
+                ? hasActiveChild
+                  ? 'sidebar-menu-item--active'
+                  : 'sidebar-menu-item'
+                : hasActiveChild
+                  ? 'sidebar-menu-item-child--active'
+                  : 'sidebar-menu-item-child'
+            )}
+          >
+            <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
+            {open && (
+              <>
+                <span className="flex-1 font-medium text-left">{label}</span>
+                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </>
+            )}
+          </button>
+        </div>
 
         {open && isExpanded && (
           <div className={cn('mt-1 space-y-1', level === 0 ? 'ml-3' : 'ml-4')}>
@@ -123,6 +132,7 @@ function MenuItemComponent({
                   expandedMenus={expandedMenus}
                   toggleSubmenu={toggleSubmenu}
                   setOpen={setOpen}
+                  showFavoriteStar={showFavoriteStar}
                 />
               ))}
           </div>
@@ -132,29 +142,56 @@ function MenuItemComponent({
   }
 
   // Leaf node (no children)
-  const isActive = item.url ? location.pathname === item.url : false
+  const isActive = item.url ? location.pathname === item.url || location.pathname.startsWith(item.url + '/') : false
+  const isFav = isFavorite(item.id)
+
   return (
-    <Link
-      key={item.id}
-      to={item.url || '#'}
-      className={cn(
-        'group relative flex items-center gap-3 rounded-lg px-3 transition-all duration-200',
-        level === 0 ? 'py-2.5' : 'py-2 text-sm',
-        !open && level === 0 && 'justify-center',
-        level === 0
-          ? isActive
-            ? 'sidebar-menu-item--active'
-            : 'sidebar-menu-item'
-          : isActive
-            ? 'sidebar-menu-item-child--active'
-            : 'sidebar-menu-item-child'
+    <div className="group relative">
+      <Link
+        key={item.id}
+        to={item.url || '#'}
+        className={cn(
+          'relative flex items-center gap-3 rounded-lg px-3 transition-all duration-200',
+          level === 0 ? 'py-2.5' : 'py-2 text-sm',
+          !open && level === 0 && 'justify-center',
+          level === 0
+            ? isActive
+              ? 'sidebar-menu-item--active'
+              : 'sidebar-menu-item'
+            : isActive
+              ? 'sidebar-menu-item-child--active'
+              : 'sidebar-menu-item-child'
+        )}
+      >
+        <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : level === 0 ? 'h-5 w-5' : 'h-4 w-4')} />
+        {open && (
+          <span className="flex-1 font-medium">{label}</span>
+        )}
+      </Link>
+      {/* Favorite star button (visible on hover when sidebar is open) */}
+      {showFavoriteStar && open && item.url && (
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            if (isFav) {
+              removeFavorite(item.id)
+            } else {
+              addFavorite(item.id)
+            }
+          }}
+          className={cn(
+            'absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded transition-all',
+            isFav
+              ? 'text-yellow-500 opacity-100'
+              : 'text-color-secondary opacity-0 group-hover:opacity-100 hover:text-yellow-500'
+          )}
+          title={isFav ? 'Favoritdan o\'chirish' : 'Favoritga qo\'shish'}
+        >
+          <Star className={cn('h-3.5 w-3.5', isFav && 'fill-current')} />
+        </button>
       )}
-    >
-      <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : level === 0 ? 'h-5 w-5' : 'h-4 w-4')} />
-      {open && (
-        <span className="flex-1 font-medium">{label}</span>
-      )}
-    </Link>
+    </div>
   )
 }
 
@@ -162,7 +199,7 @@ function MenuItemComponent({
  * Check if any item in tree is active
  */
 function checkActiveInTree(item: BackendMenuItem, pathname: string): boolean {
-  if (item.url && pathname === item.url) {
+  if (item.url && (pathname === item.url || pathname.startsWith(item.url + '/'))) {
     return true
   }
   if (item.items && item.items.length > 0) {
@@ -173,15 +210,13 @@ function checkActiveInTree(item: BackendMenuItem, pathname: string): boolean {
 
 export default function Sidebar({ open, setOpen }: SidebarProps) {
   const location = useLocation()
-  const { i18n } = useTranslation()
-  // Track expanded menus at each level for nested accordion behavior
+  const { i18n, t } = useTranslation()
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set())
 
-  // Get menu items from store
   const rootMenuItems = useRootMenuItems()
   const isLoading = useMenuLoading()
+  const favorites = useFavoritesList()
 
-  // Get current language
   const currentLang = i18n.language || 'uz'
 
   const toggleSubmenu = (itemId: string) => {
@@ -196,17 +231,46 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
     })
   }
 
-  // Sort menu items by orderNum
+  // Sort and filter menu items
   const sortedMenuItems = useMemo(() => {
     return [...rootMenuItems]
-      // Treat undefined as visible (consistent with child filter)
       .filter((item) => item.visible !== false)
       .sort((a, b) => {
-        const aOrder = a.orderNum ?? 999;
-        const bOrder = b.orderNum ?? 999;
-        return aOrder - bOrder;
+        const aOrder = a.orderNum ?? 999
+        const bOrder = b.orderNum ?? 999
+        return aOrder - bOrder
       })
   }, [rootMenuItems])
+
+  // Separate system menu from regular menus
+  const { mainMenuItems, systemMenuItems } = useMemo(() => {
+    const main: BackendMenuItem[] = []
+    const system: BackendMenuItem[] = []
+    for (const item of sortedMenuItems) {
+      if (item.icon === 'settings' || item.permission === 'system.view') {
+        system.push(item)
+      } else {
+        main.push(item)
+      }
+    }
+    return { mainMenuItems: main, systemMenuItems: system }
+  }, [sortedMenuItems])
+
+  // Flatten menu tree for favorite item lookup
+  const allFlatItems = useMemo(() => {
+    return flattenMenuTree(rootMenuItems)
+  }, [rootMenuItems])
+
+  // Get favorite menu items with their labels
+  const favoriteItems = useMemo(() => {
+    return favorites
+      .sort((a, b) => a.orderNumber - b.orderNumber)
+      .map((fav) => {
+        const menuItem = allFlatItems.find((m) => m.id === fav.menuCode)
+        return menuItem ? { ...menuItem, favoriteCode: fav.menuCode } : null
+      })
+      .filter(Boolean) as (BackendMenuItem & { favoriteCode: string })[]
+  }, [favorites, allFlatItems])
 
   return (
     <>
@@ -232,7 +296,6 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         >
         {open ? (
           <div className="flex items-center gap-2.5 md:gap-3">
-            {/* Logo */}
             <div className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg p-2 layout-bg border border-color-light">
               <img
                 src={hemisLogo}
@@ -240,8 +303,6 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className="w-full h-full object-contain"
               />
             </div>
-
-            {/* Title */}
             <div className="flex flex-col">
               <span className="text-base md:text-lg font-bold text-color-primary">
                 HEMIS
@@ -261,7 +322,6 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </div>
         )}
 
-        {/* Toggle Button */}
         <button
           onClick={() => setOpen(!open)}
           className="h-8 w-8 flex items-center justify-center rounded-lg transition-colors text-color-secondary hover:layout-bg hover:text-[var(--primary)]"
@@ -291,21 +351,84 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
             </div>
           </div>
         ) : (
-          <div className="space-y-1">
-            {sortedMenuItems.map((item) => (
-              <MenuItemComponent
-                key={item.id}
-                item={item}
-                level={0}
-                open={open}
-                currentLang={currentLang}
-                location={location}
-                expandedMenus={expandedMenus}
-                toggleSubmenu={toggleSubmenu}
-                setOpen={setOpen}
-              />
-            ))}
-          </div>
+          <>
+            {/* Favorites Section */}
+            {open && favoriteItems.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 mb-1">
+                  <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                  <span className="text-xs font-semibold text-color-secondary uppercase tracking-wider">
+                    {t('Quick links')}
+                  </span>
+                </div>
+                <div className="space-y-0.5">
+                  {favoriteItems.map((item) => {
+                    const Icon = getIcon(item.icon)
+                    const label = getMenuLabel(item, currentLang)
+                    const isActive = item.url ? location.pathname === item.url || location.pathname.startsWith(item.url + '/') : false
+                    return (
+                      <Link
+                        key={`fav-${item.id}`}
+                        to={item.url || '#'}
+                        className={cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                          isActive
+                            ? 'sidebar-menu-item-child--active'
+                            : 'sidebar-menu-item-child'
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span className="flex-1 font-medium">{label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+                {/* Separator */}
+                <div className="mt-3 mb-2 h-px bg-[var(--border-color-pro)]" />
+              </div>
+            )}
+
+            {/* Main Menu Items */}
+            <div className="space-y-1">
+              {mainMenuItems.map((item) => (
+                <MenuItemComponent
+                  key={item.id}
+                  item={item}
+                  level={0}
+                  open={open}
+                  currentLang={currentLang}
+                  location={location}
+                  expandedMenus={expandedMenus}
+                  toggleSubmenu={toggleSubmenu}
+                  setOpen={setOpen}
+                  showFavoriteStar
+                />
+              ))}
+            </div>
+
+            {/* System Separator + System Menu */}
+            {systemMenuItems.length > 0 && (
+              <>
+                <div className="my-3 h-px bg-[var(--border-color-pro)]" />
+                <div className="space-y-1">
+                  {systemMenuItems.map((item) => (
+                    <MenuItemComponent
+                      key={item.id}
+                      item={item}
+                      level={0}
+                      open={open}
+                      currentLang={currentLang}
+                      location={location}
+                      expandedMenus={expandedMenus}
+                      toggleSubmenu={toggleSubmenu}
+                      setOpen={setOpen}
+                      showFavoriteStar
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         )}
       </nav>
 

@@ -5,7 +5,7 @@
  * Matches LoginClean.tsx design system
  */
 
-import { Settings, User, LogOut, Bell, Menu, RefreshCw } from 'lucide-react'
+import { Settings, User, LogOut, Bell, Menu, RefreshCw, Search } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
@@ -85,6 +85,22 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 
       {/* Right Side - Notifications and User Menu */}
       <div className="flex items-center gap-2 md:gap-3">
+        {/* Search Button (Ctrl+K) */}
+        <button
+          type="button"
+          onClick={() => {
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
+          }}
+          className="hidden md:flex items-center gap-2 h-9 md:h-10 px-3 rounded-lg border header-btn text-color-secondary hover:text-color-primary"
+          aria-label="Sahifa qidirish (Ctrl+K)"
+        >
+          <Search className="h-4 w-4" aria-hidden="true" />
+          <span className="text-xs">Qidirish...</span>
+          <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] font-medium text-color-secondary bg-[var(--bg-pro)]">
+            Ctrl+K
+          </kbd>
+        </button>
+
         {/* Notifications Button */}
         <button
           type="button"

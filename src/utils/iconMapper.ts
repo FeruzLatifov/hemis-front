@@ -51,6 +51,8 @@ import {
   BarChart3,
   HelpCircle,
   RefreshCw,
+  List,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -110,6 +112,10 @@ const iconMap: Record<string, LucideIcon> = {
   'shield-check': ShieldCheck,
   'refresh-cw': RefreshCw,
   'award': Award,
+  'list': List,
+  'LIST': List,
+  'briefcase': Briefcase,
+  'BRIEFCASE': Briefcase,
 
   // =====================================================
   // Semantic Names (for backwards compatibility)

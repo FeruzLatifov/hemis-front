@@ -2,6 +2,7 @@
  * Main Layout Component
  *
  * Clean professional design - no gradients, no glass effects
+ * Includes CommandPalette for Ctrl+K search
  */
 
 import { useState, useEffect } from 'react'
@@ -9,6 +10,7 @@ import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
+import CommandPalette from '../CommandPalette'
 
 export default function MainLayout() {
   // Default open on desktop, closed on mobile
@@ -44,6 +46,8 @@ export default function MainLayout() {
           <Outlet />
         </main>
       </div>
+
+      <CommandPalette />
     </div>
   )
 }

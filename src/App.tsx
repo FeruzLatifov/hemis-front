@@ -21,12 +21,20 @@ import { TranslationsPage, TranslationFormPage } from './pages/admin/translation
 import { UniversitiesPage } from './pages/registry/university'
 import FacultiesPage from './pages/registry/faculty/FacultiesPage'
 
+// Placeholder page for new routes
+const PlaceholderPage = ({ title }: { title: string }) => (
+  <div className="flex items-center justify-center h-64">
+    <div className="text-center">
+      <h2 className="text-xl font-semibold text-color-primary mb-2">{title}</h2>
+      <p className="text-sm text-color-secondary">Bu sahifa hozirda ishlab chiqilmoqda</p>
+    </div>
+  </div>
+)
+
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore()
 
-  // ✅ Token is in HTTPOnly cookie - backend validates
-  // Frontend only checks if user is authenticated in Zustand
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
@@ -37,21 +45,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   const { initialize } = useAuthStore()
 
-  // Initialize auth state on mount
   useEffect(() => {
     initialize()
   }, [initialize])
 
-  // ✅ BEST PRACTICE: Proactive token refresh
-  // Automatically refreshes token before it expires
-  // No server load on every F5, only when token is about to expire
-  // Only runs when user is authenticated
   useTokenRefresh()
-
-  // ✅ BEST PRACTICE: Proactive menu loading
-  // Loads menu from backend on app startup (with 1-hour cache)
-  // Menu is permission-filtered by backend
-  // Only runs when user is authenticated (checked inside hook)
   useMenuInit()
 
   return (
@@ -66,27 +64,86 @@ function App() {
             <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="students" element={<Students />} />
-              <Route path="teachers" element={<Teachers />} />
-              <Route path="universities" element={<Universities />} />
-            <Route path="registry">
-              <Route path="e-reestr">
-                <Route path="university" element={<UniversitiesPage />} />
-                <Route path="faculty" element={<FacultiesPage />} />
+
+              {/* Institutions */}
+              <Route path="institutions">
+                <Route path="universities" element={<UniversitiesPage />} />
+                <Route path="faculties" element={<FacultiesPage />} />
+                <Route path="departments" element={<PlaceholderPage title="Kafedralar" />} />
+                <Route path="attached-specialities" element={<PlaceholderPage title="OTM yo'nalishlari" />} />
               </Route>
-            </Route>
+
+              {/* Students */}
+              <Route path="students" element={<Students />} />
+              <Route path="students/directions" element={<PlaceholderPage title="Yo'nalishlar" />} />
+              <Route path="students/groups" element={<PlaceholderPage title="Guruhlar" />} />
+              <Route path="students/diplomas" element={<PlaceholderPage title="Diplomlar" />} />
+              <Route path="students/scholarships" element={<PlaceholderPage title="Stipendiyalar" />} />
+              <Route path="students/certificates" element={<PlaceholderPage title="Sertifikatlar" />} />
+
+              {/* Teachers */}
+              <Route path="teachers" element={<Teachers />} />
+              <Route path="teachers/positions" element={<PlaceholderPage title="Lavozimlar" />} />
+              <Route path="teachers/qualifications" element={<PlaceholderPage title="Malakalar" />} />
+
+              {/* Science */}
+              <Route path="science">
+                <Route path="researchers" element={<PlaceholderPage title="Tadqiqotchilar" />} />
+                <Route path="projects" element={<PlaceholderPage title="Ilmiy loyihalar" />} />
+                <Route path="publications" element={<PlaceholderPage title="Nashrlar" />} />
+                <Route path="methodical" element={<PlaceholderPage title="Metodik ishlar" />} />
+                <Route path="intellectual" element={<PlaceholderPage title="Intellektual mulk" />} />
+              </Route>
+
+              {/* Reports */}
               <Route path="reports" element={<Reports />} />
+              <Route path="reports/students" element={<PlaceholderPage title="Talabalar hisoboti" />} />
+              <Route path="reports/teachers" element={<PlaceholderPage title="O'qituvchilar hisoboti" />} />
+              <Route path="reports/institutions" element={<PlaceholderPage title="Muassasalar hisoboti" />} />
+              <Route path="reports/academic" element={<PlaceholderPage title="Akademik hisobot" />} />
+              <Route path="reports/research" element={<PlaceholderPage title="Ilmiy hisobot" />} />
+              <Route path="reports/economic" element={<PlaceholderPage title="Iqtisodiy hisobot" />} />
+
+              {/* Rating */}
+              <Route path="rating">
+                <Route path="administrative" element={<PlaceholderPage title="Ma'muriy reyting" />} />
+                <Route path="academic" element={<PlaceholderPage title="Akademik reyting" />} />
+                <Route path="scientific" element={<PlaceholderPage title="Ilmiy reyting" />} />
+                <Route path="gpa" element={<PlaceholderPage title="GPA reyting" />} />
+              </Route>
+
+              {/* Classifiers */}
+              <Route path="classifiers">
+                <Route path="general" element={<PlaceholderPage title="Umumiy klassifikatorlar" />} />
+                <Route path="structure" element={<PlaceholderPage title="Tuzilma" />} />
+                <Route path="employee" element={<PlaceholderPage title="Xodimlar" />} />
+                <Route path="student" element={<PlaceholderPage title="Talabalar" />} />
+                <Route path="education" element={<PlaceholderPage title="Ta'lim" />} />
+                <Route path="study" element={<PlaceholderPage title="O'quv jarayoni" />} />
+                <Route path="science" element={<PlaceholderPage title="Ilmiy" />} />
+                <Route path="organizational" element={<PlaceholderPage title="Tashkiliy" />} />
+              </Route>
+
+              {/* System */}
               <Route path="system">
-                <Route path="translation" element={<TranslationsPage />} />
+                <Route path="translations" element={<TranslationsPage />} />
                 <Route path="translation/create" element={<TranslationFormPage />} />
                 <Route path="translation/:id/edit" element={<TranslationFormPage />} />
+                <Route path="users" element={<PlaceholderPage title="Foydalanuvchilar" />} />
+                <Route path="logs" element={<PlaceholderPage title="Tizim loglari" />} />
+                <Route path="report-updates" element={<PlaceholderPage title="Hisobot yangilanishlari" />} />
               </Route>
+
+              {/* Legacy routes (backward compatibility) */}
+              <Route path="universities" element={<Navigate to="/institutions/universities" replace />} />
+              <Route path="registry/e-reestr/university" element={<Navigate to="/institutions/universities" replace />} />
+              <Route path="registry/e-reestr/faculty" element={<Navigate to="/institutions/faculties" replace />} />
+
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>
         </BrowserRouter>
 
-        {/* Toast Notifications (same as univer-front) */}
         <Toaster position="bottom-right" richColors closeButton />
       </ThemeProvider>
     </QueryClientProvider>

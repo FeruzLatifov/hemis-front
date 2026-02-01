@@ -12,7 +12,9 @@ import apiClient from './client';
 
 export interface MenuItem {
   id: string;
+  i18nKey?: string;    // Translation key (English text, gettext model)
   label: string;       // Current locale label
+  labels?: Record<string, string>; // All locale labels {"uz-UZ": "...", "ru-RU": "..."}
   labelUz: string;     // Uzbek Latin label (always present)
   labelOz: string;     // Uzbek Cyrillic label (always present)
   labelRu: string;     // Russian label (always present)
