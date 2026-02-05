@@ -10,17 +10,24 @@
  * - User feedback dialog (optional)
  */
 
-import * as Sentry from '@sentry/react';
-import { AlertCircle, Home, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import i18n from '@/i18n/config';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import * as Sentry from '@sentry/react'
+import { AlertCircle, Home, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import i18n from '@/i18n/config'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 interface ErrorFallbackProps {
-  error: Error;
-  componentStack: string | null;
-  eventId: string | null;
-  resetError: () => void;
+  error: unknown
+  componentStack: string
+  eventId: string
+  resetError: () => void
 }
 
 /**
@@ -28,25 +35,27 @@ interface ErrorFallbackProps {
  *
  * Shown when an error occurs in React component tree
  */
-function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
+function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
   const handleGoHome = () => {
-    window.location.href = '/';
-  };
+    window.location.href = '/'
+  }
 
   const handleReload = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <AlertCircle className="h-8 w-8 text-destructive" />
+            <AlertCircle className="text-destructive h-8 w-8" />
             <div>
               <CardTitle>{i18n.t('An unexpected error occurred')}</CardTitle>
               <CardDescription>
-                {i18n.t('An unexpected error occurred in the application. Please refresh the page or go to the home page.')}
+                {i18n.t(
+                  'An unexpected error occurred in the application. Please refresh the page or go to the home page.',
+                )}
               </CardDescription>
             </div>
           </div>
@@ -56,13 +65,17 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
           {/* Error Message */}
           <div className="rounded-md bg-red-50 p-3">
             <p className="text-sm font-medium text-red-800">{i18n.t('Error details')}:</p>
-            <p className="mt-1 text-sm text-red-700">{error.message}</p>
+            <p className="mt-1 text-sm text-red-700">
+              {error instanceof Error ? error.message : String(error)}
+            </p>
           </div>
 
           {/* Event ID for Support */}
           {eventId && (
             <div className="rounded-md bg-blue-50 p-3">
-              <p className="text-sm font-medium text-blue-800">{i18n.t('Event ID (for support)')}:</p>
+              <p className="text-sm font-medium text-blue-800">
+                {i18n.t('Event ID (for support)')}:
+              </p>
               <p className="mt-1 font-mono text-sm text-blue-700">{eventId}</p>
               <p className="mt-2 text-xs text-blue-600">
                 {i18n.t('Send this ID to the support team')}
@@ -71,7 +84,7 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
           )}
 
           {/* Development Info */}
-          {import.meta.env.DEV && (
+          {import.meta.env.DEV && error instanceof Error && (
             <details className="rounded-md bg-gray-100 p-3">
               <summary className="cursor-pointer text-sm font-medium text-gray-700">
                 {i18n.t('Technical details (development only)')}
@@ -93,7 +106,7 @@ function ErrorFallback({ error, eventId, resetError }: ErrorFallbackProps) {
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }
 
 /**
@@ -111,13 +124,13 @@ export const ErrorBoundary = Sentry.withErrorBoundary(
   {
     fallback: ErrorFallback,
     showDialog: false, // Don't show Sentry dialog (we have our own UI)
-    beforeCapture: (scope, error, componentStack) => {
+    beforeCapture: (scope, _error, componentStack) => {
       // Add component stack to Sentry
       scope.setContext('react', {
         componentStack,
-      });
+      })
     },
-  }
-);
+  },
+)
 
-export default ErrorBoundary;
+export default ErrorBoundary

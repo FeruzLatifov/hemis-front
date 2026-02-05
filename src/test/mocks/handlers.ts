@@ -18,13 +18,13 @@ export const handlers = [
         permissions: ['VIEW_DASHBOARD', 'MANAGE_UNIVERSITIES'],
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
-      }
+      },
     })
   }),
 
   http.post(`${API_URL}/api/v1/web/auth/login`, async ({ request }) => {
-    const body = await request.json() as { username: string; password: string }
-    
+    const body = (await request.json()) as { username: string; password: string }
+
     if (body.username === 'admin' && body.password === 'admin123') {
       return HttpResponse.json({
         success: true,
@@ -32,13 +32,13 @@ export const handlers = [
         data: {
           accessToken: 'mock-access-token',
           refreshToken: 'mock-refresh-token',
-        }
+        },
       })
     }
-    
+
     return HttpResponse.json(
       { success: false, message: 'Invalid credentials', data: null },
-      { status: 401 }
+      { status: 401 },
     )
   }),
 
@@ -85,7 +85,7 @@ export const handlers = [
 
   http.get(`${API_URL}/api/v1/web/universities/:id`, ({ params }) => {
     const { id } = params
-    
+
     return HttpResponse.json({
       id: Number(id),
       code: 'TATU',
@@ -117,13 +117,13 @@ export const handlers = [
   http.get(`${API_URL}/api/v1/web/i18n/translations`, ({ request }) => {
     const url = new URL(request.url)
     const lang = url.searchParams.get('lang') || 'uz'
-    
+
     return HttpResponse.json({
-      'common.welcome': lang === 'uz' ? 'Xush kelibsiz' : 'Welcome',
-      'common.login': lang === 'uz' ? 'Kirish' : 'Login',
-      'common.logout': lang === 'uz' ? 'Chiqish' : 'Logout',
-      'common.save': lang === 'uz' ? 'Saqlash' : 'Save',
-      'common.cancel': lang === 'uz' ? 'Bekor qilish' : 'Cancel',
+      Welcome: lang === 'uz' ? 'Xush kelibsiz' : 'Welcome',
+      'Sign in': lang === 'uz' ? 'Kirish' : 'Sign in',
+      'Sign out': lang === 'uz' ? 'Chiqish' : 'Sign out',
+      Save: lang === 'uz' ? 'Saqlash' : 'Save',
+      Cancel: lang === 'uz' ? 'Bekor qilish' : 'Cancel',
     })
   }),
 ]

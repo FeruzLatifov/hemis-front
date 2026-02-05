@@ -6,23 +6,23 @@
  */
 
 import { Settings, User, LogOut, Bell, Menu, RefreshCw, Search } from 'lucide-react'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useNavigate } from 'react-router-dom'
-import { useState, useRef, useEffect } from 'react'
-import { toast } from 'sonner'
-import LanguageSwitcher from '../common/LanguageSwitcher'
-import apiClient from '../../api/client'
-import { extractApiErrorMessage } from '../../utils/error.util'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@/components/common/LanguageSwitcher'
+import { useClearCache } from '@/hooks/useClearCache'
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void
 }
 
 export default function Header({ setSidebarOpen }: HeaderProps) {
+  const { t } = useTranslation()
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isClearingCache, setIsClearingCache] = useState(false)
+  const { isClearingCache, clearCache } = useClearCache()
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -42,45 +42,26 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
     navigate('/login', { replace: true })
   }
 
-  const handleClearCache = async () => {
-    setIsClearingCache(true)
-    try {
-      const response = await apiClient.post('/api/v1/web/auth/cache/clear')
-      if (response.data?.success) {
-        toast.success('Cache tozalandi', {
-          description: 'Permissions va tarjimalar yangilandi. Sahifa qayta yuklanmoqda...',
-          duration: 2000,
-        })
-        // Reload page after short delay to fetch fresh data
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
-      } else {
-        // ⭐ Backend-driven i18n: Use backend's localized message
-        toast.error(response.data?.message || 'Cache tozalashda xatolik yuz berdi')
-      }
-    } catch (error: unknown) {
-      // ⭐ Backend-driven i18n: Use backend's localized message
-      const errorMessage = extractApiErrorMessage(error, 'Cache tozalashda xatolik yuz berdi')
-      toast.error(errorMessage)
-    } finally {
-      setIsClearingCache(false)
+  // Keyboard navigation for user dropdown
+  const handleDropdownKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsDropdownOpen(false)
     }
-  }
+  }, [])
 
   return (
     <header
-      className="flex h-14 md:h-16 items-center justify-between md:justify-end border-b px-3 md:px-6 card-white"
+      className="card-white flex h-14 items-center justify-between border-b px-3 md:h-16 md:justify-end md:px-6"
       style={{ boxShadow: 'var(--shadow-sm)' }}
     >
       {/* Left Side - Mobile Menu Button (only on mobile) */}
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
-        className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border header-btn"
-        aria-label="Menyuni ochish"
+        className="header-btn flex h-9 w-9 items-center justify-center rounded-lg border md:hidden"
+        aria-label={t('Open menu')}
       >
-        <Menu className="h-5 w-5 text-color-secondary" />
+        <Menu className="text-color-secondary h-5 w-5" />
       </button>
 
       {/* Right Side - Notifications and User Menu */}
@@ -91,12 +72,12 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           onClick={() => {
             window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
           }}
-          className="hidden md:flex items-center gap-2 h-9 md:h-10 px-3 rounded-lg border header-btn text-color-secondary hover:text-color-primary"
-          aria-label="Sahifa qidirish (Ctrl+K)"
+          className="header-btn text-color-secondary hover:text-color-primary hidden h-9 items-center gap-2 rounded-lg border px-3 md:flex md:h-10"
+          aria-label={t('Search pages (Ctrl+K)')}
         >
           <Search className="h-4 w-4" aria-hidden="true" />
-          <span className="text-xs">Qidirish...</span>
-          <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] font-medium text-color-secondary bg-[var(--bg-pro)]">
+          <span className="text-xs">{t('Search...')}</span>
+          <kbd className="text-color-secondary hidden items-center gap-0.5 rounded border bg-[var(--bg-pro)] px-1.5 py-0.5 text-[10px] font-medium lg:inline-flex">
             Ctrl+K
           </kbd>
         </button>
@@ -104,12 +85,15 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
         {/* Notifications Button */}
         <button
           type="button"
-          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn"
-          aria-label="Bildirishnomalar (3 ta yangi)"
+          className="header-btn relative flex h-9 w-9 items-center justify-center rounded-lg border md:h-10 md:w-10"
+          aria-label={t('Notifications')}
         >
-          <Bell className="h-4 w-4 md:h-5 md:w-5 text-color-secondary" aria-hidden="true" />
+          <Bell className="text-color-secondary h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />
           {/* Notification Badge */}
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full text-xs font-semibold badge-danger" aria-hidden="true">
+          <span
+            className="badge-danger absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-xs font-semibold md:h-5 md:w-5"
+            aria-hidden="true"
+          >
             3
           </span>
         </button>
@@ -120,11 +104,11 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
         {/* Cache Clear Button */}
         <button
           type="button"
-          onClick={handleClearCache}
+          onClick={clearCache}
           disabled={isClearingCache}
-          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn header-btn-success disabled:opacity-50"
-          title="Cache tozalash (tarjimalar, permissionlar)"
-          aria-label="Cache tozalash"
+          className="header-btn header-btn-success relative flex h-9 w-9 items-center justify-center rounded-lg border disabled:opacity-50 md:h-10 md:w-10"
+          title={t('Clear cache')}
+          aria-label={t('Clear cache')}
         >
           <RefreshCw
             className={`h-4 w-4 md:h-5 md:w-5 ${isClearingCache ? 'animate-spin text-[var(--success)]' : 'text-color-secondary'}`}
@@ -136,18 +120,18 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 md:gap-3 rounded-lg border px-2 md:px-3 py-1.5 md:py-2 header-btn"
-            aria-label="Foydalanuvchi menyusi"
+            className="header-btn flex items-center gap-2 rounded-lg border px-2 py-1.5 md:gap-3 md:px-3 md:py-2"
+            aria-label={t('User menu')}
             aria-expanded={isDropdownOpen}
             aria-haspopup="true"
           >
             {/* Avatar */}
-            <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full avatar-primary">
-              <User className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
+            <div className="avatar-primary flex h-7 w-7 items-center justify-center rounded-full md:h-8 md:w-8">
+              <User className="h-3.5 w-3.5 text-white md:h-4 md:w-4" />
             </div>
 
             {/* User Name */}
-            <span className="hidden font-medium sm:block text-sm md:text-base text-color-primary">
+            <span className="text-color-primary hidden text-sm font-medium sm:block md:text-base">
               {user?.username || 'Admin'}
             </span>
           </button>
@@ -155,22 +139,24 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           {/* Dropdown Menu */}
           {isDropdownOpen && (
             <div
-              className="absolute top-full right-0 mt-2 w-64 rounded-lg border overflow-hidden card-white z-50"
+              className="card-white absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border"
               style={{ boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)' }}
               role="menu"
-              aria-label="Foydalanuvchi menyusi"
+              tabIndex={0}
+              aria-label={t('User menu')}
+              onKeyDown={handleDropdownKeyDown}
             >
               {/* User Info Header */}
-              <div className="px-4 py-3 border-b layout-bg border-color-light">
+              <div className="layout-bg border-color-light border-b px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full avatar-primary">
+                  <div className="avatar-primary flex h-12 w-12 items-center justify-center rounded-full">
                     <User className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-color-primary">
+                    <p className="text-color-primary text-sm font-semibold">
                       {user?.username || 'Administrator'}
                     </p>
-                    <p className="text-xs text-color-secondary">
+                    <p className="text-color-secondary text-xs">
                       {user?.email || 'admin@hemis.uz'}
                     </p>
                   </div>
@@ -181,20 +167,20 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
               <div className="py-1" role="none">
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item"
+                  className="dropdown-item flex w-full items-center gap-3 px-4 py-3"
                   role="menuitem"
                 >
-                  <User className="h-4 w-4 text-color-secondary" aria-hidden="true" />
-                  <span className="text-sm font-medium">Profil</span>
+                  <User className="text-color-secondary h-4 w-4" aria-hidden="true" />
+                  <span className="text-sm font-medium">{t('Profile')}</span>
                 </button>
 
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item"
+                  className="dropdown-item flex w-full items-center gap-3 px-4 py-3"
                   role="menuitem"
                 >
-                  <Settings className="h-4 w-4 text-color-secondary" aria-hidden="true" />
-                  <span className="text-sm font-medium">Sozlamalar</span>
+                  <Settings className="text-color-secondary h-4 w-4" aria-hidden="true" />
+                  <span className="text-sm font-medium">{t('Settings')}</span>
                 </button>
 
                 <div className="my-1 h-px bg-[var(--border-color-pro)]" role="separator" />
@@ -202,11 +188,11 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item-danger"
+                  className="dropdown-item-danger flex w-full items-center gap-3 px-4 py-3"
                   role="menuitem"
                 >
                   <LogOut className="h-4 w-4" aria-hidden="true" />
-                  <span className="text-sm font-medium">Chiqish</span>
+                  <span className="text-sm font-medium">{t('Logout')}</span>
                 </button>
               </div>
             </div>

@@ -1,728 +1,413 @@
-# 🎓 HEMIS 2.0 - Frontend (Ministry Admin Panel)
+# HEMIS 2.0 — Ministry Frontend
 
-**O'zbekiston Respublikasi Oliy Ta'lim Vazirligi**  
+**O'zbekiston Respublikasi Oliy Ta'lim Vazirligi**
 **Oliy Ta'lim Boshqaruv Axborot Tizimi**
 
-Modern, scalable va production-ready frontend application React 19 va TypeScript asosida qurilgan.
-
-[![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF.svg)](https://vitejs.dev)
-[![TanStack Query](https://img.shields.io/badge/TanStack_Query-5.62.7-FF4154.svg)](https://tanstack.com/query)
-[![Tests](https://img.shields.io/badge/Tests-8%20passing-success.svg)]()
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)]()
+[![React](https://img.shields.io/badge/React-19.2.3-61DAFB.svg?logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.18-06B6D4.svg?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white)](.github/workflows/ci.yml)
 
 ---
 
-## 📋 Mundarija
+## Mundarija
 
-- [Texnologiyalar](#-texnologiyalar)
-- [Xususiyatlar](#-xususiyatlar)
-- [Loyiha Strukturasi](#-loyiha-strukturasi)
-- [Tezkor Boshlash](#-tezkor-boshlash)
-- [O'rnatish (To'liq)](#-ornatish-toliq)
-- [Ishga Tushirish](#-ishga-tushirish)
-- [Environment Variables](#-environment-variables)
-- [Scriptlar](#-scriptlar)
-- [Arxitektura](#-arxitektura)
-- [Best Practices](#-best-practices)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
+- [Texnologiyalar](#texnologiyalar)
+- [Tezkor boshlash](#tezkor-boshlash)
+- [Loyiha strukturasi](#loyiha-strukturasi)
+- [Scriptlar](#scriptlar)
+- [Environment variables](#environment-variables)
+- [Arxitektura](#arxitektura)
+- [Testing](#testing)
+- [Code Quality](#code-quality)
+- [Deployment](#deployment)
 
 ---
 
-## 🚀 Texnologiyalar
+## Texnologiyalar
 
-### Core Stack
+### Core
 
-| Texnologiya | Versiya | Maqsad |
-|-------------|---------|--------|
-| **React** | 19.0.0 | UI Framework |
-| **TypeScript** | 5.9.3 | Type Safety |
-| **Vite** | 7.1.7 | Build Tool |
-| **React Router** | 7.1.1 | Routing |
-| **TanStack Query** | 5.62.7 | Server State |
-| **Zustand** | 5.0.2 | Client State |
-| **Tailwind CSS** | 4.0.0 | Styling |
-| **shadcn/ui** | Latest | UI Components |
+| Texnologiya       | Versiya | Maqsad                       |
+| ----------------- | ------- | ---------------------------- |
+| React             | 19.2.3  | UI framework                 |
+| TypeScript        | 5.9.3   | Type safety (`strict: true`) |
+| Vite              | 7.3.1   | Build tool                   |
+| Tailwind CSS      | 4.1.18  | Utility-first styling        |
+| shadcn/ui (Radix) | —       | Accessible UI components     |
 
-### Key Libraries
+### State & Data
 
-- **Forms**: React Hook Form 7.54.2 + Zod 3.24.1
-- **Tables**: TanStack Table 8.21.3
-- **HTTP**: Axios 1.7.9
-- **i18n**: i18next 25.6.0
-- **Icons**: Lucide React 0.469.0
-- **Charts**: Recharts 2.15.0
-- **Testing**: Vitest 4.0.9 + Testing Library + MSW
-- **Monitoring**: Sentry 8.19.0
+| Kutubxona       | Versiya | Maqsad                           |
+| --------------- | ------- | -------------------------------- |
+| TanStack Query  | 5.90.17 | Server state, caching            |
+| TanStack Table  | 8.21.3  | Data tables                      |
+| Zustand         | 5.0.10  | Client state (auth, theme, menu) |
+| React Hook Form | 7.71.1  | Form management                  |
+| Zod             | 4.3.6   | Schema validation                |
+| Axios           | 1.13.4  | HTTP client                      |
+| React Router    | 7.13.0  | Routing (lazy-loaded)            |
 
----
+### i18n & Monitoring
 
-## ✨ Xususiyatlar
+| Kutubxona    | Versiya | Maqsad                                |
+| ------------ | ------- | ------------------------------------- |
+| i18next      | 25.7.4  | Internationalization (uz, oz, ru, en) |
+| Sentry       | 10.38.0 | Error tracking & performance          |
+| Sonner       | 2.0.7   | Toast notifications                   |
+| Lucide React | 0.469.0 | Icon library                          |
 
-### 🔐 Authentication & Authorization
-- ✅ JWT (HTTPOnly cookies)
-- ✅ Role-based access control (RBAC)
-- ✅ Auto token refresh
-- ✅ Permission-based UI
+### Dev & Quality
 
-### 📊 Dashboard
-- ✅ Real-time statistics (150K+ students, 12K+ teachers, 45 universities)
-- ✅ Interactive charts (education form, region, language)
-- ✅ Top universities ranking
-- ✅ Activity feed
-
-### 🎓 Management
-- ✅ University CRUD (filter, sort, pagination)
-- ✅ Faculty management
-- ✅ Student records
-- ✅ Teacher profiles
-
-### 🌐 Internationalization
-- ✅ 3 languages: 🇺🇿 O'zbek, 🇷🇺 Rus, 🇬🇧 Ingliz
-- ✅ Backend-managed translations
-- ✅ Language switcher
-
-### 🎨 UI/UX
-- ✅ OTM Design System
-- ✅ Dark mode
-- ✅ Responsive (mobile-first)
-- ✅ WCAG 2.1 AA compliant
-- ✅ Loading states & skeletons
-
-### 🚀 Performance
-- ✅ Code splitting
-- ✅ Smart caching (5min stale, 30min GC)
-- ✅ Optimized bundle (~500KB gzipped)
-- ✅ Debounced search
-
-### 🧪 Quality
-- ✅ TypeScript strict mode
-- ✅ 100% test coverage (utils)
-- ✅ ESLint + Prettier
-- ✅ Component tests
-- ✅ API mocking (MSW)
+| Tool                       | Maqsad                          |
+| -------------------------- | ------------------------------- |
+| Vitest + RTL + MSW         | Unit & integration testing      |
+| ESLint + jsx-a11y          | Linting + accessibility         |
+| Prettier + Tailwind plugin | Code formatting                 |
+| Husky + lint-staged        | Pre-commit hooks                |
+| Commitlint                 | Conventional commit enforcement |
+| GitHub Actions             | CI pipeline                     |
 
 ---
 
-## 📁 Loyiha Strukturasi
-
-```
-hemis-front/
-├── public/                     # Static assets
-├── src/
-│   ├── api/                    # API clients (8 files)
-│   │   ├── auth.api.ts
-│   │   ├── universities.api.ts
-│   │   ├── dashboard.api.ts
-│   │   └── client.ts          # Axios instance
-│   ├── components/             # React components (30+)
-│   │   ├── ui/                # shadcn/ui (15+ components)
-│   │   ├── layouts/           # Layout components
-│   │   ├── common/            # Shared components
-│   │   └── auth/              # Auth components
-│   ├── hooks/                  # Custom hooks (10+)
-│   │   ├── useUniversities.ts # CRUD hooks (6)
-│   │   ├── useDashboard.ts    # Dashboard hooks (2)
-│   │   ├── useTokenRefresh.ts
-│   │   └── useMenuInit.ts
-│   ├── lib/                    # Utils & configs
-│   │   ├── queryClient.ts     # TanStack Query
-│   │   ├── queryKeys.ts       # Centralized keys
-│   │   ├── utils.ts           # Helper functions
-│   │   └── __tests__/         # Unit tests
-│   ├── pages/                  # Page components (13)
-│   │   ├── dashboard/
-│   │   ├── registry/
-│   │   │   ├── university/
-│   │   │   └── faculty/
-│   │   ├── students/
-│   │   ├── teachers/
-│   │   └── Login.tsx
-│   ├── stores/                 # Zustand stores
-│   │   └── authStore.ts
-│   ├── test/                   # Test utilities
-│   │   ├── setup.ts
-│   │   └── mocks/             # MSW handlers
-│   ├── types/                  # TypeScript types (6 files)
-│   │   ├── api.types.ts
-│   │   ├── entities.types.ts
-│   │   ├── dashboard.types.ts
-│   │   └── forms.types.ts
-│   ├── i18n/                   # Translations
-│   │   ├── config.ts
-│   │   └── translations/      # uz, ru, en
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── .env                        # Environment variables
-├── package.json
-├── tsconfig.json              # Strict mode
-├── vite.config.ts
-├── vitest.config.ts           # Test config
-├── tailwind.config.ts
-└── README.md                  # This file
-```
-
-**Statistika:**
-- TypeScript files: 84
-- Components: 30+
-- Custom hooks: 10+
-- Type definitions: 50+
-- Tests: 8 (100% coverage utils)
-
----
-
-## ⚡ Tezkor Boshlash
+## Tezkor boshlash
 
 ```bash
-# 1. Clone repository
-git clone <repo-url>
-cd hemis-front
-
-# 2. Install dependencies
+# 1. Dependencies o'rnatish
 yarn install
 
-# 3. Create .env file
+# 2. Environment sozlash
 cp .env.example .env
+# .env ichida VITE_API_URL ni backend manziliga o'zgartiring
 
-# 4. Update .env
-echo "VITE_API_URL=http://localhost:8081" > .env
-
-# 5. Start dev server
+# 3. Dev server ishga tushirish
 yarn dev
-
-# 6. Open browser
 # http://localhost:3000
 ```
 
+**Talablar:** Node.js `>=20.19.0` yoki `>=22.12.0`, Yarn (Corepack)
+
 ---
 
-## 🔧 O'rnatish (To'liq)
+## Loyiha strukturasi
 
-### Talablar
-
-> ⚠️ **Muhim versiyalar**
-
-- **Node.js**: `>=20.19.0` yoki `>=22.12.0`
-- **Package Manager**: Yarn (tavsiya), npm, pnpm
-- **Backend**: HEMIS Backend (port 8081)
-
-### 1. Node.js o'rnatish
-
-```bash
-# Node.js versiyasini tekshiring
-node --version
-# v20.19.0 yoki yuqori bo'lishi kerak
-
-# Agar eski versiya bo'lsa, yangilang
-# nvm install 20
-# nvm use 20
+```
+hemis-front/
+├── .github/workflows/ci.yml      # GitHub Actions CI pipeline
+├── .husky/                        # Git hooks (pre-commit, commit-msg)
+├── public/                        # Static assets
+├── src/
+│   ├── api/                       # API modules (8 ta endpoint fayl)
+│   │   ├── client.ts              #   Axios instance + interceptors
+│   │   ├── auth.api.ts            #   Authentication
+│   │   ├── dashboard.api.ts       #   Dashboard statistics
+│   │   ├── universities.api.ts    #   University CRUD
+│   │   ├── faculties.api.ts       #   Faculty CRUD
+│   │   ├── favorites.api.ts       #   Favorites management
+│   │   ├── menu.api.ts            #   Dynamic menu
+│   │   └── translations.api.ts    #   i18n translations
+│   ├── components/
+│   │   ├── ui/                    #   shadcn/ui (16 ta komponent)
+│   │   ├── layouts/               #   MainLayout, Sidebar, Header, Breadcrumb
+│   │   ├── common/                #   LanguageSwitcher
+│   │   ├── filters/               #   ColumnSettings, TagFilter, SearchScope
+│   │   ├── CommandPalette.tsx     #   Cmd+K tezkor qidiruv
+│   │   ├── ErrorBoundary.tsx      #   Global error boundary
+│   │   └── ThemeProvider.tsx      #   Dark/light mode
+│   ├── hooks/                     # Custom hooks (7 ta)
+│   │   ├── useUniversities.ts     #   University CRUD hooks
+│   │   ├── useFavorites.ts        #   Favorites hooks
+│   │   ├── useMenu.ts             #   Menu data hooks
+│   │   ├── useTheme.ts            #   Theme hooks
+│   │   └── useClearCache.ts       #   Cache management
+│   ├── pages/                     # Route pages (lazy-loaded)
+│   │   ├── LoginPage.tsx
+│   │   ├── dashboard/             #   Statistics, charts, rankings
+│   │   ├── institutions/
+│   │   │   ├── universities/      #   University management
+│   │   │   └── faculties/         #   Faculty management
+│   │   ├── students/              #   Student records
+│   │   ├── teachers/              #   Teacher profiles
+│   │   ├── reports/               #   Analytics & reports
+│   │   └── system/
+│   │       └── translations/      #   Translation management
+│   ├── stores/                    # Zustand stores (3 ta)
+│   │   ├── authStore.ts           #   Auth state + permissions
+│   │   ├── menuStore.ts           #   Dynamic menu tree
+│   │   └── favoritesStore.ts      #   Quick links
+│   ├── lib/                       # Core utilities
+│   │   ├── queryClient.ts         #   TanStack Query config
+│   │   ├── queryKeys.ts           #   Centralized query keys
+│   │   ├── sentry.ts              #   Sentry integration
+│   │   └── utils.ts               #   cn(), helpers
+│   ├── utils/                     # Utility functions
+│   │   ├── iconMapper.ts          #   Backend icon -> Lucide mapping
+│   │   ├── menu.util.ts           #   Menu label helpers
+│   │   ├── url.util.ts            #   URL utilities
+│   │   └── error.util.ts          #   Error formatting
+│   ├── types/                     # TypeScript type definitions
+│   ├── i18n/                      # i18next config + translations (uz, oz, ru, en)
+│   ├── test/                      # Test setup + MSW mocks
+│   ├── env.ts                     # Zod env validation
+│   ├── App.tsx                    # Root component + routing
+│   └── main.tsx                   # Entry point
+├── .editorconfig                  # Editor formatting rules
+├── .env.example                   # Environment template
+├── .prettierrc                    # Prettier config (+ Tailwind plugin)
+├── commitlint.config.js           # Conventional commits
+├── eslint.config.js               # ESLint + TypeScript + jsx-a11y
+├── nginx.conf                     # Nginx SPA config
+├── nginx-security-headers.conf    # CSP, HSTS, Permissions-Policy
+├── Dockerfile                     # Multi-stage build (Node + Nginx)
+├── docker-compose.yml             # Docker Compose config
+├── vite.config.ts                 # Vite + vendor chunk splitting
+├── vitest.config.ts               # Vitest + coverage thresholds
+└── tsconfig.json                  # TypeScript strict mode
 ```
 
-### 2. Repository clone
+**Statistika:** 66 `.tsx` + 87 `.ts` source fayl, 49 test fayl, 16 UI komponent, 4 til
+
+---
+
+## Scriptlar
+
+| Buyruq                   | Tavsif                                 |
+| ------------------------ | -------------------------------------- |
+| `yarn dev`               | Development server (port 3000, HMR)    |
+| `yarn build`             | TypeScript check + production build    |
+| `yarn build:prod`        | Tarjimalarni sync + build              |
+| `yarn preview`           | Production buildni preview qilish      |
+| `yarn type-check`        | TypeScript tekshiruvi (`tsc --noEmit`) |
+| `yarn lint`              | ESLint tekshiruvi (TypeScript + a11y)  |
+| `yarn lint:fix`          | ESLint auto-fix                        |
+| `yarn format`            | Prettier bilan formatlash              |
+| `yarn test`              | Testlarni watch modda ishga tushirish  |
+| `yarn test:ui`           | Vitest UI (brauzerda)                  |
+| `yarn test:coverage`     | Coverage hisoboti                      |
+| `yarn sync:translations` | Backend tarjimalarni sync qilish       |
+
+---
+
+## Environment variables
+
+`.env.example` dan nusxa oling:
 
 ```bash
-git clone <repository-url>
-cd hemis-front
-```
-
-### 3. Dependencies o'rnatish
-
-#### Yarn (tavsiya etiladi):
-```bash
-yarn install
-```
-
-Yarn o'rnatilmagan bo'lsa:
-```bash
-npm install -g yarn
-```
-
-#### Yoki NPM:
-```bash
-npm install
-```
-
-### 4. Environment sozlash
-
-```bash
-# .env.example dan copy qiling
 cp .env.example .env
 ```
 
-`.env` faylini tahrirlang:
+### Majburiy
 
-```env
-# MAJBURIY
-VITE_API_URL=http://localhost:8081
+| O'zgaruvchi    | Tavsif              | Misol                   |
+| -------------- | ------------------- | ----------------------- |
+| `VITE_API_URL` | Backend API manzili | `http://localhost:8081` |
 
-# IXTIYORIY
-VITE_APP_NAME=HEMIS Admin Panel
-VITE_APP_VERSION=1.0.0
-VITE_DEFAULT_LOCALE=uz
+### Ixtiyoriy (default qiymatlari bor)
 
-# Sentry (Production)
-VITE_SENTRY_ENABLED=false
-VITE_SENTRY_DSN=
-```
+| O'zgaruvchi                      | Default          | Tavsif                                   |
+| -------------------------------- | ---------------- | ---------------------------------------- |
+| `VITE_APP_NAME`                  | `HEMIS Ministry` | Ilova nomi                               |
+| `VITE_APP_VERSION`               | `1.0.0`          | Versiya                                  |
+| `VITE_SENTRY_ENABLED`            | `false`          | Sentry monitoring                        |
+| `VITE_SENTRY_DSN`                | —                | Sentry DSN                               |
+| `VITE_SENTRY_ENVIRONMENT`        | —                | `development` / `staging` / `production` |
+| `VITE_SENTRY_TRACES_SAMPLE_RATE` | `0.2`            | Performance sampling (0.0–1.0)           |
 
-### 5. Backend ishga tushirish
-
-```bash
-# Backend API ishlab turishi kerak
-# Alohida terminalda:
-cd ../hemis-back
-./gradlew bootRun
-
-# Health check
-curl http://localhost:8081/actuator/health
-```
+Environment validatsiyasi `src/env.ts` da Zod schema orqali amalga oshiriladi. Noto'g'ri qiymat berilsa, ilova aniq xato xabari bilan ishga tushmaydi.
 
 ---
 
-## 🚀 Ishga Tushirish
+## Arxitektura
 
-### Development Mode
-
-```bash
-yarn dev
-```
-
-**Output:**
-```
-VITE v7.1.7  ready in 845 ms
-
-➜  Local:   http://localhost:3000/
-➜  Network: http://192.168.1.100:3000/
-```
-
-**Features:**
-- ✅ Hot Module Replacement (HMR)
-- ✅ Fast Refresh
-- ✅ TypeScript type checking
-- ✅ ESLint integration
-
-### Production Build
-
-```bash
-# Build
-yarn build
-
-# Output: dist/ folder
-# - JavaScript: ~400 KB
-# - CSS: ~50 KB
-# - Total: ~500 KB (gzipped)
-```
-
-### Preview Production
-
-```bash
-yarn preview
-# Opens: http://localhost:4173
-```
-
-### Type Checking
-
-```bash
-yarn type-check
-```
-
-### Linting
-
-```bash
-yarn lint           # Check
-yarn lint:fix       # Auto-fix
-```
-
-### Formatting
-
-```bash
-yarn format
-```
-
-### Testing
-
-```bash
-yarn test              # Watch mode
-yarn test:ui          # Vitest UI
-yarn test:coverage    # Coverage report
-```
-
----
-
-## 🌍 Environment Variables
-
-### Required (Majburiy)
-
-```env
-VITE_API_URL=http://localhost:8081
-```
-
-### Optional (Ixtiyoriy)
-
-```env
-# App
-VITE_APP_NAME=HEMIS Admin Panel
-VITE_APP_VERSION=1.0.0
-VITE_DEFAULT_LOCALE=uz    # uz | ru | en
-
-# Sentry
-VITE_SENTRY_ENABLED=false
-VITE_SENTRY_DSN=
-VITE_SENTRY_ENVIRONMENT=development
-VITE_SENTRY_TRACES_SAMPLE_RATE=0.2
-```
-
-### Environment Files
-
-```bash
-.env                  # Local (git ignored)
-.env.example         # Template (committed)
-.env.development     # Dev environment
-.env.staging         # Staging environment
-.env.production      # Production environment
-```
-
----
-
-## 📜 Scriptlar
-
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Development server (3000) |
-| `yarn build` | Production build |
-| `yarn preview` | Preview production build |
-| `yarn type-check` | TypeScript check |
-| `yarn lint` | ESLint check |
-| `yarn lint:fix` | ESLint auto-fix |
-| `yarn format` | Prettier format |
-| `yarn test` | Run tests (watch) |
-| `yarn test:ui` | Vitest UI |
-| `yarn test:coverage` | Coverage report |
-
----
-
-## 🏗️ Arxitektura
-
-### Component Hierarchy
+### Component hierarchy
 
 ```
 App
-├── QueryClientProvider (TanStack Query)
-├── ThemeProvider (Dark mode)
+├── QueryClientProvider          (TanStack Query)
+├── ThemeProvider                (dark/light mode)
 └── BrowserRouter
-    ├── Login (Public)
-    └── MainLayout (Protected)
-        ├── Sidebar
-        ├── Header
-        └── Pages
-            ├── Dashboard
-            ├── Universities
-            ├── Students
-            └── ...
+    ├── LoginPage                (public)
+    └── ProtectedRoute
+        └── MainLayout
+            ├── Sidebar          (backend-driven menu, favorites)
+            ├── Header           (user menu, language, theme, search)
+            ├── Breadcrumb       (auto-generated from menu tree)
+            └── <Suspense>       (lazy-loaded pages)
+                ├── DashboardPage
+                ├── UniversitiesPage
+                ├── FacultiesPage
+                ├── StudentsPage
+                ├── TeachersPage
+                ├── ReportsPage
+                └── TranslationsPage
 ```
 
-### Data Flow
+### Data flow
 
 ```
-User Action
-    ↓
-Component
-    ↓
-Custom Hook (useUniversities)
-    ↓
-TanStack Query (useQuery/useMutation)
-    ↓
-API Client (axios)
-    ↓
-Backend API
-    ↓
-Response → Cache → Re-render
+User Action → Component → Custom Hook → TanStack Query → API Client (Axios) → Backend
+                                              ↓
+                                         Response → Cache → Re-render
 ```
 
-### State Management
+### State management
 
-| State Type | Tool | Misol |
-|------------|------|-------|
-| Server State | TanStack Query | API data, cache |
-| Client State | Zustand | Auth, UI state |
-| Form State | React Hook Form | Form inputs |
-| URL State | React Router | Query params |
+| State turi   | Tool                  | Misol                         |
+| ------------ | --------------------- | ----------------------------- |
+| Server state | TanStack Query        | API data, cache (5 min stale) |
+| Client state | Zustand               | Auth, theme, menu, favorites  |
+| Form state   | React Hook Form + Zod | Form inputs, validation       |
+| URL state    | React Router          | Query params, routing         |
+
+### Build optimization
+
+Vite `manualChunks` orqali vendor splitting:
+
+| Chunk             | Tarkibi                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `vendor-react`    | react, react-dom, react-router-dom                                             |
+| `vendor-radix`    | Barcha @radix-ui/\* paketlar                                                   |
+| `vendor-tanstack` | react-query, react-table                                                       |
+| `vendor-i18n`     | i18next, react-i18next                                                         |
+| `vendor-sentry`   | @sentry/react                                                                  |
+| `vendor-utils`    | axios, zod, zustand, date-fns, lucide-react, sonner, clsx, tailwind-merge, cva |
 
 ---
 
-## 🎯 Best Practices
+## Testing
 
-### 1. Component Organization
+### Infratuzilma
 
-**✅ Good:**
+- **Vitest** — test runner (jsdom environment)
+- **React Testing Library** — component testing
+- **MSW** — API mocking (service worker)
+- **49 test fayl** — components, hooks, stores, API, utils
 
-```typescript
-import { Button } from '@/components/ui/button'
-import type { University } from '@/types'
+### Coverage thresholds (CI da majburiy)
 
-interface Props {
-  university: University
-  onEdit: (id: number) => void
-}
+| Metrika    | Minimal |
+| ---------- | ------- |
+| Lines      | 80%     |
+| Functions  | 80%     |
+| Branches   | 75%     |
+| Statements | 80%     |
 
-export function UniversityCard({ university, onEdit }: Props) {
-  return (
-    <div className="rounded-lg border p-4">
-      <h3>{university.name}</h3>
-      <Button onClick={() => onEdit(university.id)}>
-        Tahrirlash
-      </Button>
-    </div>
-  )
-}
-```
-
-### 2. Custom Hooks
-
-**✅ Good:**
-
-```typescript
-export function useUniversities(params?: UniversitiesParams) {
-  return useQuery({
-    queryKey: queryKeys.universities.list(params),
-    queryFn: () => universitiesApi.getUniversities(params),
-  })
-}
-
-// Usage
-const { data, isLoading } = useUniversities({ page: 1 })
-```
-
-### 3. Type Safety
-
-**✅ Good:**
-
-```typescript
-interface UniversityFormData {
-  code: string
-  name: string
-  active: boolean
-}
-
-function createUniversity(data: UniversityFormData) {
-  return universitiesApi.create(data)
-}
-```
-
-### 4. Error Handling
-
-**✅ Good:**
-
-```typescript
-const { data, isLoading, error, isError } = useUniversities()
-
-if (isLoading) return <Skeleton />
-if (isError) return <ErrorAlert error={error} />
-return <Table data={data} />
-```
-
----
-
-## 🧪 Testing
-
-### Test Structure
-
-```
-src/
-├── lib/
-│   ├── utils.ts
-│   └── __tests__/
-│       └── utils.test.ts  # ✅ 8 tests, 100% coverage
-```
-
-### Running Tests
+### Buyruqlar
 
 ```bash
 yarn test              # Watch mode
-yarn test:ui          # Vitest UI
-yarn test:coverage    # Coverage report
-```
-
-### Coverage
-
-```
-----------|---------|----------|---------|---------|
-File      | % Stmts | % Branch | % Funcs | % Lines |
-----------|---------|----------|---------|---------|
-All files |     100 |      100 |     100 |     100 |
- utils.ts |     100 |      100 |     100 |     100 |
-----------|---------|----------|---------|---------|
+yarn test:ui           # Brauzerda Vitest UI
+yarn test:coverage     # Coverage hisoboti (threshold bilan)
 ```
 
 ---
 
-## 🚢 Deployment
+## Code Quality
 
-### Build
+### CI Pipeline (GitHub Actions)
+
+`main` va `develop` branchlariga push/PR da avtomatik ishga tushadi:
+
+```
+Checkout → Node 22 Setup → Yarn Install (cached)
+    → TypeScript type-check
+    → ESLint lint
+    → Vitest coverage (80% threshold)
+    → Vite build
+    → Upload coverage artifact
+```
+
+### Pre-commit hooks (Husky)
+
+| Hook         | Vazifa                                     |
+| ------------ | ------------------------------------------ |
+| `pre-commit` | lint-staged: ESLint fix + Prettier format  |
+| `commit-msg` | Commitlint: conventional commit tekshiruvi |
+
+### Commit message formati
+
+[Conventional Commits](https://www.conventionalcommits.org/) standartida:
+
+```
+feat: yangi xususiyat qo'shish
+fix: xatoni tuzatish
+docs: hujjatni yangilash
+style: formatlash o'zgarishi
+refactor: kodni qayta tuzish
+perf: ishlash tezligini oshirish
+test: test qo'shish/tuzatish
+build: build tizimini o'zgartirish
+ci: CI konfiguratsiyasini o'zgartirish
+chore: boshqa o'zgarishlar
+```
+
+### Accessibility
+
+- `eslint-plugin-jsx-a11y` — build vaqtida a11y tekshiruvi
+- Radix UI — barcha komponentlar `aria-*` bilan
+- Keyboard navigation — Sidebar (Escape), Command Palette (Cmd+K)
+- Semantic HTML — `<nav>`, `<aside>`, `<main>`, `aria-label`, `aria-current`
+
+---
+
+## Deployment
+
+### Docker (tavsiya)
 
 ```bash
-# 1. Install
-yarn install --frozen-lockfile
+# Build
+docker build \
+  --build-arg VITE_API_URL=https://api.hemis.uz \
+  --build-arg VITE_SENTRY_ENABLED=true \
+  --build-arg VITE_SENTRY_DSN=https://xxx@sentry.io/123 \
+  -t hemis-front .
 
-# 2. Test
-yarn test run
-
-# 3. Type check
-yarn type-check
-
-# 4. Build
-yarn build
-```
-
-### Nginx Configuration
-
-```nginx
-server {
-    listen 80;
-    server_name hemis.uz;
-    root /var/www/hemis-front/dist;
-    index index.html;
-
-    # SPA fallback
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Cache static assets
-    location ~* \.(js|css|png|jpg|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Gzip
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript;
-}
-```
-
-### Docker
-
-```dockerfile
-# Build stage
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
-COPY . .
-RUN yarn build
-
-# Production stage
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-```bash
-# Build & Run
-docker build -t hemis-front .
+# Run
 docker run -p 80:80 hemis-front
 ```
 
----
+### Docker Compose
 
-## 📚 Resources
+```bash
+# .env faylda VITE_API_URL sozlab:
+docker compose up -d
 
-### Documentation
+# Health check
+curl http://localhost/health
+# {"status":"ok"}
+```
 
-- [React 19](https://react.dev)
-- [TypeScript](https://www.typescriptlang.org/docs/)
-- [TanStack Query](https://tanstack.com/query/latest)
-- [Vite](https://vitejs.dev)
-- [shadcn/ui](https://ui.shadcn.com)
-- [Tailwind CSS](https://tailwindcss.com)
+### Nginx security headers
 
-### API Documentation
+Production da quyidagi headerlar avtomatik qo'shiladi (`nginx-security-headers.conf`):
 
-Backend API: `http://localhost:8081/swagger-ui.html`
+| Header                      | Qiymat                                                 |
+| --------------------------- | ------------------------------------------------------ |
+| `Content-Security-Policy`   | `default-src 'self'; script-src 'self'; ...`           |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload`         |
+| `Permissions-Policy`        | `camera=(), microphone=(), geolocation=(), payment=()` |
+| `X-Frame-Options`           | `SAMEORIGIN`                                           |
+| `X-Content-Type-Options`    | `nosniff`                                              |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`                      |
 
-### Support
+### Manual deploy
 
-- **Email**: dev@hemis.uz
-- **Telegram**: @hemis_support
-- **GitHub**: Issues
-
----
-
-## 📊 Project Stats
-
-| Metric | Value |
-|--------|-------|
-| Total Files | 100+ |
-| Lines of Code | 8,000+ |
-| Components | 30+ |
-| Custom Hooks | 10+ |
-| Type Definitions | 50+ |
-| Test Coverage | 100% (utils) |
-| Bundle Size | ~500 KB (gzipped) |
-| Build Time | ~12s |
+```bash
+yarn build              # dist/ papkasi yaratiladi
+# dist/ ni web serverga joylashtiring
+# Nginx SPA fallback: try_files $uri $uri/ /index.html;
+```
 
 ---
 
-## 🎯 Roadmap
+## API Documentation
 
-### ✅ v1.0.0 (Current)
-- [x] Authentication & RBAC
-- [x] Dashboard
-- [x] University CRUD
-- [x] i18n (uz, ru, en)
-- [x] Dark mode
-- [x] Test infrastructure
-- [x] TypeScript strict
-- [x] TanStack Query
-
-### 🚧 v1.1.0 (In Progress)
-- [ ] Code splitting
-- [ ] Export (Excel/PDF)
-- [ ] Bulk operations
-- [ ] E2E tests
-- [ ] CI/CD
-
-### 📋 v2.0.0 (Planned)
-- [ ] Real-time (WebSocket)
-- [ ] PWA
-- [ ] Mobile app
-- [ ] AI insights
+Backend Swagger UI: `http://localhost:8081/api/swagger-ui.html`
 
 ---
 
-## 📄 License
+## Litsenziya
 
-**Copyright © 2024 O'zbekiston Respublikasi Oliy Ta'lim Vazirligi**
-
-Ushbu dastur faqat O'zbekiston Respublikasi Oliy Ta'lim Vazirligi tomonidan ichki foydalanish uchun mo'ljallangan.
-
----
-
-## 👥 Team
-
-**HEMIS Development Team**
-
-- Project Manager: pm@hemis.uz
-- Frontend Lead: frontend@hemis.uz
-- Backend Lead: backend@hemis.uz
-- UI/UX Designer: design@hemis.uz
-
----
-
-<div align="center">
-
-**Yaratildi:** 2024  
-**So'nggi yangilanish:** 2025-11-15  
-**Versiya:** 1.0.0  
-**Holat:** ✅ Production Ready
-
-**Made with ❤️ by HEMIS Development Team**
-
-[🏠 Home](/) • [📖 Docs](/docs) • [🐛 Issues](/issues) • [💡 Features](/issues)
-
-</div>
+Copyright 2024–2025 O'zbekiston Respublikasi Oliy Ta'lim Vazirligi.
+Ichki foydalanish uchun.

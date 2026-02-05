@@ -11,7 +11,15 @@
  * - React Error Boundaries integration
  */
 
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/react'
+import React from 'react'
+import {
+  useLocation,
+  useNavigationType,
+  createRoutesFromChildren,
+  matchRoutes,
+} from 'react-router-dom'
+import { env } from '@/env'
 
 /**
  * Initialize Sentry
@@ -21,30 +29,26 @@ import * as Sentry from '@sentry/react';
  */
 export function initSentry() {
   // Check if Sentry is enabled
-  const enabled = import.meta.env.VITE_SENTRY_ENABLED === 'true';
-
-  if (!enabled) {
-    return;
+  if (!env.VITE_SENTRY_ENABLED) {
+    return
   }
 
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
-
-  if (!dsn) {
-    return;
+  if (!env.VITE_SENTRY_DSN) {
+    return
   }
 
   Sentry.init({
     // DSN from Sentry.io dashboard
-    dsn,
+    dsn: env.VITE_SENTRY_DSN,
 
     // Environment (production, staging, development)
-    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
+    environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
 
     // Release version for tracking
-    release: import.meta.env.VITE_SENTRY_RELEASE || `hemis-front@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`,
+    release: env.VITE_SENTRY_RELEASE || `hemis-front@${env.VITE_APP_VERSION}`,
 
     // Performance Monitoring - Traces Sample Rate (0.0 to 1.0)
-    tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || '0.2'),
+    tracesSampleRate: parseFloat(env.VITE_SENTRY_TRACES_SAMPLE_RATE),
 
     // Integrations
     integrations: [
@@ -59,14 +63,14 @@ export function initSentry() {
 
       // Replay integration (session recording)
       Sentry.replayIntegration({
-        maskAllText: true,  // Mask all text for privacy
+        maskAllText: true, // Mask all text for privacy
         blockAllMedia: true, // Block all media
       }),
     ],
 
     // Replay Sample Rates
-    replaysSessionSampleRate: parseFloat(import.meta.env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE || '0.1'),
-    replaysOnErrorSampleRate: parseFloat(import.meta.env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE || '1.0'),
+    replaysSessionSampleRate: parseFloat(env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE),
+    replaysOnErrorSampleRate: parseFloat(env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE),
 
     // Ignore specific errors
     ignoreErrors: [
@@ -85,52 +89,19 @@ export function initSentry() {
     beforeSend(event, hint) {
       // Remove sensitive headers
       if (event.request?.headers) {
-        delete event.request.headers['Authorization'];
-        delete event.request.headers['Cookie'];
+        delete event.request.headers['Authorization']
+        delete event.request.headers['Cookie']
       }
 
       // Log to console in development
       if (import.meta.env.DEV) {
-        console.error('🐛 Sentry Event:', event);
-        console.error('🐛 Sentry Hint:', hint);
+        console.error('🐛 Sentry Event:', event)
+        console.error('🐛 Sentry Hint:', hint)
       }
 
-      return event;
+      return event
     },
-  });
-
-}
-
-/**
- * Set user context for Sentry
- * Call this after user logs in
- *
- * @example
- * setUserContext({
- *   id: '123',
- *   username: 'admin',
- *   email: 'admin@hemis.uz'
- * })
- */
-export function setUserContext(user: {
-  id: string;
-  username?: string;
-  email?: string;
-  [key: string]: unknown;
-}) {
-  Sentry.setUser({
-    id: user.id,
-    username: user.username,
-    email: user.email,
-  });
-}
-
-/**
- * Clear user context
- * Call this after user logs out
- */
-export function clearUserContext() {
-  Sentry.setUser(null);
+  })
 }
 
 /**
@@ -142,26 +113,19 @@ export function clearUserContext() {
  *   extra: { userId: '123' }
  * })
  */
-export function captureError(error: Error, context?: {
-  tags?: Record<string, string>;
-  extra?: Record<string, unknown>;
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
-}) {
+export function captureError(
+  error: Error,
+  context?: {
+    tags?: Record<string, string>
+    extra?: Record<string, unknown>
+    level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+  },
+) {
   Sentry.captureException(error, {
     tags: context?.tags,
     extra: context?.extra,
     level: context?.level,
-  });
-}
-
-/**
- * Capture a message manually
- *
- * @example
- * captureMessage('User attempted invalid action', 'warning')
- */
-export function captureMessage(message: string, level: 'fatal' | 'error' | 'warning' | 'info' | 'debug' = 'info') {
-  Sentry.captureMessage(message, level);
+  })
 }
 
 /**
@@ -175,17 +139,13 @@ export function captureMessage(message: string, level: 'fatal' | 'error' | 'warn
  * })
  */
 export function addBreadcrumb(breadcrumb: {
-  category?: string;
-  message: string;
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
-  data?: Record<string, unknown>;
+  category?: string
+  message: string
+  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+  data?: Record<string, unknown>
 }) {
-  Sentry.addBreadcrumb(breadcrumb);
+  Sentry.addBreadcrumb(breadcrumb)
 }
 
 // Re-export Sentry for advanced use cases
-export { Sentry };
-
-// React Router imports (for integration)
-import React from 'react';
-import { useLocation, useNavigationType, createRoutesFromChildren, matchRoutes } from 'react-router-dom';
+export { Sentry }

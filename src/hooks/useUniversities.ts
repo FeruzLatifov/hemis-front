@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { universitiesApi, type UniversitiesParams, type UniversityRow } from '@/api/universities.api'
+import {
+  universitiesApi,
+  type UniversitiesParams,
+  type UniversityRow,
+} from '@/api/universities.api'
 import { queryKeys } from '@/lib/queryKeys'
 import { toast } from 'sonner'
 import i18n from '@/i18n/config'
@@ -19,7 +23,7 @@ export function useUniversities(params: UniversitiesParams = {}) {
  */
 export function useUniversity(code: string) {
   return useQuery({
-    queryKey: queryKeys.universities.byId(Number(code)),
+    queryKey: queryKeys.universities.byId(code),
     queryFn: () => universitiesApi.getUniversity(code),
     enabled: !!code, // Only fetch if code exists
   })
@@ -30,7 +34,7 @@ export function useUniversity(code: string) {
  */
 export function useUniversityDictionaries() {
   return useQuery({
-    queryKey: ['universities', 'dictionaries'],
+    queryKey: queryKeys.universities.dictionaries,
     queryFn: () => universitiesApi.getDictionaries(),
     staleTime: 1000 * 60 * 60, // 1 hour - dictionaries don't change often
   })
@@ -68,7 +72,7 @@ export function useUpdateUniversity() {
       // Invalidate specific university and list
       queryClient.invalidateQueries({ queryKey: queryKeys.universities.all })
       queryClient.invalidateQueries({
-        queryKey: queryKeys.universities.byId(Number(variables.code)),
+        queryKey: queryKeys.universities.byId(variables.code),
       })
       toast.success(i18n.t('University successfully updated'))
     },

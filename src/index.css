@@ -23,7 +23,7 @@
   --color-accent-foreground: 222.2 47.4% 11.2%;
   --color-destructive: 0 84.2% 60.2%;
   --color-destructive-foreground: 210 40% 98%;
-  
+
   --radius: 0.75rem;
 }
 
@@ -51,42 +51,57 @@
 
 /* Professional OTM rang tizimi (like univer-front) */
 :root {
-  --app-bg: #F5F6FA;
-  --card-bg: #FFFFFF;
-  --primary: #2F80ED;
-  --primary-hover: #2666BE;
-  --text-primary: #1E2124;
-  --text-secondary: #6B7280;
-  --border-color-pro: #E5E7EB;
-  --success: #27AE60;
-  --warning: #F2C94C;
-  --danger: #EB5757;
+  --app-bg: #f5f6fa;
+  --card-bg: #ffffff;
+  --primary: #2f80ed;
+  --primary-hover: #2666be;
+  --text-primary: #1e2124;
+  --text-secondary: #6b7280;
+  --border-color-pro: #e5e7eb;
+  --success: #27ae60;
+  --warning: #f2c94c;
+  --danger: #eb5757;
   --active-bg: rgba(47, 128, 237, 0.12);
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .dark {
   --app-bg: #111827;
-  --card-bg: #1F2937;
-  --text-primary: #F9FAFB;
-  --text-secondary: #9CA3AF;
+  --card-bg: #1f2937;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
   --border-color-pro: #374151;
 }
 
 /* Custom Animations for Login Page */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes slideUp {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .animate-float {
@@ -99,18 +114,37 @@
 
 /* Login Page — animated blobs */
 @keyframes blob-drift-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(50px, -70px) scale(1.12); }
-  66% { transform: translate(-30px, 40px) scale(0.92); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(50px, -70px) scale(1.12);
+  }
+  66% {
+    transform: translate(-30px, 40px) scale(0.92);
+  }
 }
 @keyframes blob-drift-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-60px, 40px) scale(1.08); }
-  66% { transform: translate(40px, -50px) scale(1.15); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-60px, 40px) scale(1.08);
+  }
+  66% {
+    transform: translate(40px, -50px) scale(1.15);
+  }
 }
 @keyframes blob-drift-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(35px, 50px) scale(1.1); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(35px, 50px) scale(1.1);
+  }
 }
 
 .login-blob {
@@ -131,13 +165,15 @@
   background-color: var(--card-bg);
   border: 1px solid var(--border-color-pro);
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.04);
   padding: 40px;
 }
 
 /* Login submit button */
 .login-submit-btn {
-  background-color: #1B3A6B;
+  background-color: #1b3a6b;
   color: white;
   width: 100%;
   display: flex;
@@ -170,7 +206,9 @@
   font-size: 14px;
   background-color: var(--card-bg);
   color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   outline: none;
 }
 .login-input::placeholder {
@@ -178,7 +216,7 @@
   opacity: 0.6;
 }
 .login-input:focus {
-  border-color: #1B3A6B;
+  border-color: #1b3a6b;
   box-shadow: 0 0 0 3px rgba(27, 58, 107, 0.1);
 }
 .login-input:disabled {
@@ -201,11 +239,21 @@
 body {
   background-color: var(--app-bg);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', "rlig" 1, "calt" 1;
+  font-feature-settings:
+    'cv02',
+    'cv03',
+    'cv04',
+    'cv11',
+    'rlig' 1,
+    'calt' 1;
 }
 
 /* Custom Scrollbar - Clean Design */
@@ -215,17 +263,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F5F6FA;
+  background: #f5f6fa;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E5E7EB;
+  background: #e5e7eb;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2F80ED;
+  background: #2f80ed;
 }
 
 /* Animations */
@@ -241,11 +289,12 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(47, 128, 237, 0.3);
   }
   50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 40px rgba(47, 128, 237, 0.6);
   }
 }
 
@@ -259,25 +308,25 @@ body {
 
 /* Selection */
 ::selection {
-  background-color: rgb(233 213 255);
-  color: rgb(88 28 135);
+  background-color: rgba(47, 128, 237, 0.2);
+  color: #1e2124;
 }
 
 .dark ::selection {
-  background-color: rgb(88 28 135);
-  color: rgb(250 245 255);
+  background-color: rgba(47, 128, 237, 0.4);
+  color: #f9fafb;
 }
 
 /* Focus visible */
 *:focus-visible {
   outline: none;
   ring: 2px;
-  ring-color: rgb(168 85 247);
+  ring-color: var(--primary);
   ring-offset: 2px;
 }
 
 .dark *:focus-visible {
-  ring-color: rgb(192 132 252);
+  ring-color: #60a5fa;
 }
 
 /* Professional buttons */
@@ -296,7 +345,7 @@ body {
 }
 
 .btn-primary:disabled {
-  background-color: #BFD5F5;
+  background-color: #bfd5f5;
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -367,12 +416,12 @@ body {
 }
 
 .sidebar-menu-item-child--active {
-  background-color: #EFF6FF;
+  background-color: #eff6ff;
   color: var(--primary);
 }
 
 .sidebar-menu-item-child--active:hover {
-  background-color: #EFF6FF;
+  background-color: #eff6ff;
 }
 
 /* Layout components */
@@ -420,12 +469,12 @@ body {
 }
 
 .header-btn-success:hover {
-  background-color: #F0FDF4;
+  background-color: #f0fdf4;
   border-color: var(--success);
 }
 
 .header-btn-danger:hover {
-  background-color: #FEF2F2;
+  background-color: #fef2f2;
 }
 
 /* Dropdown menu item */
@@ -443,7 +492,7 @@ body {
 }
 
 .dropdown-item-danger:hover {
-  background-color: #FEF2F2;
+  background-color: #fef2f2;
 }
 
 /* Badge styles */
@@ -469,10 +518,10 @@ body {
 }
 
 .lang-item--active {
-  background-color: #EFF6FF;
+  background-color: #eff6ff;
   color: var(--primary);
 }
 
 .lang-item--active:hover {
-  background-color: #EFF6FF;
+  background-color: #eff6ff;
 }

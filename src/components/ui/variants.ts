@@ -10,8 +10,9 @@ export const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary-500 text-white hover:bg-primary-600',
-        secondary: 'border-transparent bg-secondary-500 text-white hover:bg-secondary-600',
+        default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary:
+          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructive: 'border-transparent bg-red-500 text-white hover:bg-red-600',
         outline: 'text-foreground',
       },
@@ -19,7 +20,7 @@ export const badgeVariants = cva(
     defaultVariants: {
       variant: 'default',
     },
-  }
+  },
 )
 
 export const buttonVariants = cva(
@@ -27,12 +28,12 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary-500 text-white hover:bg-primary-600 shadow',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow',
         destructive: 'bg-red-500 text-white hover:bg-red-600',
         outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary-500 text-white hover:bg-secondary-600',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary-500 underline-offset-4 hover:underline',
+        link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -45,5 +46,5 @@ export const buttonVariants = cva(
       variant: 'default',
       size: 'default',
     },
-  }
+  },
 )

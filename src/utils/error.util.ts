@@ -17,13 +17,15 @@ import axios, { type AxiosError } from 'axios'
  * }
  */
 type ApiErrorPayload = {
-  message?: string           // ← Localized message from backend (PRIMARY)
-  error?: string | {
-    message?: string
-  }
+  message?: string // ← Localized message from backend (PRIMARY)
+  error?:
+    | string
+    | {
+        message?: string
+      }
   error_description?: string // OAuth2 style error
-  errorCode?: string         // Error code for debugging (AUTH_FAILED, etc.)
-  eventId?: string           // Sentry Event ID from backend
+  errorCode?: string // Error code for debugging (AUTH_FAILED, etc.)
+  eventId?: string // Sentry Event ID from backend
   status?: number
   path?: string
 }
@@ -47,10 +49,7 @@ const isAxiosApiError = (error: unknown): error is AxiosApiError =>
  * @param fallback - Fallback message if nothing found
  * @returns Localized error message from backend
  */
-export const extractApiErrorMessage = (
-  error: unknown,
-  fallback = 'Unexpected error'
-): string => {
+export const extractApiErrorMessage = (error: unknown, fallback = 'Unexpected error'): string => {
   if (isAxiosApiError(error)) {
     const data = error.response?.data
 
@@ -87,28 +86,6 @@ export const extractApiErrorMessage = (
   }
 
   return fallback
-}
-
-/**
- * Extract error code from API response
- * Used for specific error handling (e.g., rate limiting, account locked)
- */
-export const extractErrorCode = (error: unknown): string | undefined => {
-  if (isAxiosApiError(error)) {
-    return error.response?.data?.errorCode
-  }
-  return undefined
-}
-
-/**
- * Extract Sentry Event ID from backend error response
- * Useful for support tickets
- */
-export const extractEventId = (error: unknown): string | undefined => {
-  if (isAxiosApiError(error)) {
-    return error.response?.data?.eventId
-  }
-  return undefined
 }
 
 export const isNetworkError = (error: unknown): boolean => {

@@ -10,28 +10,13 @@ import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
 import { Home, ChevronRight } from 'lucide-react'
-import { useRootMenuItems } from '../../stores/menuStore'
-import type { MenuItem } from '../../api/menu.api'
+import { useRootMenuItems } from '@/stores/menuStore'
+import type { MenuItem } from '@/api/menu.api'
+import { getMenuLabel } from '@/utils/menu.util'
 
 interface BreadcrumbItem {
   label: string
   url?: string
-}
-
-/**
- * Get label for menu item based on current language
- */
-function getMenuLabel(item: MenuItem, lang: string): string {
-  switch (lang) {
-    case 'oz':
-      return item.labelOz || item.labelUz
-    case 'ru':
-      return item.labelRu || item.labelUz
-    case 'en':
-      return item.labelEn || item.labelUz
-    default:
-      return item.labelUz
-  }
 }
 
 /**
@@ -41,7 +26,7 @@ function getMenuLabel(item: MenuItem, lang: string): string {
 function findBreadcrumbPath(
   items: MenuItem[],
   targetUrl: string,
-  lang: string
+  lang: string,
 ): BreadcrumbItem[] | null {
   for (const item of items) {
     if (item.url === targetUrl) {
@@ -51,10 +36,7 @@ function findBreadcrumbPath(
     if (item.items && item.items.length > 0) {
       const childPath = findBreadcrumbPath(item.items, targetUrl, lang)
       if (childPath) {
-        return [
-          { label: getMenuLabel(item, lang), url: item.url },
-          ...childPath,
-        ]
+        return [{ label: getMenuLabel(item, lang), url: item.url }, ...childPath]
       }
     }
   }
@@ -80,7 +62,7 @@ const ROUTE_LABELS: Record<string, string> = {
   edit: 'Edit',
 }
 
-function getFallbackLabel(segment: string, _lang: string): string {
+function getFallbackLabel(segment: string): string {
   const key = ROUTE_LABELS[segment]
   if (key) {
     return i18n.t(key)
@@ -130,7 +112,7 @@ export default function Breadcrumb() {
         items.push({ label: lastItem.label, url: currentPath })
       } else {
         items.push({
-          label: getFallbackLabel(segment, currentLang),
+          label: getFallbackLabel(segment),
           url: currentPath,
         })
       }
@@ -148,13 +130,13 @@ export default function Breadcrumb() {
 
   return (
     <nav
-      aria-label="Breadcrumb"
-      className="flex items-center gap-1.5 px-3 md:px-4 lg:px-6 py-2.5 text-sm border-b border-color-light"
+      aria-label={i18n.t('Breadcrumb')}
+      className="border-color-light flex items-center gap-1.5 border-b px-3 py-2.5 text-sm md:px-4 lg:px-6"
     >
       {/* Home link */}
       <Link
         to="/dashboard"
-        className="flex items-center gap-1 text-color-secondary hover:text-[var(--primary)] transition-colors"
+        className="text-color-secondary flex items-center gap-1 transition-colors hover:text-[var(--primary)]"
         title={homeLabel}
       >
         <Home className="h-4 w-4" />
@@ -167,15 +149,15 @@ export default function Breadcrumb() {
 
         return (
           <span key={index} className="flex items-center gap-1.5">
-            <ChevronRight className="h-3.5 w-3.5 text-color-secondary" aria-hidden="true" />
+            <ChevronRight className="text-color-secondary h-3.5 w-3.5" aria-hidden="true" />
             {isLast ? (
-              <span className="font-medium text-color-primary" aria-current="page">
+              <span className="text-color-primary font-medium" aria-current="page">
                 {item.label}
               </span>
             ) : (
               <Link
                 to={item.url || '#'}
-                className="text-color-secondary hover:text-[var(--primary)] transition-colors"
+                className="text-color-secondary transition-colors hover:text-[var(--primary)]"
               >
                 {item.label}
               </Link>

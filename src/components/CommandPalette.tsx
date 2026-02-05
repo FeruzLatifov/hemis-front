@@ -10,10 +10,10 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Clock, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useMenuStore } from '../stores/menuStore'
-import { flattenMenuTree } from '../api/menu.api'
-import type { MenuItem } from '../api/menu.api'
-import { getIcon } from '../utils/iconMapper'
+import { useMenuStore } from '@/stores/menuStore'
+import { flattenMenuTree } from '@/api/menu.api'
+import { getIcon } from '@/utils/iconMapper'
+import { getMenuLabel } from '@/utils/menu.util'
 
 // =====================================================
 // Constants
@@ -43,22 +43,6 @@ interface SearchableItem {
 // =====================================================
 // Helpers
 // =====================================================
-
-/**
- * Get label for menu item based on current language
- */
-const getMenuLabel = (item: MenuItem, lang: string): string => {
-  switch (lang) {
-    case 'oz':
-      return item.labelOz || item.labelUz
-    case 'ru':
-      return item.labelRu || item.labelUz
-    case 'en':
-      return item.labelEn || item.labelUz
-    default:
-      return item.labelUz
-  }
-}
 
 /**
  * Simple fuzzy match: checks if all query characters appear in order within the target
@@ -110,9 +94,7 @@ const loadRecentPages = (): RecentPage[] => {
     const raw = localStorage.getItem(RECENT_PAGES_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw) as RecentPage[]
-    return parsed
-      .sort((a, b) => b.visitedAt - a.visitedAt)
-      .slice(0, MAX_RECENT_ITEMS)
+    return parsed.sort((a, b) => b.visitedAt - a.visitedAt).slice(0, MAX_RECENT_ITEMS)
   } catch {
     return []
   }
@@ -121,14 +103,14 @@ const loadRecentPages = (): RecentPage[] => {
 /**
  * Save a visited page to recent pages in localStorage
  */
-export const addRecentPage = (page: Omit<RecentPage, 'visitedAt'>): void => {
+const addRecentPage = (page: Omit<RecentPage, 'visitedAt'>): void => {
   try {
     const existing = loadRecentPages()
     const filtered = existing.filter((p) => p.url !== page.url)
-    const updated: RecentPage[] = [
-      { ...page, visitedAt: Date.now() },
-      ...filtered,
-    ].slice(0, MAX_RECENT_ITEMS)
+    const updated: RecentPage[] = [{ ...page, visitedAt: Date.now() }, ...filtered].slice(
+      0,
+      MAX_RECENT_ITEMS,
+    )
     localStorage.setItem(RECENT_PAGES_KEY, JSON.stringify(updated))
   } catch {
     // Silently fail if localStorage is unavailable
@@ -166,8 +148,11 @@ export default function CommandPalette() {
       }))
   }, [menuItems, currentLang])
 
-  // Load recent pages
-  const recentPages = useMemo(() => loadRecentPages(), [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Load recent pages (recompute when palette opens)
+  const recentPages = useMemo(() => {
+    if (!isOpen) return []
+    return loadRecentPages()
+  }, [isOpen])
 
   // Filter items based on query
   const filteredItems = useMemo(() => {
@@ -243,7 +228,7 @@ export default function CommandPalette() {
       setIsOpen(false)
       navigate(url)
     },
-    [navigate]
+    [navigate],
   )
 
   // Keyboard navigation
@@ -271,7 +256,7 @@ export default function CommandPalette() {
           break
       }
     },
-    [allItems, activeIndex, handleSelect]
+    [allItems, activeIndex, handleSelect],
   )
 
   // Close on overlay click
@@ -287,24 +272,29 @@ export default function CommandPalette() {
   const hasRecentPages = !query.trim() && recentPages.length > 0
   const hasFilteredItems = filteredItems.length > 0
 
-  // Track current index for data-active across sections
-  let itemIndex = -1
+  // Precompute section offsets for keyboard navigation
+  const recentStartIndex = 0
+  const filteredStartIndex = hasRecentPages ? recentPages.length : 0
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-[20vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-[20vh]"
       onClick={handleOverlayClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') handleOverlayClick(e as unknown as React.MouseEvent)
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={t('Tezkor qidiruv')}
     >
       <div
-        className="w-full max-w-lg mx-4 rounded-lg border card-white overflow-hidden"
+        className="card-white mx-4 w-full max-w-lg overflow-hidden rounded-lg border"
         style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
       >
         {/* Search Input */}
-        <div className="flex items-center gap-3 px-4 border-b border-color-light">
-          <Search className="h-4 w-4 text-color-secondary shrink-0" />
+        <div className="border-color-light flex items-center gap-3 border-b px-4">
+          <Search className="text-color-secondary h-4 w-4 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -312,28 +302,23 @@ export default function CommandPalette() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('Sahifalarni qidirish...')}
-            className="w-full py-3 text-sm outline-none bg-transparent text-color-primary placeholder:text-color-secondary"
+            className="text-color-primary placeholder:text-color-secondary w-full bg-transparent py-3 text-sm outline-none"
           />
-          <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border border-color-light px-1.5 text-[10px] font-medium text-color-secondary">
+          <kbd className="border-color-light text-color-secondary hidden h-5 items-center gap-1 rounded border px-1.5 text-[10px] font-medium sm:inline-flex">
             ESC
           </kbd>
         </div>
 
         {/* Results */}
-        <div
-          ref={listRef}
-          className="max-h-[300px] overflow-y-auto py-2"
-          role="listbox"
-        >
+        <div ref={listRef} className="max-h-[300px] overflow-y-auto py-2" role="listbox">
           {/* Recent Pages Section */}
           {hasRecentPages && (
             <>
-              <div className="px-4 py-2 text-xs font-semibold text-color-secondary uppercase tracking-wider">
+              <div className="text-color-secondary px-4 py-2 text-xs font-semibold tracking-wider uppercase">
                 {t("So'nggi")}
               </div>
-              {recentPages.map((page) => {
-                itemIndex++
-                const currentIndex = itemIndex
+              {recentPages.map((page, idx) => {
+                const currentIndex = recentStartIndex + idx
                 const isActive = activeIndex === currentIndex
 
                 return (
@@ -341,20 +326,18 @@ export default function CommandPalette() {
                     key={`recent-${page.url}`}
                     data-active={isActive}
                     className={cn(
-                      'w-full px-4 py-2.5 flex items-center gap-3 cursor-pointer transition-colors text-left',
-                      isActive ? 'layout-bg' : 'hover:layout-bg'
+                      'flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left transition-colors',
+                      isActive ? 'layout-bg' : 'hover:layout-bg',
                     )}
                     onClick={() => handleSelect(page.url, page.label, page.icon)}
                     onMouseEnter={() => setActiveIndex(currentIndex)}
                     role="option"
                     aria-selected={isActive}
                   >
-                    <Clock className="h-4 w-4 text-color-secondary shrink-0" />
-                    <span className="flex-1 text-sm text-color-primary truncate">
-                      {page.label}
-                    </span>
+                    <Clock className="text-color-secondary h-4 w-4 shrink-0" />
+                    <span className="text-color-primary flex-1 truncate text-sm">{page.label}</span>
                     {isActive && (
-                      <ArrowRight className="h-3.5 w-3.5 text-color-secondary shrink-0" />
+                      <ArrowRight className="text-color-secondary h-3.5 w-3.5 shrink-0" />
                     )}
                   </button>
                 )
@@ -364,18 +347,17 @@ export default function CommandPalette() {
 
           {/* Divider between sections */}
           {hasRecentPages && hasFilteredItems && (
-            <div className="my-1 border-t border-color-light" />
+            <div className="border-color-light my-1 border-t" />
           )}
 
           {/* All Pages Section */}
           {hasFilteredItems && (
             <>
-              <div className="px-4 py-2 text-xs font-semibold text-color-secondary uppercase tracking-wider">
+              <div className="text-color-secondary px-4 py-2 text-xs font-semibold tracking-wider uppercase">
                 {query.trim() ? t('Natijalar') : t('Barcha sahifalar')}
               </div>
-              {filteredItems.map((item) => {
-                itemIndex++
-                const currentIndex = itemIndex
+              {filteredItems.map((item, idx) => {
+                const currentIndex = filteredStartIndex + idx
                 const isActive = activeIndex === currentIndex
                 const IconComponent = getIcon(item.icon)
 
@@ -384,20 +366,18 @@ export default function CommandPalette() {
                     key={`page-${item.id}`}
                     data-active={isActive}
                     className={cn(
-                      'w-full px-4 py-2.5 flex items-center gap-3 cursor-pointer transition-colors text-left',
-                      isActive ? 'layout-bg' : 'hover:layout-bg'
+                      'flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left transition-colors',
+                      isActive ? 'layout-bg' : 'hover:layout-bg',
                     )}
                     onClick={() => handleSelect(item.url, item.label, item.icon)}
                     onMouseEnter={() => setActiveIndex(currentIndex)}
                     role="option"
                     aria-selected={isActive}
                   >
-                    <IconComponent className="h-4 w-4 text-color-secondary shrink-0" />
-                    <span className="flex-1 text-sm text-color-primary truncate">
-                      {item.label}
-                    </span>
+                    <IconComponent className="text-color-secondary h-4 w-4 shrink-0" />
+                    <span className="text-color-primary flex-1 truncate text-sm">{item.label}</span>
                     {isActive && (
-                      <ArrowRight className="h-3.5 w-3.5 text-color-secondary shrink-0" />
+                      <ArrowRight className="text-color-secondary h-3.5 w-3.5 shrink-0" />
                     )}
                   </button>
                 )
@@ -408,32 +388,30 @@ export default function CommandPalette() {
           {/* Empty State */}
           {!hasRecentPages && !hasFilteredItems && (
             <div className="px-4 py-8 text-center">
-              <p className="text-sm text-color-secondary">
-                {t('Natija topilmadi')}
-              </p>
+              <p className="text-color-secondary text-sm">{t('Natija topilmadi')}</p>
             </div>
           )}
         </div>
 
         {/* Footer Hint */}
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-color-light">
-          <div className="flex items-center gap-1.5 text-xs text-color-secondary">
-            <kbd className="inline-flex h-4 items-center rounded border border-color-light px-1 text-[10px] font-medium">
+        <div className="border-color-light flex items-center gap-4 border-t px-4 py-2">
+          <div className="text-color-secondary flex items-center gap-1.5 text-xs">
+            <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               &uarr;
             </kbd>
-            <kbd className="inline-flex h-4 items-center rounded border border-color-light px-1 text-[10px] font-medium">
+            <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               &darr;
             </kbd>
             <span>{t('navigatsiya')}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-color-secondary">
-            <kbd className="inline-flex h-4 items-center rounded border border-color-light px-1 text-[10px] font-medium">
+          <div className="text-color-secondary flex items-center gap-1.5 text-xs">
+            <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               Enter
             </kbd>
             <span>{t('tanlash')}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-color-secondary">
-            <kbd className="inline-flex h-4 items-center rounded border border-color-light px-1 text-[10px] font-medium">
+          <div className="text-color-secondary flex items-center gap-1.5 text-xs">
+            <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               Esc
             </kbd>
             <span>{t('yopish')}</span>

@@ -1,39 +1,39 @@
-import { Settings2 } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Settings2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface Column {
-  id: string;
-  label: string;
-  visible: boolean;
-  canHide: boolean;
+  id: string
+  label: string
+  visible: boolean
+  canHide: boolean
 }
 
 interface ColumnSettingsPopoverProps {
-  columns: Column[];
-  onToggle: (columnId: string) => void;
+  columns: Column[]
+  onToggle: (columnId: string) => void
 }
 
 export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopoverProps) {
-  const visibleCount = columns.filter(c => c.visible).length;
+  const { t } = useTranslation()
+  const visibleCount = columns.filter((c) => c.visible).length
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button
-          className="p-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          title="Ustunlar sozlamalari"
+          className="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 transition-colors hover:bg-gray-50"
+          title={t('Column settings')}
         >
-          <Settings2 className="w-4 h-4" />
+          <Settings2 className="h-4 w-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <h4 className="text-sm font-semibold text-gray-900">
-            Ustunlar sozlamalari
-          </h4>
-          <p className="text-xs text-gray-600 mt-1">
-            Ko'rsatilgan: <span className="font-medium">{visibleCount}</span> / {columns.length}
+        <div className="border-b border-gray-200 bg-gray-50 p-4">
+          <h4 className="text-sm font-semibold text-gray-900">{t('Column settings')}</h4>
+          <p className="mt-1 text-xs text-gray-600">
+            {t('Shown')}: <span className="font-medium">{visibleCount}</span> / {columns.length}
           </p>
         </div>
 
@@ -42,22 +42,20 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
             {columns.map((column) => (
               <label
                 key={column.id}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors ${
-                  !column.canHide ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-gray-50 ${
+                  !column.canHide ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 }`}
               >
                 <Checkbox
                   checked={column.visible}
                   onCheckedChange={() => column.canHide && onToggle(column.id)}
                   disabled={!column.canHide}
-                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                  className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
                 />
-                <span className="text-sm text-gray-700 flex-1">
-                  {column.label}
-                </span>
+                <span className="flex-1 text-sm text-gray-700">{column.label}</span>
                 {!column.canHide && (
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                    Majburiy
+                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                    {t('Required')}
                   </span>
                 )}
               </label>
@@ -65,21 +63,21 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
           </div>
         </div>
 
-        <div className="p-3 border-t border-gray-200 bg-gray-50">
+        <div className="border-t border-gray-200 bg-gray-50 p-3">
           <button
             onClick={() => {
               columns.forEach((col) => {
                 if (col.canHide && !col.visible) {
-                  onToggle(col.id);
+                  onToggle(col.id)
                 }
-              });
+              })
             }}
-            className="w-full px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+            className="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
           >
-            Barchasini ko'rsatish
+            {t('Show all')}
           </button>
         </div>
       </PopoverContent>
     </Popover>
-  );
+  )
 }
