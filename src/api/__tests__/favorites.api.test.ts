@@ -44,7 +44,7 @@ describe('favorites.api', () => {
         },
       ]
 
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockFavorites })
+      vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockFavorites } })
 
       const result = await getUserFavorites()
 
@@ -55,7 +55,7 @@ describe('favorites.api', () => {
     })
 
     it('returns empty array when user has no favorites', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: [] })
+      vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } })
 
       const result = await getUserFavorites()
 
@@ -75,7 +75,7 @@ describe('favorites.api', () => {
         createdAt: '2024-06-15T10:00:00Z',
       }
 
-      vi.mocked(apiClient.post).mockResolvedValue({ data: mockFavorite })
+      vi.mocked(apiClient.post).mockResolvedValue({ data: { data: mockFavorite } })
 
       const result = await addFavorite('STUDENTS')
 
@@ -150,7 +150,7 @@ describe('favorites.api', () => {
 
   describe('HTTP methods', () => {
     it('getUserFavorites uses GET', async () => {
-      vi.mocked(apiClient.get).mockResolvedValue({ data: [] })
+      vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } })
       await getUserFavorites()
       expect(apiClient.get).toHaveBeenCalled()
       expect(apiClient.post).not.toHaveBeenCalled()
@@ -159,7 +159,7 @@ describe('favorites.api', () => {
     })
 
     it('addFavorite uses POST', async () => {
-      vi.mocked(apiClient.post).mockResolvedValue({ data: {} })
+      vi.mocked(apiClient.post).mockResolvedValue({ data: { data: {} } })
       await addFavorite('TEST')
       expect(apiClient.post).toHaveBeenCalled()
       expect(apiClient.get).not.toHaveBeenCalled()

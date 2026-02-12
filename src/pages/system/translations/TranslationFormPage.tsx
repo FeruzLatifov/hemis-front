@@ -7,17 +7,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
 import { AlertTriangle } from 'lucide-react'
 import {
-  getTranslationById,
-  updateTranslation,
   searchByMessageText,
-  TranslationUpdateRequest,
-  Translation,
+  type TranslationUpdateRequest,
+  type Translation,
 } from '@/api/translations.api'
 import { extractApiErrorMessage } from '@/utils/error.util'
 import { useTranslation } from 'react-i18next'
+import { useUnsavedChanges } from '@/hooks'
+import { useTranslationById, useUpdateTranslation } from '@/hooks/useTranslations'
 
 interface FormErrors {
   category?: string
@@ -30,6 +29,16 @@ export default function TranslationFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
+  // Fetch translation via hook
+  const {
+    data: translationData,
+    isLoading: loadingData,
+    error: fetchError,
+  } = useTranslationById(id)
+
+  // Update mutation
+  const updateMutation = useUpdateTranslation()
+
   // Form state
   const [formData, setFormData] = useState<TranslationUpdateRequest>({
     category: '',
@@ -41,51 +50,39 @@ export default function TranslationFormPage() {
     active: true,
   })
 
-  const [loading, setLoading] = useState(false)
-  const [loadingData, setLoadingData] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [error, setError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [similarTranslations, setSimilarTranslations] = useState<Translation[]>([])
+  const [isDirty, setIsDirty] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const loadTranslation = useCallback(async (translationId: string) => {
-    try {
-      setLoadingData(true)
-      setError(null)
+  // Warn user about unsaved changes when navigating away
+  useUnsavedChanges({
+    isDirty,
+    message: t("Saqlanmagan o'zgarishlar bor. Sahifadan chiqmoqchimisiz?"),
+  })
 
-      const translation = await getTranslationById(translationId)
-
-      // Extract translations by language
-      const translations: Record<string, string> = {}
-      if (translation.translations && typeof translation.translations === 'object') {
-        // Handle new DTO format: { "ru-RU": "text", "en-US": "text" }
-        Object.entries(translation.translations).forEach(([lang, text]) => {
-          translations[lang] = String(text)
-        })
-      }
-
-      setFormData({
-        category: translation.category,
-        messageKey: translation.messageKey,
-        messageUz: translation.message, // Default uz-UZ message
-        messageOz: translations['oz-UZ'] || '',
-        messageRu: translations['ru-RU'] || '',
-        messageEn: translations['en-US'] || '',
-        active: translation.isActive,
-      })
-    } catch (err: unknown) {
-      setError(extractApiErrorMessage(err, 'Failed to load translation'))
-    } finally {
-      setLoadingData(false)
-    }
-  }, [])
-
-  // Load existing translation
+  // Populate form when translation data loads
   useEffect(() => {
-    if (id) {
-      loadTranslation(id)
+    if (!translationData) return
+
+    const translations: Record<string, string> = {}
+    if (translationData.translations && typeof translationData.translations === 'object') {
+      Object.entries(translationData.translations).forEach(([lang, text]) => {
+        translations[lang] = String(text)
+      })
     }
-  }, [id, loadTranslation])
+
+    setFormData({
+      category: translationData.category,
+      messageKey: translationData.messageKey,
+      messageUz: translationData.message,
+      messageOz: translations['oz-UZ'] || '',
+      messageRu: translations['ru-RU'] || '',
+      messageEn: translations['en-US'] || '',
+      active: translationData.isActive,
+    })
+  }, [translationData])
 
   // Check for similar translations (debounced)
   const checkSimilar = useCallback(
@@ -137,7 +134,7 @@ export default function TranslationFormPage() {
   }
 
   // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!validate()) {
@@ -145,36 +142,27 @@ export default function TranslationFormPage() {
     }
 
     if (!id) {
-      setError('Translation ID not found')
+      setSubmitError('Translation ID not found')
       return
     }
 
-    try {
-      setLoading(true)
-      setError(null)
+    setSubmitError(null)
 
-      await updateTranslation(id, formData)
-
-      toast.success(t('Translation successfully updated'), {
-        duration: 3000,
-        position: 'bottom-right',
-      })
-
-      // Redirect to list
-      setTimeout(() => {
-        navigate('/system/translations')
-      }, 500)
-    } catch (err: unknown) {
-      // ⭐ Backend-driven i18n: Use backend's localized message
-      const errorMessage = extractApiErrorMessage(err, t('Error saving translation'))
-      setError(errorMessage)
-      toast.error(errorMessage, {
-        duration: 5000,
-        position: 'bottom-right',
-      })
-    } finally {
-      setLoading(false)
-    }
+    updateMutation.mutate(
+      { id, data: formData },
+      {
+        onSuccess: () => {
+          setIsDirty(false)
+          setTimeout(() => {
+            navigate('/system/translations')
+          }, 500)
+        },
+        onError: (err: unknown) => {
+          const errorMessage = extractApiErrorMessage(err, t('Error saving translation'))
+          setSubmitError(errorMessage)
+        },
+      },
+    )
   }
 
   // Handle input change
@@ -183,6 +171,9 @@ export default function TranslationFormPage() {
       ...prev,
       [field]: value,
     }))
+
+    // Mark form as dirty
+    setIsDirty(true)
 
     // Clear error for this field
     if (errors[field as keyof FormErrors]) {
@@ -202,6 +193,12 @@ export default function TranslationFormPage() {
   const handleCancel = () => {
     navigate('/system/translations')
   }
+
+  // Derived state
+  const loading = updateMutation.isPending
+  const error =
+    submitError ||
+    (fetchError ? extractApiErrorMessage(fetchError, 'Failed to load translation') : null)
 
   if (loadingData) {
     return (

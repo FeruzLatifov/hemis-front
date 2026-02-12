@@ -84,7 +84,7 @@ describe('getDashboardStats', () => {
   })
 
   it('calls the correct endpoint', async () => {
-    mockGet.mockResolvedValueOnce({ data: mockStatsResponse })
+    mockGet.mockResolvedValueOnce({ data: { data: mockStatsResponse } })
 
     await getDashboardStats()
 
@@ -92,7 +92,7 @@ describe('getDashboardStats', () => {
   })
 
   it('returns the response data', async () => {
-    mockGet.mockResolvedValueOnce({ data: mockStatsResponse })
+    mockGet.mockResolvedValueOnce({ data: { data: mockStatsResponse } })
 
     const result = await getDashboardStats()
 
@@ -118,7 +118,7 @@ describe('dashboardApi.getStats', () => {
   })
 
   it('calls the same endpoint as getDashboardStats', async () => {
-    mockGet.mockResolvedValueOnce({ data: mockStatsResponse })
+    mockGet.mockResolvedValueOnce({ data: { data: mockStatsResponse } })
 
     const result = await dashboardApi.getStats()
 

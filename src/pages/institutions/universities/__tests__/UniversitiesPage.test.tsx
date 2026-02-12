@@ -16,12 +16,13 @@ vi.mock('react-i18next', () => ({
 }))
 
 // Mock react-router-dom
+const mockNavigate = vi.fn()
 const mockSetSearchParams = vi.fn()
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {
     ...actual,
-    useNavigate: () => vi.fn(),
+    useNavigate: () => mockNavigate,
     useParams: () => ({}),
     useSearchParams: () => [new URLSearchParams(), mockSetSearchParams],
   }
@@ -84,7 +85,7 @@ vi.mock('@/api/universities.api', () => ({
       size: 20,
       number: 0,
     }),
-    exportUniversities: vi.fn().mockResolvedValue(undefined),
+    exportUniversities: vi.fn().mockResolvedValue([]),
     getDictionaries: vi.fn().mockResolvedValue({
       regions: [{ code: 'R1', name: 'Tashkent' }],
       ownerships: [{ code: 'O1', name: 'State' }],
@@ -96,11 +97,51 @@ vi.mock('@/api/universities.api', () => ({
 
 // Mock useUniversities hooks
 vi.mock('@/hooks/useUniversities', () => ({
+  useUniversities: vi.fn(() => ({
+    data: {
+      content: [
+        {
+          code: 'U001',
+          name: 'Test University',
+          tin: '123456789',
+          region: 'Tashkent',
+          ownership: 'State',
+          type: 'University',
+          address: '123 Test St',
+          cadastre: 'CAD-001',
+          active: true,
+        },
+        {
+          code: 'U002',
+          name: 'Inactive University',
+          tin: '987654321',
+          region: 'Samarkand',
+          ownership: 'Private',
+          type: 'Institute',
+          address: '456 Other St',
+          cadastre: 'CAD-002',
+          active: false,
+        },
+      ],
+      totalElements: 50,
+      totalPages: 3,
+      size: 20,
+      number: 0,
+    },
+    isLoading: false,
+    isPlaceholderData: false,
+    refetch: vi.fn(),
+  })),
   useUniversityDictionaries: vi.fn(() => ({
     data: {
       regions: [{ code: 'R1', name: 'Tashkent' }],
       ownerships: [{ code: 'O1', name: 'State' }],
       types: [{ code: 'T1', name: 'University' }],
+      activityStatuses: [{ code: 'A1', name: 'Active' }],
+      belongsToOptions: [{ code: 'B1', name: 'Ministry' }],
+      contractCategories: [{ code: 'C1', name: 'Contract' }],
+      versionTypes: [{ code: 'V1', name: 'Version 1' }],
+      districts: [{ code: 'D1', name: 'District 1' }],
     },
     isLoading: false,
   })),
@@ -140,51 +181,30 @@ vi.mock('@/lib/queryKeys', () => ({
   },
 }))
 
-// Mock sub-components that may cause issues
-vi.mock('../UniversityDetailDrawer', () => ({
-  default: ({ open, code }: { open: boolean; code: string | null }) =>
-    open ? <div data-testid="university-detail-drawer">Detail: {code}</div> : null,
-}))
-
-vi.mock('../UniversityFormDialog', () => ({
-  default: ({
-    open,
-    onSuccess,
-    onOpenChange,
-  }: {
-    open: boolean
-    university: unknown
-    onSuccess: () => void
-    onOpenChange: (open: boolean) => void
-  }) =>
-    open ? (
-      <div data-testid="university-form-dialog">
-        Form Dialog
-        <button data-testid="form-success-btn" onClick={onSuccess}>
-          Save
-        </button>
-        <button data-testid="form-cancel-btn" onClick={() => onOpenChange(false)}>
-          Cancel Form
-        </button>
-      </div>
-    ) : null,
-}))
-
 // Mock filter components
 vi.mock('@/components/filters/CustomTagFilter', () => ({
   CustomTagFilter: (props: {
     label: string
-    onClose: () => void
+    data: { code: string; name: string }[]
+    value: string[]
     onChange: (codes: string[]) => void
+    onClose?: () => void
   }) => (
     <div data-testid="custom-tag-filter">
-      {props.label}
-      <button data-testid={`remove-filter-${props.label}`} onClick={props.onClose}>
-        X
-      </button>
+      <span data-testid={`filter-label-${props.label}`}>{props.label}</span>
       <button data-testid={`update-filter-${props.label}`} onClick={() => props.onChange(['R1'])}>
         Select
       </button>
+      {props.value.length > 0 && (
+        <button data-testid={`clear-filter-${props.label}`} onClick={() => props.onChange([])}>
+          Clear
+        </button>
+      )}
+      {props.onClose && (
+        <button data-testid={`remove-filter-${props.label}`} onClick={props.onClose}>
+          Remove
+        </button>
+      )}
     </div>
   ),
 }))
@@ -215,6 +235,62 @@ vi.mock('@/components/filters/SearchScopeSelector', () => ({
 
 vi.mock('@/components/filters/ColumnSettingsPopover', () => ({
   ColumnSettingsPopover: () => <div data-testid="column-settings-popover">Column Settings</div>,
+}))
+
+// Mock DataTablePagination
+vi.mock('@/components/tables/DataTablePagination', () => ({
+  DataTablePagination: ({
+    page,
+    totalPages,
+    totalElements,
+    pageSize,
+    onPageChange,
+    onPageSizeChange,
+  }: {
+    page: number
+    totalPages: number
+    totalElements: number
+    pageSize: number
+    onPageChange: (page: number) => void
+    onPageSizeChange: (size: number) => void
+  }) => (
+    <div data-testid="data-table-pagination">
+      <div>
+        <span>Per page</span>
+        <select
+          data-testid="page-size-select"
+          value={pageSize}
+          onChange={(e) => onPageSizeChange(Number(e.target.value))}
+        >
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div>
+        <span>Total: {totalElements}</span>
+      </div>
+      <div>
+        <button
+          data-testid="prev-page-btn"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 0}
+        >
+          Previous
+        </button>
+        <span data-testid="page-info">
+          Page {page + 1} / {totalPages}
+        </span>
+        <button
+          data-testid="next-page-btn"
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages - 1}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  ),
 }))
 
 // Mock alert-dialog
@@ -261,20 +337,13 @@ describe('UniversitiesPage', () => {
     localStorage.clear()
   })
 
-  it('renders page with title', async () => {
+  it('renders page with toolbar elements', async () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
-    })
-  })
-
-  it('shows loading state when data is loading', async () => {
-    render(<UniversitiesPage />)
-
-    // After data loads, the table should be visible
-    await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
+      expect(screen.getByText('Filters')).toBeInTheDocument()
+      expect(screen.getByText('Add')).toBeInTheDocument()
+      expect(screen.getByText('Excel')).toBeInTheDocument()
     })
   })
 
@@ -305,6 +374,19 @@ describe('UniversitiesPage', () => {
     })
   })
 
+  it('navigates to create page when Add button is clicked', async () => {
+    const user = userEvent.setup()
+    render(<UniversitiesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Add')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('Add'))
+
+    expect(mockNavigate).toHaveBeenCalledWith('/institutions/universities/create')
+  })
+
   it('has an Excel export button', async () => {
     render(<UniversitiesPage />)
 
@@ -320,16 +402,16 @@ describe('UniversitiesPage', () => {
       expect(screen.getByText('Code')).toBeInTheDocument()
       expect(screen.getByText('Name')).toBeInTheDocument()
       expect(screen.getByText('INN')).toBeInTheDocument()
-      expect(screen.getByText('Region')).toBeInTheDocument()
+      // "Region" appears in both filter label and table header
+      expect(screen.getAllByText('Region').length).toBeGreaterThanOrEqual(1)
     })
   })
 
-  it('shows total count and page info', async () => {
+  it('shows total count in toolbar', async () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Total/)).toBeInTheDocument()
-      expect(screen.getByText(/Page/)).toBeInTheDocument()
+      expect(screen.getAllByText(/Total/).length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -337,6 +419,7 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
+      expect(screen.getByTestId('data-table-pagination')).toBeInTheDocument()
       expect(screen.getByText(/Per page/)).toBeInTheDocument()
     })
   })
@@ -349,126 +432,12 @@ describe('UniversitiesPage', () => {
     })
   })
 
-  // --- New tests for coverage ---
-
   it('shows active/inactive status badges in table rows', async () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
       expect(screen.getByText('Active')).toBeInTheDocument()
       expect(screen.getByText('Inactive')).toBeInTheDocument()
-    })
-  })
-
-  it('opens form dialog when Add button is clicked', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Add')).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByText('Add'))
-
-    await waitFor(() => {
-      expect(screen.getByTestId('university-form-dialog')).toBeInTheDocument()
-    })
-  })
-
-  it('opens detail drawer when View button is clicked', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test University')).toBeInTheDocument()
-    })
-
-    const viewButtons = screen.getAllByTitle('View')
-    await user.click(viewButtons[0])
-
-    await waitFor(() => {
-      expect(screen.getByTestId('university-detail-drawer')).toBeInTheDocument()
-      expect(screen.getByText('Detail: U001')).toBeInTheDocument()
-    })
-  })
-
-  it('opens form dialog for editing when Edit button is clicked', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test University')).toBeInTheDocument()
-    })
-
-    const editButtons = screen.getAllByTitle('Edit')
-    await user.click(editButtons[0])
-
-    await waitFor(() => {
-      expect(screen.getByTestId('university-form-dialog')).toBeInTheDocument()
-    })
-  })
-
-  it('opens delete confirmation dialog when Delete button is clicked', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test University')).toBeInTheDocument()
-    })
-
-    const deleteButtons = screen.getAllByTitle('Delete')
-    await user.click(deleteButtons[0])
-
-    await waitFor(() => {
-      expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
-      expect(screen.getByText('Delete university')).toBeInTheDocument()
-    })
-  })
-
-  it('calls delete mutation when confirming delete', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test University')).toBeInTheDocument()
-    })
-
-    const deleteButtons = screen.getAllByTitle('Delete')
-    await user.click(deleteButtons[0])
-
-    await waitFor(() => {
-      expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
-    })
-
-    // Click the Delete action button within the dialog
-    const deleteAction = screen.getByText('Delete')
-    await user.click(deleteAction)
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      'U001',
-      expect.objectContaining({ onSettled: expect.any(Function) }),
-    )
-  })
-
-  it('dismisses delete dialog via onOpenChange', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test University')).toBeInTheDocument()
-    })
-
-    const deleteButtons = screen.getAllByTitle('Delete')
-    await user.click(deleteButtons[0])
-
-    await waitFor(() => {
-      expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByTestId('alert-dialog-dismiss'))
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('alert-dialog')).not.toBeInTheDocument()
     })
   })
 
@@ -511,153 +480,84 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
+      expect(screen.getByText('Filters')).toBeInTheDocument()
     })
 
-    // The filter toggle button is the one with the Filter icon - find button that toggles filter panel
-    // It does not have text; it has a Filter icon. Find it by its class or role.
-    // Looking at the source, the filter button is before SearchScopeSelector
-    const filterToggleButtons = screen
-      .getByText('Institutions list')
-      .closest('.bg-white')!
-      .querySelectorAll('button')
-    // First button in the header actions area is the filter toggle
-    const filterToggle = filterToggleButtons[0]
-    await user.click(filterToggle)
+    // Initially, filters should not be visible in DOM (grid-rows-[0fr])
+    // After clicking, CustomTagFilter components should appear
+    const filterButton = screen.getByText('Filters')
+    await user.click(filterButton)
 
-    // After toggling, the filter panel should appear with available filter buttons
     await waitFor(() => {
-      expect(screen.getByText('+ Region')).toBeInTheDocument()
-      expect(screen.getByText('+ Ownership')).toBeInTheDocument()
-      expect(screen.getByText('+ University type')).toBeInTheDocument()
+      // Check that filter components are now visible
+      expect(screen.getByTestId('filter-label-Region')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Ownership')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Type')).toBeInTheDocument()
     })
   })
 
-  it('adds a horizontal filter when filter button in panel is clicked', async () => {
+  it('renders all filter components when panel is open', async () => {
     const user = userEvent.setup()
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
+      expect(screen.getByText('Filters')).toBeInTheDocument()
     })
 
-    // Open filter panel
-    const filterToggleButtons = screen
-      .getByText('Institutions list')
-      .closest('.bg-white')!
-      .querySelectorAll('button')
-    await user.click(filterToggleButtons[0])
+    await user.click(screen.getByText('Filters'))
 
     await waitFor(() => {
-      expect(screen.getByText('+ Region')).toBeInTheDocument()
-    })
-
-    // Add the Region filter
-    await user.click(screen.getByText('+ Region'))
-
-    // The CustomTagFilter should appear
-    await waitFor(() => {
-      expect(screen.getByTestId('custom-tag-filter')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Region')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Ownership')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Type')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Activity status')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Belongs to')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Contract category')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-HEMIS version')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-District')).toBeInTheDocument()
+      expect(screen.getByTestId('filter-label-Status')).toBeInTheDocument()
     })
   })
 
-  it('removes a horizontal filter when close is clicked', async () => {
+  it('updates filter when filter value changes', async () => {
     const user = userEvent.setup()
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
+      expect(screen.getByText('Filters')).toBeInTheDocument()
     })
 
-    // Open filter panel
-    const filterToggleButtons = screen
-      .getByText('Institutions list')
-      .closest('.bg-white')!
-      .querySelectorAll('button')
-    await user.click(filterToggleButtons[0])
+    await user.click(screen.getByText('Filters'))
 
     await waitFor(() => {
-      expect(screen.getByText('+ Region')).toBeInTheDocument()
+      expect(screen.getByTestId('update-filter-Region')).toBeInTheDocument()
     })
 
-    // Add filter
-    await user.click(screen.getByText('+ Region'))
-    await waitFor(() => {
-      expect(screen.getByTestId('custom-tag-filter')).toBeInTheDocument()
-    })
-
-    // Remove filter
-    await user.click(screen.getByTestId('remove-filter-Region'))
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('custom-tag-filter')).not.toBeInTheDocument()
-    })
-  })
-
-  it('updates a horizontal filter when values change', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
-    })
-
-    // Open filter panel
-    const filterToggleButtons = screen
-      .getByText('Institutions list')
-      .closest('.bg-white')!
-      .querySelectorAll('button')
-    await user.click(filterToggleButtons[0])
-
-    await waitFor(() => {
-      expect(screen.getByText('+ Region')).toBeInTheDocument()
-    })
-
-    // Add filter
-    await user.click(screen.getByText('+ Region'))
-    await waitFor(() => {
-      expect(screen.getByTestId('custom-tag-filter')).toBeInTheDocument()
-    })
-
-    // Update filter values
     await user.click(screen.getByTestId('update-filter-Region'))
 
-    // Filter should still be present (with updated values internally)
-    expect(screen.getByTestId('custom-tag-filter')).toBeInTheDocument()
+    // The filter change should trigger URL params update via mockSetSearchParams
+    expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
-  it('clears all filters when Clear button is clicked', async () => {
+  it('calls setSearchParams when filter value is selected', async () => {
     const user = userEvent.setup()
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
+      expect(screen.getByText('Filters')).toBeInTheDocument()
     })
 
-    // Open filter panel
-    const filterToggleButtons = screen
-      .getByText('Institutions list')
-      .closest('.bg-white')!
-      .querySelectorAll('button')
-    await user.click(filterToggleButtons[0])
+    await user.click(screen.getByText('Filters'))
 
-    // Add a filter first
     await waitFor(() => {
-      expect(screen.getByText('+ Region')).toBeInTheDocument()
-    })
-    await user.click(screen.getByText('+ Region'))
-
-    // Wait for the Clear button to appear
-    await waitFor(() => {
-      expect(screen.getByText('Clear')).toBeInTheDocument()
+      expect(screen.getByTestId('update-filter-Region')).toBeInTheDocument()
     })
 
-    await user.click(screen.getByText('Clear'))
+    // Select a filter value — this triggers handleFilterChange which calls setSearchParams
+    await user.click(screen.getByTestId('update-filter-Region'))
 
-    // Filters should be cleared
-    await waitFor(() => {
-      expect(screen.queryByTestId('custom-tag-filter')).not.toBeInTheDocument()
-    })
+    // Verify setSearchParams was called (filter applied via URL)
+    expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
   it('handles search submit and clear', async () => {
@@ -668,16 +568,12 @@ describe('UniversitiesPage', () => {
       expect(screen.getByTestId('search-scope-selector')).toBeInTheDocument()
     })
 
-    // Type in search
     await user.type(screen.getByTestId('search-scope-selector'), 'test query')
 
-    // Click search button
     await user.click(screen.getByTestId('search-btn'))
 
-    // Now clear
     await user.click(screen.getByTestId('clear-search-btn'))
 
-    // Input should be cleared
     await waitFor(() => {
       expect(screen.getByTestId('search-scope-selector')).toHaveValue('')
     })
@@ -688,27 +584,10 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Institutions list')).toBeInTheDocument()
+      expect(screen.getByTitle('Refresh')).toBeInTheDocument()
     })
 
-    // Open filter panel
-    const filterToggleButtons = screen
-      .getByText('Institutions list')
-      .closest('.bg-white')!
-      .querySelectorAll('button')
-    await user.click(filterToggleButtons[0])
-
-    // Add a filter to make the Refresh button appear
-    await waitFor(() => {
-      expect(screen.getByText('+ Region')).toBeInTheDocument()
-    })
-    await user.click(screen.getByText('+ Region'))
-
-    await waitFor(() => {
-      expect(screen.getByText('Refresh')).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByText('Refresh'))
+    await user.click(screen.getByTitle('Refresh'))
 
     expect(toast.success).toHaveBeenCalledWith('Data refreshed')
   })
@@ -718,42 +597,24 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('1 / 3')).toBeInTheDocument()
+      expect(screen.getByTestId('page-info')).toHaveTextContent('Page 1 / 3')
     })
 
-    // Find the next page button (ChevronRight)
-    const paginationButtons = screen.getByText('1 / 3').parentElement!.querySelectorAll('button')
-    const nextButton = paginationButtons[1] // second button is next
+    const nextButton = screen.getByTestId('next-page-btn')
     await user.click(nextButton)
 
-    await waitFor(() => {
-      expect(screen.getByText('2 / 3')).toBeInTheDocument()
-    })
+    expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
-  it('navigates to previous page', async () => {
-    const user = userEvent.setup()
+  it('has previous page button', async () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('1 / 3')).toBeInTheDocument()
+      expect(screen.getByTestId('prev-page-btn')).toBeInTheDocument()
     })
 
-    // Go to page 2 first
-    const paginationButtons = screen.getByText('1 / 3').parentElement!.querySelectorAll('button')
-    await user.click(paginationButtons[1])
-    await waitFor(() => {
-      expect(screen.getByText('2 / 3')).toBeInTheDocument()
-    })
-
-    // Go back
-    const paginationButtonsAfter = screen
-      .getByText('2 / 3')
-      .parentElement!.querySelectorAll('button')
-    await user.click(paginationButtonsAfter[0])
-    await waitFor(() => {
-      expect(screen.getByText('1 / 3')).toBeInTheDocument()
-    })
+    // At page 0, prev button is disabled
+    expect(screen.getByTestId('prev-page-btn')).toBeDisabled()
   })
 
   it('changes page size', async () => {
@@ -761,65 +622,29 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Per page/)).toBeInTheDocument()
+      expect(screen.getByTestId('page-size-select')).toBeInTheDocument()
     })
 
-    const select = screen.getByRole('combobox')
+    const select = screen.getByTestId('page-size-select')
     await user.selectOptions(select, '50')
 
-    expect(select).toHaveValue('50')
-  })
-
-  it('closes form dialog via onOpenChange (cancel)', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Add')).toBeInTheDocument()
-    })
-
-    // Open form
-    await user.click(screen.getByText('Add'))
-    await waitFor(() => {
-      expect(screen.getByTestId('university-form-dialog')).toBeInTheDocument()
-    })
-
-    // Cancel form via onOpenChange
-    await user.click(screen.getByTestId('form-cancel-btn'))
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('university-form-dialog')).not.toBeInTheDocument()
-    })
-  })
-
-  it('closes form dialog via onSuccess', async () => {
-    const user = userEvent.setup()
-    render(<UniversitiesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Add')).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByText('Add'))
-    await waitFor(() => {
-      expect(screen.getByTestId('university-form-dialog')).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByTestId('form-success-btn'))
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('university-form-dialog')).not.toBeInTheDocument()
-    })
+    expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
   it('shows empty state when no universities exist', async () => {
-    ;(universitiesApi.getUniversities as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      content: [],
-      totalElements: 0,
-      totalPages: 0,
-      size: 20,
-      number: 0,
-    })
+    const { useUniversities } = await import('@/hooks/useUniversities')
+    vi.mocked(useUniversities).mockReturnValueOnce({
+      data: {
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        size: 20,
+        number: 0,
+      },
+      isLoading: false,
+      isPlaceholderData: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useUniversities>)
 
     render(<UniversitiesPage />)
 
@@ -833,17 +658,17 @@ describe('UniversitiesPage', () => {
 
     render(<UniversitiesPage />)
 
-    // The component should have loaded the saved visibility state
-    // Since tin is hidden, its header should not be visible
-    // (This tests the localStorage initialization branch in useState)
+    // Component should render without errors
+    expect(screen.getByText('Filters')).toBeInTheDocument()
   })
 
   it('handles invalid JSON in localStorage gracefully', () => {
     localStorage.setItem('universities-column-visibility', 'invalid-json')
 
-    // Should not throw - the catch block returns {}
     render(<UniversitiesPage />)
 
-    expect(screen.getByText('Institutions list')).toBeInTheDocument()
+    // Component should render without errors and show toolbar
+    expect(screen.getByText('Filters')).toBeInTheDocument()
+    expect(screen.getByText('Add')).toBeInTheDocument()
   })
 })

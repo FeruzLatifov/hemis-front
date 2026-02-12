@@ -489,16 +489,23 @@ describe('Response Interceptor - other errors', () => {
     const error = makeAxiosError(403, { message: 'Forbidden' })
     await expect(responseRejected(error)).rejects.toBe(error)
 
-    // Only the generic breadcrumb (no 400/404 breadcrumb, no 500 captureError)
-    expect(addBreadcrumb).toHaveBeenCalledTimes(1)
+    // Generic breadcrumb + security breadcrumb for 403
+    expect(addBreadcrumb).toHaveBeenCalledTimes(2)
     expect(addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
         category: 'api',
         message: expect.stringContaining('API Error: 403'),
       }),
     )
+    expect(addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: 'security',
+        message: expect.stringContaining('Access denied'),
+      }),
+    )
     expect(captureError).not.toHaveBeenCalled()
-    expect(toast.error).not.toHaveBeenCalled()
+    // 403 shows toast.error with access denied message
+    expect(toast.error).toHaveBeenCalled()
   })
 
   it('uses error.message as fallback when no response data message', async () => {

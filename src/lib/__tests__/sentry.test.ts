@@ -130,7 +130,7 @@ describe('sentry', () => {
       initSentry()
 
       // Extract the beforeSend callback from the init call
-      const initCall = vi.mocked(Sentry.init).mock.calls[0][0] as {
+      const initCall = vi.mocked(Sentry.init).mock.calls[0][0] as unknown as {
         beforeSend: (event: Record<string, unknown>, hint: unknown) => Record<string, unknown>
       }
       const beforeSend = initCall.beforeSend

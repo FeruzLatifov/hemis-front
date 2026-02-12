@@ -270,7 +270,7 @@ describe('Sidebar', () => {
 
   it('renders the toggle button to open/close sidebar', () => {
     render(<Sidebar {...defaultProps} />)
-    const toggleButton = screen.getByLabelText('Menyuni yopish')
+    const toggleButton = screen.getByLabelText('Close menu')
     expect(toggleButton).toBeInTheDocument()
   })
 
@@ -279,7 +279,7 @@ describe('Sidebar', () => {
     const setOpen = vi.fn()
     render(<Sidebar open={true} setOpen={setOpen} />)
 
-    const toggleButton = screen.getByLabelText('Menyuni yopish')
+    const toggleButton = screen.getByLabelText('Close menu')
     await user.click(toggleButton)
 
     expect(setOpen).toHaveBeenCalledWith(false)

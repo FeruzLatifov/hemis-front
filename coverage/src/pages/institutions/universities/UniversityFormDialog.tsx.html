@@ -563,7 +563,27 @@
 <a name='L498'></a><a href='#L498'>498</a>
 <a name='L499'></a><a href='#L499'>499</a>
 <a name='L500'></a><a href='#L500'>500</a>
-<a name='L501'></a><a href='#L501'>501</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L501'></a><a href='#L501'>501</a>
+<a name='L502'></a><a href='#L502'>502</a>
+<a name='L503'></a><a href='#L503'>503</a>
+<a name='L504'></a><a href='#L504'>504</a>
+<a name='L505'></a><a href='#L505'>505</a>
+<a name='L506'></a><a href='#L506'>506</a>
+<a name='L507'></a><a href='#L507'>507</a>
+<a name='L508'></a><a href='#L508'>508</a>
+<a name='L509'></a><a href='#L509'>509</a>
+<a name='L510'></a><a href='#L510'>510</a>
+<a name='L511'></a><a href='#L511'>511</a>
+<a name='L512'></a><a href='#L512'>512</a>
+<a name='L513'></a><a href='#L513'>513</a>
+<a name='L514'></a><a href='#L514'>514</a>
+<a name='L515'></a><a href='#L515'>515</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -622,14 +642,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -729,13 +755,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -855,6 +880,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1063,24 +1090,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { universitiesApi, UniversityRow } from '@/api/universities.api';
-import { useUniversityDictionaries } from '@/hooks/useUniversities';
-import { toast } from 'sonner';
-import { extractApiErrorMessage } from '@/utils/error.util';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Building2, MapPin, Globe, Settings, Info, Save } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { universitiesApi, UniversityRow } from '@/api/universities.api'
+import { useUniversityDictionaries } from '@/hooks/useUniversities'
+import { toast } from 'sonner'
+import { extractApiErrorMessage } from '@/utils/error.util'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Loader2, Building2, MapPin, Globe, Settings, Info, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 &nbsp;
 // Zod validation schema
 const universitySchema = z.object({
@@ -1105,16 +1139,15 @@ const universitySchema = z.object({
   addStudent: z.boolean(),
   allowGrouping: z.boolean(),
   allowTransferOutside: z.boolean(),
-});
+})
 &nbsp;
-type UniversityFormData = z.infer&lt;typeof universitySchema&gt;;
-&nbsp;
+type UniversityFormData = z.infer&lt;typeof universitySchema&gt;
 &nbsp;
 interface UniversityFormDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) =&gt; void;
-  university?: UniversityRow | null;
-  onSuccess: () =&gt; void;
+  open: boolean
+  onOpenChange: (open: boolean) =&gt; void
+  university?: UniversityRow | null
+  onSuccess: () =&gt; void
 }
 &nbsp;
 export default function UniversityFormDialog({
@@ -1123,10 +1156,11 @@ export default function UniversityFormDialog({
   university,
   onSuccess,
 }: UniversityFormDialogProps) {
-  const { t } = useTranslation();
-  const { data: dictionaries = { regions: [], ownerships: [], types: [] } } = useUniversityDictionaries();
+  const { t } = useTranslation()
+  const { data: dictionaries = { regions: [], ownerships: [], types: [] } } =
+    useUniversityDictionaries()
 &nbsp;
-  const isEdit = !!university;
+  const isEdit = !!university
 &nbsp;
   // React Hook Form with Zod validation
   const form = useForm&lt;UniversityFormData&gt;({
@@ -1154,9 +1188,15 @@ export default function UniversityFormDialog({
       allowGrouping: false,
       allowTransferOutside: true,
     },
-  });
+  })
 &nbsp;
-  const { handleSubmit, formState: { errors, isSubmitting }, reset, setValue, watch } = form;
+  const {
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+    watch,
+  } = form
 &nbsp;
   // Populate form when editing
   useEffect(() =&gt; {
@@ -1183,7 +1223,7 @@ export default function UniversityFormDialog({
         addStudent: university.addStudent ?? false,
         allowGrouping: university.allowGrouping ?? false,
         allowTransferOutside: university.allowTransferOutside ?? true,
-      });
+      })
     } else if (!university &amp;&amp; open) {
       reset({
         code: '',
@@ -1207,75 +1247,80 @@ export default function UniversityFormDialog({
         addStudent: false,
         allowGrouping: false,
         allowTransferOutside: true,
-      });
+      })
     }
-  }, [university, open, reset]);
+  }, [university, open, reset])
 &nbsp;
   const onSubmit = <span class="fstat-no" title="function not covered" >async (d</span>ata: UniversityFormData) =&gt; {
 <span class="cstat-no" title="statement not covered" >    try {</span>
 <span class="cstat-no" title="statement not covered" >      if (isEdit) {</span>
-<span class="cstat-no" title="statement not covered" >        await universitiesApi.updateUniversity(university.code, data);</span>
-<span class="cstat-no" title="statement not covered" >        toast.success(t('University successfully updated'));</span>
+<span class="cstat-no" title="statement not covered" >        await universitiesApi.updateUniversity(university.code, data)</span>
+<span class="cstat-no" title="statement not covered" >        toast.success(t('University successfully updated'))</span>
       } else {
-<span class="cstat-no" title="statement not covered" >        await universitiesApi.createUniversity(data);</span>
-<span class="cstat-no" title="statement not covered" >        toast.success(t('University successfully created'));</span>
+<span class="cstat-no" title="statement not covered" >        await universitiesApi.createUniversity(data)</span>
+<span class="cstat-no" title="statement not covered" >        toast.success(t('University successfully created'))</span>
       }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      onSuccess();</span>
-<span class="cstat-no" title="statement not covered" >      onOpenChange(false);</span>
+<span class="cstat-no" title="statement not covered" >      onSuccess()</span>
+<span class="cstat-no" title="statement not covered" >      onOpenChange(false)</span>
     } catch (error: unknown) {
       // ⭐ Backend-driven i18n: Use backend's localized message
-<span class="cstat-no" title="statement not covered" >      toast.error(extractApiErrorMessage(error, isEdit ? t('Failed to update university') : t('Failed to create university')));</span>
+<span class="cstat-no" title="statement not covered" >      toast.error(</span>
+        extractApiErrorMessage(
+          error,
+          isEdit ? t('Failed to update university') : t('Failed to create university'),
+        ),
+      )
     }
-  };
+  }
 &nbsp;
   return (
     &lt;Dialog open={open} onOpenChange={onOpenChange}&gt;
-      &lt;DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0"&gt;
-        &lt;DialogHeader className="px-6 py-5 border-b bg-blue-50"&gt;
+      &lt;DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden p-0"&gt;
+        &lt;DialogHeader className="border-b bg-blue-50 px-6 py-5"&gt;
           &lt;div className="flex items-center gap-3"&gt;
-            &lt;div className="p-2 bg-blue-100 rounded-lg"&gt;
-              &lt;Building2 className="w-6 h-6 text-blue-600" /&gt;
+            &lt;div className="rounded-lg bg-blue-100 p-2"&gt;
+              &lt;Building2 className="h-6 w-6 text-blue-600" /&gt;
             &lt;/div&gt;
             &lt;div&gt;
               &lt;DialogTitle className="text-2xl font-bold"&gt;
                 {isEdit ? t('Edit HEI') : t('Add new HEI')}
               &lt;/DialogTitle&gt;
-              &lt;p className="text-sm text-gray-600 mt-1"&gt;
+              &lt;p className="mt-1 text-sm text-gray-600"&gt;
                 {isEdit ? t('Update data') : t('Enter new university data')}
               &lt;/p&gt;
             &lt;/div&gt;
           &lt;/div&gt;
         &lt;/DialogHeader&gt;
 &nbsp;
-        &lt;form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-hidden flex flex-col"&gt;
-          &lt;Tabs defaultValue="basic" className="flex-1 flex flex-col"&gt;
+        &lt;form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden"&gt;
+          &lt;Tabs defaultValue="basic" className="flex flex-1 flex-col"&gt;
             &lt;TabsList className="mx-6 mt-4 grid grid-cols-5 gap-1"&gt;
               &lt;TabsTrigger value="basic" className="flex items-center gap-2"&gt;
-                &lt;Building2 className="w-4 h-4" /&gt;
+                &lt;Building2 className="h-4 w-4" /&gt;
                 {t('Basic')}
               &lt;/TabsTrigger&gt;
               &lt;TabsTrigger value="location" className="flex items-center gap-2"&gt;
-                &lt;MapPin className="w-4 h-4" /&gt;
+                &lt;MapPin className="h-4 w-4" /&gt;
                 {t('Address')}
               &lt;/TabsTrigger&gt;
               &lt;TabsTrigger value="urls" className="flex items-center gap-2"&gt;
-                &lt;Globe className="w-4 h-4" /&gt;
+                &lt;Globe className="h-4 w-4" /&gt;
                 {t('Links')}
               &lt;/TabsTrigger&gt;
               &lt;TabsTrigger value="settings" className="flex items-center gap-2"&gt;
-                &lt;Settings className="w-4 h-4" /&gt;
+                &lt;Settings className="h-4 w-4" /&gt;
                 {t('Settings')}
               &lt;/TabsTrigger&gt;
               &lt;TabsTrigger value="additional" className="flex items-center gap-2"&gt;
-                &lt;Info className="w-4 h-4" /&gt;
+                &lt;Info className="h-4 w-4" /&gt;
                 {t('Additional')}
               &lt;/TabsTrigger&gt;
             &lt;/TabsList&gt;
 &nbsp;
             &lt;div className="flex-1 overflow-y-auto px-6 py-5"&gt;
               {/* Basic Tab */}
-              &lt;TabsContent value="basic" className="space-y-4 mt-0"&gt;
+              &lt;TabsContent value="basic" className="mt-0 space-y-4"&gt;
                 &lt;div className="grid grid-cols-2 gap-4"&gt;
                   &lt;div className="space-y-2"&gt;
                     &lt;Label htmlFor="code"&gt;
@@ -1294,11 +1339,7 @@ export default function UniversityFormDialog({
                   &lt;/div&gt;
                   &lt;div className="space-y-2"&gt;
                     &lt;Label htmlFor="tin"&gt;{t('INN')}&lt;/Label&gt;
-                    &lt;Input
-                      id="tin"
-                      {...form.register('tin')}
-                      placeholder="123456789"
-                    /&gt;
+                    &lt;Input id="tin" {...form.register('tin')} placeholder="123456789" /&gt;
                   &lt;/div&gt;
                 &lt;/div&gt;
 &nbsp;
@@ -1312,9 +1353,7 @@ export default function UniversityFormDialog({
                     placeholder={t('Full name of HEI')}
                     className={errors.name ? <span class="branch-0 cbranch-no" title="branch not covered" >'border-red-500' : '</span>'}
                   /&gt;
-                  {errors.name &amp;&amp; (
-<span class="branch-1 cbranch-no" title="branch not covered" >                    &lt;p className="text-sm text-red-500"&gt;{t(errors.name.message!)}&lt;/p&gt;</span>
-                  )}
+                  {errors.name &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >&lt;p className="text-sm text-red-500"&gt;{t(errors.name.message!)}&lt;/p&gt;}</span>
                 &lt;/div&gt;
 &nbsp;
                 &lt;div className="grid grid-cols-2 gap-4"&gt;
@@ -1361,14 +1400,16 @@ export default function UniversityFormDialog({
                       &lt;/SelectContent&gt;
                     &lt;/Select&gt;
                     {errors.universityTypeCode &amp;&amp; (
-<span class="branch-1 cbranch-no" title="branch not covered" >                      &lt;p className="text-sm text-red-500"&gt;{t(errors.universityTypeCode.message!)}&lt;/p&gt;</span>
+<span class="branch-1 cbranch-no" title="branch not covered" >                      &lt;p className="text-sm text-red-500"&gt;</span>
+                        {t(errors.universityTypeCode.message!)}
+                      &lt;/p&gt;
                     )}
                   &lt;/div&gt;
                 &lt;/div&gt;
               &lt;/TabsContent&gt;
 &nbsp;
               {/* Location Tab */}
-              &lt;TabsContent value="location" className="space-y-4 mt-0"&gt;
+              &lt;TabsContent value="location" className="mt-0 space-y-4"&gt;
                 &lt;div className="space-y-2"&gt;
                   &lt;Label&gt;{t('Region')}&lt;/Label&gt;
                   &lt;Select
@@ -1419,7 +1460,7 @@ export default function UniversityFormDialog({
               &lt;/TabsContent&gt;
 &nbsp;
               {/* URLs Tab */}
-              &lt;TabsContent value="urls" className="space-y-4 mt-0"&gt;
+              &lt;TabsContent value="urls" className="mt-0 space-y-4"&gt;
                 &lt;div className="space-y-2"&gt;
                   &lt;Label htmlFor="universityUrl"&gt;{t('Official website')}&lt;/Label&gt;
                   &lt;Input
@@ -1463,7 +1504,7 @@ export default function UniversityFormDialog({
                 &lt;/div&gt;
 &nbsp;
                 &lt;div className="space-y-2"&gt;
-                  &lt;Label htmlFor="uzbmbUrl"&gt;UZBMB URL&lt;/Label&gt;
+                  &lt;Label htmlFor="uzbmbUrl"&gt;{t('UZBMB URL')}&lt;/Label&gt;
                   &lt;Input
                     id="uzbmbUrl"
                     {...form.register('uzbmbUrl')}
@@ -1478,7 +1519,7 @@ export default function UniversityFormDialog({
               &lt;/TabsContent&gt;
 &nbsp;
               {/* Settings Tab */}
-              &lt;TabsContent value="settings" className="space-y-3 mt-0"&gt;
+              &lt;TabsContent value="settings" className="mt-0 space-y-3"&gt;
                 {[
                   { key: 'active' as const, label: t('Active') },
                   { key: 'gpaEdit' as const, label: t('GPA editing') },
@@ -1489,7 +1530,7 @@ export default function UniversityFormDialog({
                 ].map((setting) =&gt; (
                   &lt;div
                     key={setting.key}
-                    className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 rounded-lg bg-gray-50 p-4 transition-colors hover:bg-gray-100"
                   &gt;
                     &lt;Checkbox
                       id={setting.key}
@@ -1498,7 +1539,7 @@ export default function UniversityFormDialog({
                     /&gt;
                     &lt;Label
                       htmlFor={setting.key}
-                      className="text-sm font-medium cursor-pointer flex-1"
+                      className="flex-1 cursor-pointer text-sm font-medium"
                     &gt;
                       {setting.label}
                     &lt;/Label&gt;
@@ -1507,7 +1548,7 @@ export default function UniversityFormDialog({
               &lt;/TabsContent&gt;
 &nbsp;
               {/* Additional Tab */}
-              &lt;TabsContent value="additional" className="space-y-4 mt-0"&gt;
+              &lt;TabsContent value="additional" className="mt-0 space-y-4"&gt;
                 &lt;div className="space-y-2"&gt;
                   &lt;Label htmlFor="bankInfo"&gt;{t('Bank info')}&lt;/Label&gt;
                   &lt;Textarea
@@ -1532,7 +1573,7 @@ export default function UniversityFormDialog({
           &lt;/Tabs&gt;
 &nbsp;
           {/* Footer */}
-          &lt;div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-gray-50"&gt;
+          &lt;div className="flex items-center justify-end gap-3 border-t bg-gray-50 px-6 py-4"&gt;
             &lt;Button
               type="button"
               variant="outline"
@@ -1548,12 +1589,12 @@ export default function UniversityFormDialog({
             &gt;
               {isSubmitting ? (
 <span class="branch-0 cbranch-no" title="branch not covered" >                &lt;&gt;</span>
-                  &lt;Loader2 className="w-5 h-5 animate-spin mr-2" /&gt;
+                  &lt;Loader2 className="mr-2 h-5 w-5 animate-spin" /&gt;
                   {t('Saving...')}
                 &lt;/&gt;
               ) : (
                 &lt;&gt;
-                  &lt;Save className="w-5 h-5 mr-2" /&gt;
+                  &lt;Save className="mr-2 h-5 w-5" /&gt;
                   {isEdit ? t('Save') : t('Create')}
                 &lt;/&gt;
               )}
@@ -1562,15 +1603,16 @@ export default function UniversityFormDialog({
         &lt;/form&gt;
       &lt;/DialogContent&gt;
     &lt;/Dialog&gt;
-  );
-}</pre></td></tr></table></pre>
+  )
+}
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

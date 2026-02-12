@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>18/20</span>
+                <span class='fraction'>10/12</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -210,7 +210,11 @@
 <a name='L145'></a><a href='#L145'>145</a>
 <a name='L146'></a><a href='#L146'>146</a>
 <a name='L147'></a><a href='#L147'>147</a>
-<a name='L148'></a><a href='#L148'>148</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -235,15 +239,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -329,6 +335,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -370,9 +378,15 @@
  * - React Error Boundaries integration
  */
 &nbsp;
-import * as Sentry from '@sentry/react';
-import React from 'react';
-import { useLocation, useNavigationType, createRoutesFromChildren, matchRoutes } from 'react-router-dom';
+import * as Sentry from '@sentry/react'
+import React from 'react'
+import {
+  useLocation,
+  useNavigationType,
+  createRoutesFromChildren,
+  matchRoutes,
+} from 'react-router-dom'
+import { env } from '@/env'
 &nbsp;
 /**
  * Initialize Sentry
@@ -382,30 +396,26 @@ import { useLocation, useNavigationType, createRoutesFromChildren, matchRoutes }
  */
 export function initSentry() {
   // Check if Sentry is enabled
-  const enabled = import.meta.env.VITE_SENTRY_ENABLED === 'true';
-&nbsp;
-  if (!enabled) {
-    return;
+  if (!env.VITE_SENTRY_ENABLED) {
+    return
   }
 &nbsp;
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
-&nbsp;
-  if (!dsn) {
-    return;
+  if (!env.VITE_SENTRY_DSN) {
+    return
   }
 &nbsp;
   Sentry.init({
     // DSN from Sentry.io dashboard
-    dsn,
+    dsn: env.VITE_SENTRY_DSN,
 &nbsp;
     // Environment (production, staging, development)
-    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
+    environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
 &nbsp;
     // Release version for tracking
-    release: import.meta.env.VITE_SENTRY_RELEASE || `hemis-front@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`,
+    release: env.VITE_SENTRY_RELEASE || `hemis-front@${env.VITE_APP_VERSION}`,
 &nbsp;
     // Performance Monitoring - Traces Sample Rate (0.0 to 1.0)
-    tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || '0.2'),
+    tracesSampleRate: parseFloat(env.VITE_SENTRY_TRACES_SAMPLE_RATE),
 &nbsp;
     // Integrations
     integrations: [
@@ -420,14 +430,14 @@ export function initSentry() {
 &nbsp;
       // Replay integration (session recording)
       Sentry.replayIntegration({
-        maskAllText: true,  // Mask all text for privacy
+        maskAllText: true, // Mask all text for privacy
         blockAllMedia: true, // Block all media
       }),
     ],
 &nbsp;
     // Replay Sample Rates
-    replaysSessionSampleRate: parseFloat(import.meta.env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE || '0.1'),
-    replaysOnErrorSampleRate: parseFloat(import.meta.env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE || '1.0'),
+    replaysSessionSampleRate: parseFloat(env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE),
+    replaysOnErrorSampleRate: parseFloat(env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE),
 &nbsp;
     // Ignore specific errors
     ignoreErrors: [
@@ -446,20 +456,19 @@ export function initSentry() {
     beforeSend(event, hint) {
       // Remove sensitive headers
       <span class="missing-if-branch" title="else path not taken" >E</span>if (event.request?.headers) {
-        delete event.request.headers['Authorization'];
-        delete event.request.headers['Cookie'];
+        delete event.request.headers['Authorization']
+        delete event.request.headers['Cookie']
       }
 &nbsp;
       // Log to console in development
       <span class="missing-if-branch" title="else path not taken" >E</span>if (import.meta.env.DEV) {
-        console.error('🐛 Sentry Event:', event);
-        console.error('🐛 Sentry Hint:', hint);
+        console.error('🐛 Sentry Event:', event)
+        console.error('🐛 Sentry Hint:', hint)
       }
 &nbsp;
-      return event;
+      return event
     },
-  });
-&nbsp;
+  })
 }
 &nbsp;
 /**
@@ -471,16 +480,19 @@ export function initSentry() {
  *   extra: { userId: '123' }
  * })
  */
-export function captureError(error: Error, context?: {
-  tags?: Record&lt;string, string&gt;;
-  extra?: Record&lt;string, unknown&gt;;
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
-}) {
+export function captureError(
+  error: Error,
+  context?: {
+    tags?: Record&lt;string, string&gt;
+    extra?: Record&lt;string, unknown&gt;
+    level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+  },
+) {
   Sentry.captureException(error, {
     tags: context?.tags,
     extra: context?.extra,
     level: context?.level,
-  });
+  })
 }
 &nbsp;
 /**
@@ -494,16 +506,16 @@ export function captureError(error: Error, context?: {
  * })
  */
 export function addBreadcrumb(breadcrumb: {
-  category?: string;
-  message: string;
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
-  data?: Record&lt;string, unknown&gt;;
+  category?: string
+  message: string
+  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+  data?: Record&lt;string, unknown&gt;
 }) {
-  Sentry.addBreadcrumb(breadcrumb);
+  Sentry.addBreadcrumb(breadcrumb)
 }
 &nbsp;
 // Re-export Sentry for advanced use cases
-export { Sentry };
+export { Sentry }
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -511,7 +523,7 @@ export { Sentry };
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

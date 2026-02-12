@@ -52,6 +52,17 @@ vi.mock('@/stores/authStore', () => ({
   }),
 }))
 
+// Mock i18n config (used by test-utils provider)
+vi.mock('@/i18n/config', () => ({
+  default: {
+    t: (key: string) => key,
+    language: 'uz',
+    changeLanguage: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
+}))
+
 // Mock react-router-dom
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -59,6 +70,13 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    useLocation: () => ({
+      pathname: '/login',
+      search: '',
+      hash: '',
+      state: null,
+      key: 'default',
+    }),
     useParams: () => ({}),
     useSearchParams: () => [new URLSearchParams(), vi.fn()],
   }

@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90% </span>
+                <span class="strong">88.88% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>9/10</span>
+                <span class='fraction'>8/9</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>9/9</span>
+                <span class='fraction'>8/8</span>
             </div>
         
             
@@ -248,8 +248,12 @@
 <a name='L183'></a><a href='#L183'>183</a>
 <a name='L184'></a><a href='#L184'>184</a>
 <a name='L185'></a><a href='#L185'>185</a>
-<a name='L186'></a><a href='#L186'>186</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -265,11 +269,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">26x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">26x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">26x</span>
 <span class="cline-any cline-yes">22x</span>
@@ -284,6 +288,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -433,54 +441,59 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
-import { X, Building2, Code, Calendar, User, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { facultiesApi } from '@/api/faculties.api';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useTranslation } from 'react-i18next'
+import { X, Building2, Code, Calendar, User, Info } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
+import { useFacultyDetail } from '@/hooks/useFaculties'
 &nbsp;
 interface FacultyDetailDrawerProps {
-  facultyCode: string;
-  onClose: () =&gt; void;
+  facultyCode: string
+  onClose: () =&gt; void
 }
 &nbsp;
 export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDetailDrawerProps) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation()
 &nbsp;
-  const { data: faculty, isLoading, error } = useQuery({
-    queryKey: ['faculty-detail', facultyCode],
-    queryFn: () =&gt; facultiesApi.getFacultyDetail(facultyCode),
-    enabled: !!facultyCode,
-  });
+  const {
+    data: faculty,
+    isLoading,
+    error,
+  } = useFacultyDetail(facultyCode)
 &nbsp;
   const formatDate = (dateString?: string) =&gt; {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!dateString) <span class="cstat-no" title="statement not covered" >return '-';</span>
-    const date = new Date(dateString);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!dateString) <span class="cstat-no" title="statement not covered" >return '-'</span>
+    const date = new Date(dateString)
     return new Intl.DateTimeFormat(i18n.language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    }).format(date);
-  };
+    }).format(date)
+  }
 &nbsp;
   return (
-    &lt;div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-end animate-in fade-in duration-200"&gt;
-      &lt;div className="bg-background h-full w-full max-w-2xl shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300"&gt;
+    &lt;div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-end bg-black/50 duration-200"&gt;
+      &lt;div className="bg-background animate-in slide-in-from-right h-full w-full max-w-2xl overflow-y-auto shadow-2xl duration-300"&gt;
         {/* Header */}
-        &lt;div className="sticky top-0 z-10 bg-background border-b px-6 py-4 flex items-center justify-between"&gt;
+        &lt;div className="bg-background sticky top-0 z-10 flex items-center justify-between border-b px-6 py-4"&gt;
           &lt;div className="flex items-center gap-3"&gt;
-            &lt;Building2 className="h-6 w-6 text-primary" /&gt;
+            &lt;Building2 className="text-primary h-6 w-6" /&gt;
             &lt;div&gt;
               &lt;h2 className="text-xl font-semibold"&gt;
                 {isLoading ? &lt;Skeleton className="h-6 w-48" /&gt; : faculty?.nameUz}
               &lt;/h2&gt;
-              &lt;p className="text-sm text-muted-foreground"&gt;
-                {isLoading ? &lt;Skeleton className="h-4 w-32 mt-1" /&gt; : `${t('Code')}: ${faculty?.code}`}
+              &lt;p className="text-muted-foreground text-sm"&gt;
+                {isLoading ? (
+                  &lt;Skeleton className="mt-1 h-4 w-32" /&gt;
+                ) : (
+                  `${t('Code')}: ${faculty?.code}`
+                )}
               &lt;/p&gt;
             &lt;/div&gt;
           &lt;/div&gt;
@@ -490,20 +503,21 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
         &lt;/div&gt;
 &nbsp;
         {/* Content */}
-        &lt;div className="p-6 space-y-6"&gt;
+        &lt;div className="space-y-6 p-6"&gt;
           {isLoading ? (
             &lt;div className="space-y-4"&gt;
               {[...Array(6)].map((_, i) =&gt; (
                 &lt;Card key={i} className="p-4"&gt;
-                  &lt;Skeleton className="h-5 w-32 mb-2" /&gt;
+                  &lt;Skeleton className="mb-2 h-5 w-32" /&gt;
                   &lt;Skeleton className="h-6 w-full" /&gt;
                 &lt;/Card&gt;
               ))}
             &lt;/div&gt;
           ) : error ? (
-            &lt;Card className="p-6 border-red-200 bg-red-50"&gt;
+            &lt;Card className="border-red-200 bg-red-50 p-6"&gt;
               &lt;p className="text-red-600"&gt;
-                {t('Failed to load data')}: {error instanceof Error ? error.message : <span class="branch-1 cbranch-no" title="branch not covered" >'Unknown error'}</span>
+                {t('Failed to load data')}:{' '}
+                {error instanceof Error ? error.message : <span class="branch-1 cbranch-no" title="branch not covered" >'Unknown error'}</span>
               &lt;/p&gt;
             &lt;/Card&gt;
           ) : faculty ? (
@@ -512,10 +526,8 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
               &lt;Card className="p-4"&gt;
                 &lt;div className="flex items-center justify-between"&gt;
                   &lt;div className="flex items-center gap-2"&gt;
-                    &lt;Info className="h-4 w-4 text-muted-foreground" /&gt;
-                    &lt;span className="text-sm font-medium text-muted-foreground"&gt;
-                      {t('Status')}
-                    &lt;/span&gt;
+                    &lt;Info className="text-muted-foreground h-4 w-4" /&gt;
+                    &lt;span className="text-muted-foreground text-sm font-medium"&gt;{t('Status')}&lt;/span&gt;
                   &lt;/div&gt;
                   &lt;Badge variant={faculty.status ? 'default' : <span class="branch-1 cbranch-no" title="branch not covered" >'secondary'}&gt;</span>
                     {faculty.status ? t('Active') : <span class="branch-1 cbranch-no" title="branch not covered" >t('Inactive')}</span>
@@ -524,13 +536,13 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
               &lt;/Card&gt;
 &nbsp;
               {/* Basic Information */}
-              &lt;Card className="p-4 space-y-4"&gt;
-                &lt;h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide"&gt;
+              &lt;Card className="space-y-4 p-4"&gt;
+                &lt;h3 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase"&gt;
                   {t('Basic information')}
                 &lt;/h3&gt;
-                
+&nbsp;
                 &lt;div&gt;
-                  &lt;label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1"&gt;
+                  &lt;label className="text-muted-foreground mb-1 flex items-center gap-2 text-sm font-medium"&gt;
                     &lt;Code className="h-4 w-4" /&gt;
                     {t('Code')}
                   &lt;/label&gt;
@@ -538,17 +550,19 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
                 &lt;/div&gt;
 &nbsp;
                 &lt;div&gt;
-                  &lt;label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1"&gt;
+                  &lt;label className="text-muted-foreground mb-1 flex items-center gap-2 text-sm font-medium"&gt;
                     &lt;Building2 className="h-4 w-4" /&gt;
                     {t('University name')}
                   &lt;/label&gt;
                   &lt;p className="text-base font-medium"&gt;{faculty.universityName}&lt;/p&gt;
-                  &lt;p className="text-sm text-muted-foreground"&gt;{t('University code')}: {faculty.universityCode}&lt;/p&gt;
+                  &lt;p className="text-muted-foreground text-sm"&gt;
+                    {t('University code')}: {faculty.universityCode}
+                  &lt;/p&gt;
                 &lt;/div&gt;
 &nbsp;
                 {faculty.shortName &amp;&amp; (
                   &lt;div&gt;
-                    &lt;label className="text-sm font-medium text-muted-foreground mb-1"&gt;
+                    &lt;label className="text-muted-foreground mb-1 text-sm font-medium"&gt;
                       {t('Short name')}
                     &lt;/label&gt;
                     &lt;p className="text-base"&gt;{faculty.shortName}&lt;/p&gt;
@@ -557,29 +571,31 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
 &nbsp;
                 {faculty.departmentType &amp;&amp; (
                   &lt;div&gt;
-                    &lt;label className="text-sm font-medium text-muted-foreground mb-1"&gt;
+                    &lt;label className="text-muted-foreground mb-1 text-sm font-medium"&gt;
                       {t('Faculty type')}
                     &lt;/label&gt;
-                    &lt;p className="text-base"&gt;{faculty.departmentTypeName || <span class="branch-1 cbranch-no" title="branch not covered" >faculty.departmentType}&lt;</span>/p&gt;
+                    &lt;p className="text-base"&gt;
+                      {faculty.departmentTypeName || <span class="branch-1 cbranch-no" title="branch not covered" >faculty.departmentType}</span>
+                    &lt;/p&gt;
                   &lt;/div&gt;
                 )}
               &lt;/Card&gt;
 &nbsp;
               {/* Audit Information */}
-              &lt;Card className="p-4 space-y-4"&gt;
-                &lt;h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide"&gt;
+              &lt;Card className="space-y-4 p-4"&gt;
+                &lt;h3 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase"&gt;
                   {t('Audit information')}
                 &lt;/h3&gt;
 &nbsp;
                 {faculty.createdAt &amp;&amp; (
                   &lt;div&gt;
-                    &lt;label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1"&gt;
+                    &lt;label className="text-muted-foreground mb-1 flex items-center gap-2 text-sm font-medium"&gt;
                       &lt;Calendar className="h-4 w-4" /&gt;
                       {t('Created at')}
                     &lt;/label&gt;
                     &lt;p className="text-base"&gt;{formatDate(faculty.createdAt)}&lt;/p&gt;
                     {faculty.createdBy &amp;&amp; (
-                      &lt;p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"&gt;
+                      &lt;p className="text-muted-foreground mt-1 flex items-center gap-1 text-sm"&gt;
                         &lt;User className="h-3 w-3" /&gt;
                         {faculty.createdBy}
                       &lt;/p&gt;
@@ -589,13 +605,13 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
 &nbsp;
                 {faculty.updatedAt &amp;&amp; (
                   &lt;div&gt;
-                    &lt;label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-1"&gt;
+                    &lt;label className="text-muted-foreground mb-1 flex items-center gap-2 text-sm font-medium"&gt;
                       &lt;Calendar className="h-4 w-4" /&gt;
                       {t('Updated at')}
                     &lt;/label&gt;
                     &lt;p className="text-base"&gt;{formatDate(faculty.updatedAt)}&lt;/p&gt;
                     {faculty.updatedBy &amp;&amp; (
-                      &lt;p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"&gt;
+                      &lt;p className="text-muted-foreground mt-1 flex items-center gap-1 text-sm"&gt;
                         &lt;User className="h-3 w-3" /&gt;
                         {faculty.updatedBy}
                       &lt;/p&gt;
@@ -608,16 +624,15 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
         &lt;/div&gt;
 &nbsp;
         {/* Footer */}
-        &lt;div className="sticky bottom-0 bg-background border-t px-6 py-4"&gt;
+        &lt;div className="bg-background sticky bottom-0 border-t px-6 py-4"&gt;
           &lt;Button onClick={onClose} className="w-full"&gt;
             {t('Close')}
           &lt;/Button&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-  );
+  )
 }
-&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -625,7 +640,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

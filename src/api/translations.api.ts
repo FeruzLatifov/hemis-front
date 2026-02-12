@@ -88,45 +88,25 @@ export const getTranslations = async (params?: {
   sortBy?: string
   sortDir?: string
 }): Promise<TranslationListResponse> => {
-  const { data } = await apiClient.get('/api/v1/web/system/translation', { params })
+  const { data: wrapped } = await apiClient.get('/api/v1/web/system/translation', { params })
+  const data = wrapped.data
 
-  // Normalize various response shapes to TranslationListResponse
-  const normalize = (raw: unknown): TranslationListResponse => {
-    // If backend returns array directly
-    if (Array.isArray(raw)) {
-      return {
-        content: raw as Translation[],
-        currentPage: 0,
-        totalItems: raw.length,
-        totalPages: 1,
-        pageSize: raw.length,
-      }
-    }
+  // Normalize paged response shape
+  const rawObj = data as Record<string, unknown>
+  const content: Translation[] = (rawObj?.content ?? rawObj?.items ?? []) as Translation[]
+  const totalItems: number = (rawObj?.totalItems ?? rawObj?.total ?? content.length) as number
+  const pageSize: number = (rawObj?.pageSize ?? rawObj?.size ?? content.length) as number
+  const currentPage: number = (rawObj?.currentPage ?? rawObj?.page ?? 0) as number
+  const totalPages: number = (rawObj?.totalPages ??
+    (pageSize ? Math.max(1, Math.ceil(totalItems / pageSize)) : 1)) as number
 
-    // If wrapped in { data: ... }
-    if (raw && typeof raw === 'object' && 'data' in raw) {
-      return normalize((raw as Record<string, unknown>).data)
-    }
-
-    // Common paged shapes
-    const rawObj = raw as Record<string, unknown>
-    const content: Translation[] = (rawObj?.content ?? rawObj?.items ?? []) as Translation[]
-    const totalItems: number = (rawObj?.totalItems ?? rawObj?.total ?? content.length) as number
-    const pageSize: number = (rawObj?.pageSize ?? rawObj?.size ?? content.length) as number
-    const currentPage: number = (rawObj?.currentPage ?? rawObj?.page ?? 0) as number
-    const totalPages: number = (rawObj?.totalPages ??
-      (pageSize ? Math.max(1, Math.ceil(totalItems / pageSize)) : 1)) as number
-
-    return {
-      content,
-      currentPage,
-      totalItems,
-      totalPages,
-      pageSize,
-    }
+  return {
+    content,
+    currentPage,
+    totalItems,
+    totalPages,
+    pageSize,
   }
-
-  return normalize(data)
 }
 
 /**
@@ -134,7 +114,7 @@ export const getTranslations = async (params?: {
  */
 export const getTranslationById = async (id: string): Promise<Translation> => {
   const response = await apiClient.get(`/api/v1/web/system/translation/${id}`)
-  return response.data
+  return response.data.data
 }
 
 /**
@@ -145,15 +125,15 @@ export const updateTranslation = async (
   data: TranslationUpdateRequest,
 ): Promise<Translation> => {
   const response = await apiClient.put(`/api/v1/web/system/translation/${id}`, data)
-  return response.data
+  return response.data.data
 }
 
 /**
  * Toggle translation active status
  */
-export const toggleTranslationActive = async (id: string): Promise<Translation> => {
+export const toggleTranslationActive = async (id: string): Promise<{ active: boolean }> => {
   const response = await apiClient.patch(`/api/v1/web/system/translation/${id}/toggle-active`)
-  return response.data
+  return response.data.data
 }
 
 /**
@@ -161,7 +141,7 @@ export const toggleTranslationActive = async (id: string): Promise<Translation> 
  */
 export const getTranslationStatistics = async (): Promise<TranslationStatistics> => {
   const response = await apiClient.get('/api/v1/web/system/translation/stats')
-  return response.data
+  return response.data.data
 }
 
 /**
@@ -169,7 +149,7 @@ export const getTranslationStatistics = async (): Promise<TranslationStatistics>
  */
 export const clearTranslationCache = async (): Promise<{ message: string }> => {
   const response = await apiClient.post('/api/v1/web/system/translation/cache/clear')
-  return response.data
+  return { message: response.data.message || 'Cache cleared' }
 }
 
 /**
@@ -179,7 +159,8 @@ export const exportTranslations = async (language: string): Promise<ExportRespon
   const response = await apiClient.post('/api/v1/web/system/translation/export', undefined, {
     params: { language },
   })
-  return response.data
+  const data = response.data.data
+  return data.properties as ExportResponse
 }
 
 /**
@@ -187,7 +168,7 @@ export const exportTranslations = async (language: string): Promise<ExportRespon
  */
 export const regeneratePropertiesFiles = async (): Promise<RegenerateResponse> => {
   const response = await apiClient.post('/api/v1/web/system/translation/properties/regenerate')
-  return response.data
+  return response.data.data
 }
 
 /**

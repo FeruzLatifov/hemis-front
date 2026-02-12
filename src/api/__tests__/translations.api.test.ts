@@ -58,7 +58,7 @@ describe('getTranslations', () => {
       totalPages: 1,
       pageSize: 10,
     }
-    mockGet.mockResolvedValueOnce({ data: mockData })
+    mockGet.mockResolvedValueOnce({ data: { data: mockData } })
 
     const params = { category: 'auth', page: 0, size: 10 }
     const result = await getTranslations(params)
@@ -68,7 +68,7 @@ describe('getTranslations', () => {
     expect(result.totalItems).toBe(1)
   })
 
-  it('normalizes array response shape', async () => {
+  it('normalizes response with content array only', async () => {
     const items = [
       {
         id: '1',
@@ -89,7 +89,7 @@ describe('getTranslations', () => {
         updatedAt: '',
       },
     ]
-    mockGet.mockResolvedValueOnce({ data: items })
+    mockGet.mockResolvedValueOnce({ data: { data: { content: items } } })
 
     const result = await getTranslations()
 
@@ -129,20 +129,22 @@ describe('getTranslations', () => {
   it('normalizes paginated object with alternative field names', async () => {
     mockGet.mockResolvedValueOnce({
       data: {
-        items: [
-          {
-            id: '1',
-            category: 'common',
-            messageKey: 'cancel',
-            message: 'Bekor',
-            isActive: true,
-            createdAt: '',
-            updatedAt: '',
-          },
-        ],
-        total: 50,
-        size: 20,
-        page: 2,
+        data: {
+          items: [
+            {
+              id: '1',
+              category: 'common',
+              messageKey: 'cancel',
+              message: 'Bekor',
+              isActive: true,
+              createdAt: '',
+              updatedAt: '',
+            },
+          ],
+          total: 50,
+          size: 20,
+          page: 2,
+        },
       },
     })
 
@@ -171,7 +173,7 @@ describe('getTranslationById', () => {
       createdAt: '',
       updatedAt: '',
     }
-    mockGet.mockResolvedValueOnce({ data: translation })
+    mockGet.mockResolvedValueOnce({ data: { data: translation } })
 
     const result = await getTranslationById('42')
 
@@ -195,7 +197,7 @@ describe('updateTranslation', () => {
       createdAt: '',
       updatedAt: '',
     }
-    mockPut.mockResolvedValueOnce({ data: updated })
+    mockPut.mockResolvedValueOnce({ data: { data: updated } })
 
     const updateData = {
       category: 'auth',
@@ -215,21 +217,14 @@ describe('toggleTranslationActive', () => {
   })
 
   it('calls PATCH with correct URL', async () => {
-    const toggled = {
-      id: '42',
-      category: 'auth',
-      messageKey: 'login.title',
-      message: 'Kirish',
-      isActive: false,
-      createdAt: '',
-      updatedAt: '',
-    }
-    mockPatch.mockResolvedValueOnce({ data: toggled })
+    mockPatch.mockResolvedValueOnce({
+      data: { success: true, data: { active: false } },
+    })
 
     const result = await toggleTranslationActive('42')
 
     expect(mockPatch).toHaveBeenCalledWith('/api/v1/web/system/translation/42/toggle-active')
-    expect(result.isActive).toBe(false)
+    expect(result.active).toBe(false)
   })
 })
 
@@ -247,7 +242,7 @@ describe('getTranslationStatistics', () => {
       categoryBreakdown: { auth: 30, common: 50, admin: 20 },
       languages: ['uz', 'ru', 'en', 'oz'],
     }
-    mockGet.mockResolvedValueOnce({ data: stats })
+    mockGet.mockResolvedValueOnce({ data: { data: stats } })
 
     const result = await getTranslationStatistics()
 
@@ -278,7 +273,7 @@ describe('exportTranslations', () => {
 
   it('calls POST with language param', async () => {
     const exportData = { 'login.title': 'Kirish', 'login.submit': 'Yuborish' }
-    mockPost.mockResolvedValueOnce({ data: exportData })
+    mockPost.mockResolvedValueOnce({ data: { data: { properties: exportData } } })
 
     const result = await exportTranslations('uz')
 
@@ -302,7 +297,7 @@ describe('regeneratePropertiesFiles', () => {
       totalTranslations: 100,
       timestamp: '2025-01-01T00:00:00Z',
     }
-    mockPost.mockResolvedValueOnce({ data: response })
+    mockPost.mockResolvedValueOnce({ data: { data: response } })
 
     const result = await regeneratePropertiesFiles()
 
@@ -358,11 +353,13 @@ describe('findDuplicateMessages', () => {
 
     mockGet.mockResolvedValueOnce({
       data: {
-        content: translations,
-        currentPage: 0,
-        totalItems: 4,
-        totalPages: 1,
-        pageSize: 5000,
+        data: {
+          content: translations,
+          currentPage: 0,
+          totalItems: 4,
+          totalPages: 1,
+          pageSize: 5000,
+        },
       },
     })
 
@@ -424,11 +421,13 @@ describe('findDuplicateMessages', () => {
 
     mockGet.mockResolvedValueOnce({
       data: {
-        content: translations,
-        currentPage: 0,
-        totalItems: 5,
-        totalPages: 1,
-        pageSize: 5000,
+        data: {
+          content: translations,
+          currentPage: 0,
+          totalItems: 5,
+          totalPages: 1,
+          pageSize: 5000,
+        },
       },
     })
 
@@ -463,11 +462,13 @@ describe('findDuplicateMessages', () => {
 
     mockGet.mockResolvedValueOnce({
       data: {
-        content: translations,
-        currentPage: 0,
-        totalItems: 2,
-        totalPages: 1,
-        pageSize: 5000,
+        data: {
+          content: translations,
+          currentPage: 0,
+          totalItems: 2,
+          totalPages: 1,
+          pageSize: 5000,
+        },
       },
     })
 
@@ -508,11 +509,13 @@ describe('searchByMessageText', () => {
 
     mockGet.mockResolvedValueOnce({
       data: {
-        content: translations,
-        currentPage: 0,
-        totalItems: 1,
-        totalPages: 1,
-        pageSize: 10,
+        data: {
+          content: translations,
+          currentPage: 0,
+          totalItems: 1,
+          totalPages: 1,
+          pageSize: 10,
+        },
       },
     })
 
@@ -527,11 +530,13 @@ describe('searchByMessageText', () => {
   it('trims whitespace from search text', async () => {
     mockGet.mockResolvedValueOnce({
       data: {
-        content: [],
-        currentPage: 0,
-        totalItems: 0,
-        totalPages: 1,
-        pageSize: 10,
+        data: {
+          content: [],
+          currentPage: 0,
+          totalItems: 0,
+          totalPages: 1,
+          pageSize: 10,
+        },
       },
     })
 
@@ -555,7 +560,7 @@ describe('downloadTranslationsAsJson', () => {
       'common.ok': 'OK',
       simple: 'Oddiy',
     }
-    mockPost.mockResolvedValueOnce({ data: exportData })
+    mockPost.mockResolvedValueOnce({ data: { data: { properties: exportData } } })
 
     // Mock DOM methods
     const mockClick = vi.fn()

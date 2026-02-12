@@ -51,6 +51,8 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 
   return (
     <header
+      role="banner"
+      aria-label={t('Main header')}
       className="card-white flex h-14 items-center justify-between border-b px-3 md:h-16 md:justify-end md:px-6"
       style={{ boxShadow: 'var(--shadow-sm)' }}
     >

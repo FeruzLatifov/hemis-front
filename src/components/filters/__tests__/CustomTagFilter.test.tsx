@@ -1,7 +1,7 @@
 /**
  * CustomTagFilter Component Tests
  *
- * Tests rendering, close button, popover with search and checkbox items.
+ * Tests rendering, clear/remove buttons, popover with search and button items.
  */
 
 import { render, screen } from '@/test/test-utils'
@@ -60,84 +60,93 @@ describe('CustomTagFilter', () => {
     vi.clearAllMocks()
   })
 
-  it('renders the filter label', () => {
+  it('renders the filter label with colon', () => {
     render(<CustomTagFilter {...defaultProps} />)
-    expect(screen.getByText('Holat')).toBeInTheDocument()
+    expect(screen.getByText('Holat:')).toBeInTheDocument()
   })
 
-  it('renders selected count badge', () => {
+  it('renders selected item name', () => {
     render(<CustomTagFilter {...defaultProps} />)
-    expect(screen.getByText('1')).toBeInTheDocument()
-  })
-
-  it('does not render badge when value is empty', () => {
-    render(<CustomTagFilter {...defaultProps} value={[]} />)
-    expect(screen.queryByText('0')).not.toBeInTheDocument()
-  })
-
-  it('renders the close (remove) button', () => {
-    render(<CustomTagFilter {...defaultProps} />)
-    // The close button has an X icon
-    const closeButtons = screen.getAllByRole('button')
-    // Last button should be the close button
-    const closeButton = closeButtons[closeButtons.length - 1]
-    expect(closeButton).toBeInTheDocument()
-  })
-
-  it('calls onClose when close button is clicked', async () => {
-    const user = userEvent.setup()
-    render(<CustomTagFilter {...defaultProps} />)
-
-    const closeButtons = screen.getAllByRole('button')
-    // The close button is separate from the label button
-    const closeButton = closeButtons[closeButtons.length - 1]
-    await user.click(closeButton)
-
-    expect(defaultProps.onClose).toHaveBeenCalled()
-  })
-
-  it('opens popover on label click and shows items', async () => {
-    const user = userEvent.setup()
-    render(<CustomTagFilter {...defaultProps} />)
-
-    // Click the label button to open popover
-    await user.click(screen.getByText('Holat'))
-
-    // Should show all items
     expect(screen.getByText('Faol')).toBeInTheDocument()
+  })
+
+  it('shows "All" text when value is empty', () => {
+    render(<CustomTagFilter {...defaultProps} value={[]} />)
+    expect(screen.getByText('All')).toBeInTheDocument()
+  })
+
+  it('shows "+N" badge when multiple items selected', () => {
+    render(<CustomTagFilter {...defaultProps} value={['active', 'inactive']} />)
+    expect(screen.getByText('+1')).toBeInTheDocument()
+  })
+
+  it('renders clear button when items are selected', () => {
+    render(<CustomTagFilter {...defaultProps} />)
+    const clearBtn = screen.getByTitle('Clear')
+    expect(clearBtn).toBeInTheDocument()
+  })
+
+  it('renders remove filter button when no items selected and onClose provided', () => {
+    render(<CustomTagFilter {...defaultProps} value={[]} />)
+    const removeBtn = screen.getByTitle('Remove filter')
+    expect(removeBtn).toBeInTheDocument()
+  })
+
+  it('calls onChange with empty array when clear button is clicked', async () => {
+    const user = userEvent.setup()
+    render(<CustomTagFilter {...defaultProps} />)
+
+    await user.click(screen.getByTitle('Clear'))
+    expect(defaultProps.onChange).toHaveBeenCalledWith([])
+  })
+
+  it('opens popover on trigger click and shows items', async () => {
+    const user = userEvent.setup()
+    render(<CustomTagFilter {...defaultProps} />)
+
+    await user.click(screen.getByText('Holat:'))
+
+    // Should show all items in the popover
+    // "Faol" already exists in the trigger, but it should also appear in the popover list
+    const faolElements = screen.getAllByText('Faol')
+    expect(faolElements.length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Nofaol')).toBeInTheDocument()
     expect(screen.getByText('Bitirgan')).toBeInTheDocument()
   })
 
-  it('shows "Select all" option in popover', async () => {
+  it('shows "All" option in popover', async () => {
     const user = userEvent.setup()
     render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    expect(screen.getByText('Barchasini tanlang')).toBeInTheDocument()
+    // The "All" button should be present in the popover
+    const allElements = screen.getAllByText('All')
+    expect(allElements.length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows search input in popover', async () => {
     const user = userEvent.setup()
     render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    expect(screen.getByPlaceholderText('Qidirish...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
   })
 
   it('filters items based on search query', async () => {
     const user = userEvent.setup()
     render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    const searchInput = screen.getByPlaceholderText('Qidirish...')
+    const searchInput = screen.getByPlaceholderText('Search...')
     await user.type(searchInput, 'Faol')
 
-    expect(screen.getByText('Faol')).toBeInTheDocument()
-    expect(screen.getByText('Nofaol')).toBeInTheDocument() // "Nofaol" contains "Faol"
+    // "Faol" and "Nofaol" (contains "Faol") should be visible
+    const faolElements = screen.getAllByText(/Faol/)
+    expect(faolElements.length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Nofaol')).toBeInTheDocument()
     expect(screen.queryByText('Bitirgan')).not.toBeInTheDocument()
   })
 
@@ -145,60 +154,51 @@ describe('CustomTagFilter', () => {
     const user = userEvent.setup()
     render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    const searchInput = screen.getByPlaceholderText('Qidirish...')
+    const searchInput = screen.getByPlaceholderText('Search...')
     await user.type(searchInput, 'xxxxxxxxxxx')
 
-    expect(screen.getByText('Hech narsa topilmadi')).toBeInTheDocument()
+    expect(screen.getByText('No results found')).toBeInTheDocument()
   })
 
-  it('calls onChange when item checkbox is toggled (add)', async () => {
+  it('calls onChange when item button is clicked (add)', async () => {
     const user = userEvent.setup()
     render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    // Click on "Nofaol" label to toggle it
-    const nofaolLabel = screen.getByText('Nofaol').closest('label')!
-    await user.click(nofaolLabel)
+    // Click on "Nofaol" button to toggle it
+    await user.click(screen.getByText('Nofaol'))
 
     expect(defaultProps.onChange).toHaveBeenCalledWith(['active', 'inactive'])
   })
 
-  it('calls onChange when item checkbox is toggled (remove)', async () => {
+  it('calls onChange when item button is clicked (remove)', async () => {
     const user = userEvent.setup()
     render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    // Click on "Faol" label to toggle it off (currently selected)
-    const faolLabel = screen.getByText('Faol').closest('label')!
-    await user.click(faolLabel)
+    // Click on "Faol" in the popover list to toggle it off
+    // "Faol" appears in both trigger and popover, get the one in the popover list
+    const faolElements = screen.getAllByText('Faol')
+    // The last one should be in the popover items list
+    await user.click(faolElements[faolElements.length - 1])
 
     expect(defaultProps.onChange).toHaveBeenCalledWith([])
   })
 
-  it('calls onChange with all codes when select all is clicked', async () => {
+  it('calls onChange with empty array when "All" is clicked (clears selection)', async () => {
     const user = userEvent.setup()
-    render(<CustomTagFilter {...defaultProps} value={[]} />)
+    render(<CustomTagFilter {...defaultProps} />)
 
-    await user.click(screen.getByText('Holat'))
+    await user.click(screen.getByText('Holat:'))
 
-    const selectAllLabel = screen.getByText('Barchasini tanlang').closest('label')!
-    await user.click(selectAllLabel)
-
-    expect(defaultProps.onChange).toHaveBeenCalledWith(['active', 'inactive', 'graduated'])
-  })
-
-  it('calls onChange with empty array when deselect all', async () => {
-    const user = userEvent.setup()
-    render(<CustomTagFilter {...defaultProps} value={['active', 'inactive', 'graduated']} />)
-
-    await user.click(screen.getByText('Holat'))
-
-    const selectAllLabel = screen.getByText('Barchasini tanlang').closest('label')!
-    await user.click(selectAllLabel)
+    // Click the "All" button in the popover — clears selection
+    const allElements = screen.getAllByText('All')
+    // The "All" button inside the popover
+    await user.click(allElements[allElements.length - 1])
 
     expect(defaultProps.onChange).toHaveBeenCalledWith([])
   })

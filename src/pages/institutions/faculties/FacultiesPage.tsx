@@ -11,8 +11,6 @@
  */
 
 import React, { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { queryKeys } from '@/lib/queryKeys'
 import { useTranslation } from 'react-i18next'
 import {
   useReactTable,
@@ -33,9 +31,12 @@ import {
 } from '@/components/ui/select'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { toast } from 'sonner'
-import { facultiesApi, FacultyGroupRow, FacultyRow, PageResponse } from '@/api/faculties.api'
-import { extractApiErrorMessage } from '@/utils/error.util'
+import { type FacultyGroupRow, type FacultyRow } from '@/api/faculties.api'
+import {
+  useFacultyGroups,
+  useFacultiesByUniversity,
+  useExportFaculties,
+} from '@/hooks/useFaculties'
 import FacultyDetailDrawer from './FacultyDetailDrawer'
 
 type TableRow = {
@@ -54,49 +55,20 @@ export default function FacultiesPage() {
   const [selectedFacultyCode, setSelectedFacultyCode] = useState<string | null>(null)
 
   // Fetch university groups
-  const {
-    data: groupsData,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: queryKeys.faculties.groups({ search, status, page }),
-    queryFn: () =>
-      facultiesApi.getGroups({
-        q: search || undefined,
-        status: status === 'all' ? undefined : status === 'true',
-        page,
-        size: 20,
-      }),
-  })
+  const { data: groupsData, isLoading, error, refetch } = useFacultyGroups({ search, status, page })
 
   // Fetch faculties for expanded universities
   const expandedUniversities = Object.keys(expanded).filter((key) => expanded[key])
   const facultyPages: Record<string, number> = {}
 
-  const facultyQueries = useQuery({
-    queryKey: queryKeys.faculties.byUniversity(expandedUniversities, {
-      facultyPages,
-      search,
-      status,
-    }),
-    queryFn: async () => {
-      const results: Record<string, PageResponse<FacultyRow>> = {}
-      await Promise.all(
-        expandedUniversities.map(async (univCode) => {
-          const facultyPage = facultyPages[univCode] || 0
-          results[univCode] = await facultiesApi.getFacultiesByUniversity(univCode, {
-            q: search || undefined,
-            status: status === 'all' ? undefined : status === 'true',
-            page: facultyPage,
-            size: 50,
-          })
-        }),
-      )
-      return results
-    },
-    enabled: expandedUniversities.length > 0,
+  const facultyQueries = useFacultiesByUniversity(expandedUniversities, {
+    facultyPages,
+    search,
+    status,
   })
+
+  // Export mutation
+  const exportMutation = useExportFaculties()
 
   // Auto-expand all groups when searching to fetch child faculties by query
   useEffect(() => {
@@ -261,31 +233,11 @@ export default function FacultiesPage() {
     getExpandedRowModel: getExpandedRowModel(),
   })
 
-  const handleExport = async () => {
-    try {
-      const blob = await facultiesApi.exportFaculties({
-        q: search || undefined,
-        status: status === 'all' ? undefined : status === 'true',
-      })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `faculties_${new Date().toISOString().slice(0, 10)}.xlsx`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      toast.success(t('Download Excel'), {
-        duration: 3000,
-        position: 'bottom-right',
-      })
-    } catch (error) {
-      // ⭐ Backend-driven i18n: Use backend's localized message
-      toast.error(extractApiErrorMessage(error, t('Export failed')), {
-        duration: 5000,
-        position: 'bottom-right',
-      })
-    }
+  const handleExport = () => {
+    exportMutation.mutate({
+      q: search || undefined,
+      status: status === 'all' ? undefined : status === 'true',
+    })
   }
 
   return (

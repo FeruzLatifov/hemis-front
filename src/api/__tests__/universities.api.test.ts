@@ -213,7 +213,7 @@ describe('universitiesApi', () => {
       const row = await adaptSingle(snakeCaseDTO())
 
       expect(row.soatoRegion).toBe('SOATO_REG')
-      expect(row.regionCode).toBe('SOATO_REG')
+      expect(row.regionCode).toBe('SOATO_CODE')
       expect(row.ownershipCode).toBe('OWN_STATE')
       expect(row.universityTypeCode).toBe('TYPE_UNI')
       expect(row.universityUrl).toBe('https://tatu.uz')
@@ -239,7 +239,7 @@ describe('universitiesApi', () => {
       const row = await adaptSingle(camelCaseDTO())
 
       expect(row.soatoRegion).toBe('SOATO_REG_CC')
-      expect(row.regionCode).toBe('SOATO_REG_CC')
+      expect(row.regionCode).toBe('SOATO_CC')
       expect(row.ownershipCode).toBe('OWN_PRIVATE')
       expect(row.universityTypeCode).toBe('TYPE_INST')
       expect(row.universityUrl).toBe('https://tdtu.uz')
@@ -563,47 +563,45 @@ describe('universitiesApi', () => {
   // ─── exportUniversities ────────────────────────────────────────────
 
   describe('exportUniversities', () => {
-    it('creates blob download link and triggers download', async () => {
-      const blobData = new Blob(['csv,data'], { type: 'text/csv' })
-      const fakeUrl = 'blob:http://localhost/fake-blob-url'
+    it('fetches all universities via GET and returns adapted rows', async () => {
+      const backendPage = {
+        content: [snakeCaseDTO(), camelCaseDTO()],
+        totalElements: 2,
+        totalPages: 1,
+        size: 10000,
+        number: 0,
+      }
 
-      vi.mocked(apiClient.post).mockResolvedValue({
-        data: blobData,
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: { success: true, data: backendPage },
       })
 
-      const createObjectURLMock = vi.fn().mockReturnValue(fakeUrl)
-      const revokeObjectURLMock = vi.fn()
-      window.URL.createObjectURL = createObjectURLMock
-      window.URL.revokeObjectURL = revokeObjectURLMock
-
-      const mockLink = {
-        href: '',
-        setAttribute: vi.fn(),
-        click: vi.fn(),
-        remove: vi.fn(),
-      }
-      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as unknown as HTMLElement)
-      vi.spyOn(document.body, 'appendChild').mockImplementation((node) => node)
-
       const params = { q: 'TATU', regionId: 'REG_01' }
-      await universitiesApi.exportUniversities(params)
+      const result = await universitiesApi.exportUniversities(params)
 
-      expect(apiClient.post).toHaveBeenCalledWith(
-        '/api/v1/web/registry/universities/export',
-        null,
-        {
-          params,
-          responseType: 'blob',
-        },
-      )
-      expect(createObjectURLMock).toHaveBeenCalled()
-      expect(mockLink.href).toBe(fakeUrl)
-      expect(mockLink.setAttribute).toHaveBeenCalledWith('download', 'universities.csv')
-      expect(mockLink.click).toHaveBeenCalled()
-      expect(mockLink.remove).toHaveBeenCalled()
-      expect(revokeObjectURLMock).toHaveBeenCalledWith(fakeUrl)
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/registry/universities', {
+        params: { ...params, page: 0, size: 10000 },
+      })
+      expect(result).toHaveLength(2)
+      expect(result[0].code).toBe('TATU')
+      expect(result[1].code).toBe('TDTU')
+    })
 
-      vi.restoreAllMocks()
+    it('returns empty array when no content', async () => {
+      const backendPage = {
+        content: null,
+        totalElements: 0,
+        totalPages: 0,
+        size: 10000,
+        number: 0,
+      }
+
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: { success: true, data: backendPage },
+      })
+
+      const result = await universitiesApi.exportUniversities({})
+      expect(result).toEqual([])
     })
   })
 })

@@ -146,11 +146,7 @@
 <a name='L81'></a><a href='#L81'>81</a>
 <a name='L82'></a><a href='#L82'>82</a>
 <a name='L83'></a><a href='#L83'>83</a>
-<a name='L84'></a><a href='#L84'>84</a>
-<a name='L85'></a><a href='#L85'>85</a>
-<a name='L86'></a><a href='#L86'>86</a>
-<a name='L87'></a><a href='#L87'>87</a>
-<a name='L88'></a><a href='#L88'>88</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L84'></a><a href='#L84'>84</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -172,8 +168,6 @@
 <span class="cline-any cline-yes">32x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -203,8 +197,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -237,43 +229,41 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Settings2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Settings2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
 &nbsp;
 interface Column {
-  id: string;
-  label: string;
-  visible: boolean;
-  canHide: boolean;
+  id: string
+  label: string
+  visible: boolean
+  canHide: boolean
 }
 &nbsp;
 interface ColumnSettingsPopoverProps {
-  columns: Column[];
-  onToggle: (columnId: string) =&gt; void;
+  columns: Column[]
+  onToggle: (columnId: string) =&gt; void
 }
 &nbsp;
 export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopoverProps) {
-  const { t } = useTranslation();
-  const visibleCount = columns.filter(c =&gt; c.visible).length;
+  const { t } = useTranslation()
+  const visibleCount = columns.filter((c) =&gt; c.visible).length
 &nbsp;
   return (
     &lt;Popover&gt;
       &lt;PopoverTrigger asChild&gt;
         &lt;button
-          className="p-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 transition-colors hover:bg-gray-50"
           title={t('Column settings')}
         &gt;
-          &lt;Settings2 className="w-4 h-4" /&gt;
+          &lt;Settings2 className="h-4 w-4" /&gt;
         &lt;/button&gt;
       &lt;/PopoverTrigger&gt;
       &lt;PopoverContent className="w-80 p-0" align="end"&gt;
-        &lt;div className="p-4 border-b border-gray-200 bg-gray-50"&gt;
-          &lt;h4 className="text-sm font-semibold text-gray-900"&gt;
-            {t('Column settings')}
-          &lt;/h4&gt;
-          &lt;p className="text-xs text-gray-600 mt-1"&gt;
+        &lt;div className="border-b border-gray-200 bg-gray-50 p-4"&gt;
+          &lt;h4 className="text-sm font-semibold text-gray-900"&gt;{t('Column settings')}&lt;/h4&gt;
+          &lt;p className="mt-1 text-xs text-gray-600"&gt;
             {t('Shown')}: &lt;span className="font-medium"&gt;{visibleCount}&lt;/span&gt; / {columns.length}
           &lt;/p&gt;
         &lt;/div&gt;
@@ -283,21 +273,19 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
             {columns.map((column) =&gt; (
               &lt;label
                 key={column.id}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors ${
-                  !column.canHide ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-gray-50 ${
+                  !column.canHide ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 }`}
               &gt;
                 &lt;Checkbox
                   checked={column.visible}
                   onCheckedChange={() =&gt; column.canHide &amp;&amp; onToggle(column.id)}
                   disabled={!column.canHide}
-                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                  className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
                 /&gt;
-                &lt;span className="text-sm text-gray-700 flex-1"&gt;
-                  {column.label}
-                &lt;/span&gt;
+                &lt;span className="flex-1 text-sm text-gray-700"&gt;{column.label}&lt;/span&gt;
                 {!column.canHide &amp;&amp; (
-                  &lt;span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"&gt;
+                  &lt;span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500"&gt;
                     {t('Required')}
                   &lt;/span&gt;
                 )}
@@ -306,23 +294,23 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
           &lt;/div&gt;
         &lt;/div&gt;
 &nbsp;
-        &lt;div className="p-3 border-t border-gray-200 bg-gray-50"&gt;
+        &lt;div className="border-t border-gray-200 bg-gray-50 p-3"&gt;
           &lt;button
             onClick={() =&gt; {
               columns.forEach((col) =&gt; {
                 if (col.canHide &amp;&amp; !col.visible) {
-                  onToggle(col.id);
+                  onToggle(col.id)
                 }
-              });
+              })
             }}
-            className="w-full px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+            className="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
           &gt;
             {t('Show all')}
           &lt;/button&gt;
         &lt;/div&gt;
       &lt;/PopoverContent&gt;
     &lt;/Popover&gt;
-  );
+  )
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -331,7 +319,7 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

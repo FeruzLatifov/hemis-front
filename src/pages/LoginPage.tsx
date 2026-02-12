@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
@@ -28,7 +28,11 @@ const resolveLanguage = (lang?: string | null): SupportedLang => {
 const Login = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuthStore()
+
+  // Get redirect path from state (set by ProtectedRoute)
+  const from = (location.state as { from?: string })?.from || '/dashboard'
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -64,58 +68,68 @@ const Login = () => {
     setPasswordError('')
   }, [currentLang, i18n])
 
-  const handleLanguageChange = (lang: SupportedLang) => {
-    if (lang === currentLang) {
-      setIsLangDropdownOpen(false)
-      return
-    }
-    setCurrentLang(lang)
-    setIsLangDropdownOpen(false)
-  }
-
-  const validateField = (value: string, minLength: number, label: string) => {
-    const trimmed = value.trim()
-    if (!trimmed) return t('{{field}} is required', { field: label })
-    if (trimmed.length < minLength)
-      return t('Must be at least {{count}} characters', { count: minLength })
-    return ''
-  }
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const uErr = validateField(username, 3, t('Username'))
-    const pErr = validateField(password, 6, t('Password'))
-    setUsernameError(uErr)
-    setPasswordError(pErr)
-    if (uErr || pErr) return
-
-    setIsLoading(true)
-    try {
-      await login({
-        username: username.trim(),
-        password,
-        locale: currentLang,
-      })
-      toast.success(t('Welcome back!'), { duration: 2000, position: 'bottom-right' })
-      navigate('/dashboard', { replace: true })
-    } catch (err: unknown) {
-      const status = getErrorStatus(err, 0)
-      if (isNetworkError(err) || status === 0) {
-        toast.error(t('Backend server is not available'), {
-          duration: 8000,
-          position: 'bottom-right',
-        })
+  const handleLanguageChange = useCallback(
+    (lang: SupportedLang) => {
+      if (lang === currentLang) {
+        setIsLangDropdownOpen(false)
         return
       }
-      toast.error(extractApiErrorMessage(err, t('Something went wrong')), {
-        duration: status === 429 ? 8000 : 5000,
-        position: 'bottom-right',
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+      setCurrentLang(lang)
+      setIsLangDropdownOpen(false)
+    },
+    [currentLang],
+  )
+
+  const validateField = useCallback(
+    (value: string, minLength: number, label: string) => {
+      const trimmed = value.trim()
+      if (!trimmed) return t('{{field}} is required', { field: label })
+      if (trimmed.length < minLength)
+        return t('Must be at least {{count}} characters', { count: minLength })
+      return ''
+    },
+    [t],
+  )
+
+  const handleLogin = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+
+      const uErr = validateField(username, 3, t('Username'))
+      const pErr = validateField(password, 6, t('Password'))
+      setUsernameError(uErr)
+      setPasswordError(pErr)
+      if (uErr || pErr) return
+
+      setIsLoading(true)
+      try {
+        await login({
+          username: username.trim(),
+          password,
+          locale: currentLang,
+        })
+        toast.success(t('Welcome back!'), { duration: 2000, position: 'bottom-right' })
+        // Redirect to the original page or dashboard
+        navigate(from, { replace: true })
+      } catch (err: unknown) {
+        const status = getErrorStatus(err, 0)
+        if (isNetworkError(err) || status === 0) {
+          toast.error(t('Backend server is not available'), {
+            duration: 8000,
+            position: 'bottom-right',
+          })
+          return
+        }
+        toast.error(extractApiErrorMessage(err, t('Something went wrong')), {
+          duration: status === 429 ? 8000 : 5000,
+          position: 'bottom-right',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [username, password, currentLang, validateField, login, navigate, t, from],
+  )
 
   return (
     <div className="flex min-h-screen flex-col overflow-hidden lg:flex-row">

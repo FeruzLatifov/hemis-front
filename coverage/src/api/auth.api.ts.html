@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>26/26</span>
+                <span class='fraction'>28/28</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>26/26</span>
+                <span class='fraction'>28/28</span>
             </div>
         
             
@@ -193,7 +193,10 @@
 <a name='L128'></a><a href='#L128'>128</a>
 <a name='L129'></a><a href='#L129'>129</a>
 <a name='L130'></a><a href='#L130'>130</a>
-<a name='L131'></a><a href='#L131'>131</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -246,9 +249,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
@@ -266,30 +267,33 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -330,26 +334,27 @@
  * Uses /api/v1/web/auth endpoints for web users
  */
 &nbsp;
-import axios from 'axios';
-import apiClient from './client';
-import type { LoginRequest, LoginResponse, AdminUser } from '@/types/auth.types';
-import i18n from '@/i18n/config';
+import axios from 'axios'
+import apiClient from './client'
+import type { LoginRequest, LoginResponse, AdminUser } from '@/types/auth.types'
+import i18n from '@/i18n/config'
 &nbsp;
 /**
- * Backend error response structure
+ * Backend error response structure (ResponseWrapper format)
  */
 interface ErrorResponse {
-  message?: string;
-  error?: string;
-  errorCode?: string;
-  eventId?: string;
+  success?: boolean
+  message?: string
+  error?: string
+  errorCode?: string
+  eventId?: string
 }
 &nbsp;
 /**
  * Map backend user data to AdminUser
  */
 function mapUser(userInfo: Record&lt;string, unknown&gt;, locale?: string): AdminUser {
-  const user = userInfo.user as Record&lt;string, unknown&gt;;
+  const user = userInfo.user as Record&lt;string, unknown&gt;
   return {
     id: String(user.id),
     username: String(user.username),
@@ -358,7 +363,7 @@ function mapUser(userInfo: Record&lt;string, unknown&gt;, locale?: string): Admi
     locale: (locale || String(user.locale || 'uz')) as 'uz' | 'ru' | 'en',
     active: (user.active as boolean) ?? true,
     createdAt: String(user.createdAt || new Date().toISOString()),
-  };
+  }
 }
 &nbsp;
 /**
@@ -370,22 +375,20 @@ function mapUser(userInfo: Record&lt;string, unknown&gt;, locale?: string): Admi
 export const login = async (credentials: LoginRequest): Promise&lt;LoginResponse&gt; =&gt; {
   try {
     // Step 1: Get JWT tokens (in HTTPOnly cookies)
-    await apiClient.post(
-      '/api/v1/web/auth/login',
-      {
-        username: credentials.username,
-        password: credentials.password,
-      }
-    );
+    await apiClient.post('/api/v1/web/auth/login', {
+      username: credentials.username,
+      password: credentials.password,
+    })
 &nbsp;
     // Step 2: Get user info + permissions (token sent via cookie)
-    const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me');
+    const { data: wrapped } = await apiClient.get('/api/v1/web/auth/me')
+    const userInfo = wrapped.data
 &nbsp;
     return {
       user: mapUser(userInfo, credentials.locale),
       university: userInfo.university || null,
       permissions: userInfo.permissions || [],
-    };
+    }
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       // Network error - backend is unreachable
@@ -395,20 +398,22 @@ export const login = async (credentials: LoginRequest): Promise&lt;LoginResponse
         !error.response ||
         (error.request &amp;&amp; (<span class="branch-4 cbranch-no" title="branch not covered" >error.request.status === 0 || <span class="branch-5 cbranch-no" title="branch not covered" >e</span>rror.request.readyState === 4))</span>
       ) {
-        const msg = i18n.t('Backend server is not available', { defaultValue: 'Backend server ishlamayapti' });
-        error.message = msg || <span class="branch-1 cbranch-no" title="branch not covered" >'Backend server ishlamayapti';</span>
-        throw error;
+        const msg = i18n.t('Backend server is not available', {
+          defaultValue: 'Backend server ishlamayapti',
+        })
+        error.message = msg || <span class="branch-1 cbranch-no" title="branch not covered" >'Backend server ishlamayapti'</span>
+        throw error
       }
 &nbsp;
       // Backend-driven i18n: Use backend's localized message directly
-      const errorData = error.response?.data as ErrorResponse;
-      error.message = errorData?.message || <span class="branch-1 cbranch-no" title="branch not covered" >errorData?.error || <span class="branch-2 cbranch-no" title="branch not covered" >'</span>Login failed';</span>
-      throw error;
+      const errorData = error.response?.data as ErrorResponse
+      error.message = errorData?.message || <span class="branch-1 cbranch-no" title="branch not covered" >errorData?.error || <span class="branch-2 cbranch-no" title="branch not covered" >'</span>Login failed'</span>
+      throw error
     }
 &nbsp;
-    throw error instanceof Error ? error : <span class="branch-1 cbranch-no" title="branch not covered" >new Error('Login failed');</span>
+    throw error instanceof Error ? error : <span class="branch-1 cbranch-no" title="branch not covered" >new Error('Login failed')</span>
   }
-};
+}
 &nbsp;
 /**
  * Refresh access token
@@ -417,17 +422,18 @@ export const login = async (credentials: LoginRequest): Promise&lt;LoginResponse
  * Tokens are in HTTPOnly cookies — no need to send in body
  */
 export const refreshToken = async (): Promise&lt;LoginResponse&gt; =&gt; {
-  await apiClient.post('/api/v1/web/auth/refresh', {});
+  await apiClient.post('/api/v1/web/auth/refresh', {})
 &nbsp;
   // Get fresh user data and permissions
-  const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me');
+  const { data: wrapped } = await apiClient.get('/api/v1/web/auth/me')
+  const userInfo = wrapped.data
 &nbsp;
   return {
     user: mapUser(userInfo),
     university: userInfo.university || null,
     permissions: userInfo.permissions || <span class="branch-1 cbranch-no" title="branch not covered" >[],</span>
-  };
-};
+  }
+}
 &nbsp;
 /**
  * Logout user
@@ -437,11 +443,11 @@ export const refreshToken = async (): Promise&lt;LoginResponse&gt; =&gt; {
  */
 export const logout = async (): Promise&lt;void&gt; =&gt; {
   try {
-    await apiClient.post('/api/v1/web/auth/logout');
+    await apiClient.post('/api/v1/web/auth/logout')
   } catch {
     // Ignore errors - client-side cleanup will happen anyway
   }
-};
+}
 &nbsp;
 /**
  * Get current authenticated user
@@ -450,9 +456,9 @@ export const logout = async (): Promise&lt;void&gt; =&gt; {
  * Token is in HTTPOnly cookie
  */
 export const getCurrentUser = async (): Promise&lt;AdminUser&gt; =&gt; {
-  const { data } = await apiClient.get('/api/v1/web/auth/me');
-  return mapUser(data);
-};
+  const { data: wrapped } = await apiClient.get('/api/v1/web/auth/me')
+  return mapUser(wrapped.data)
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -460,7 +466,7 @@ export const getCurrentUser = async (): Promise&lt;AdminUser&gt; =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

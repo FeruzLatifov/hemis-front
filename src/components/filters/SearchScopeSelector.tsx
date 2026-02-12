@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Select,
   SelectContent,
@@ -32,6 +33,7 @@ export function SearchScopeSelector({
   onSearch,
   onClear,
 }: SearchScopeSelectorProps) {
+  const { t } = useTranslation()
   const currentScope = scopes.find((s) => s.value === value)
 
   return (
@@ -40,7 +42,7 @@ export function SearchScopeSelector({
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="w-[140px] rounded-none border-0 border-r border-gray-300 bg-white focus:ring-0 focus:ring-offset-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600">Qidirish:</span>
+            <span className="text-xs font-medium text-gray-600">{t('Search')}:</span>
             <SelectValue />
           </div>
         </SelectTrigger>
@@ -68,7 +70,7 @@ export function SearchScopeSelector({
               onSearch()
             }
           }}
-          placeholder={`${currentScope?.label || 'Hamma'} bo'yicha qidirish...`}
+          placeholder={t('Search by {{field}}...', { field: currentScope?.label || t('All') })}
           className="w-full border-0 bg-transparent py-2.5 pr-10 pl-10 text-sm placeholder:text-gray-400 focus:outline-none"
         />
         {searchValue && (

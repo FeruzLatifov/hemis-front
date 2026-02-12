@@ -11,9 +11,10 @@ import type { LoginRequest, LoginResponse, AdminUser } from '@/types/auth.types'
 import i18n from '@/i18n/config'
 
 /**
- * Backend error response structure
+ * Backend error response structure (ResponseWrapper format)
  */
 interface ErrorResponse {
+  success?: boolean
   message?: string
   error?: string
   errorCode?: string
@@ -51,6 +52,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     })
 
     // Step 2: Get user info + permissions (token sent via cookie)
+    // Note: /auth/me returns UserInfoResponse directly (NOT wrapped in ResponseWrapper)
     const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me')
 
     return {
@@ -94,6 +96,7 @@ export const refreshToken = async (): Promise<LoginResponse> => {
   await apiClient.post('/api/v1/web/auth/refresh', {})
 
   // Get fresh user data and permissions
+  // Note: /auth/me returns UserInfoResponse directly (NOT wrapped in ResponseWrapper)
   const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me')
 
   return {
@@ -124,6 +127,7 @@ export const logout = async (): Promise<void> => {
  * Token is in HTTPOnly cookie
  */
 export const getCurrentUser = async (): Promise<AdminUser> => {
-  const { data } = await apiClient.get('/api/v1/web/auth/me')
-  return mapUser(data)
+  // Note: /auth/me returns UserInfoResponse directly (NOT wrapped in ResponseWrapper)
+  const { data: userInfo } = await apiClient.get('/api/v1/web/auth/me')
+  return mapUser(userInfo)
 }

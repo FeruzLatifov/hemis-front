@@ -1,13 +1,15 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useCallback } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from 'sonner'
+import { Toaster, toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { ThemeProvider } from './components/ThemeProvider'
 import { queryClient } from './lib/queryClient'
 import MainLayout from './components/layouts/MainLayout'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { RouteErrorBoundary } from './components/RouteErrorBoundary'
 import { useAuthStore } from './stores/authStore'
+import { useIdleTimeout } from './hooks/useIdleTimeout'
 import './i18n/config'
 
 // Lazy-loaded pages
@@ -25,9 +27,17 @@ const TranslationFormPage = lazy(() =>
 const UniversitiesPage = lazy(() =>
   import('./pages/institutions/universities').then((m) => ({ default: m.UniversitiesPage })),
 )
+const UniversityDetailPage = lazy(
+  () => import('./pages/institutions/universities/UniversityDetailPage'),
+)
+const UniversityFormPage = lazy(
+  () => import('./pages/institutions/universities/UniversityFormPage'),
+)
 const FacultiesPage = lazy(() =>
   import('./pages/institutions/faculties').then((m) => ({ default: m.FacultiesPage })),
 )
+const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 // Loading fallback
 const PageLoader = () => {
@@ -64,9 +74,11 @@ const ProtectedRoute = ({
   permission?: string
 }) => {
   const { isAuthenticated, permissions } = useAuthStore()
+  const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Save the current location for redirect after login
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />
   }
 
   if (permission && !permissions.includes(permission)) {
@@ -78,11 +90,38 @@ const ProtectedRoute = ({
 
 function App() {
   const { t } = useTranslation()
-  const { initialize, logout } = useAuthStore()
+  const { initialize, logout, refresh, isAuthenticated } = useAuthStore()
+
+  // ✅ SECURITY: Auto-logout after idle timeout
+  const handleIdleLogout = useCallback(() => {
+    toast.warning(t('Session expired due to inactivity'))
+    logout()
+  }, [logout, t])
+
+  useIdleTimeout({
+    onIdle: handleIdleLogout,
+    enabled: isAuthenticated,
+  })
 
   useEffect(() => {
     initialize()
   }, [initialize])
+
+  // ✅ SECURITY: Periodic permission refresh (every 15 minutes)
+  // Ensures permissions stay fresh even during long sessions
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const REFRESH_INTERVAL = 15 * 60 * 1000 // 15 minutes
+
+    const intervalId = setInterval(() => {
+      refresh().catch(() => {
+        // Silent failure - if refresh fails, the next API call will handle it
+      })
+    }, REFRESH_INTERVAL)
+
+    return () => clearInterval(intervalId)
+  }, [isAuthenticated, refresh])
 
   // Listen for auth:logout events from API interceptor
   useEffect(() => {
@@ -113,12 +152,57 @@ function App() {
                   }
                 >
                   <Route index element={<Navigate to="/dashboard" replace />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route
+                    path="dashboard"
+                    element={
+                      <RouteErrorBoundary>
+                        <DashboardPage />
+                      </RouteErrorBoundary>
+                    }
+                  />
 
                   {/* Institutions */}
                   <Route path="institutions">
-                    <Route path="universities" element={<UniversitiesPage />} />
-                    <Route path="faculties" element={<FacultiesPage />} />
+                    <Route
+                      path="universities"
+                      element={
+                        <RouteErrorBoundary>
+                          <UniversitiesPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="universities/create"
+                      element={
+                        <RouteErrorBoundary>
+                          <UniversityFormPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="universities/:code"
+                      element={
+                        <RouteErrorBoundary>
+                          <UniversityDetailPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="universities/:code/edit"
+                      element={
+                        <RouteErrorBoundary>
+                          <UniversityFormPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="faculties"
+                      element={
+                        <RouteErrorBoundary>
+                          <FacultiesPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
                     <Route
                       path="departments"
                       element={<PlaceholderPage title={t('Departments')} />}
@@ -130,7 +214,14 @@ function App() {
                   </Route>
 
                   {/* Students */}
-                  <Route path="students" element={<StudentsPage />} />
+                  <Route
+                    path="students"
+                    element={
+                      <RouteErrorBoundary>
+                        <StudentsPage />
+                      </RouteErrorBoundary>
+                    }
+                  />
                   <Route
                     path="students/directions"
                     element={<PlaceholderPage title={t('Directions')} />}
@@ -150,7 +241,14 @@ function App() {
                   />
 
                   {/* Teachers */}
-                  <Route path="teachers" element={<TeachersPage />} />
+                  <Route
+                    path="teachers"
+                    element={
+                      <RouteErrorBoundary>
+                        <TeachersPage />
+                      </RouteErrorBoundary>
+                    }
+                  />
                   <Route
                     path="teachers/positions"
                     element={<PlaceholderPage title={t('Positions')} />}
@@ -185,7 +283,14 @@ function App() {
                   </Route>
 
                   {/* Reports */}
-                  <Route path="reports" element={<ReportsPage />} />
+                  <Route
+                    path="reports"
+                    element={
+                      <RouteErrorBoundary>
+                        <ReportsPage />
+                      </RouteErrorBoundary>
+                    }
+                  />
                   <Route
                     path="reports/students"
                     element={<PlaceholderPage title={t('Students report')} />}
@@ -248,11 +353,41 @@ function App() {
 
                   {/* System */}
                   <Route path="system">
-                    <Route path="translations" element={<TranslationsPage />} />
-                    <Route path="translation/create" element={<TranslationFormPage />} />
-                    <Route path="translation/:id/edit" element={<TranslationFormPage />} />
+                    <Route
+                      path="translations"
+                      element={
+                        <RouteErrorBoundary>
+                          <TranslationsPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="translation/create"
+                      element={
+                        <RouteErrorBoundary>
+                          <TranslationFormPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="translation/:id/edit"
+                      element={
+                        <RouteErrorBoundary>
+                          <TranslationFormPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
                     <Route path="users" element={<PlaceholderPage title={t('Users')} />} />
-                    <Route path="logs" element={<PlaceholderPage title={t('System logs')} />} />
+                    <Route
+                      path="logs"
+                      element={
+                        <ProtectedRoute permission="audit.view">
+                          <RouteErrorBoundary>
+                            <LogsPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
                     <Route
                       path="report-updates"
                       element={<PlaceholderPage title={t('Report updates')} />}
@@ -273,8 +408,12 @@ function App() {
                     element={<Navigate to="/institutions/faculties" replace />}
                   />
 
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                  {/* 404 for unknown routes within protected area */}
+                  <Route path="*" element={<NotFoundPage />} />
                 </Route>
+
+                {/* Global 404 route */}
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
           </ErrorBoundary>

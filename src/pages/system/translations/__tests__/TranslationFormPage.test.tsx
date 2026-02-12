@@ -2,6 +2,17 @@ import { render, screen, waitFor, fireEvent, act } from '@/test/test-utils'
 
 const mockNavigate = vi.fn()
 
+// Mock i18n config (used by hooks via i18n.t())
+vi.mock('@/i18n/config', () => ({
+  default: {
+    t: (key: string) => key,
+    language: 'uz',
+    changeLanguage: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
+}))
+
 // Mock react-i18next - must include initReactI18next for i18n/config.ts
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -16,7 +27,7 @@ vi.mock('react-i18next', () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
-// Mock react-router-dom
+// Mock react-router-dom (useBlocker needs data router - mock it directly)
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {
@@ -24,6 +35,7 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate,
     useParams: () => ({ id: 'tr-001' }),
     useSearchParams: () => [new URLSearchParams(), vi.fn()],
+    useBlocker: () => ({ state: 'unblocked', proceed: vi.fn(), reset: vi.fn() }),
   }
 })
 
@@ -682,8 +694,8 @@ describe('TranslationFormPage', () => {
     // Make updateTranslation hang for a while
     let resolveUpdate: () => void
     vi.mocked(api.updateTranslation).mockReturnValueOnce(
-      new Promise<Record<string, never>>((resolve) => {
-        resolveUpdate = () => resolve({})
+      new Promise((resolve) => {
+        resolveUpdate = () => resolve({} as never)
       }),
     )
 

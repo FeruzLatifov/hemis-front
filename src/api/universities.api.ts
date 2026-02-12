@@ -50,6 +50,7 @@ interface UniversityBackendDTO {
   allowTransferOutside?: boolean
 
   // Other fields
+  _university_version?: string
   _version_type?: string
   versionType?: string
   _terrain?: string
@@ -94,8 +95,12 @@ export interface UniversityRow {
   allowGrouping?: boolean
   allowTransferOutside?: boolean
   contractCategory?: string
+  contractCategoryCode?: string
   activityStatus?: string
+  activityStatusCode?: string
   belongsTo?: string
+  belongsToCode?: string
+  versionTypeCode?: string
   terrain?: string
   mailAddress?: string
   bankInfo?: string
@@ -120,9 +125,21 @@ export interface UniversitiesParams {
   size?: number
   sort?: string
   q?: string
+  searchField?: string
   regionId?: string
   ownershipId?: string
   typeId?: string
+  activityStatusId?: string
+  belongsToId?: string
+  contractCategoryId?: string
+  versionTypeId?: string
+  districtId?: string
+  active?: string
+  gpaEdit?: string
+  accreditationEdit?: string
+  addStudent?: string
+  allowGrouping?: string
+  allowTransferOutside?: string
 }
 
 export interface Dictionary {
@@ -134,6 +151,16 @@ export interface Dictionaries {
   ownerships: Dictionary[]
   types: Dictionary[]
   regions: Dictionary[]
+  activityStatuses: Dictionary[]
+  belongsToOptions: Dictionary[]
+  contractCategories: Dictionary[]
+  versionTypes: Dictionary[]
+  districts: Dictionary[]
+}
+
+/** Convert empty/whitespace-only strings to undefined so backend receives NULL instead of "" */
+function emptyToUndefined(val: string | undefined | null): string | undefined {
+  return val && val.trim() ? val : undefined
 }
 
 /**
@@ -149,7 +176,7 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
     cadastre: dto.cadastre,
 
     // Classifiers (codes)
-    regionCode: dto._soato_region ?? dto.soatoRegion ?? dto._soato ?? dto.soato,
+    regionCode: dto._soato ?? dto.soato ?? dto._soato_region ?? dto.soatoRegion,
     soatoRegion: dto._soato_region ?? dto.soatoRegion,
     ownershipCode: dto._ownership ?? dto.ownership,
     universityTypeCode: dto._university_type ?? dto.universityType,
@@ -175,13 +202,17 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
 
     // Other fields
     versionType: dto._version_type ?? dto.versionType,
+    versionTypeCode: dto._university_version ?? dto.versionType,
     terrain: dto._terrain ?? dto.terrain,
     mailAddress: dto.mail_address ?? dto.mailAddress,
     bankInfo: dto.bank_info ?? dto.bankInfo,
     accreditationInfo: dto.accreditation_info ?? dto.accreditationInfo,
     contractCategory: dto._university_contract_category ?? dto.contractCategory,
+    contractCategoryCode: dto._university_contract_category ?? dto.contractCategory,
     activityStatus: dto._university_activity_status ?? dto.activityStatus,
+    activityStatusCode: dto._university_activity_status ?? dto.activityStatus,
     belongsTo: dto._university_belongs_to ?? dto.belongsTo,
+    belongsToCode: dto._university_belongs_to ?? dto.belongsTo,
   }
 }
 
@@ -211,19 +242,15 @@ export const universitiesApi = {
   },
 
   async exportUniversities(params: Omit<UniversitiesParams, 'page' | 'size' | 'sort'>) {
-    const response = await apiClient.post('/api/v1/web/registry/universities/export', null, {
-      params,
-      responseType: 'blob',
+    // Fetch all matching universities (no pagination)
+    const response = await apiClient.get<{
+      success: boolean
+      data: PagedResponse<UniversityBackendDTO>
+    }>('/api/v1/web/registry/universities', {
+      params: { ...params, page: 0, size: 10000 },
     })
-
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'universities.csv')
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
+    const rows = (response.data.data.content ?? []).map(adaptDTO)
+    return rows
   },
 
   async getDictionaries() {
@@ -236,29 +263,38 @@ export const universitiesApi = {
   /**
    * Create new university
    */
-  async createUniversity(data: Partial<UniversityRow>): Promise<UniversityRow> {
+  async createUniversity(data: Partial<UniversityDetail>): Promise<UniversityRow> {
     const response = await apiClient.post<{ success: boolean; data: UniversityBackendDTO }>(
       '/api/v1/web/registry/universities',
       {
         code: data.code,
         name: data.name,
-        tin: data.tin,
-        ownership: data.ownershipCode,
-        soato: data.regionCode,
-        soatoRegion: data.soatoRegion,
-        universityType: data.universityTypeCode,
-        address: data.address,
-        cadastre: data.cadastre,
-        universityUrl: data.universityUrl,
-        studentUrl: data.studentUrl,
-        teacherUrl: data.teacherUrl,
-        uzbmbUrl: data.uzbmbUrl,
+        tin: emptyToUndefined(data.tin),
+        ownership: emptyToUndefined(data.ownershipCode),
+        soato: emptyToUndefined(data.regionCode),
+        soatoRegion: emptyToUndefined(data.soatoRegion),
+        universityType: emptyToUndefined(data.universityTypeCode),
+        address: emptyToUndefined(data.address),
+        cadastre: emptyToUndefined(data.cadastre),
+        universityUrl: emptyToUndefined(data.universityUrl),
+        studentUrl: emptyToUndefined(data.studentUrl),
+        teacherUrl: emptyToUndefined(data.teacherUrl),
+        uzbmbUrl: emptyToUndefined(data.uzbmbUrl),
+        mailAddress: emptyToUndefined(data.mailAddress),
+        bankInfo: emptyToUndefined(data.bankInfo),
+        accreditationInfo: emptyToUndefined(data.accreditationInfo),
         active: data.active ?? true,
         gpaEdit: data.gpaEdit ?? false,
         accreditationEdit: data.accreditationEdit ?? true,
         addStudent: data.addStudent ?? false,
         allowGrouping: data.allowGrouping ?? false,
         allowTransferOutside: data.allowTransferOutside ?? true,
+        activityStatus: emptyToUndefined(data.activityStatusCode),
+        belongsTo: emptyToUndefined(data.belongsToCode),
+        contractCategory: emptyToUndefined(data.contractCategoryCode),
+        universityVersion: emptyToUndefined(data.versionTypeCode),
+        terrain: emptyToUndefined(data.terrain),
+        parentUniversity: emptyToUndefined(data.parentUniversity),
       },
     )
     return adaptDTO(response.data.data)
@@ -267,29 +303,38 @@ export const universitiesApi = {
   /**
    * Update existing university
    */
-  async updateUniversity(code: string, data: Partial<UniversityRow>): Promise<UniversityRow> {
+  async updateUniversity(code: string, data: Partial<UniversityDetail>): Promise<UniversityRow> {
     const response = await apiClient.put<{ success: boolean; data: UniversityBackendDTO }>(
       `/api/v1/web/registry/universities/${code}`,
       {
         code: data.code,
         name: data.name,
-        tin: data.tin,
-        ownership: data.ownershipCode,
-        soato: data.regionCode,
-        soatoRegion: data.soatoRegion,
-        universityType: data.universityTypeCode,
-        address: data.address,
-        cadastre: data.cadastre,
-        universityUrl: data.universityUrl,
-        studentUrl: data.studentUrl,
-        teacherUrl: data.teacherUrl,
-        uzbmbUrl: data.uzbmbUrl,
+        tin: emptyToUndefined(data.tin),
+        ownership: emptyToUndefined(data.ownershipCode),
+        soato: emptyToUndefined(data.regionCode),
+        soatoRegion: emptyToUndefined(data.soatoRegion),
+        universityType: emptyToUndefined(data.universityTypeCode),
+        address: emptyToUndefined(data.address),
+        cadastre: emptyToUndefined(data.cadastre),
+        universityUrl: emptyToUndefined(data.universityUrl),
+        studentUrl: emptyToUndefined(data.studentUrl),
+        teacherUrl: emptyToUndefined(data.teacherUrl),
+        uzbmbUrl: emptyToUndefined(data.uzbmbUrl),
+        mailAddress: emptyToUndefined(data.mailAddress),
+        bankInfo: emptyToUndefined(data.bankInfo),
+        accreditationInfo: emptyToUndefined(data.accreditationInfo),
         active: data.active,
         gpaEdit: data.gpaEdit,
         accreditationEdit: data.accreditationEdit,
         addStudent: data.addStudent,
         allowGrouping: data.allowGrouping,
         allowTransferOutside: data.allowTransferOutside,
+        activityStatus: emptyToUndefined(data.activityStatusCode),
+        belongsTo: emptyToUndefined(data.belongsToCode),
+        contractCategory: emptyToUndefined(data.contractCategoryCode),
+        universityVersion: emptyToUndefined(data.versionTypeCode),
+        terrain: emptyToUndefined(data.terrain),
+        parentUniversity: emptyToUndefined(data.parentUniversity),
       },
     )
     return adaptDTO(response.data.data)

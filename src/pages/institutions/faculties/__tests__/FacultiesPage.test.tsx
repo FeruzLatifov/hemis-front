@@ -1,6 +1,17 @@
 import { render, screen, waitFor } from '@/test/test-utils'
 import userEvent from '@testing-library/user-event'
 
+// Mock i18n config (used by hooks via i18n.t())
+vi.mock('@/i18n/config', () => ({
+  default: {
+    t: (key: string) => key,
+    language: 'uz',
+    changeLanguage: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
+}))
+
 // Mock react-i18next - must include initReactI18next for i18n/config.ts
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -209,8 +220,11 @@ describe('FacultiesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Mock URL.createObjectURL and revokeObjectURL
-    global.URL.createObjectURL = vi.fn(() => 'blob:http://localhost/test')
-    global.URL.revokeObjectURL = vi.fn()
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: vi.fn(() => 'blob:http://localhost/test'),
+      revokeObjectURL: vi.fn(),
+    })
   })
 
   it('renders page with title', async () => {

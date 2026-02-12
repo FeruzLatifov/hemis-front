@@ -13,7 +13,16 @@ import userEvent from '@testing-library/user-event'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, params?: Record<string, unknown>) => {
+      if (params) {
+        let result = key
+        Object.entries(params).forEach(([k, v]) => {
+          result = result.replace(`{{${k}}}`, String(v))
+        })
+        return result
+      }
+      return key
+    },
     i18n: { language: 'uz', changeLanguage: vi.fn(), on: vi.fn(), off: vi.fn() },
   }),
   I18nextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -64,21 +73,21 @@ describe('SearchScopeSelector', () => {
 
   it('renders the search input', () => {
     render(<SearchScopeSelector {...defaultProps} />)
-    const input = screen.getByPlaceholderText("Hamma bo'yicha qidirish...")
+    const input = screen.getByPlaceholderText('Search by Hamma...')
     expect(input).toBeInTheDocument()
   })
 
   it('renders scope selector trigger', () => {
     render(<SearchScopeSelector {...defaultProps} />)
     // The select trigger shows the scope label
-    expect(screen.getByText('Qidirish:')).toBeInTheDocument()
+    expect(screen.getByText('Search:')).toBeInTheDocument()
   })
 
   it('calls onSearchChange when typing in the search input', async () => {
     const user = userEvent.setup()
     render(<SearchScopeSelector {...defaultProps} />)
 
-    const input = screen.getByPlaceholderText("Hamma bo'yicha qidirish...")
+    const input = screen.getByPlaceholderText('Search by Hamma...')
     await user.type(input, 'test')
 
     expect(defaultProps.onSearchChange).toHaveBeenCalled()
@@ -87,7 +96,7 @@ describe('SearchScopeSelector', () => {
   it('calls onSearch when Enter is pressed', () => {
     render(<SearchScopeSelector {...defaultProps} />)
 
-    const input = screen.getByPlaceholderText("Hamma bo'yicha qidirish...")
+    const input = screen.getByPlaceholderText('Search by Hamma...')
     fireEvent.keyDown(input, { key: 'Enter' })
 
     expect(defaultProps.onSearch).toHaveBeenCalled()
@@ -124,6 +133,6 @@ describe('SearchScopeSelector', () => {
 
   it('updates placeholder based on selected scope', () => {
     render(<SearchScopeSelector {...defaultProps} value="name" />)
-    expect(screen.getByPlaceholderText("Nomi bo'yicha qidirish...")).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search by Nomi...')).toBeInTheDocument()
   })
 })

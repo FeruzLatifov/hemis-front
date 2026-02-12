@@ -263,7 +263,13 @@
 <a name='L198'></a><a href='#L198'>198</a>
 <a name='L199'></a><a href='#L199'>199</a>
 <a name='L200'></a><a href='#L200'>200</a>
-<a name='L201'></a><a href='#L201'>201</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -283,15 +289,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-yes">21x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">21x</span>
 <span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -302,19 +308,21 @@
 <span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">21x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">21x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -381,7 +389,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -516,17 +528,19 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 &nbsp;
   return (
     &lt;header
-      className="flex h-14 md:h-16 items-center justify-between md:justify-end border-b px-3 md:px-6 card-white"
+      role="banner"
+      aria-label={t('Main header')}
+      className="card-white flex h-14 items-center justify-between border-b px-3 md:h-16 md:justify-end md:px-6"
       style={{ boxShadow: 'var(--shadow-sm)' }}
     &gt;
       {/* Left Side - Mobile Menu Button (only on mobile) */}
       &lt;button
         type="button"
         onClick={() =&gt; setSidebarOpen(true)}
-        className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border header-btn"
+        className="header-btn flex h-9 w-9 items-center justify-center rounded-lg border md:hidden"
         aria-label={t('Open menu')}
       &gt;
-        &lt;Menu className="h-5 w-5 text-color-secondary" /&gt;
+        &lt;Menu className="text-color-secondary h-5 w-5" /&gt;
       &lt;/button&gt;
 &nbsp;
       {/* Right Side - Notifications and User Menu */}
@@ -537,12 +551,12 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           onClick={<span class="fstat-no" title="function not covered" >() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))</span>
           }}
-          className="hidden md:flex items-center gap-2 h-9 md:h-10 px-3 rounded-lg border header-btn text-color-secondary hover:text-color-primary"
+          className="header-btn text-color-secondary hover:text-color-primary hidden h-9 items-center gap-2 rounded-lg border px-3 md:flex md:h-10"
           aria-label={t('Search pages (Ctrl+K)')}
         &gt;
           &lt;Search className="h-4 w-4" aria-hidden="true" /&gt;
           &lt;span className="text-xs"&gt;{t('Search...')}&lt;/span&gt;
-          &lt;kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] font-medium text-color-secondary bg-[var(--bg-pro)]"&gt;
+          &lt;kbd className="text-color-secondary hidden items-center gap-0.5 rounded border bg-[var(--bg-pro)] px-1.5 py-0.5 text-[10px] font-medium lg:inline-flex"&gt;
             Ctrl+K
           &lt;/kbd&gt;
         &lt;/button&gt;
@@ -550,12 +564,15 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
         {/* Notifications Button */}
         &lt;button
           type="button"
-          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn"
+          className="header-btn relative flex h-9 w-9 items-center justify-center rounded-lg border md:h-10 md:w-10"
           aria-label={t('Notifications')}
         &gt;
-          &lt;Bell className="h-4 w-4 md:h-5 md:w-5 text-color-secondary" aria-hidden="true" /&gt;
+          &lt;Bell className="text-color-secondary h-4 w-4 md:h-5 md:w-5" aria-hidden="true" /&gt;
           {/* Notification Badge */}
-          &lt;span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full text-xs font-semibold badge-danger" aria-hidden="true"&gt;
+          &lt;span
+            className="badge-danger absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-xs font-semibold md:h-5 md:w-5"
+            aria-hidden="true"
+          &gt;
             3
           &lt;/span&gt;
         &lt;/button&gt;
@@ -568,7 +585,7 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           type="button"
           onClick={clearCache}
           disabled={isClearingCache}
-          className="relative flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg border header-btn header-btn-success disabled:opacity-50"
+          className="header-btn header-btn-success relative flex h-9 w-9 items-center justify-center rounded-lg border disabled:opacity-50 md:h-10 md:w-10"
           title={t('Clear cache')}
           aria-label={t('Clear cache')}
         &gt;
@@ -582,18 +599,18 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           &lt;button
             type="button"
             onClick={() =&gt; setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 md:gap-3 rounded-lg border px-2 md:px-3 py-1.5 md:py-2 header-btn"
+            className="header-btn flex items-center gap-2 rounded-lg border px-2 py-1.5 md:gap-3 md:px-3 md:py-2"
             aria-label={t('User menu')}
             aria-expanded={isDropdownOpen}
             aria-haspopup="true"
           &gt;
             {/* Avatar */}
-            &lt;div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full avatar-primary"&gt;
-              &lt;User className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" /&gt;
+            &lt;div className="avatar-primary flex h-7 w-7 items-center justify-center rounded-full md:h-8 md:w-8"&gt;
+              &lt;User className="h-3.5 w-3.5 text-white md:h-4 md:w-4" /&gt;
             &lt;/div&gt;
 &nbsp;
             {/* User Name */}
-            &lt;span className="hidden font-medium sm:block text-sm md:text-base text-color-primary"&gt;
+            &lt;span className="text-color-primary hidden text-sm font-medium sm:block md:text-base"&gt;
               {user?.username || 'Admin'}
             &lt;/span&gt;
           &lt;/button&gt;
@@ -601,23 +618,24 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           {/* Dropdown Menu */}
           {isDropdownOpen &amp;&amp; (
             &lt;div
-              className="absolute top-full right-0 mt-2 w-64 rounded-lg border overflow-hidden card-white z-50"
+              className="card-white absolute top-full right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border"
               style={{ boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)' }}
               role="menu"
+              tabIndex={0}
               aria-label={t('User menu')}
               onKeyDown={handleDropdownKeyDown}
             &gt;
               {/* User Info Header */}
-              &lt;div className="px-4 py-3 border-b layout-bg border-color-light"&gt;
+              &lt;div className="layout-bg border-color-light border-b px-4 py-3"&gt;
                 &lt;div className="flex items-center gap-3"&gt;
-                  &lt;div className="flex h-12 w-12 items-center justify-center rounded-full avatar-primary"&gt;
+                  &lt;div className="avatar-primary flex h-12 w-12 items-center justify-center rounded-full"&gt;
                     &lt;User className="h-6 w-6 text-white" /&gt;
                   &lt;/div&gt;
                   &lt;div className="flex-1"&gt;
-                    &lt;p className="text-sm font-semibold text-color-primary"&gt;
+                    &lt;p className="text-color-primary text-sm font-semibold"&gt;
                       {user?.username || <span class="branch-1 cbranch-no" title="branch not covered" >'Administrator'}</span>
                     &lt;/p&gt;
-                    &lt;p className="text-xs text-color-secondary"&gt;
+                    &lt;p className="text-color-secondary text-xs"&gt;
                       {user?.email || <span class="branch-1 cbranch-no" title="branch not covered" >'admin@hemis.uz'}</span>
                     &lt;/p&gt;
                   &lt;/div&gt;
@@ -628,19 +646,19 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
               &lt;div className="py-1" role="none"&gt;
                 &lt;button
                   type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item"
+                  className="dropdown-item flex w-full items-center gap-3 px-4 py-3"
                   role="menuitem"
                 &gt;
-                  &lt;User className="h-4 w-4 text-color-secondary" aria-hidden="true" /&gt;
+                  &lt;User className="text-color-secondary h-4 w-4" aria-hidden="true" /&gt;
                   &lt;span className="text-sm font-medium"&gt;{t('Profile')}&lt;/span&gt;
                 &lt;/button&gt;
 &nbsp;
                 &lt;button
                   type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item"
+                  className="dropdown-item flex w-full items-center gap-3 px-4 py-3"
                   role="menuitem"
                 &gt;
-                  &lt;Settings className="h-4 w-4 text-color-secondary" aria-hidden="true" /&gt;
+                  &lt;Settings className="text-color-secondary h-4 w-4" aria-hidden="true" /&gt;
                   &lt;span className="text-sm font-medium"&gt;{t('Settings')}&lt;/span&gt;
                 &lt;/button&gt;
 &nbsp;
@@ -649,7 +667,7 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
                 &lt;button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-3 px-4 py-3 dropdown-item-danger"
+                  className="dropdown-item-danger flex w-full items-center gap-3 px-4 py-3"
                   role="menuitem"
                 &gt;
                   &lt;LogOut className="h-4 w-4" aria-hidden="true" /&gt;
@@ -670,7 +688,7 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

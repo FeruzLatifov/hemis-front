@@ -42,7 +42,7 @@ describe('auth.api', () => {
       // Mock POST /api/v1/web/auth/login
       mockPost.mockResolvedValueOnce({ data: { success: true } })
 
-      // Mock GET /api/v1/web/auth/me
+      // Mock GET /api/v1/web/auth/me (returns UserInfoResponse directly, NOT wrapped in ResponseWrapper)
       mockGet.mockResolvedValueOnce({
         data: {
           user: {
@@ -191,7 +191,7 @@ describe('auth.api', () => {
       // Mock POST /api/v1/web/auth/refresh
       mockPost.mockResolvedValueOnce({ data: { success: true } })
 
-      // Mock GET /api/v1/web/auth/me
+      // Mock GET /api/v1/web/auth/me (returns UserInfoResponse directly)
       mockGet.mockResolvedValueOnce({
         data: {
           user: {

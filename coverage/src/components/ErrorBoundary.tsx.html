@@ -186,7 +186,27 @@
 <a name='L121'></a><a href='#L121'>121</a>
 <a name='L122'></a><a href='#L122'>122</a>
 <a name='L123'></a><a href='#L123'>123</a>
-<a name='L124'></a><a href='#L124'>124</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -226,6 +246,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -321,17 +347,24 @@
  * - User feedback dialog (optional)
  */
 &nbsp;
-import * as Sentry from '@sentry/react';
-import { AlertCircle, Home, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import i18n from '@/i18n/config';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import * as Sentry from '@sentry/react'
+import { AlertCircle, Home, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import i18n from '@/i18n/config'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 &nbsp;
 interface ErrorFallbackProps {
-  error: unknown;
-  componentStack: string;
-  eventId: string;
-  resetError: () =&gt; void;
+  error: unknown
+  componentStack: string
+  eventId: string
+  resetError: () =&gt; void
 }
 &nbsp;
 /**
@@ -341,23 +374,25 @@ interface ErrorFallbackProps {
  */
 function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
   const handleGoHome = () =&gt; {
-    window.location.href = '/';
-  };
+    window.location.href = '/'
+  }
 &nbsp;
   const handleReload = () =&gt; {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 &nbsp;
   return (
     &lt;div className="flex min-h-screen items-center justify-center bg-gray-50 p-4"&gt;
       &lt;Card className="w-full max-w-lg"&gt;
         &lt;CardHeader&gt;
           &lt;div className="flex items-center gap-3"&gt;
-            &lt;AlertCircle className="h-8 w-8 text-destructive" /&gt;
+            &lt;AlertCircle className="text-destructive h-8 w-8" /&gt;
             &lt;div&gt;
               &lt;CardTitle&gt;{i18n.t('An unexpected error occurred')}&lt;/CardTitle&gt;
               &lt;CardDescription&gt;
-                {i18n.t('An unexpected error occurred in the application. Please refresh the page or go to the home page.')}
+                {i18n.t(
+                  'An unexpected error occurred in the application. Please refresh the page or go to the home page.',
+                )}
               &lt;/CardDescription&gt;
             &lt;/div&gt;
           &lt;/div&gt;
@@ -367,13 +402,17 @@ function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
           {/* Error Message */}
           &lt;div className="rounded-md bg-red-50 p-3"&gt;
             &lt;p className="text-sm font-medium text-red-800"&gt;{i18n.t('Error details')}:&lt;/p&gt;
-            &lt;p className="mt-1 text-sm text-red-700"&gt;{error instanceof Error ? error.message : String(error)}&lt;/p&gt;
+            &lt;p className="mt-1 text-sm text-red-700"&gt;
+              {error instanceof Error ? error.message : String(error)}
+            &lt;/p&gt;
           &lt;/div&gt;
 &nbsp;
           {/* Event ID for Support */}
           {eventId &amp;&amp; (
             &lt;div className="rounded-md bg-blue-50 p-3"&gt;
-              &lt;p className="text-sm font-medium text-blue-800"&gt;{i18n.t('Event ID (for support)')}:&lt;/p&gt;
+              &lt;p className="text-sm font-medium text-blue-800"&gt;
+                {i18n.t('Event ID (for support)')}:
+              &lt;/p&gt;
               &lt;p className="mt-1 font-mono text-sm text-blue-700"&gt;{eventId}&lt;/p&gt;
               &lt;p className="mt-2 text-xs text-blue-600"&gt;
                 {i18n.t('Send this ID to the support team')}
@@ -404,7 +443,7 @@ function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
         &lt;/CardFooter&gt;
       &lt;/Card&gt;
     &lt;/div&gt;
-  );
+  )
 }
 &nbsp;
 /**
@@ -426,12 +465,12 @@ export const ErrorBoundary = Sentry.withErrorBoundary(
       // Add component stack to Sentry
 <span class="cstat-no" title="statement not covered" >      scope.setContext('react', {</span>
         componentStack,
-      });
+      })
     },
-  }
-);
+  },
+)
 &nbsp;
-export default ErrorBoundary;
+export default ErrorBoundary
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -439,7 +478,7 @@ export default ErrorBoundary;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

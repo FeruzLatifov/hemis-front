@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>8/8</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
@@ -150,7 +150,14 @@
 <a name='L85'></a><a href='#L85'>85</a>
 <a name='L86'></a><a href='#L86'>86</a>
 <a name='L87'></a><a href='#L87'>87</a>
-<a name='L88'></a><a href='#L88'>88</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -184,6 +191,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">8x</span>
@@ -237,29 +246,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Search } from 'lucide-react';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 &nbsp;
 interface SearchScope {
-  value: string;
-  label: string;
-  icon?: React.ReactNode;
+  value: string
+  label: string
+  icon?: React.ReactNode
 }
 &nbsp;
 interface SearchScopeSelectorProps {
-  value: string;
-  onChange: (value: string) =&gt; void;
-  scopes: SearchScope[];
-  searchValue: string;
-  onSearchChange: (value: string) =&gt; void;
-  onSearch: () =&gt; void;
-  onClear: () =&gt; void;
+  value: string
+  onChange: (value: string) =&gt; void
+  scopes: SearchScope[]
+  searchValue: string
+  onSearchChange: (value: string) =&gt; void
+  onSearch: () =&gt; void
+  onClear: () =&gt; void
 }
 &nbsp;
 export function SearchScopeSelector({
@@ -271,19 +286,20 @@ export function SearchScopeSelector({
   onSearch,
   onClear,
 }: SearchScopeSelectorProps) {
-  const currentScope = scopes.find(s =&gt; s.value === value);
+  const { t } = useTranslation()
+  const currentScope = scopes.find((s) =&gt; s.value === value)
 &nbsp;
   return (
-    &lt;div className="flex items-center gap-0 rounded-lg border border-gray-300 bg-white overflow-hidden"&gt;
+    &lt;div className="flex items-center gap-0 overflow-hidden rounded-lg border border-gray-300 bg-white"&gt;
       {/* Scope Selector */}
       &lt;Select value={value} onValueChange={onChange}&gt;
-        &lt;SelectTrigger className="w-[140px] border-0 border-r border-gray-300 rounded-none focus:ring-0 focus:ring-offset-0 bg-white"&gt;
+        &lt;SelectTrigger className="w-[140px] rounded-none border-0 border-r border-gray-300 bg-white focus:ring-0 focus:ring-offset-0"&gt;
           &lt;div className="flex items-center gap-2"&gt;
-            &lt;span className="text-xs text-gray-600 font-medium"&gt;Qidirish:&lt;/span&gt;
+            &lt;span className="text-xs font-medium text-gray-600"&gt;{t('Search')}:&lt;/span&gt;
             &lt;SelectValue /&gt;
           &lt;/div&gt;
         &lt;/SelectTrigger&gt;
-        &lt;SelectContent className="!bg-white !border-gray-300"&gt;
+        &lt;SelectContent className="!border-gray-300 !bg-white"&gt;
           {scopes.map((scope) =&gt; (
             &lt;SelectItem key={scope.value} value={scope.value}&gt;
               &lt;div className="flex items-center gap-2"&gt;
@@ -296,33 +312,38 @@ export function SearchScopeSelector({
       &lt;/Select&gt;
 &nbsp;
       {/* Search Input */}
-      &lt;div className="flex-1 relative"&gt;
-        &lt;Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" /&gt;
+      &lt;div className="relative flex-1"&gt;
+        &lt;Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" /&gt;
         &lt;input
           type="text"
           value={searchValue}
           onChange={(e) =&gt; onSearchChange(e.target.value)}
           onKeyDown={(e) =&gt; {
             if (e.key === 'Enter') {
-              onSearch();
+              onSearch()
             }
           }}
-          placeholder={`${currentScope?.label || <span class="branch-1 cbranch-no" title="branch not covered" >'Hamma'}</span> bo'yicha qidirish...`}
-          className="w-full pl-10 pr-10 py-2.5 text-sm bg-transparent border-0 focus:outline-none placeholder:text-gray-400"
+          placeholder={t('Search by {{field}}...', { field: currentScope?.label || <span class="branch-1 cbranch-no" title="branch not covered" >t('All') }</span>)}
+          className="w-full border-0 bg-transparent py-2.5 pr-10 pl-10 text-sm placeholder:text-gray-400 focus:outline-none"
         /&gt;
         {searchValue &amp;&amp; (
           &lt;button
             onClick={onClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
           &gt;
-            &lt;svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
-              &lt;path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /&gt;
+            &lt;svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
+              &lt;path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              /&gt;
             &lt;/svg&gt;
           &lt;/button&gt;
         )}
       &lt;/div&gt;
     &lt;/div&gt;
-  );
+  )
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -331,7 +352,7 @@ export function SearchScopeSelector({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

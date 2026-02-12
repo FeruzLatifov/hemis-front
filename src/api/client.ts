@@ -31,6 +31,25 @@ const apiClient = axios.create({
   withCredentials: true, // ✅ CRITICAL: Enable cookies (HTTPOnly)
 })
 
+// ✅ SECURITY: Token refresh debouncing to prevent race conditions
+// When multiple 401s occur simultaneously, only one refresh is executed
+let isRefreshing = false
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void
+  reject: (reason?: unknown) => void
+}> = []
+
+const processQueue = (error: Error | null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve()
+    }
+  })
+  failedQueue = []
+}
+
 // Request interceptor - Add locale header (token in HTTPOnly cookie)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -100,7 +119,18 @@ apiClient.interceptors.response.use(
         return Promise.reject(error)
       }
 
+      // ✅ SECURITY: Debounced token refresh - prevents race conditions
+      if (isRefreshing) {
+        // Another refresh is in progress - queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        })
+          .then(() => apiClient(originalRequest))
+          .catch((err) => Promise.reject(err))
+      }
+
       originalRequest._retry = true
+      isRefreshing = true
 
       try {
         // ✅ Call refresh endpoint (refreshToken is in HTTPOnly cookie)
@@ -113,21 +143,24 @@ apiClient.interceptors.response.use(
         )
 
         // ✅ New tokens are automatically set in cookies by backend
-        // Backend response: { success: true, message: "..." } (no tokens in body)
-        // No need to save to localStorage
+        // Process queued requests
+        processQueue(null)
 
         // Retry original request (token in cookie)
         return apiClient(originalRequest)
-      } catch {
-        // Refresh failed - logout silently
+      } catch (refreshError) {
+        // Refresh failed - reject all queued requests
+        processQueue(refreshError as Error)
+
+        // Logout silently
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('auth:logout'))
         }
 
         // ⭐ Return original error, not refreshError
-        // This prevents "Refresh token talab qilinadi" message from being shown
-        // Instead, the original 401 error message will be shown (or user redirected to login)
         return Promise.reject(error)
+      } finally {
+        isRefreshing = false
       }
     }
 
@@ -169,6 +202,45 @@ apiClient.interceptors.response.use(
           url: originalRequest.url,
           errorCode,
         },
+      })
+    }
+
+    // ✅ SECURITY: Handle 429 Rate Limiting
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers['retry-after']
+      const waitTime = retryAfter ? parseInt(retryAfter, 10) : 60
+
+      addBreadcrumb({
+        category: 'security',
+        message: `Rate limited: ${originalRequest.url}`,
+        level: 'warning',
+        data: {
+          url: originalRequest.url,
+          retryAfter: waitTime,
+        },
+      })
+
+      toast.warning(errorMessage || "Juda ko'p so'rov yuborildi", {
+        description: `${waitTime} soniyadan keyin qayta urinib ko'ring`,
+        duration: 8000,
+      })
+    }
+
+    // ✅ SECURITY: Handle 403 Forbidden
+    if (error.response?.status === 403) {
+      addBreadcrumb({
+        category: 'security',
+        message: `Access denied: ${originalRequest.url}`,
+        level: 'warning',
+        data: {
+          url: originalRequest.url,
+          errorCode,
+        },
+      })
+
+      toast.error(errorMessage || "Ruxsat yo'q", {
+        description: "Bu amalni bajarish uchun ruxsatingiz yo'q",
+        duration: 5000,
       })
     }
 

@@ -1,11 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, Code, Calendar, User, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { facultiesApi } from '@/api/faculties.api'
+import { useFacultyDetail } from '@/hooks/useFaculties'
 
 interface FacultyDetailDrawerProps {
   facultyCode: string
@@ -15,15 +14,7 @@ interface FacultyDetailDrawerProps {
 export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDetailDrawerProps) {
   const { t, i18n } = useTranslation()
 
-  const {
-    data: faculty,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['faculty-detail', facultyCode],
-    queryFn: () => facultiesApi.getFacultyDetail(facultyCode),
-    enabled: !!facultyCode,
-  })
+  const { data: faculty, isLoading, error } = useFacultyDetail(facultyCode)
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-'

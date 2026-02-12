@@ -233,12 +233,7 @@
 <a name='L168'></a><a href='#L168'>168</a>
 <a name='L169'></a><a href='#L169'>169</a>
 <a name='L170'></a><a href='#L170'>170</a>
-<a name='L171'></a><a href='#L171'>171</a>
-<a name='L172'></a><a href='#L172'>172</a>
-<a name='L173'></a><a href='#L173'>173</a>
-<a name='L174'></a><a href='#L174'>174</a>
-<a name='L175'></a><a href='#L175'>175</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L171'></a><a href='#L171'>171</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -280,9 +275,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -319,17 +311,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -365,8 +357,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
@@ -432,7 +424,6 @@ interface BreadcrumbItem {
   url?: string
 }
 &nbsp;
-&nbsp;
 /**
  * Find path from root to target URL in menu tree
  * Returns array of menu items forming the breadcrumb trail
@@ -440,7 +431,7 @@ interface BreadcrumbItem {
 function findBreadcrumbPath(
   items: MenuItem[],
   targetUrl: string,
-  lang: string
+  lang: string,
 ): BreadcrumbItem[] | null {
   for (const item of items) {
     if (item.url === targetUrl) {
@@ -450,10 +441,7 @@ function findBreadcrumbPath(
     if (item.items &amp;&amp; item.items.length &gt; 0) {
       const childPath = findBreadcrumbPath(item.items, targetUrl, lang)
       if (childPath) {
-        return [
-          { label: getMenuLabel(item, lang), url: item.url },
-          ...childPath,
-        ]
+        return [{ label: getMenuLabel(item, lang), url: item.url }, ...childPath]
       }
     }
   }
@@ -547,13 +535,13 @@ export default function Breadcrumb() {
 &nbsp;
   return (
     &lt;nav
-      aria-label="Breadcrumb"
-      className="flex items-center gap-1.5 px-3 md:px-4 lg:px-6 py-2.5 text-sm border-b border-color-light"
+      aria-label={i18n.t('Breadcrumb')}
+      className="border-color-light flex items-center gap-1.5 border-b px-3 py-2.5 text-sm md:px-4 lg:px-6"
     &gt;
       {/* Home link */}
       &lt;Link
         to="/dashboard"
-        className="flex items-center gap-1 text-color-secondary hover:text-[var(--primary)] transition-colors"
+        className="text-color-secondary flex items-center gap-1 transition-colors hover:text-[var(--primary)]"
         title={homeLabel}
       &gt;
         &lt;Home className="h-4 w-4" /&gt;
@@ -566,15 +554,15 @@ export default function Breadcrumb() {
 &nbsp;
         return (
           &lt;span key={index} className="flex items-center gap-1.5"&gt;
-            &lt;ChevronRight className="h-3.5 w-3.5 text-color-secondary" aria-hidden="true" /&gt;
+            &lt;ChevronRight className="text-color-secondary h-3.5 w-3.5" aria-hidden="true" /&gt;
             {isLast ? (
-              &lt;span className="font-medium text-color-primary" aria-current="page"&gt;
+              &lt;span className="text-color-primary font-medium" aria-current="page"&gt;
                 {item.label}
               &lt;/span&gt;
             ) : (
               &lt;Link
                 to={item.url || '#'}
-                className="text-color-secondary hover:text-[var(--primary)] transition-colors"
+                className="text-color-secondary transition-colors hover:text-[var(--primary)]"
               &gt;
                 {item.label}
               &lt;/Link&gt;
@@ -592,7 +580,7 @@ export default function Breadcrumb() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

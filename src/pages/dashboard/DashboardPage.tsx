@@ -15,14 +15,12 @@ import {
   Loader2,
   type LucideIcon,
 } from 'lucide-react'
-import { queryKeys } from '@/lib/queryKeys'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import CountUp from 'react-countup'
 import { cn } from '@/lib/utils'
-import { useQuery } from '@tanstack/react-query'
-import { getDashboardStats } from '@/api/dashboard.api'
+import { useDashboardStats } from '@/hooks/useDashboard'
 import { formatDistanceToNow } from 'date-fns'
 import { uz } from 'date-fns/locale'
 import { ru } from 'date-fns/locale'
@@ -35,16 +33,7 @@ const dateFnsLocales = { uz, ru, en: enUS } as const
 export default function Dashboard() {
   const { t } = useTranslation()
   // Fetch real data from API
-  const {
-    data: dashboardData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: queryKeys.dashboard.stats,
-    queryFn: getDashboardStats,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
-  })
+  const { data: dashboardData, isLoading, error } = useDashboardStats()
 
   if (isLoading) {
     return (

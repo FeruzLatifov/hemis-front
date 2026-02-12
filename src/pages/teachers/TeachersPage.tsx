@@ -184,7 +184,7 @@ export default function Teachers() {
         </Card>
         <Card className="border border-[var(--border-color-pro)] shadow-sm">
           <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">PhD/DSc</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('PhD/DSc')}</p>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">5,678</p>
           </CardContent>
         </Card>

@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import {
   universitiesApi,
   type UniversitiesParams,
-  type UniversityRow,
+  type UniversityDetail,
 } from '@/api/universities.api'
 import { queryKeys } from '@/lib/queryKeys'
 import { toast } from 'sonner'
@@ -15,6 +15,7 @@ export function useUniversities(params: UniversitiesParams = {}) {
   return useQuery({
     queryKey: queryKeys.universities.list(params as Record<string, unknown>),
     queryFn: () => universitiesApi.getUniversities(params),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -47,7 +48,7 @@ export function useCreateUniversity() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: Partial<UniversityRow>) => universitiesApi.createUniversity(data),
+    mutationFn: (data: Partial<UniversityDetail>) => universitiesApi.createUniversity(data),
     onSuccess: () => {
       // Invalidate and refetch universities list
       queryClient.invalidateQueries({ queryKey: queryKeys.universities.all })
@@ -66,7 +67,7 @@ export function useUpdateUniversity() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ code, data }: { code: string; data: Partial<UniversityRow> }) =>
+    mutationFn: ({ code, data }: { code: string; data: Partial<UniversityDetail> }) =>
       universitiesApi.updateUniversity(code, data),
     onSuccess: (_, variables) => {
       // Invalidate specific university and list

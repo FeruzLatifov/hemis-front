@@ -6,7 +6,7 @@
  * Features: Favorites section, system separator, command palette hint
  */
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, memo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
@@ -43,7 +43,11 @@ interface MenuItemComponentProps {
   onRemoveFavorite: (menuCode: string) => void
 }
 
-function MenuItemComponent({
+/**
+ * Memoized recursive menu item component
+ * Prevents unnecessary re-renders in deep menu trees
+ */
+const MenuItemComponent = memo(function MenuItemComponent({
   item,
   level,
   open,
@@ -182,7 +186,7 @@ function MenuItemComponent({
       )}
     </div>
   )
-}
+})
 
 /**
  * Check if any item in tree is active
@@ -197,7 +201,7 @@ function checkActiveInTree(item: BackendMenuItem, pathname: string): boolean {
   return false
 }
 
-export default function Sidebar({ open, setOpen }: SidebarProps) {
+function Sidebar({ open, setOpen }: SidebarProps) {
   const location = useLocation()
   const { i18n, t } = useTranslation()
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set())
@@ -241,7 +245,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
     [removeFavoriteMutation],
   )
 
-  const toggleSubmenu = (itemId: string) => {
+  const toggleSubmenu = useCallback((itemId: string) => {
     setExpandedMenus((prev) => {
       const newSet = new Set(prev)
       if (newSet.has(itemId)) {
@@ -251,7 +255,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       }
       return newSet
     })
-  }
+  }, [])
 
   // Sort and filter menu items
   const sortedMenuItems = useMemo(() => {
@@ -473,3 +477,5 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
     </>
   )
 }
+
+export default memo(Sidebar)

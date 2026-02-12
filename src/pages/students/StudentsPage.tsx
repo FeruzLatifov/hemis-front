@@ -292,7 +292,7 @@ export default function Students() {
                 <SelectItem value="all">{t('All')}</SelectItem>
                 <SelectItem value="bachelor">{t('Bachelor')}</SelectItem>
                 <SelectItem value="master">{t('Master')}</SelectItem>
-                <SelectItem value="phd">PhD/DSc</SelectItem>
+                <SelectItem value="phd">{t('PhD/DSc')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -302,8 +302,8 @@ export default function Students() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('All')}</SelectItem>
-                <SelectItem value="grant">Grant</SelectItem>
-                <SelectItem value="contract">Kontrakt</SelectItem>
+                <SelectItem value="grant">{t('Grant')}</SelectItem>
+                <SelectItem value="contract">{t('Contract')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -367,12 +367,7 @@
 <a name='L302'></a><a href='#L302'>302</a>
 <a name='L303'></a><a href='#L303'>303</a>
 <a name='L304'></a><a href='#L304'>304</a>
-<a name='L305'></a><a href='#L305'>305</a>
-<a name='L306'></a><a href='#L306'>306</a>
-<a name='L307'></a><a href='#L307'>307</a>
-<a name='L308'></a><a href='#L308'>308</a>
-<a name='L309'></a><a href='#L309'>309</a>
-<a name='L310'></a><a href='#L310'>310</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L305'></a><a href='#L305'>305</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -559,7 +554,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -590,10 +585,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -680,143 +671,142 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import apiClient from './client';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import apiClient from './client'
 &nbsp;
 /**
  * Backend DTO - handles both snake_case and camelCase field names
  * from legacy CUBA and modern Spring Boot endpoints
  */
 interface UniversityBackendDTO {
-  code: string;
-  name: string;
-  tin?: string;
-  address?: string;
-  cadastre?: string;
-  active?: boolean;
+  code: string
+  name: string
+  tin?: string
+  address?: string
+  cadastre?: string
+  active?: boolean
 &nbsp;
   // Region/SOATO (multiple naming conventions)
-  _soato_region?: string;
-  soatoRegion?: string;
-  _soato?: string;
-  soato?: string;
-  region?: string;
+  _soato_region?: string
+  soatoRegion?: string
+  _soato?: string
+  soato?: string
+  region?: string
 &nbsp;
   // Ownership
-  _ownership?: string;
-  ownership?: string;
+  _ownership?: string
+  ownership?: string
 &nbsp;
   // University type
-  _university_type?: string;
-  universityType?: string;
+  _university_type?: string
+  universityType?: string
 &nbsp;
   // URLs (snake_case and camelCase)
-  university_url?: string;
-  universityUrl?: string;
-  teacher_url?: string;
-  teacherUrl?: string;
-  student_url?: string;
-  studentUrl?: string;
-  uzbmb_url?: string;
-  uzbmbUrl?: string;
+  university_url?: string
+  universityUrl?: string
+  teacher_url?: string
+  teacherUrl?: string
+  student_url?: string
+  studentUrl?: string
+  uzbmb_url?: string
+  uzbmbUrl?: string
 &nbsp;
   // Flags
-  gpa_edit?: boolean;
-  gpaEdit?: boolean;
-  accreditation_edit?: boolean;
-  accreditationEdit?: boolean;
-  add_student?: boolean;
-  addStudent?: boolean;
-  allow_grouping?: boolean;
-  allowGrouping?: boolean;
-  allow_transfer_outside?: boolean;
-  allowTransferOutside?: boolean;
+  gpa_edit?: boolean
+  gpaEdit?: boolean
+  accreditation_edit?: boolean
+  accreditationEdit?: boolean
+  add_student?: boolean
+  addStudent?: boolean
+  allow_grouping?: boolean
+  allowGrouping?: boolean
+  allow_transfer_outside?: boolean
+  allowTransferOutside?: boolean
 &nbsp;
   // Other fields
-  _version_type?: string;
-  versionType?: string;
-  _terrain?: string;
-  terrain?: string;
-  mail_address?: string;
-  mailAddress?: string;
-  bank_info?: string;
-  bankInfo?: string;
-  accreditation_info?: string;
-  accreditationInfo?: string;
-  _university_contract_category?: string;
-  contractCategory?: string;
-  _university_activity_status?: string;
-  activityStatus?: string;
-  _university_belongs_to?: string;
-  belongsTo?: string;
-  _parent_university?: string;
-  parentUniversity?: string;
+  _version_type?: string
+  versionType?: string
+  _terrain?: string
+  terrain?: string
+  mail_address?: string
+  mailAddress?: string
+  bank_info?: string
+  bankInfo?: string
+  accreditation_info?: string
+  accreditationInfo?: string
+  _university_contract_category?: string
+  contractCategory?: string
+  _university_activity_status?: string
+  activityStatus?: string
+  _university_belongs_to?: string
+  belongsTo?: string
+  _parent_university?: string
+  parentUniversity?: string
 }
 &nbsp;
 export interface UniversityRow {
-  code: string;
-  name: string;
-  tin?: string;
-  address?: string;
-  region?: string;
-  regionCode?: string;
-  ownership?: string;
-  ownershipCode?: string;
-  universityType?: string;
-  universityTypeCode?: string;
-  soatoRegion?: string;
-  cadastre?: string;
-  versionType?: string;
-  universityUrl?: string;
-  teacherUrl?: string;
-  studentUrl?: string;
-  uzbmbUrl?: string;
-  gpaEdit?: boolean;
-  accreditationEdit?: boolean;
-  addStudent?: boolean;
-  allowGrouping?: boolean;
-  allowTransferOutside?: boolean;
-  contractCategory?: string;
-  activityStatus?: string;
-  belongsTo?: string;
-  terrain?: string;
-  mailAddress?: string;
-  bankInfo?: string;
-  accreditationInfo?: string;
-  active?: boolean;
+  code: string
+  name: string
+  tin?: string
+  address?: string
+  region?: string
+  regionCode?: string
+  ownership?: string
+  ownershipCode?: string
+  universityType?: string
+  universityTypeCode?: string
+  soatoRegion?: string
+  cadastre?: string
+  versionType?: string
+  universityUrl?: string
+  teacherUrl?: string
+  studentUrl?: string
+  uzbmbUrl?: string
+  gpaEdit?: boolean
+  accreditationEdit?: boolean
+  addStudent?: boolean
+  allowGrouping?: boolean
+  allowTransferOutside?: boolean
+  contractCategory?: string
+  activityStatus?: string
+  belongsTo?: string
+  terrain?: string
+  mailAddress?: string
+  bankInfo?: string
+  accreditationInfo?: string
+  active?: boolean
 }
 &nbsp;
 export interface UniversityDetail extends UniversityRow {
-  parentUniversity?: string;
+  parentUniversity?: string
 }
 &nbsp;
 export interface PagedResponse&lt;T&gt; {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
+  content: T[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
 }
 &nbsp;
 export interface UniversitiesParams {
-  page?: number;
-  size?: number;
-  sort?: string;
-  q?: string;
-  regionId?: string;
-  ownershipId?: string;
-  typeId?: string;
+  page?: number
+  size?: number
+  sort?: string
+  q?: string
+  regionId?: string
+  ownershipId?: string
+  typeId?: string
 }
 &nbsp;
 export interface Dictionary {
-  code: string;
-  name: string;
+  code: string
+  name: string
 }
 &nbsp;
 export interface Dictionaries {
-  ownerships: Dictionary[];
-  types: Dictionary[];
-  regions: Dictionary[];
+  ownerships: Dictionary[]
+  types: Dictionary[]
+  regions: Dictionary[]
 }
 &nbsp;
 /**
@@ -865,61 +855,57 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
     contractCategory: dto._university_contract_category ?? dto.contractCategory,
     activityStatus: dto._university_activity_status ?? dto.activityStatus,
     belongsTo: dto._university_belongs_to ?? dto.belongsTo,
-  };
+  }
 }
 &nbsp;
 export const universitiesApi = {
   async getUniversities(params: UniversitiesParams = {}): Promise&lt;PagedResponse&lt;UniversityRow&gt;&gt; {
-    const response = await apiClient.get&lt;{ success: boolean; data: PagedResponse&lt;UniversityBackendDTO&gt; }&gt;(
-      '/api/v1/web/registry/universities',
-      { params }
-    );
-    const page = response.data.data;
+    const response = await apiClient.get&lt;{
+      success: boolean
+      data: PagedResponse&lt;UniversityBackendDTO&gt;
+    }&gt;('/api/v1/web/registry/universities', { params })
+    const page = response.data.data
 &nbsp;
     return {
       ...page,
       content: (page.content ?? []).map(adaptDTO),
-    };
+    }
   },
 &nbsp;
   async getUniversity(id: string): Promise&lt;UniversityDetail&gt; {
     const response = await apiClient.get&lt;{ success: boolean; data: UniversityBackendDTO }&gt;(
-      `/api/v1/web/registry/universities/${id}`
-    );
-    const dto = response.data.data;
+      `/api/v1/web/registry/universities/${id}`,
+    )
+    const dto = response.data.data
     return {
       ...adaptDTO(dto),
       parentUniversity: dto._parent_university ?? dto.parentUniversity,
-    };
+    }
   },
 &nbsp;
   async exportUniversities(params: Omit&lt;UniversitiesParams, 'page' | 'size' | 'sort'&gt;) {
-    const response = await apiClient.post(
-      '/api/v1/web/registry/universities/export',
-      null,
-      {
-        params,
-        responseType: 'blob',
-      }
-    );
-    
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'universities.csv');
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
+    const response = await apiClient.post('/api/v1/web/registry/universities/export', null, {
+      params,
+      responseType: 'blob',
+    })
+&nbsp;
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'universities.csv')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
   },
 &nbsp;
   async getDictionaries() {
     const response = await apiClient.get&lt;{ success: boolean; data: Dictionaries }&gt;(
-      '/api/v1/web/registry/universities/dictionaries'
-    );
-    return response.data.data;
+      '/api/v1/web/registry/universities/dictionaries',
+    )
+    return response.data.data
   },
-  
+&nbsp;
   /**
    * Create new university
    */
@@ -946,9 +932,9 @@ export const universitiesApi = {
         addStudent: data.addStudent ?? false,
         allowGrouping: data.allowGrouping ?? false,
         allowTransferOutside: data.allowTransferOutside ?? true,
-      }
-    );
-    return adaptDTO(response.data.data);
+      },
+    )
+    return adaptDTO(response.data.data)
   },
 &nbsp;
   /**
@@ -977,19 +963,18 @@ export const universitiesApi = {
         addStudent: data.addStudent,
         allowGrouping: data.allowGrouping,
         allowTransferOutside: data.allowTransferOutside,
-      }
-    );
-    return adaptDTO(response.data.data);
+      },
+    )
+    return adaptDTO(response.data.data)
   },
 &nbsp;
   /**
    * Delete university (soft delete)
    */
   async deleteUniversity(code: string): Promise&lt;void&gt; {
-    await apiClient.delete(`/api/v1/web/registry/universities/${code}`);
+    await apiClient.delete(`/api/v1/web/registry/universities/${code}`)
   },
-};
-&nbsp;
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -997,7 +982,7 @@ export const universitiesApi = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-02T16:17:06.922Z
+                at 2026-02-06T05:59:19.087Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

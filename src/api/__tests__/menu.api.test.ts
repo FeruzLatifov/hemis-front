@@ -42,7 +42,7 @@ describe('menu.api', () => {
         locale: 'uz-UZ',
       }
 
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockResponse })
+      vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockResponse } })
 
       const result = await getUserMenu()
 
@@ -60,7 +60,7 @@ describe('menu.api', () => {
         locale: 'ru-RU',
       }
 
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockResponse })
+      vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockResponse } })
 
       const result = await getUserMenu('ru-RU')
 
@@ -80,7 +80,7 @@ describe('menu.api', () => {
         },
       }
 
-      vi.mocked(apiClient.get).mockResolvedValue({ data: mockResponse })
+      vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockResponse } })
 
       const result = await getUserMenu()
 
