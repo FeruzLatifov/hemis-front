@@ -44,7 +44,14 @@ export function useIdleTimeout({
   }, [timeout, onIdle, enabled])
 
   useEffect(() => {
-    if (!enabled) return
+    // ✅ MEMORY LEAK FIX: Clean up immediately when disabled
+    if (!enabled) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+      return
+    }
 
     // Events that indicate user activity
     const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click']
@@ -84,10 +91,11 @@ export function useIdleTimeout({
     // Initial timer setup
     resetTimer()
 
-    // Cleanup
+    // Cleanup on unmount or when dependencies change
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
       }
       activityEvents.forEach((event) => {
         document.removeEventListener(event, handleActivity)

@@ -29,8 +29,21 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
   }
 
   return (
-    <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-end bg-black/50 duration-200">
-      <div className="bg-background animate-in slide-in-from-right h-full w-full max-w-2xl overflow-y-auto shadow-2xl duration-300">
+    <div
+      role="button"
+      tabIndex={-1}
+      className="fixed inset-0 z-50 flex items-center justify-end bg-gray-900/40 duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose()
+      }}
+    >
+      <div
+        className="bg-background h-full w-full max-w-2xl overflow-y-auto border-l border-gray-200 duration-300"
+        style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
+      >
         {/* Header */}
         <div className="bg-background sticky top-0 z-10 flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">
@@ -48,8 +61,9 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+            {t('Close')}
           </Button>
         </div>
 
@@ -68,7 +82,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
             <Card className="border-red-200 bg-red-50 p-6">
               <p className="text-red-600">
                 {t('Failed to load data')}:{' '}
-                {error instanceof Error ? error.message : 'Unknown error'}
+                {error instanceof Error ? error.message : t('Unknown error')}
               </p>
             </Card>
           ) : faculty ? (

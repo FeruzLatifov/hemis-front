@@ -74,7 +74,7 @@ describe('StudentsPage', () => {
   it('renders search and filter section', () => {
     render(<Students />)
     expect(screen.getByText('Search and filter')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Search by full name, code, PINFL...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search by code or PINFL...')).toBeInTheDocument()
   })
 
   it('renders student list table with headers', () => {
@@ -147,7 +147,7 @@ describe('StudentsPage', () => {
 
   it('allows typing in the search input', () => {
     render(<Students />)
-    const searchInput = screen.getByPlaceholderText('Search by full name, code, PINFL...')
+    const searchInput = screen.getByPlaceholderText('Search by code or PINFL...')
     fireEvent.change(searchInput, { target: { value: 'Ahmadov' } })
     expect(searchInput).toHaveValue('Ahmadov')
   })

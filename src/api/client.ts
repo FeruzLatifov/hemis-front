@@ -35,7 +35,7 @@ const apiClient = axios.create({
 // When multiple 401s occur simultaneously, only one refresh is executed
 let isRefreshing = false
 let failedQueue: Array<{
-  resolve: (value?: unknown) => void
+  resolve: (value: void | PromiseLike<void>) => void
   reject: (reason?: unknown) => void
 }> = []
 
@@ -121,12 +121,10 @@ apiClient.interceptors.response.use(
 
       // ✅ SECURITY: Debounced token refresh - prevents race conditions
       if (isRefreshing) {
-        // Another refresh is in progress - queue this request
-        return new Promise((resolve, reject) => {
+        // Another refresh is in progress - queue this request and wait
+        return new Promise<void>((resolve, reject) => {
           failedQueue.push({ resolve, reject })
-        })
-          .then(() => apiClient(originalRequest))
-          .catch((err) => Promise.reject(err))
+        }).then(() => apiClient(originalRequest))
       }
 
       originalRequest._retry = true
@@ -143,13 +141,13 @@ apiClient.interceptors.response.use(
         )
 
         // ✅ New tokens are automatically set in cookies by backend
-        // Process queued requests
+        // Resolve all queued requests so they can retry
         processQueue(null)
 
         // Retry original request (token in cookie)
         return apiClient(originalRequest)
       } catch (refreshError) {
-        // Refresh failed - reject all queued requests
+        // Refresh failed - reject all queued requests with the refresh error
         processQueue(refreshError as Error)
 
         // Logout silently
@@ -157,7 +155,7 @@ apiClient.interceptors.response.use(
           window.dispatchEvent(new CustomEvent('auth:logout'))
         }
 
-        // ⭐ Return original error, not refreshError
+        // Return original error, not refreshError
         return Promise.reject(error)
       } finally {
         isRefreshing = false

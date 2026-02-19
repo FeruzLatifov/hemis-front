@@ -32,19 +32,22 @@ export const auditApi = {
   // Activity Logs
   // =====================================================
 
-  async getActivities(params: ActivityLogFilter = {}): Promise<PagedResponse<ActivityLogRow>> {
+  async getActivities(
+    params: ActivityLogFilter = {},
+    signal?: AbortSignal,
+  ): Promise<PagedResponse<ActivityLogRow>> {
     const response = await apiClient.get<{
       success: boolean
       data: PagedResponse<ActivityLogRow>
-    }>('/api/v1/web/audit/activities', { params })
+    }>('/api/v1/web/audit/activities', { params, signal })
     return response.data.data
   },
 
-  async getActivityDetail(id: string): Promise<ActivityLogDetail> {
+  async getActivityDetail(id: string, signal?: AbortSignal): Promise<ActivityLogDetail> {
     const response = await apiClient.get<{
       success: boolean
       data: ActivityLogDetail
-    }>(`/api/v1/web/audit/activities/${id}`)
+    }>(`/api/v1/web/audit/activities/${id}`, { signal })
     return response.data.data
   },
 
@@ -52,19 +55,22 @@ export const auditApi = {
   // Error Logs
   // =====================================================
 
-  async getErrors(params: ErrorLogFilter = {}): Promise<PagedResponse<ErrorLogRow>> {
+  async getErrors(
+    params: ErrorLogFilter = {},
+    signal?: AbortSignal,
+  ): Promise<PagedResponse<ErrorLogRow>> {
     const response = await apiClient.get<{
       success: boolean
       data: PagedResponse<ErrorLogRow>
-    }>('/api/v1/web/audit/errors', { params })
+    }>('/api/v1/web/audit/errors', { params, signal })
     return response.data.data
   },
 
-  async getErrorDetail(id: string): Promise<ErrorLogDetail> {
+  async getErrorDetail(id: string, signal?: AbortSignal): Promise<ErrorLogDetail> {
     const response = await apiClient.get<{
       success: boolean
       data: ErrorLogDetail
-    }>(`/api/v1/web/audit/errors/${id}`)
+    }>(`/api/v1/web/audit/errors/${id}`, { signal })
     return response.data.data
   },
 
@@ -72,11 +78,14 @@ export const auditApi = {
   // Login Logs
   // =====================================================
 
-  async getLogins(params: LoginLogFilter = {}): Promise<PagedResponse<LoginLogRow>> {
+  async getLogins(
+    params: LoginLogFilter = {},
+    signal?: AbortSignal,
+  ): Promise<PagedResponse<LoginLogRow>> {
     const response = await apiClient.get<{
       success: boolean
       data: PagedResponse<LoginLogRow>
-    }>('/api/v1/web/audit/logins', { params })
+    }>('/api/v1/web/audit/logins', { params, signal })
     return response.data.data
   },
 
@@ -88,11 +97,12 @@ export const auditApi = {
     entityType: string,
     entityId: string,
     params: EntityHistoryFilter = {},
+    signal?: AbortSignal,
   ): Promise<PagedResponse<Record<string, unknown>>> {
     const response = await apiClient.get<{
       success: boolean
       data: PagedResponse<Record<string, unknown>>
-    }>(`/api/v1/web/audit/entities/${entityType}/${entityId}/history`, { params })
+    }>(`/api/v1/web/audit/entities/${entityType}/${entityId}/history`, { params, signal })
     return response.data.data
   },
 
@@ -100,11 +110,11 @@ export const auditApi = {
   // Statistics
   // =====================================================
 
-  async getStats(params: StatsFilter = {}): Promise<AuditStats> {
+  async getStats(params: StatsFilter = {}, signal?: AbortSignal): Promise<AuditStats> {
     const response = await apiClient.get<{
       success: boolean
       data: AuditStats
-    }>('/api/v1/web/audit/stats', { params })
+    }>('/api/v1/web/audit/stats', { params, signal })
     return response.data.data
   },
 }

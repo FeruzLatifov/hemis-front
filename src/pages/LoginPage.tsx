@@ -32,7 +32,9 @@ const Login = () => {
   const { login } = useAuthStore()
 
   // Get redirect path from state (set by ProtectedRoute)
-  const from = (location.state as { from?: string })?.from || '/dashboard'
+  // Validate redirect URL to prevent open redirect attacks
+  const rawFrom = (location.state as { from?: string })?.from || '/dashboard'
+  const from = rawFrom.startsWith('/') && !rawFrom.startsWith('//') ? rawFrom : '/dashboard'
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')

@@ -56,10 +56,20 @@ export default function UniversitiesPage() {
   const navigate = useNavigate()
   const searchContainerRef = useRef<HTMLDivElement>(null)
 
-  // ─── URL-driven state ─────────────────────────────────────────────
-  const currentPage = Number(searchParams.get('page')) || 0
-  const pageSize = Number(searchParams.get('size')) || PAGINATION.DEFAULT_PAGE_SIZE
-  const searchFromUrl = searchParams.get('q') || ''
+  // ─── URL-driven state (validated) ────────────────────────────────
+  const currentPage = Math.max(
+    0,
+    Math.min(9999, parseInt(searchParams.get('page') || '0', 10) || 0),
+  )
+  const pageSize = Math.max(
+    1,
+    Math.min(
+      500,
+      parseInt(searchParams.get('size') || String(PAGINATION.DEFAULT_PAGE_SIZE), 10) ||
+        PAGINATION.DEFAULT_PAGE_SIZE,
+    ),
+  )
+  const searchFromUrl = (searchParams.get('q') || '').slice(0, 200)
   const searchScope = searchParams.get('scope') || 'all'
   const sortFromUrl = searchParams.get('sort') || 'name,asc'
   const regionId = searchParams.get('regionId') || ''

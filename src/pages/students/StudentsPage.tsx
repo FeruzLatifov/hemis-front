@@ -1,32 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Search,
-  Plus,
-  Filter,
-  Download,
-  Upload,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
   Users,
   Award,
   GraduationCap,
+  MoreHorizontal,
+  Eye,
+  Edit,
   CheckCircle,
   XCircle,
   Clock,
+  Loader2,
+  SlidersHorizontal,
 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -39,129 +30,342 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Skeleton } from '@/components/ui/skeleton'
+import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { useTranslation } from 'react-i18next'
-
-// Mock data
-const students = [
-  {
-    id: 1,
-    code: 'ST2024001',
-    fullName: 'Ahmadov Sardor Akmalovich',
-    pinfl: '12345678901234',
-    university: 'TDTU',
-    faculty: 'Informatika',
-    specialty: 'Dasturiy injiniring',
-    course: 2,
-    educationType: 'Bakalavr',
-    paymentForm: 'Grant',
-    status: 'active',
-  },
-  {
-    id: 2,
-    code: 'ST2024002',
-    fullName: 'Karimova Nilufar Shavkatovna',
-    pinfl: '23456789012345',
-    university: "O'zMU",
-    faculty: 'Matematika',
-    specialty: 'Amaliy matematika',
-    course: 3,
-    educationType: 'Bakalavr',
-    paymentForm: 'Kontrakt',
-    status: 'active',
-  },
-  {
-    id: 3,
-    code: 'ST2024003',
-    fullName: 'Rahimov Bobur Olimovich',
-    pinfl: '34567890123456',
-    university: 'TATU',
-    faculty: 'AT va TS',
-    specialty: 'Axborot xavfsizligi',
-    course: 1,
-    educationType: 'Bakalavr',
-    paymentForm: 'Grant',
-    status: 'active',
-  },
-  {
-    id: 4,
-    code: 'ST2024004',
-    fullName: 'Tursunova Madina Azizovna',
-    pinfl: '45678901234567',
-    university: 'SamDU',
-    faculty: 'Fizika',
-    specialty: 'Yadro fizikasi',
-    course: 4,
-    educationType: 'Bakalavr',
-    paymentForm: 'Grant',
-    status: 'active',
-  },
-  {
-    id: 5,
-    code: 'MA2024001',
-    fullName: 'Aliyev Javohir Murodovich',
-    pinfl: '56789012345678',
-    university: 'TDTU',
-    faculty: 'Informatika',
-    specialty: "Sun'iy intellekt",
-    course: 1,
-    educationType: 'Magistr',
-    paymentForm: 'Kontrakt',
-    status: 'active',
-  },
-]
+import { PAGINATION, UI } from '@/constants'
+import { useStudents, useStudentStats, useStudentDictionaries } from '@/hooks/useStudents'
+import type { StudentsParams, StudentRow } from '@/api/students.api'
+import { StudentsFilters, STUDENT_FILTER_KEYS, type StudentsFilterValues } from './StudentsFilters'
 
 export default function Students() {
   const { t } = useTranslation()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterUniversity, setFilterUniversity] = useState('all')
-  const [filterEducationType, setFilterEducationType] = useState('all')
-  const [filterPaymentForm, setFilterPaymentForm] = useState('all')
 
+  // =====================================================
+  // URL-driven state
+  // =====================================================
+  const [searchParams, setSearchParams] = useSearchParams()
+  const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)
+  const pageSize = Math.max(
+    1,
+    Math.min(100, parseInt(searchParams.get('size') || String(PAGINATION.DEFAULT_PAGE_SIZE), 10)),
+  )
+  const searchFromUrl = (searchParams.get('q') || '').slice(0, 200)
+  const searchFieldFromUrl = (searchParams.get('searchField') || 'code') as 'code' | 'pinfl'
+
+  // Filter values from URL
+  const studentStatusFilter = searchParams.get('studentStatus') || ''
+  const paymentFormFilter = searchParams.get('paymentForm') || ''
+  const educationTypeFilter = searchParams.get('educationType') || ''
+  const educationFormFilter = searchParams.get('educationForm') || ''
+  const courseFilter = searchParams.get('course') || ''
+  const genderFilter = searchParams.get('gender') || ''
+
+  // =====================================================
+  // Local UI state
+  // =====================================================
+  const [searchInput, setSearchInput] = useState(searchFromUrl)
+  const [searchField, setSearchField] = useState<'code' | 'pinfl'>(searchFieldFromUrl)
+  const [debouncedSearch, setDebouncedSearch] = useState(searchFromUrl)
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null)
+  const [showFiltersPanel, setShowFiltersPanel] = useState(
+    () =>
+      !!(
+        studentStatusFilter ||
+        paymentFormFilter ||
+        educationTypeFilter ||
+        educationFormFilter ||
+        courseFilter ||
+        genderFilter
+      ),
+  )
+
+  // =====================================================
+  // URL update helper
+  // =====================================================
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        for (const [key, value] of Object.entries(updates)) {
+          if (value === undefined || value === '') {
+            next.delete(key)
+          } else {
+            next.set(key, value)
+          }
+        }
+        return next
+      })
+    },
+    [setSearchParams],
+  )
+
+  // =====================================================
+  // Debounced search
+  // =====================================================
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchInput)
+    }, UI.SEARCH_DEBOUNCE)
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (debouncedSearch !== searchFromUrl) {
+      updateSearchParams({ q: debouncedSearch || undefined, page: undefined })
+    }
+  }, [debouncedSearch, searchFromUrl, updateSearchParams])
+
+  // =====================================================
+  // Filter values object for StudentsFilters
+  // =====================================================
+  const filterValues = useMemo<StudentsFilterValues>(
+    () => ({
+      studentStatus: studentStatusFilter,
+      paymentForm: paymentFormFilter,
+      educationType: educationTypeFilter,
+      educationForm: educationFormFilter,
+      course: courseFilter,
+      gender: genderFilter,
+    }),
+    [
+      studentStatusFilter,
+      paymentFormFilter,
+      educationTypeFilter,
+      educationFormFilter,
+      courseFilter,
+      genderFilter,
+    ],
+  )
+
+  const hasActiveFilters = !!(
+    studentStatusFilter ||
+    paymentFormFilter ||
+    educationTypeFilter ||
+    educationFormFilter ||
+    courseFilter ||
+    genderFilter
+  )
+
+  const activeFilterCount = [
+    studentStatusFilter,
+    paymentFormFilter,
+    educationTypeFilter,
+    educationFormFilter,
+    courseFilter,
+    genderFilter,
+  ].filter(Boolean).length
+
+  // =====================================================
+  // Build query params
+  // =====================================================
+  const queryParams = useMemo<StudentsParams>(
+    () => ({
+      page: currentPage,
+      size: pageSize,
+      q: debouncedSearch || undefined,
+      searchField: debouncedSearch ? searchField : undefined,
+      studentStatus: studentStatusFilter || undefined,
+      paymentForm: paymentFormFilter || undefined,
+      educationType: educationTypeFilter || undefined,
+      educationForm: educationFormFilter || undefined,
+      course: courseFilter || undefined,
+      gender: genderFilter || undefined,
+    }),
+    [
+      currentPage,
+      pageSize,
+      debouncedSearch,
+      searchField,
+      studentStatusFilter,
+      paymentFormFilter,
+      educationTypeFilter,
+      educationFormFilter,
+      courseFilter,
+      genderFilter,
+    ],
+  )
+
+  // =====================================================
+  // Data fetching
+  // =====================================================
+  const { data: pagedData, isLoading } = useStudents(queryParams)
+  const { data: stats, isLoading: statsLoading } = useStudentStats()
+  const { data: dictionaries } = useStudentDictionaries()
+
+  const students = useMemo(() => pagedData?.content ?? [], [pagedData?.content])
+  const totalElements = pagedData?.totalElements ?? 0
+  const totalPages = pagedData?.totalPages ?? 0
+
+  // =====================================================
+  // Code → Name resolver using dictionaries
+  // =====================================================
+  const resolveName = useCallback(
+    (
+      dictKey:
+        | 'courses'
+        | 'studentStatuses'
+        | 'paymentForms'
+        | 'educationTypes'
+        | 'educationForms'
+        | 'genders',
+      code: string,
+    ): string => {
+      if (!code || !dictionaries) return code || '\u2014'
+      const items = dictionaries[dictKey]
+      return items?.find((item) => item.code === code)?.name || code
+    },
+    [dictionaries],
+  )
+
+  // =====================================================
+  // Pagination handlers
+  // =====================================================
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateSearchParams({ page: page > 0 ? String(page) : undefined })
+    },
+    [updateSearchParams],
+  )
+
+  const handlePageSizeChange = useCallback(
+    (size: number) => {
+      updateSearchParams({
+        size: size !== PAGINATION.DEFAULT_PAGE_SIZE ? String(size) : undefined,
+        page: undefined,
+      })
+    },
+    [updateSearchParams],
+  )
+
+  // =====================================================
+  // Filter handlers
+  // =====================================================
+  const handleFilterChange = useCallback(
+    (key: string, values: string[]) => {
+      updateSearchParams({
+        [key]: values.length > 0 ? values.join(',') : undefined,
+        page: undefined,
+      })
+    },
+    [updateSearchParams],
+  )
+
+  const handleClearFilters = useCallback(() => {
+    setSearchInput('')
+    setDebouncedSearch('')
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    const clearObj: Record<string, undefined> = { q: undefined, page: undefined, size: undefined }
+    for (const key of STUDENT_FILTER_KEYS) {
+      clearObj[key] = undefined
+    }
+    updateSearchParams(clearObj)
+  }, [updateSearchParams])
+
+  // =====================================================
+  // Keyboard shortcut: Ctrl+K to focus search
+  // =====================================================
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        document.getElementById('students-search')?.focus()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  // =====================================================
+  // Helper functions
+  // =====================================================
   const getStatusBadge = (status: string) => {
+    const name = resolveName('studentStatuses', status)
     switch (status) {
-      case 'active':
+      case '10':
+        return (
+          <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-950/30 dark:text-slate-400">
+            <Clock className="mr-1 h-3 w-3" />
+            {name}
+          </Badge>
+        )
+      case '11':
         return (
           <Badge className="bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400">
             <CheckCircle className="mr-1 h-3 w-3" />
-            {t('Active')}
+            {name}
           </Badge>
         )
-      case 'inactive':
+      case '12':
         return (
           <Badge className="bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400">
             <XCircle className="mr-1 h-3 w-3" />
-            {t('Inactive')}
+            {name}
           </Badge>
         )
-      case 'vacation':
+      case '13':
         return (
           <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400">
             <Clock className="mr-1 h-3 w-3" />
-            {t('On leave')}
+            {name}
+          </Badge>
+        )
+      case '14':
+        return (
+          <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+            <Award className="mr-1 h-3 w-3" />
+            {name}
+          </Badge>
+        )
+      case '15':
+        return (
+          <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400">
+            <Clock className="mr-1 h-3 w-3" />
+            {name}
           </Badge>
         )
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return <Badge variant="secondary">{name}</Badge>
     }
   }
 
   const getPaymentBadge = (form: string) => {
-    return form === 'Grant' ? (
-      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-        <GraduationCap className="mr-1 h-3 w-3" />
-        {t('Grant')}
-      </Badge>
-    ) : (
-      <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400">
-        <span className="mr-1">💰</span>
-        {t('Contract')}
-      </Badge>
-    )
+    const name = resolveName('paymentForms', form)
+    switch (form) {
+      case '11':
+        return (
+          <Badge className="bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400">
+            <GraduationCap className="mr-1 h-3 w-3" />
+            {name}
+          </Badge>
+        )
+      case '12':
+        return (
+          <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400">
+            {name}
+          </Badge>
+        )
+      default:
+        return <Badge variant="secondary">{name}</Badge>
+    }
   }
 
+  const formatNumber = (n: number) => n.toLocaleString()
+
+  const getInitials = (student: StudentRow) => {
+    const first = (student.lastname || '?')[0]
+    const second = (student.firstname || '?')[0]
+    return `${first}${second}`.toUpperCase()
+  }
+
+  // =====================================================
+  // Render
+  // =====================================================
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -174,20 +378,6 @@ export default function Students() {
             {t('Student list and management')}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <Upload className="h-4 w-4" />
-            {t('Import')}
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            {t('Export')}
-          </Button>
-          <Button className="gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)]">
-            <Plus className="h-4 w-4" />
-            {t('New student')}
-          </Button>
-        </div>
       </div>
 
       {/* Stats Summary */}
@@ -199,7 +389,13 @@ export default function Students() {
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {t('Total')}
                 </p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">453,678</p>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {statsLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    formatNumber(stats?.total ?? 0)
+                  )}
+                </div>
               </div>
               <Users className="h-10 w-10 text-blue-500 opacity-50" />
             </div>
@@ -213,7 +409,13 @@ export default function Students() {
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {t('Grant recipients')}
                 </p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">245,830</p>
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {statsLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    formatNumber(stats?.grantCount ?? 0)
+                  )}
+                </div>
               </div>
               <GraduationCap className="h-10 w-10 text-green-500 opacity-50" />
             </div>
@@ -227,9 +429,15 @@ export default function Students() {
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {t('Contract students')}
                 </p>
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">207,848</p>
+                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {statsLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    formatNumber(stats?.contractCount ?? 0)
+                  )}
+                </div>
               </div>
-              <span className="text-4xl opacity-50">💰</span>
+              <Award className="h-10 w-10 text-orange-500 opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -241,7 +449,13 @@ export default function Students() {
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {t('Graduates')}
                 </p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">89,456</p>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {statsLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    formatNumber(stats?.graduateCount ?? 0)
+                  )}
+                </div>
               </div>
               <Award className="h-10 w-10 text-blue-500 opacity-50" />
             </div>
@@ -249,126 +463,159 @@ export default function Students() {
         </Card>
       </div>
 
-      {/* Filters and Search */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Filter className="h-5 w-5 text-[var(--primary)]" />
-            {t('Search and filter')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  placeholder={t('Search by full name, code, PINFL...')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      {/* Data Table with Toolbar + Filters */}
+      <div className="rounded-lg border border-[var(--border-color-pro)] bg-white dark:bg-slate-950">
+        {/* ──── Toolbar ──── */}
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-2.5 dark:border-slate-800">
+          {/* Filter Toggle */}
+          <button
+            onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+              showFiltersPanel || activeFilterCount > 0
+                ? 'border-[var(--primary)]/20 bg-[var(--active-bg)] text-[var(--primary)]'
+                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
+            }`}
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            <span>{t('Filters')}</span>
+            {activeFilterCount > 0 && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          {/* Search field selector + input */}
+          <div className="flex flex-1 items-center gap-0">
+            <select
+              value={searchField}
+              onChange={(e) => {
+                const val = e.target.value as 'code' | 'pinfl'
+                setSearchField(val)
+                updateSearchParams({
+                  searchField: val === 'code' ? undefined : val,
+                  page: undefined,
+                })
+              }}
+              className="h-8 rounded-l-md border border-r-0 border-gray-200 bg-gray-50 px-2 text-xs font-medium text-gray-600 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              <option value="code">{t('Code')}</option>
+              <option value="pinfl">{t('PINFL')}</option>
+            </select>
+            <div className="relative flex-1">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                id="students-search"
+                placeholder={`${searchField === 'pinfl' ? t('Search by PINFL...') : t('Search by code...')} (Ctrl+K)`}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="h-8 rounded-l-none border-0 bg-transparent pl-9 text-sm shadow-none focus-visible:ring-0"
+              />
             </div>
-
-            <Select value={filterUniversity} onValueChange={setFilterUniversity}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('University')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('All HEIs')}</SelectItem>
-                <SelectItem value="tdtu">TDTU</SelectItem>
-                <SelectItem value="ozmu">O'zMU</SelectItem>
-                <SelectItem value="tatu">TATU</SelectItem>
-                <SelectItem value="samdu">SamDU</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterEducationType} onValueChange={setFilterEducationType}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('Education type')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('All')}</SelectItem>
-                <SelectItem value="bachelor">{t('Bachelor')}</SelectItem>
-                <SelectItem value="master">{t('Master')}</SelectItem>
-                <SelectItem value="phd">{t('PhD/DSc')}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterPaymentForm} onValueChange={setFilterPaymentForm}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('Payment form')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('All')}</SelectItem>
-                <SelectItem value="grant">{t('Grant')}</SelectItem>
-                <SelectItem value="contract">{t('Contract')}</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Data Table */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t('Student list')}</CardTitle>
-              <CardDescription>
-                {students.length} {t('students found')}
-              </CardDescription>
-            </div>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" />
-              {t('Configure columns')}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
-            <Table>
-              <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+          {/* Result count */}
+          <span className="text-xs text-gray-400">
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              t('{{count}} students found', { count: formatNumber(totalElements) })
+            )}
+          </span>
+        </div>
+
+        {/* ──── Filters Panel ──── */}
+        <StudentsFilters
+          filterValues={filterValues}
+          onFilterChange={handleFilterChange}
+          onClearFilters={handleClearFilters}
+          showPanel={showFiltersPanel}
+          hasActiveFilters={hasActiveFilters}
+          dictionaries={
+            dictionaries ?? {
+              courses: [],
+              studentStatuses: [],
+              paymentForms: [],
+              educationTypes: [],
+              educationForms: [],
+              genders: [],
+            }
+          }
+          t={t}
+        />
+
+        {/* ──── Table ──── */}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+              <TableRow>
+                <TableHead>{t('Code')}</TableHead>
+                <TableHead>{t('Full name')}</TableHead>
+                <TableHead>PINFL</TableHead>
+                <TableHead>{t('Course')}</TableHead>
+                <TableHead>{t('Education type')}</TableHead>
+                <TableHead>{t('Education form')}</TableHead>
+                <TableHead>{t('Payment')}</TableHead>
+                <TableHead>{t('Status')}</TableHead>
+                <TableHead className="text-right">{t('Actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 9 }).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton className="h-5 w-full" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : students.length === 0 ? (
                 <TableRow>
-                  <TableHead className="w-12">
-                    <input type="checkbox" className="rounded" />
-                  </TableHead>
-                  <TableHead>{t('Code')}</TableHead>
-                  <TableHead>{t('Full name')}</TableHead>
-                  <TableHead>PINFL</TableHead>
-                  <TableHead>{t('Universities')}</TableHead>
-                  <TableHead>{t('Specialty')}</TableHead>
-                  <TableHead>{t('Course')}</TableHead>
-                  <TableHead>{t('Education type')}</TableHead>
-                  <TableHead>{t('Payment')}</TableHead>
-                  <TableHead>{t('Status')}</TableHead>
-                  <TableHead className="text-right">{t('Actions')}</TableHead>
+                  <TableCell colSpan={9} className="py-12 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Users className="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                      <p className="text-sm font-medium text-gray-900 dark:text-slate-300">
+                        {t('No data found')}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {debouncedSearch || hasActiveFilters
+                          ? t('Try changing your search or filters')
+                          : t('No students found')}
+                      </p>
+                      {(debouncedSearch || hasActiveFilters) && (
+                        <button
+                          onClick={handleClearFilters}
+                          className="mt-1 text-xs text-[var(--primary)] transition-colors hover:underline"
+                        >
+                          {t('Clear')} {t('Filters').toLowerCase()}
+                        </button>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students.map((student) => (
+              ) : (
+                students.map((student) => (
                   <TableRow
                     key={student.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
-                    <TableCell>
-                      <input type="checkbox" className="rounded" />
-                    </TableCell>
-                    <TableCell className="font-mono font-medium text-blue-600 dark:text-blue-400">
+                    <TableCell className="font-mono text-sm font-medium text-blue-600 dark:text-blue-400">
                       {student.code}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] font-semibold text-white">
-                          {student.fullName.split(' ')[0][0]}
-                          {student.fullName.split(' ')[1][0]}
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white">
+                          {getInitials(student)}
                         </div>
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-white">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-slate-900 dark:text-white">
                             {student.fullName}
                           </p>
-                          <p className="text-xs text-slate-500">{student.faculty}</p>
+                          {student.groupName && (
+                            <p className="truncate text-xs text-slate-500">{student.groupName}</p>
+                          )}
                         </div>
                       </div>
                     </TableCell>
@@ -376,33 +623,24 @@ export default function Students() {
                       {student.pinfl}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-medium">
-                        {student.university}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-sm">
-                      {student.specialty}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {student.course}-{t('course')}
-                      </Badge>
+                      {student.course ? (
+                        <Badge variant="secondary">{resolveName('courses', student.course)}</Badge>
+                      ) : (
+                        '\u2014'
+                      )}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        className={
-                          student.educationType === 'Bakalavr'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400'
-                            : student.educationType === 'Magistr'
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400'
-                              : 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400'
-                        }
-                      >
-                        {student.educationType}
+                      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                        {resolveName('educationTypes', student.educationType)}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                        {resolveName('educationForms', student.educationForm)}
+                      </span>
                     </TableCell>
                     <TableCell>{getPaymentBadge(student.paymentForm)}</TableCell>
-                    <TableCell>{getStatusBadge(student.status)}</TableCell>
+                    <TableCell>{getStatusBadge(student.studentStatus)}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -419,57 +657,30 @@ export default function Students() {
                             <Edit className="mr-2 h-4 w-4" />
                             {t('Edit')}
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t('Delete')}
-                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-          {/* Pagination */}
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t('Showing {{from}}-{{to}} of {{total}} students', {
-                from: 1,
-                to: 5,
-                total: '453,678',
-              })}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled>
-                {t('Previous')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)]"
-              >
-                1
-              </Button>
-              <Button variant="outline" size="sm">
-                2
-              </Button>
-              <Button variant="outline" size="sm">
-                3
-              </Button>
-              <span className="px-2">...</span>
-              <Button variant="outline" size="sm">
-                90,736
-              </Button>
-              <Button variant="outline" size="sm">
-                {t('Next')}
-              </Button>
-            </div>
+        {/* Pagination */}
+        {!isLoading && totalElements > 0 && (
+          <div className="border-t border-gray-100 px-4 py-3 dark:border-slate-800">
+            <DataTablePagination
+              page={currentPage}
+              totalPages={totalPages}
+              totalElements={totalElements}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   )
 }

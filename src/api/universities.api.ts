@@ -217,11 +217,14 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
 }
 
 export const universitiesApi = {
-  async getUniversities(params: UniversitiesParams = {}): Promise<PagedResponse<UniversityRow>> {
+  async getUniversities(
+    params: UniversitiesParams = {},
+    signal?: AbortSignal,
+  ): Promise<PagedResponse<UniversityRow>> {
     const response = await apiClient.get<{
       success: boolean
       data: PagedResponse<UniversityBackendDTO>
-    }>('/api/v1/web/registry/universities', { params })
+    }>('/api/v1/web/registry/universities', { params, signal })
     const page = response.data.data
 
     return {
@@ -230,9 +233,10 @@ export const universitiesApi = {
     }
   },
 
-  async getUniversity(id: string): Promise<UniversityDetail> {
+  async getUniversity(id: string, signal?: AbortSignal): Promise<UniversityDetail> {
     const response = await apiClient.get<{ success: boolean; data: UniversityBackendDTO }>(
       `/api/v1/web/registry/universities/${id}`,
+      { signal },
     )
     const dto = response.data.data
     return {

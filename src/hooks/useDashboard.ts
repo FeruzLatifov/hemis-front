@@ -8,7 +8,7 @@ import { queryKeys } from '@/lib/queryKeys'
 export function useDashboardStats() {
   return useQuery({
     queryKey: queryKeys.dashboard.stats,
-    queryFn: getDashboardStats,
+    queryFn: ({ signal }) => getDashboardStats(signal),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
   })

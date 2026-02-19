@@ -79,16 +79,22 @@ export interface RegenerateResponse {
 /**
  * Get translations list with pagination and filters
  */
-export const getTranslations = async (params?: {
-  category?: string
-  search?: string
-  active?: boolean
-  page?: number
-  size?: number
-  sortBy?: string
-  sortDir?: string
-}): Promise<TranslationListResponse> => {
-  const { data: wrapped } = await apiClient.get('/api/v1/web/system/translation', { params })
+export const getTranslations = async (
+  params?: {
+    category?: string
+    search?: string
+    active?: boolean
+    page?: number
+    size?: number
+    sortBy?: string
+    sortDir?: string
+  },
+  signal?: AbortSignal,
+): Promise<TranslationListResponse> => {
+  const { data: wrapped } = await apiClient.get('/api/v1/web/system/translation', {
+    params,
+    signal,
+  })
   const data = wrapped.data
 
   // Normalize paged response shape
@@ -112,8 +118,11 @@ export const getTranslations = async (params?: {
 /**
  * Get single translation by ID
  */
-export const getTranslationById = async (id: string): Promise<Translation> => {
-  const response = await apiClient.get(`/api/v1/web/system/translation/${id}`)
+export const getTranslationById = async (
+  id: string,
+  signal?: AbortSignal,
+): Promise<Translation> => {
+  const response = await apiClient.get(`/api/v1/web/system/translation/${id}`, { signal })
   return response.data.data
 }
 
@@ -139,8 +148,10 @@ export const toggleTranslationActive = async (id: string): Promise<{ active: boo
 /**
  * Get translation statistics
  */
-export const getTranslationStatistics = async (): Promise<TranslationStatistics> => {
-  const response = await apiClient.get('/api/v1/web/system/translation/stats')
+export const getTranslationStatistics = async (
+  signal?: AbortSignal,
+): Promise<TranslationStatistics> => {
+  const response = await apiClient.get('/api/v1/web/system/translation/stats', { signal })
   return response.data.data
 }
 

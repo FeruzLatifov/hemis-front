@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { captureError } from './lib/sentry'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster, toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +16,10 @@ import './i18n/config'
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'))
+const StudentsLayout = lazy(() => import('./pages/students/StudentsLayout'))
 const StudentsPage = lazy(() => import('./pages/students/StudentsPage'))
+const StudentDuplicatesPage = lazy(() => import('./pages/students/StudentDuplicatesPage'))
+const StudentDirectionsPage = lazy(() => import('./pages/students/StudentDirectionsPage'))
 const TeachersPage = lazy(() => import('./pages/teachers/TeachersPage'))
 const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'))
 const TranslationsPage = lazy(() =>
@@ -37,6 +41,7 @@ const FacultiesPage = lazy(() =>
   import('./pages/institutions/faculties').then((m) => ({ default: m.FacultiesPage })),
 )
 const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
+const ClassifierCategoryPage = lazy(() => import('./pages/classifiers/ClassifierCategoryPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 // Loading fallback
@@ -115,8 +120,15 @@ function App() {
     const REFRESH_INTERVAL = 15 * 60 * 1000 // 15 minutes
 
     const intervalId = setInterval(() => {
-      refresh().catch(() => {
-        // Silent failure - if refresh fails, the next API call will handle it
+      refresh().catch((error: unknown) => {
+        // Log non-401 errors to Sentry for visibility
+        const status = error instanceof Error ? (error as { status?: number }).status : undefined
+        if (status !== 401) {
+          captureError(error instanceof Error ? error : new Error('Permission refresh failed'), {
+            tags: { context: 'permission_refresh' },
+            level: 'warning',
+          })
+        }
       })
     }, REFRESH_INTERVAL)
 
@@ -213,32 +225,29 @@ function App() {
                     />
                   </Route>
 
-                  {/* Students */}
+                  {/* Students — shared horizontal tab layout */}
                   <Route
                     path="students"
                     element={
                       <RouteErrorBoundary>
-                        <StudentsPage />
+                        <StudentsLayout />
                       </RouteErrorBoundary>
                     }
-                  />
-                  <Route
-                    path="students/directions"
-                    element={<PlaceholderPage title={t('Directions')} />}
-                  />
-                  <Route path="students/groups" element={<PlaceholderPage title={t('Groups')} />} />
-                  <Route
-                    path="students/diplomas"
-                    element={<PlaceholderPage title={t('Diplomas')} />}
-                  />
-                  <Route
-                    path="students/scholarships"
-                    element={<PlaceholderPage title={t('Scholarships')} />}
-                  />
-                  <Route
-                    path="students/certificates"
-                    element={<PlaceholderPage title={t('Certificates')} />}
-                  />
+                  >
+                    <Route index element={<StudentsPage />} />
+                    <Route path="duplicates" element={<StudentDuplicatesPage />} />
+                    <Route path="directions" element={<StudentDirectionsPage />} />
+                    <Route path="groups" element={<PlaceholderPage title={t('Groups')} />} />
+                    <Route path="diplomas" element={<PlaceholderPage title={t('Diplomas')} />} />
+                    <Route
+                      path="scholarships"
+                      element={<PlaceholderPage title={t('Scholarships')} />}
+                    />
+                    <Route
+                      path="certificates"
+                      element={<PlaceholderPage title={t('Certificates')} />}
+                    />
+                  </Route>
 
                   {/* Teachers */}
                   <Route
@@ -336,18 +345,12 @@ function App() {
                   {/* Classifiers */}
                   <Route path="classifiers">
                     <Route
-                      path="general"
-                      element={<PlaceholderPage title={t('General classifiers')} />}
-                    />
-                    <Route path="structure" element={<PlaceholderPage title={t('Structure')} />} />
-                    <Route path="employee" element={<PlaceholderPage title={t('Employees')} />} />
-                    <Route path="student" element={<PlaceholderPage title={t('Students')} />} />
-                    <Route path="education" element={<PlaceholderPage title={t('Education')} />} />
-                    <Route path="study" element={<PlaceholderPage title={t('Study process')} />} />
-                    <Route path="science" element={<PlaceholderPage title={t('Scientific')} />} />
-                    <Route
-                      path="organizational"
-                      element={<PlaceholderPage title={t('Organizational')} />}
+                      path=":category"
+                      element={
+                        <RouteErrorBoundary>
+                          <ClassifierCategoryPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                   </Route>
 

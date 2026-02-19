@@ -93,10 +93,42 @@ export function initSentry() {
         delete event.request.headers['Cookie']
       }
 
+      // Remove sensitive data from request body (passwords, tokens)
+      if (event.request?.data) {
+        try {
+          const data =
+            typeof event.request.data === 'string'
+              ? JSON.parse(event.request.data)
+              : event.request.data
+          const sensitiveKeys = [
+            'password',
+            'token',
+            'secret',
+            'accessToken',
+            'refreshToken',
+            'credit_card',
+          ]
+          for (const key of sensitiveKeys) {
+            if (key in data) {
+              data[key] = '[FILTERED]'
+            }
+          }
+          event.request.data = typeof event.request.data === 'string' ? JSON.stringify(data) : data
+        } catch {
+          // If parsing fails, redact the entire body if it looks like it might contain sensitive data
+          if (
+            typeof event.request.data === 'string' &&
+            /password|token|secret/i.test(event.request.data)
+          ) {
+            event.request.data = '[FILTERED]'
+          }
+        }
+      }
+
       // Log to console in development
       if (import.meta.env.DEV) {
-        console.error('🐛 Sentry Event:', event)
-        console.error('🐛 Sentry Hint:', hint)
+        console.error('Sentry Event:', event)
+        console.error('Sentry Hint:', hint)
       }
 
       return event

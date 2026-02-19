@@ -13,6 +13,7 @@ import {
   DollarSign,
   Activity,
   Loader2,
+  RefreshCw,
   type LucideIcon,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,7 +34,7 @@ const dateFnsLocales = { uz, ru, en: enUS } as const
 export default function Dashboard() {
   const { t } = useTranslation()
   // Fetch real data from API
-  const { data: dashboardData, isLoading, error } = useDashboardStats()
+  const { data: dashboardData, isLoading, error, refetch } = useDashboardStats()
 
   if (isLoading) {
     return (
@@ -48,7 +49,15 @@ export default function Dashboard() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <p className="mb-2 text-lg text-red-600">{t('Failed to load data')}</p>
-          <p className="text-sm text-slate-600">{t('Please refresh the page')}</p>
+          <p className="mb-4 text-sm text-slate-600">{t('Please refresh the page')}</p>
+          <Button
+            onClick={() => refetch()}
+            variant="default"
+            className="bg-[var(--primary)] hover:bg-[var(--primary-hover)]"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            {t('Retry')}
+          </Button>
         </div>
       </div>
     )

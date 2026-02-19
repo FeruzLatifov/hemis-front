@@ -4,6 +4,7 @@ import { facultiesApi, type FacultyRow, type PageResponse } from '@/api/facultie
 import { toast } from 'sonner'
 import i18n from '@/i18n/config'
 import { extractApiErrorMessage } from '@/utils/error.util'
+import { PAGINATION, UI } from '@/constants'
 
 /**
  * Hook to fetch university groups (root level of faculty tree)
@@ -15,13 +16,16 @@ export function useFacultyGroups(params: { search?: string; status?: string; pag
       status: params.status,
       page: params.page,
     }),
-    queryFn: () =>
-      facultiesApi.getGroups({
-        q: params.search || undefined,
-        status: params.status === 'all' ? undefined : params.status === 'true',
-        page: params.page,
-        size: 20,
-      }),
+    queryFn: ({ signal }) =>
+      facultiesApi.getGroups(
+        {
+          q: params.search || undefined,
+          status: params.status === 'all' ? undefined : params.status === 'true',
+          page: params.page,
+          size: PAGINATION.DEFAULT_PAGE_SIZE,
+        },
+        signal,
+      ),
   })
 }
 
@@ -42,17 +46,21 @@ export function useFacultiesByUniversity(
       search: params.search,
       status: params.status,
     }),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const results: Record<string, PageResponse<FacultyRow>> = {}
       await Promise.all(
         expandedCodes.map(async (univCode) => {
           const facultyPage = params.facultyPages?.[univCode] || 0
-          results[univCode] = await facultiesApi.getFacultiesByUniversity(univCode, {
-            q: params.search || undefined,
-            status: params.status === 'all' ? undefined : params.status === 'true',
-            page: facultyPage,
-            size: 50,
-          })
+          results[univCode] = await facultiesApi.getFacultiesByUniversity(
+            univCode,
+            {
+              q: params.search || undefined,
+              status: params.status === 'all' ? undefined : params.status === 'true',
+              page: facultyPage,
+              size: PAGINATION.EXPANDED_PAGE_SIZE,
+            },
+            signal,
+          )
         }),
       )
       return results
@@ -67,7 +75,7 @@ export function useFacultiesByUniversity(
 export function useFacultyDetail(code: string | null) {
   return useQuery({
     queryKey: queryKeys.faculties.byId(code || ''),
-    queryFn: () => facultiesApi.getFacultyDetail(code!),
+    queryFn: ({ signal }) => facultiesApi.getFacultyDetail(code!, signal),
     enabled: !!code,
   })
 }
@@ -88,14 +96,12 @@ export function useExportFaculties() {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
       toast.success(i18n.t('Download Excel'), {
-        duration: 3000,
-        position: 'bottom-right',
+        duration: UI.TOAST_DURATION,
       })
     },
     onError: (error: Error) => {
       toast.error(extractApiErrorMessage(error, i18n.t('Export failed')), {
-        duration: 5000,
-        position: 'bottom-right',
+        duration: UI.TOAST_ERROR_DURATION,
       })
     },
   })

@@ -56,6 +56,8 @@ export {
 
 export { useDashboardStats } from './useDashboard'
 
+export { useStudents, useStudent, useStudentStats, useStudentDictionaries } from './useStudents'
+
 export {
   useFacultyGroups,
   useFacultiesByUniversity,

@@ -61,8 +61,8 @@ export interface DashboardStats {
 /**
  * Get dashboard statistics
  */
-export const getDashboardStats = async (): Promise<DashboardStats> => {
-  const response = await apiClient.get('/api/v1/web/dashboard/stats')
+export const getDashboardStats = async (signal?: AbortSignal): Promise<DashboardStats> => {
+  const response = await apiClient.get('/api/v1/web/dashboard/stats', { signal })
   return response.data.data
 }
 

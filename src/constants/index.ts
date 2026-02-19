@@ -63,6 +63,7 @@ export const LOCALE_BCP47: Record<SupportedLocale, string> = {
 export const PAGINATION = {
   DEFAULT_PAGE: 0,
   DEFAULT_PAGE_SIZE: 20,
+  EXPANDED_PAGE_SIZE: 50,
   PAGE_SIZE_OPTIONS: [10, 20, 50, 100],
   MAX_PAGE_SIZE: 100,
 } as const

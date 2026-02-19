@@ -1,27 +1,16 @@
-/**
- * Faculty Registry Page - Main Component
- *
- * Features:
- * - Lazy-loaded tree structure (University → Faculties)
- * - Server-side pagination
- * - Search and filter
- * - Excel export
- * - Column visibility toggle
- * - i18n support (uz-UZ, oz-UZ, ru-RU, en-US)
- */
-
-import React, { useEffect, useState } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  useReactTable,
-  getCoreRowModel,
-  getExpandedRowModel,
-  ColumnDef,
-  flexRender,
-} from '@tanstack/react-table'
-import { ChevronRight, ChevronDown, Download, RefreshCw, Eye } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+  ChevronRight,
+  ChevronDown,
+  Download,
+  RefreshCw,
+  Eye,
+  Search,
+  Building2,
+  Loader2,
+} from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -29,51 +18,139 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
+import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { type FacultyGroupRow, type FacultyRow } from '@/api/faculties.api'
 import {
   useFacultyGroups,
   useFacultiesByUniversity,
   useExportFaculties,
 } from '@/hooks/useFaculties'
+import { useDebounce } from '@/hooks/useDebounce'
+import { PAGINATION, UI } from '@/constants'
+import { toast } from 'sonner'
 import FacultyDetailDrawer from './FacultyDetailDrawer'
-
-type TableRow = {
-  type: 'group' | 'faculty'
-  data: FacultyGroupRow | FacultyRow
-  isExpanded?: boolean
-  subRows?: TableRow[]
-}
 
 export default function FacultiesPage() {
   const { t } = useTranslation()
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState<string>('all')
-  const [page, setPage] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // URL-driven state
+  const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)
+  const pageSize = Math.max(
+    1,
+    Math.min(
+      100,
+      parseInt(searchParams.get('size') || String(PAGINATION.DEFAULT_PAGE_SIZE), 10) ||
+        PAGINATION.DEFAULT_PAGE_SIZE,
+    ),
+  )
+  const searchFromUrl = (searchParams.get('q') || '').slice(0, 200)
+  const statusFromUrl = searchParams.get('status') || 'all'
+
+  // Local UI state
+  const [searchInput, setSearchInput] = useState(searchFromUrl)
+  const debouncedSearch = useDebounce(searchInput, UI.SEARCH_DEBOUNCE)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [selectedFacultyCode, setSelectedFacultyCode] = useState<string | null>(null)
 
+  // URL helpers
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        for (const [key, value] of Object.entries(updates)) {
+          if (value === undefined || value === '') {
+            next.delete(key)
+          } else {
+            next.set(key, value)
+          }
+        }
+        return next
+      })
+    },
+    [setSearchParams],
+  )
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    if (debouncedSearch !== searchFromUrl) {
+      updateSearchParams({ q: debouncedSearch || undefined, page: undefined })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch])
+
+  // Handlers
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateSearchParams({ page: page > 0 ? String(page) : undefined })
+    },
+    [updateSearchParams],
+  )
+
+  const handlePageSizeChange = useCallback(
+    (size: number) => {
+      updateSearchParams({
+        size: size !== PAGINATION.DEFAULT_PAGE_SIZE ? String(size) : undefined,
+        page: undefined,
+      })
+    },
+    [updateSearchParams],
+  )
+
+  const handleStatusChange = useCallback(
+    (value: string) => {
+      updateSearchParams({
+        status: value !== 'all' ? value : undefined,
+        page: undefined,
+      })
+    },
+    [updateSearchParams],
+  )
+
   // Fetch university groups
-  const { data: groupsData, isLoading, error, refetch } = useFacultyGroups({ search, status, page })
+  const {
+    data: groupsData,
+    isLoading,
+    isPlaceholderData,
+    refetch,
+  } = useFacultyGroups({
+    search: debouncedSearch,
+    status: statusFromUrl,
+    page: currentPage,
+  })
+
+  const totalElements = groupsData?.totalElements ?? 0
+  const totalPages = groupsData?.totalPages ?? 0
 
   // Fetch faculties for expanded universities
   const expandedUniversities = Object.keys(expanded).filter((key) => expanded[key])
-  const facultyPages: Record<string, number> = {}
 
   const facultyQueries = useFacultiesByUniversity(expandedUniversities, {
-    facultyPages,
-    search,
-    status,
+    search: debouncedSearch,
+    status: statusFromUrl,
   })
 
-  // Export mutation
+  // Export
   const exportMutation = useExportFaculties()
 
-  // Auto-expand all groups when searching to fetch child faculties by query
+  const handleExport = useCallback(() => {
+    exportMutation.mutate({
+      q: debouncedSearch || undefined,
+      status: statusFromUrl === 'all' ? undefined : statusFromUrl === 'true',
+    })
+  }, [exportMutation, debouncedSearch, statusFromUrl])
+
+  const handleRefresh = useCallback(() => {
+    refetch()
+    toast.success(t('Data refreshed'))
+  }, [refetch, t])
+
+  // Auto-expand all groups when searching
   useEffect(() => {
     if (!groupsData?.content) return
-    const hasSearch = (search || '').trim().length > 0
+    const hasSearch = (debouncedSearch || '').trim().length > 0
     if (hasSearch) {
       const allExpanded: Record<string, boolean> = {}
       for (const g of groupsData.content) {
@@ -81,310 +158,273 @@ export default function FacultiesPage() {
       }
       setExpanded(allExpanded)
     }
-  }, [groupsData, search, setExpanded])
+  }, [groupsData, debouncedSearch])
 
-  const columns: ColumnDef<TableRow>[] = [
-    {
-      id: 'expander',
-      header: () => null,
-      cell: ({ row }) => {
-        if (row.original.type === 'faculty') return null
-        const isExpanded = expanded[row.original.data.universityCode]
-        return (
-          <button
-            onClick={() => {
-              const code = row.original.data.universityCode
-              setExpanded((prev) => ({ ...prev, [code]: !prev[code] }))
-            }}
-            className="p-1"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </button>
-        )
-      },
-      size: 40,
-    },
-    {
-      accessorKey: 'name',
-      header: t('University name'),
-      cell: ({ row }) => {
-        const data = row.original.data
-        if (row.original.type === 'group') {
-          return <div className="font-medium">{(data as FacultyGroupRow).universityName}</div>
-        } else {
-          return <div className="ml-6 text-sm">{(data as FacultyRow).nameUz}</div>
-        }
-      },
-    },
-    {
-      accessorKey: 'code',
-      header: t('Code'),
-      cell: ({ row }) => {
-        const data = row.original.data
-        return row.original.type === 'group'
-          ? (data as FacultyGroupRow).universityCode
-          : (data as FacultyRow).code
-      },
-    },
-    {
-      accessorKey: 'count',
-      header: t('Faculty count'),
-      cell: ({ row }) => {
-        if (row.original.type === 'group') {
-          const data = row.original.data as FacultyGroupRow
-          return (
-            <div className="text-sm">
-              <span className="font-medium">{data.facultyCount}</span>
-              <span className="text-muted-foreground ml-1">
-                ({t('Active')}: {data.activeFacultyCount} / {t('Inactive')}:{' '}
-                {data.inactiveFacultyCount})
-              </span>
-            </div>
-          )
-        }
-        return null
-      },
-    },
-    {
-      accessorKey: 'status',
-      header: t('Status'),
-      cell: ({ row }) => {
-        if (row.original.type === 'faculty') {
-          const data = row.original.data as FacultyRow
-          return (
-            <span
-              className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                data.status ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600'
-              }`}
-            >
-              {data.status ? t('Active') : t('Inactive')}
-            </span>
-          )
-        }
-        return null
-      },
-    },
-    {
-      id: 'actions',
-      header: t('Actions'),
-      cell: ({ row }) => {
-        if (row.original.type === 'faculty') {
-          const data = row.original.data as FacultyRow
-          return (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                setSelectedFacultyCode(data.code)
-              }}
-            >
-              <Eye className="mr-1 h-4 w-4" />
-              {t('View')}
-            </Button>
-          )
-        }
-        return null
-      },
-      size: 100,
-    },
-  ]
+  // Toggle expand
+  const toggleExpand = useCallback((code: string) => {
+    setExpanded((prev) => ({ ...prev, [code]: !prev[code] }))
+  }, [])
 
-  // Prepare table data
-  const tableData: TableRow[] = React.useMemo(() => {
+  // Build flat rows for rendering
+  const rows = useMemo(() => {
     if (!groupsData?.content) return []
 
-    return groupsData.content
-      .map((group) => {
-        const row: TableRow = {
-          type: 'group',
-          data: group,
-          subRows: [],
+    const result: Array<
+      | { type: 'group'; data: FacultyGroupRow }
+      | { type: 'faculty'; data: FacultyRow; universityCode: string }
+    > = []
+
+    for (const group of groupsData.content) {
+      result.push({ type: 'group', data: group })
+
+      if (expanded[group.universityCode] && facultyQueries.data?.[group.universityCode]) {
+        const faculties = facultyQueries.data[group.universityCode].content
+        for (const faculty of faculties) {
+          result.push({ type: 'faculty', data: faculty, universityCode: group.universityCode })
         }
+      }
+    }
 
-        // Add faculty children if expanded
-        if (expanded[group.universityCode] && facultyQueries.data?.[group.universityCode]) {
-          const facultiesData = facultyQueries.data[group.universityCode]
-          row.subRows = facultiesData.content.map((faculty: FacultyRow) => ({
-            type: 'faculty' as const,
-            data: faculty,
-          }))
-        }
+    return result
+  }, [groupsData, expanded, facultyQueries.data])
 
-        // When searching, show only groups that have matching child faculties
-        const hasSearch = (search || '').trim().length > 0
-        if (hasSearch && (row.subRows?.length || 0) === 0) {
-          return null
-        }
-
-        return row
-      })
-      .filter((row): row is TableRow => row !== null)
-  }, [groupsData, expanded, facultyQueries.data, search])
-
-  const table = useReactTable({
-    data: tableData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-  })
-
-  const handleExport = () => {
-    exportMutation.mutate({
-      q: search || undefined,
-      status: status === 'all' ? undefined : status === 'true',
-    })
-  }
+  const loading = isLoading && !isPlaceholderData
+  const hasFilters = !!(debouncedSearch || statusFromUrl !== 'all')
 
   return (
     <>
-      <div className="container mx-auto space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">{t('Faculties')}</h1>
-            <p className="text-muted-foreground">{t('Filters')}</p>
-          </div>
-        </div>
+      <div className="space-y-3 p-4">
+        {/* Card container */}
+        <div
+          className="rounded-md border border-gray-200 bg-white"
+          style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
+        >
+          {/* Toolbar */}
+          <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-2.5">
+            {/* Search */}
+            <div className="relative max-w-sm flex-1">
+              <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder={t('Search...')}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full rounded-md border border-gray-200 bg-white py-1.5 pr-3 pl-9 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--active-bg)] focus:outline-none"
+              />
+            </div>
 
-        {/* Filters */}
-        <Card className="p-4">
-          <div className="flex flex-wrap gap-4">
-            <Input
-              placeholder={t('Search...')}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(0)
-              }}
-              className="max-w-sm"
-            />
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[180px]">
+            {/* Status filter */}
+            <Select value={statusFromUrl} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder={t('Status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('Status')}</SelectItem>
+                <SelectItem value="all">{t('All')}</SelectItem>
                 <SelectItem value="true">{t('Active')}</SelectItem>
                 <SelectItem value="false">{t('Inactive')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {t('Refresh')}
-            </Button>
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="mr-2 h-4 w-4" />
-              {t('Export')}
-            </Button>
-          </div>
-        </Card>
 
-        {/* Table */}
-        <Card>
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Total count */}
+            <span className="text-xs text-gray-500 tabular-nums">
+              {t('Total')}: <span className="font-semibold text-gray-700">{totalElements}</span>
+            </span>
+
+            <div className="h-5 w-px bg-gray-200" />
+
+            {/* Refresh */}
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              {t('Refresh')}
+            </button>
+
+            {/* Export */}
+            <button
+              onClick={handleExport}
+              disabled={exportMutation.isPending}
+              className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+            >
+              {exportMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {t('Export')}
+            </button>
+          </div>
+
+          {/* Progress bar */}
+          {(isLoading || isPlaceholderData) && (
+            <div className="progress-indeterminate h-0.5 w-full" />
+          )}
+
+          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-muted/50 sticky top-0">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th key={header.id} className="px-4 py-3 text-left text-sm font-medium">
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
+              <thead className="sticky top-0 z-10">
+                <tr className="border-b border-gray-200">
+                  <th className="w-10 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500" />
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                    {t('University name')}
+                  </th>
+                  <th className="w-32 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                    {t('Code')}
+                  </th>
+                  <th className="w-64 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                    {t('Faculty count')}
+                  </th>
+                  <th className="w-28 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                    {t('Status')}
+                  </th>
+                  <th className="w-24 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                    {t('Actions')}
+                  </th>
+                </tr>
               </thead>
               <tbody>
-                {isLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}>
-                      <td colSpan={columns.length} className="px-4 py-3">
-                        <Skeleton className="h-8 w-full" />
+                {loading ? (
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <tr key={`skeleton-${i}`} className={i % 2 === 1 ? 'bg-gray-50' : ''}>
+                      <td className="px-3 py-2" />
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-full rounded" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-20 rounded" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-32 rounded" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-16 rounded" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-4 w-12 rounded" />
                       </td>
                     </tr>
                   ))
-                ) : error ? (
+                ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length} className="px-4 py-8 text-center text-red-500">
-                      {t('Failed to load data')}:{' '}
-                      {error instanceof Error ? error.message : 'Unknown error'}
-                    </td>
-                  </tr>
-                ) : table.getRowModel().rows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="text-muted-foreground px-4 py-8 text-center"
-                    >
-                      {t('No data found')}
+                    <td colSpan={6} className="px-4 py-16 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <Building2 className="h-8 w-8 text-gray-400" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{t('No data found')}</p>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {hasFilters
+                              ? t('Try changing your search or filters')
+                              : t('No faculties have been added yet')}
+                          </p>
+                        </div>
+                        {hasFilters && (
+                          <button
+                            onClick={() => {
+                              setSearchInput('')
+                              updateSearchParams({
+                                q: undefined,
+                                status: undefined,
+                                page: undefined,
+                              })
+                            }}
+                            className="mt-1 text-xs text-[var(--primary)] transition-colors hover:underline"
+                          >
+                            {t('Clear')} {t('Filters').toLowerCase()}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ) : (
-                  <>
-                    {table.getRowModel().rows.map((row) => (
-                      <React.Fragment key={row.id}>
-                        <tr className="hover:bg-muted/50 border-b">
-                          {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="px-4 py-3">
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
-                          ))}
+                  rows.map((row, idx) => {
+                    if (row.type === 'group') {
+                      const group = row.data
+                      const isExpanded = expanded[group.universityCode]
+                      return (
+                        <tr
+                          key={`group-${group.universityCode}`}
+                          className={`cursor-pointer border-b border-gray-200 transition-colors hover:bg-gray-50 ${
+                            idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'
+                          }`}
+                          onClick={() => toggleExpand(group.universityCode)}
+                        >
+                          <td className="px-3 py-2">
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                            {group.universityName}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-600">
+                            {group.universityCode}
+                          </td>
+                          <td className="px-3 py-2 text-sm">
+                            <span className="font-medium">{group.facultyCount}</span>
+                            <span className="ml-1 text-gray-500">
+                              ({t('Active')}: {group.activeFacultyCount} / {t('Inactive')}:{' '}
+                              {group.inactiveFacultyCount})
+                            </span>
+                          </td>
+                          <td className="px-3 py-2" />
+                          <td className="px-3 py-2" />
                         </tr>
-                        {/* Render sub-rows (faculties) */}
-                        {row.original.subRows?.map((subRow, idx) => (
-                          <tr key={`${row.id}-sub-${idx}`} className="hover:bg-muted/50 border-b">
-                            {columns.map((column, colIdx) => (
-                              <td key={colIdx} className="px-4 py-2">
-                                {column.cell && typeof column.cell === 'function'
-                                  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    flexRender(column.cell, { row: { original: subRow } } as any)
-                                  : null}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </React.Fragment>
-                    ))}
-                  </>
+                      )
+                    }
+
+                    // Faculty row (child — indented, subtle background)
+                    const faculty = row.data
+                    return (
+                      <tr
+                        key={`faculty-${faculty.code}`}
+                        className="border-b border-gray-200 bg-gray-50 transition-colors hover:bg-gray-100"
+                      >
+                        <td className="px-3 py-2" />
+                        <td className="px-3 py-2 pl-9 text-sm text-gray-700">{faculty.nameUz}</td>
+                        <td className="px-3 py-2 text-sm text-gray-600">{faculty.code}</td>
+                        <td className="px-3 py-2" />
+                        <td className="px-3 py-2">
+                          <Badge variant={faculty.status ? 'default' : 'secondary'}>
+                            {faculty.status ? t('Active') : t('Inactive')}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-2">
+                          <button
+                            onClick={() => setSelectedFacultyCode(faculty.code)}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            {t('View')}
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
           </div>
 
           {/* Pagination */}
-          {groupsData && groupsData.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t px-4 py-3">
-              <div className="text-muted-foreground text-sm">
-                {t('of')} {groupsData.totalElements} {t('Rows per page')}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  disabled={page === 0}
-                >
-                  {t('Previous')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= groupsData.totalPages - 1}
-                >
-                  {t('Next')}
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
+          <div className="border-t border-gray-200 px-4">
+            <DataTablePagination
+              page={currentPage}
+              totalPages={totalPages}
+              totalElements={totalElements}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Faculty Detail Drawer */}

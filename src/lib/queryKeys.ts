@@ -53,4 +53,26 @@ export const queryKeys = {
     entityHistory: (entityType: string, entityId: string, filters?: Record<string, unknown>) =>
       ['audit', 'entityHistory', entityType, entityId, filters] as const,
   },
+
+  students: {
+    all: ['students'] as const,
+    list: (filters?: Record<string, unknown>) => ['students', 'list', filters] as const,
+    byId: (id: string) => ['students', id] as const,
+    stats: (university?: string) => ['students', 'stats', university] as const,
+    dictionaries: ['students', 'dictionaries'] as const,
+    duplicateStats: (university?: string) => ['students', 'duplicateStats', university] as const,
+    duplicates: (filters?: Record<string, unknown>) => ['students', 'duplicates', filters] as const,
+    duplicateGroupDetail: (pinfl: string) => ['students', 'duplicateGroup', pinfl] as const,
+    directions: (filters?: Record<string, unknown>) => ['students', 'directions', filters] as const,
+    directionsSummary: ['students', 'directionsSummary'] as const,
+  },
+
+  classifiers: {
+    all: ['classifiers'] as const,
+    categories: ['classifiers', 'categories'] as const,
+    byCategory: (category: string) => ['classifiers', 'category', category] as const,
+    items: (apiKey: string, filters?: Record<string, unknown>) =>
+      ['classifiers', 'items', apiKey, filters] as const,
+    byId: (apiKey: string, code: string) => ['classifiers', apiKey, code] as const,
+  },
 } as const

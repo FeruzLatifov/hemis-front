@@ -69,40 +69,90 @@ const MenuItemComponent = memo(function MenuItemComponent({
 
   if (hasChildren) {
     const hasActiveChild = item.items!.some((child) => checkActiveInTree(child, location.pathname))
+    const isParentActive = item.url
+      ? location.pathname === item.url || location.pathname.startsWith(item.url + '/')
+      : false
+
+    // Parent with URL navigates on click; expand toggle is a separate chevron button.
+    // Parent without URL just toggles the submenu.
+    const parentHasUrl = !!item.url
 
     return (
       <div key={item.id}>
-        <div className="group relative">
-          <button
-            onClick={() => {
-              if (!open && level === 0) setOpen(true)
-              toggleSubmenu(item.id)
-            }}
-            className={cn(
-              'relative flex w-full items-center gap-3 rounded-lg px-3 transition-all duration-200',
-              level === 0 ? 'py-2.5' : 'py-2 text-sm',
-              !open && level === 0 && 'justify-center',
-              level === 0
-                ? hasActiveChild
-                  ? 'sidebar-menu-item--active'
-                  : 'sidebar-menu-item'
-                : hasActiveChild
-                  ? 'sidebar-menu-item-child--active'
-                  : 'sidebar-menu-item-child',
-            )}
-          >
-            <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
-            {open && (
-              <>
-                <span className="flex-1 text-left font-medium">{label}</span>
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </>
-            )}
-          </button>
+        <div className="group relative flex items-center">
+          {parentHasUrl ? (
+            // Navigate + auto-expand
+            <Link
+              to={item.url!}
+              onClick={() => {
+                if (!open && level === 0) setOpen(true)
+                if (!isExpanded) toggleSubmenu(item.id)
+              }}
+              className={cn(
+                'relative flex flex-1 items-center gap-3 rounded-lg px-3 transition-all duration-200',
+                level === 0 ? 'py-2.5' : 'py-2 text-sm',
+                !open && level === 0 && 'justify-center',
+                level === 0
+                  ? hasActiveChild || isParentActive
+                    ? 'sidebar-menu-item--active'
+                    : 'sidebar-menu-item'
+                  : hasActiveChild || isParentActive
+                    ? 'sidebar-menu-item-child--active'
+                    : 'sidebar-menu-item-child',
+              )}
+            >
+              <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
+              {open && <span className="flex-1 text-left font-medium">{label}</span>}
+            </Link>
+          ) : (
+            // No URL — just toggle submenu
+            <button
+              onClick={() => {
+                if (!open && level === 0) setOpen(true)
+                toggleSubmenu(item.id)
+              }}
+              className={cn(
+                'relative flex w-full items-center gap-3 rounded-lg px-3 transition-all duration-200',
+                level === 0 ? 'py-2.5' : 'py-2 text-sm',
+                !open && level === 0 && 'justify-center',
+                level === 0
+                  ? hasActiveChild
+                    ? 'sidebar-menu-item--active'
+                    : 'sidebar-menu-item'
+                  : hasActiveChild
+                    ? 'sidebar-menu-item-child--active'
+                    : 'sidebar-menu-item-child',
+              )}
+            >
+              <Icon className={cn(level === 0 && !open ? 'h-6 w-6' : 'h-5 w-5')} />
+              {open && (
+                <>
+                  <span className="flex-1 text-left font-medium">{label}</span>
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </>
+              )}
+            </button>
+          )}
+          {/* Chevron toggle for parents with URL (separate from Link) */}
+          {parentHasUrl && open && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                toggleSubmenu(item.id)
+              }}
+              className="text-color-secondary hover:text-color-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+          )}
         </div>
 
         {open && isExpanded && (
@@ -211,6 +261,24 @@ function Sidebar({ open, setOpen }: SidebarProps) {
   const favorites = useFavoritesList()
 
   const currentLang = i18n.language || 'uz'
+
+  // Auto-expand parent menus that contain the current active page
+  useEffect(() => {
+    if (rootMenuItems.length === 0) return
+    const toExpand = new Set<string>()
+    for (const item of rootMenuItems) {
+      if (item.items && item.items.length > 0 && checkActiveInTree(item, location.pathname)) {
+        toExpand.add(item.id)
+      }
+    }
+    if (toExpand.size > 0) {
+      setExpandedMenus((prev) => {
+        const merged = new Set(prev)
+        for (const id of toExpand) merged.add(id)
+        return merged.size !== prev.size ? merged : prev
+      })
+    }
+  }, [rootMenuItems, location.pathname])
 
   // Close sidebar on Escape (mobile)
   const handleEscape = useCallback(

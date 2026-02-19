@@ -14,7 +14,7 @@ import i18n from '@/i18n/config'
 export function useUniversities(params: UniversitiesParams = {}) {
   return useQuery({
     queryKey: queryKeys.universities.list(params as Record<string, unknown>),
-    queryFn: () => universitiesApi.getUniversities(params),
+    queryFn: ({ signal }) => universitiesApi.getUniversities(params, signal),
     placeholderData: keepPreviousData,
   })
 }
@@ -25,7 +25,7 @@ export function useUniversities(params: UniversitiesParams = {}) {
 export function useUniversity(code: string) {
   return useQuery({
     queryKey: queryKeys.universities.byId(code),
-    queryFn: () => universitiesApi.getUniversity(code),
+    queryFn: ({ signal }) => universitiesApi.getUniversity(code, signal),
     enabled: !!code, // Only fetch if code exists
   })
 }

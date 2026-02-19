@@ -50,8 +50,11 @@ export interface MenuResponse {
  * @param locale Optional locale (default: uz-UZ)
  * @returns Full menu response with permissions
  */
-export const getUserMenu = async (locale = 'uz-UZ'): Promise<MenuResponse> => {
-  const response = await apiClient.get(`/api/v1/web/menu?locale=${locale}`)
+export const getUserMenu = async (
+  locale = 'uz-UZ',
+  signal?: AbortSignal,
+): Promise<MenuResponse> => {
+  const response = await apiClient.get(`/api/v1/web/menu?locale=${locale}`, { signal })
   return response.data.data
 }
 
