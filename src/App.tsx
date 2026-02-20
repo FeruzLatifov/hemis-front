@@ -40,7 +40,6 @@ const UniversityFormPage = lazy(
 const FacultiesPage = lazy(() =>
   import('./pages/institutions/faculties').then((m) => ({ default: m.FacultiesPage })),
 )
-const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
 const ClassifierCategoryPage = lazy(() => import('./pages/classifiers/ClassifierCategoryPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
@@ -385,9 +384,7 @@ function App() {
                       path="logs"
                       element={
                         <ProtectedRoute permission="audit.view">
-                          <RouteErrorBoundary>
-                            <LogsPage />
-                          </RouteErrorBoundary>
+                          <PlaceholderPage title={t('Logs')} />
                         </ProtectedRoute>
                       }
                     />
