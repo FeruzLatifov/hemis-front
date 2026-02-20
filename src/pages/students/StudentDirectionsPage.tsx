@@ -50,7 +50,7 @@ export default function StudentDirectionsPage() {
   // Local UI state for search input (debounced)
   // =====================================================
   const [searchInput, setSearchInput] = useState(searchQuery)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   // Sync search input when URL changes externally
   useEffect(() => {
@@ -324,7 +324,7 @@ export default function StudentDirectionsPage() {
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              t('{{count}} specialities found', { count: formatNumber(totalElements) })
+              t('{{count}} specialities found', { count: Number(totalElements) })
             )}
           </span>
         </div>

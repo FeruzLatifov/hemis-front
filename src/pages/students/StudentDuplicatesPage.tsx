@@ -379,7 +379,7 @@ export default function StudentDuplicatesPage() {
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              t('{{count}} groups found', { count: formatNumber(totalElements) })
+              t('{{count}} groups found', { count: Number(totalElements) })
             )}
           </span>
         </div>

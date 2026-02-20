@@ -519,7 +519,7 @@ export default function Students() {
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              t('{{count}} students found', { count: formatNumber(totalElements) })
+              t('{{count}} students found', { count: Number(totalElements) })
             )}
           </span>
         </div>

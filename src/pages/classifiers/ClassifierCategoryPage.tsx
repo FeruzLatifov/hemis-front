@@ -155,7 +155,7 @@ export default function ClassifierCategoryPage() {
     createMutation.mutate(
       {
         code: createForm.code.trim(),
-        name: createForm.name.trim() || undefined,
+        name: createForm.name.trim(),
         nameRu: createForm.nameRu.trim() || undefined,
         nameEn: createForm.nameEn.trim() || undefined,
         active: createForm.active,
