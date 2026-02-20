@@ -1,0 +1,63 @@
+replicaCount: 2
+
+image:
+  repository: harbor.e-edu.uz/ministry-front/hemis-front
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: new-ministry-pull-front
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: new-ministry.hemis.uz
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  paths:
+    - path: /
+      pathType: Prefix
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  minAvailable: 1
+
+probes:
+  liveness:
+    path: /health
+    port: 80
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /health
+    port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
