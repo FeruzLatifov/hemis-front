@@ -189,7 +189,7 @@ export default function StudentDirectionsPage() {
         <h1 className="font-display text-4xl font-bold text-[var(--primary)] dark:text-blue-400">
           {t('Directions')}
         </h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-[var(--text-secondary)]">
           {t('Speciality statistics by education type')}
         </p>
       </div>
@@ -200,10 +200,10 @@ export default function StudentDirectionsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Total specialities')}
                 </p>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
                   {summaryLoading ? (
                     <Skeleton className="h-8 w-24" />
                   ) : (
@@ -211,7 +211,7 @@ export default function StudentDirectionsPage() {
                   )}
                 </div>
               </div>
-              <BookOpen className="h-10 w-10 text-slate-400 opacity-50" />
+              <BookOpen className="h-10 w-10 text-[var(--text-secondary)] opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -220,7 +220,7 @@ export default function StudentDirectionsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('With students')}
                 </p>
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -240,7 +240,7 @@ export default function StudentDirectionsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Without students')}
                 </p>
                 <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
@@ -258,18 +258,18 @@ export default function StudentDirectionsPage() {
       </div>
 
       {/* Filters + Table */}
-      <div className="rounded-lg border border-[var(--border-color-pro)] bg-white dark:bg-slate-950">
+      <div className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
         {/* Toolbar: Search + Education Type Tabs + HasStudents filter */}
-        <div className="flex flex-wrap items-center gap-3 border-b border-gray-100 px-4 py-3 dark:border-slate-800">
+        <div className="flex flex-wrap items-center gap-3 border-b border-[var(--border-color-pro)] px-4 py-3">
           {/* Search input */}
           <div className="relative w-full sm:w-72">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder={t('Search by speciality...')}
-              className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 pr-3 pl-9 text-sm transition-colors outline-none placeholder:text-gray-400 focus:border-blue-300 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:placeholder:text-slate-500 dark:focus:border-blue-600 dark:focus:bg-slate-950"
+              className="h-9 w-full rounded-lg border border-[var(--border-color-pro)] bg-[var(--input-bg)] pr-3 pl-9 text-sm transition-colors outline-none placeholder:text-[var(--text-secondary)] focus:border-blue-300 focus:bg-[var(--card-bg)]"
             />
           </div>
 
@@ -284,7 +284,7 @@ export default function StudentDirectionsPage() {
                   className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[var(--active-bg)] text-[var(--primary)]'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-900'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   {t(tab.labelKey)}
@@ -300,7 +300,7 @@ export default function StudentDirectionsPage() {
               className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                 hasStudentsFilter === true
                   ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-900'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               {t('Has students')}
@@ -312,7 +312,7 @@ export default function StudentDirectionsPage() {
               className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                 hasStudentsFilter === false
                   ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-900'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               {t('No students')}
@@ -320,7 +320,7 @@ export default function StudentDirectionsPage() {
           </div>
 
           {/* Result count */}
-          <span className="ml-auto text-xs text-gray-400">
+          <span className="text-muted-foreground ml-auto text-xs">
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
@@ -333,32 +333,32 @@ export default function StudentDirectionsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-                <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
+              <tr className="border-b border-[var(--border-color-pro)] bg-[var(--table-header-bg)]">
+                <th className="px-4 py-3 text-left font-medium text-[var(--text-secondary)]">
                   {t('Speciality code')}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-left font-medium text-[var(--text-secondary)]">
                   {t('Speciality name')}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-left font-medium text-[var(--text-secondary)]">
                   {t('Education type')}
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">
                   {t('Total students')}
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">
                   <span className="inline-flex items-center gap-1">
                     <UserCheck className="h-3.5 w-3.5" />
                     {t('Active students')}
                   </span>
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">
                   <span className="inline-flex items-center gap-1">
                     <GraduationCap className="h-3.5 w-3.5" />
                     {t('Graduated')}
                   </span>
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-slate-400">
+                <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">
                   <span className="inline-flex items-center gap-1">
                     <UserMinus className="h-3.5 w-3.5" />
                     {t('Expelled')}
@@ -366,7 +366,7 @@ export default function StudentDirectionsPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[var(--border-color-pro)]">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
@@ -379,8 +379,8 @@ export default function StudentDirectionsPage() {
                 <tr>
                   <td colSpan={7} className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <BookOpen className="h-12 w-12 text-slate-300 dark:text-slate-600" />
-                      <p className="text-sm font-medium text-gray-900 dark:text-slate-300">
+                      <BookOpen className="h-12 w-12 text-[var(--border-color-pro)]" />
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
                         {t('No data found')}
                       </p>
                     </div>
@@ -388,16 +388,15 @@ export default function StudentDirectionsPage() {
                 </tr>
               ) : (
                 specialities.map((sp) => (
-                  <tr
-                    key={sp.id}
-                    className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50"
-                  >
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">{sp.code}</td>
-                    <td className="max-w-xs truncate px-4 py-3 font-medium text-slate-900 dark:text-white">
+                  <tr key={sp.id} className="transition-colors hover:bg-[var(--hover-bg)]">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--text-secondary)]">
+                      {sp.code}
+                    </td>
+                    <td className="max-w-xs truncate px-4 py-3 font-medium text-[var(--text-primary)]">
                       {sp.name}
                     </td>
                     <td className="px-4 py-3">{getEducationTypeBadge(sp.educationType)}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">
+                    <td className="px-4 py-3 text-right font-semibold text-[var(--text-primary)]">
                       {formatNumber(sp.totalStudents)}
                     </td>
                     <td className="px-4 py-3 text-right text-green-600 dark:text-green-400">
@@ -418,7 +417,7 @@ export default function StudentDirectionsPage() {
 
         {/* Pagination */}
         {!isLoading && totalElements > 0 && (
-          <div className="border-t border-gray-100 px-4 py-3 dark:border-slate-800">
+          <div className="border-t border-[var(--border-color-pro)] px-4 py-3">
             <DataTablePagination
               page={currentPage}
               totalPages={totalPages}

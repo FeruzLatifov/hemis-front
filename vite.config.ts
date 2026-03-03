@@ -29,7 +29,7 @@ export default defineConfig({
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
       // ✅ SECURITY FIX: CSP header for development (production uses nginx-security-headers.conf)
       'Content-Security-Policy':
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: http://localhost:* https://*.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: http://localhost:* http://172.18.9.1:* https://*.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
     },
   },
   build: {

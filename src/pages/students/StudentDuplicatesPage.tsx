@@ -215,7 +215,7 @@ export default function StudentDuplicatesPage() {
         <h1 className="font-display text-4xl font-bold text-[var(--primary)] dark:text-blue-400">
           {t('Duplicates')}
         </h1>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-[var(--text-secondary)]">
           {t('Students with duplicate PINFL analysis')}
         </p>
       </div>
@@ -226,10 +226,10 @@ export default function StudentDuplicatesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Total duplicate PINFLs')}
                 </p>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
                   {statsLoading ? (
                     <Skeleton className="h-8 w-24" />
                   ) : (
@@ -237,7 +237,7 @@ export default function StudentDuplicatesPage() {
                   )}
                 </div>
               </div>
-              <Copy className="h-10 w-10 text-slate-400 opacity-50" />
+              <Copy className="h-10 w-10 text-[var(--text-secondary)] opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -246,7 +246,7 @@ export default function StudentDuplicatesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Cross university')}
                 </p>
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">
@@ -266,7 +266,7 @@ export default function StudentDuplicatesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Same university')}
                 </p>
                 <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
@@ -286,7 +286,7 @@ export default function StudentDuplicatesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Multi level')}
                 </p>
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -306,7 +306,7 @@ export default function StudentDuplicatesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Internal transfer')}
                 </p>
                 <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">
@@ -326,7 +326,7 @@ export default function StudentDuplicatesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('External transfer')}
                 </p>
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
@@ -344,9 +344,9 @@ export default function StudentDuplicatesPage() {
       </div>
 
       {/* Reason Tabs + List */}
-      <div className="rounded-lg border border-[var(--border-color-pro)] bg-white dark:bg-slate-950">
+      <div className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
         {/* Tabs */}
-        <div className="flex flex-wrap items-center gap-1 border-b border-gray-100 px-4 py-2 dark:border-slate-800">
+        <div className="flex flex-wrap items-center gap-1 border-b border-[var(--border-color-pro)] px-4 py-2">
           {REASON_TABS.map((tab) => {
             const count = getReasonTabCount(tab.key)
             const isActive = reasonFilter === tab.key
@@ -357,7 +357,7 @@ export default function StudentDuplicatesPage() {
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-[var(--active-bg)] text-[var(--primary)]'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-900'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {t(tab.labelKey)}
@@ -365,7 +365,7 @@ export default function StudentDuplicatesPage() {
                   className={`rounded-full px-1.5 py-0.5 text-xs ${
                     isActive
                       ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
-                      : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'
+                      : 'bg-[var(--hover-bg)] text-[var(--text-secondary)]'
                   }`}
                 >
                   {statsLoading ? '-' : formatNumber(count)}
@@ -375,7 +375,7 @@ export default function StudentDuplicatesPage() {
           })}
 
           {/* Result count */}
-          <span className="ml-auto text-xs text-gray-400">
+          <span className="ml-auto text-xs text-[var(--text-secondary)]">
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
@@ -385,7 +385,7 @@ export default function StudentDuplicatesPage() {
         </div>
 
         {/* Groups list */}
-        <div className="divide-y divide-gray-100 dark:divide-slate-800">
+        <div className="divide-y divide-[var(--border-color-pro)]">
           {isLoading ? (
             Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="px-4 py-4">
@@ -394,25 +394,25 @@ export default function StudentDuplicatesPage() {
             ))
           ) : groups.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-16">
-              <Copy className="h-12 w-12 text-slate-300 dark:text-slate-600" />
-              <p className="text-sm font-medium text-gray-900 dark:text-slate-300">
-                {t('No data found')}
+              <Copy className="h-12 w-12 text-[var(--border-color-pro)]" />
+              <p className="text-sm font-medium text-[var(--text-primary)]">{t('No data found')}</p>
+              <p className="text-xs text-[var(--text-secondary)]">
+                {t('No duplicate records found')}
               </p>
-              <p className="text-xs text-gray-500">{t('No duplicate records found')}</p>
             </div>
           ) : (
             groups.map((group) => (
               <button
                 key={group.pinfl}
                 onClick={() => setSelectedPinfl(group.pinfl)}
-                className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50"
+                className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[var(--hover-bg)]"
               >
                 {/* Name + PINFL */}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-slate-900 dark:text-white">
+                  <p className="truncate font-medium text-[var(--text-primary)]">
                     {group.representativeName || group.pinfl}
                   </p>
-                  <p className="font-mono text-xs text-slate-400">{group.pinfl}</p>
+                  <p className="font-mono text-xs text-[var(--text-secondary)]">{group.pinfl}</p>
                 </div>
 
                 {/* Reason badge */}
@@ -420,15 +420,13 @@ export default function StudentDuplicatesPage() {
 
                 {/* Active summary */}
                 <div className="hidden shrink-0 text-right text-sm sm:block">
-                  <span className="text-slate-600 dark:text-slate-400">
-                    {getActiveLabel(group)}
-                  </span>
+                  <span className="text-[var(--text-secondary)]">{getActiveLabel(group)}</span>
                 </div>
 
                 {/* Count */}
                 <div className="flex shrink-0 items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-600 dark:text-slate-400">
+                  <Users className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                  <span className="text-sm font-medium text-[var(--text-secondary)]">
                     {group.count}
                   </span>
                 </div>
@@ -439,7 +437,7 @@ export default function StudentDuplicatesPage() {
 
         {/* Pagination */}
         {!isLoading && totalElements > 0 && (
-          <div className="border-t border-gray-100 px-4 py-3 dark:border-slate-800">
+          <div className="border-t border-[var(--border-color-pro)] px-4 py-3">
             <DataTablePagination
               page={currentPage}
               totalPages={totalPages}

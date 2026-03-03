@@ -288,7 +288,9 @@ export default function Teachers() {
                           <p className="font-medium text-slate-900 dark:text-white">
                             {teacher.fullName}
                           </p>
-                          <p className="text-xs text-slate-500">{teacher.pinfl}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {teacher.pinfl}
+                          </p>
                         </div>
                       </div>
                     </TableCell>

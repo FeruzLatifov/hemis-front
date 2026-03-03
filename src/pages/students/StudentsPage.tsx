@@ -289,7 +289,7 @@ export default function Students() {
     switch (status) {
       case '10':
         return (
-          <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-950/30 dark:text-slate-400">
+          <Badge className="bg-[var(--badge-muted-bg)] text-[var(--badge-muted-text)]">
             <Clock className="mr-1 h-3 w-3" />
             {name}
           </Badge>
@@ -374,9 +374,7 @@ export default function Students() {
           <h1 className="font-display text-4xl font-bold text-[var(--primary)] dark:text-blue-400">
             {t('Students')}
           </h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">
-            {t('Student list and management')}
-          </p>
+          <p className="mt-1 text-[var(--text-secondary)]">{t('Student list and management')}</p>
         </div>
       </div>
 
@@ -386,9 +384,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  {t('Total')}
-                </p>
+                <p className="text-sm font-medium text-[var(--text-secondary)]">{t('Total')}</p>
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {statsLoading ? (
                     <Skeleton className="h-8 w-24" />
@@ -406,7 +402,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Grant recipients')}
                 </p>
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -426,7 +422,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Contract students')}
                 </p>
                 <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
@@ -446,9 +442,7 @@ export default function Students() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  {t('Graduates')}
-                </p>
+                <p className="text-sm font-medium text-[var(--text-secondary)]">{t('Graduates')}</p>
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {statsLoading ? (
                     <Skeleton className="h-8 w-24" />
@@ -464,16 +458,16 @@ export default function Students() {
       </div>
 
       {/* Data Table with Toolbar + Filters */}
-      <div className="rounded-lg border border-[var(--border-color-pro)] bg-white dark:bg-slate-950">
+      <div className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
         {/* ──── Toolbar ──── */}
-        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-2.5 dark:border-slate-800">
+        <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFiltersPanel(!showFiltersPanel)}
             className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
               showFiltersPanel || activeFilterCount > 0
                 ? 'border-[var(--primary)]/20 bg-[var(--active-bg)] text-[var(--primary)]'
-                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
+                : 'border-[var(--border-color-pro)] bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'
             }`}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -497,13 +491,13 @@ export default function Students() {
                   page: undefined,
                 })
               }}
-              className="h-8 rounded-l-md border border-r-0 border-gray-200 bg-gray-50 px-2 text-xs font-medium text-gray-600 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              className="h-8 rounded-l-md border border-r-0 border-[var(--border-color-pro)] bg-[var(--table-row-alt)] px-2 text-xs font-medium text-[var(--text-secondary)] focus:outline-none"
             >
               <option value="code">{t('Code')}</option>
               <option value="pinfl">{t('PINFL')}</option>
             </select>
             <div className="relative flex-1">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
               <Input
                 id="students-search"
                 placeholder={`${searchField === 'pinfl' ? t('Search by PINFL...') : t('Search by code...')} (Ctrl+K)`}
@@ -515,7 +509,7 @@ export default function Students() {
           </div>
 
           {/* Result count */}
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-[var(--text-secondary)]">
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
@@ -547,7 +541,7 @@ export default function Students() {
         {/* ──── Table ──── */}
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+            <TableHeader className="bg-[var(--table-header-bg)]">
               <TableRow>
                 <TableHead>{t('Code')}</TableHead>
                 <TableHead>{t('Full name')}</TableHead>
@@ -575,11 +569,11 @@ export default function Students() {
                 <TableRow>
                   <TableCell colSpan={9} className="py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <Users className="h-12 w-12 text-slate-300 dark:text-slate-600" />
-                      <p className="text-sm font-medium text-gray-900 dark:text-slate-300">
+                      <Users className="h-12 w-12 text-[var(--border-color-pro)]" />
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
                         {t('No data found')}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--text-secondary)]">
                         {debouncedSearch || hasActiveFilters
                           ? t('Try changing your search or filters')
                           : t('No students found')}
@@ -597,10 +591,7 @@ export default function Students() {
                 </TableRow>
               ) : (
                 students.map((student) => (
-                  <TableRow
-                    key={student.id}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-900/50"
-                  >
+                  <TableRow key={student.id} className="hover:bg-[var(--hover-bg)]">
                     <TableCell className="font-mono text-sm font-medium text-blue-600 dark:text-blue-400">
                       {student.code}
                     </TableCell>
@@ -610,16 +601,18 @@ export default function Students() {
                           {getInitials(student)}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">
+                          <p className="truncate font-medium text-[var(--text-primary)]">
                             {student.fullName}
                           </p>
                           {student.groupName && (
-                            <p className="truncate text-xs text-slate-500">{student.groupName}</p>
+                            <p className="truncate text-xs text-[var(--text-secondary)]">
+                              {student.groupName}
+                            </p>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-sm text-slate-600 dark:text-slate-400">
+                    <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
                       {student.pinfl}
                     </TableCell>
                     <TableCell>
@@ -635,7 +628,7 @@ export default function Students() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                      <span className="text-sm text-[var(--text-secondary)]">
                         {resolveName('educationForms', student.educationForm)}
                       </span>
                     </TableCell>
@@ -669,7 +662,7 @@ export default function Students() {
 
         {/* Pagination */}
         {!isLoading && totalElements > 0 && (
-          <div className="border-t border-gray-100 px-4 py-3 dark:border-slate-800">
+          <div className="border-t border-[var(--border-color-pro)] px-4 py-3">
             <DataTablePagination
               page={currentPage}
               totalPages={totalPages}

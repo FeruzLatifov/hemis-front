@@ -25,16 +25,15 @@ export function DuplicateDetectorPanel({ duplicates, onClose }: DuplicateDetecto
   return (
     <div className="px-6 pt-4">
       <div
-        className="overflow-hidden rounded-lg border"
+        className="overflow-hidden rounded-lg border bg-amber-50 dark:bg-amber-950/20"
         style={{
           borderColor: 'var(--warning)',
-          backgroundColor: '#FFFBEB',
         }}
       >
         {/* Panel Header */}
         <div
-          className="flex items-center justify-between border-b px-4 py-3"
-          style={{ borderColor: 'var(--warning)', backgroundColor: '#FEF3C7' }}
+          className="flex items-center justify-between border-b bg-amber-100 px-4 py-3 dark:bg-amber-900/20"
+          style={{ borderColor: 'var(--warning)' }}
         >
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" style={{ color: 'var(--warning)' }} />

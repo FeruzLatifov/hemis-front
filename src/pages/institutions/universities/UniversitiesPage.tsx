@@ -611,7 +611,7 @@ export default function UniversitiesPage() {
   // ─── Helpers ────────────────────────────────────────────────────────
   const getSortIcon = (columnId: string) => {
     const sort = sorting.find((s) => s.id === columnId)
-    if (!sort) return <ArrowUpDown className="ml-1 inline h-3 w-3 text-gray-400" />
+    if (!sort) return <ArrowUpDown className="ml-1 inline h-3 w-3 text-[var(--text-secondary)]" />
     return sort.desc ? (
       <ArrowDown className="ml-1 inline h-3 w-3 text-[var(--primary)]" />
     ) : (
@@ -628,16 +628,16 @@ export default function UniversitiesPage() {
   return (
     <div className="space-y-3 p-4">
       {/* ──── Card Container ──── */}
-      <div className="rounded-lg border border-[var(--border-color-pro)] bg-white">
+      <div className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
         {/* ──── Toolbar ──── */}
-        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-2.5">
+        <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFiltersPanel(!showFiltersPanel)}
             className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
               showFiltersPanel || activeFilterCount > 0
                 ? 'border-[var(--primary)]/20 bg-[var(--active-bg)] text-[var(--primary)]'
-                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                : 'border-[var(--border-color-pro)] bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'
             }`}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -666,19 +666,20 @@ export default function UniversitiesPage() {
           <div className="flex-1" />
 
           {/* Total count */}
-          <span className="text-xs text-gray-500 tabular-nums">
-            {t('Total')}: <span className="font-semibold text-gray-700">{totalElements}</span>
+          <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+            {t('Total')}:{' '}
+            <span className="font-semibold text-[var(--text-primary)]">{totalElements}</span>
           </span>
 
-          <div className="h-5 w-px bg-gray-200" />
+          <div className="h-5 w-px bg-[var(--border-color-pro)]" />
 
           {/* Density toggle */}
           <button
             onClick={() => setDensity((d) => (d === 'compact' ? 'comfortable' : 'compact'))}
             className={`rounded-lg p-1.5 transition-colors ${
               isCompact
-                ? 'bg-gray-100 text-gray-700'
-                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                ? 'bg-[var(--hover-bg)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
             }`}
             title={isCompact ? t('Comfortable view') : t('Compact view')}
           >
@@ -689,7 +690,7 @@ export default function UniversitiesPage() {
           <button
             onClick={handleRefresh}
             disabled={isLoading}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
+            className="rounded-lg p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)] disabled:opacity-40"
             title={t('Refresh')}
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -698,7 +699,7 @@ export default function UniversitiesPage() {
           {/* Export Excel */}
           <button
             onClick={onExportAll}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80"
           >
             <FileSpreadsheet className="h-4 w-4" />
             Excel
@@ -721,12 +722,12 @@ export default function UniversitiesPage() {
             }}
           />
 
-          <div className="h-5 w-px bg-gray-200" />
+          <div className="h-5 w-px bg-[var(--border-color-pro)]" />
 
           {/* Add Button */}
           <button
             onClick={() => navigate('/institutions/universities/create')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
           >
             <Plus className="h-4 w-4" />
             {t('Add')}
@@ -753,14 +754,14 @@ export default function UniversitiesPage() {
             <div className="h-4 w-px bg-[var(--primary)]/20" />
             <button
               onClick={onExportSelected}
-              className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+              className="inline-flex items-center gap-1 rounded-md bg-[var(--emerald-bg)] px-2 py-0.5 text-xs font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80"
             >
               <FileSpreadsheet className="h-3 w-3" />
               {t('Export selected')}
             </button>
             <button
               onClick={() => setRowSelection({})}
-              className="ml-auto text-xs text-gray-400 transition-colors hover:text-gray-600"
+              className="ml-auto text-xs text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
             >
               {t('Clear')}
             </button>
@@ -780,14 +781,16 @@ export default function UniversitiesPage() {
           >
             <thead className="sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-gray-100">
+                <tr key={headerGroup.id} className="border-b border-[var(--border-color-pro)]">
                   {headerGroup.headers.map((header) => {
                     const canSort = header.column.getCanSort()
                     return (
                       <th
                         key={header.id}
-                        className={`relative bg-gray-50 text-left font-medium text-gray-500 ${headerPx} ${cellText} ${
-                          canSort ? 'cursor-pointer select-none hover:text-gray-700' : ''
+                        className={`relative bg-[var(--table-row-alt)] text-left font-medium text-[var(--text-secondary)] ${headerPx} ${cellText} ${
+                          canSort
+                            ? 'cursor-pointer select-none hover:text-[var(--text-primary)]'
+                            : ''
                         }`}
                         style={{ width: header.getSize() }}
                         onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
@@ -839,7 +842,10 @@ export default function UniversitiesPage() {
             <tbody>
               {loading ? (
                 Array.from({ length: pageSize }).map((_, i) => (
-                  <tr key={`skeleton-${i}`} className={i % 2 === 1 ? 'bg-gray-50' : ''}>
+                  <tr
+                    key={`skeleton-${i}`}
+                    className={i % 2 === 1 ? 'bg-[var(--table-row-alt)]' : ''}
+                  >
                     {table.getVisibleLeafColumns().map((col) => (
                       <td key={col.id} className={cellPx} style={{ width: col.getSize() }}>
                         <Skeleton className={`${isCompact ? 'h-3' : 'h-4'} w-full rounded`} />
@@ -854,10 +860,12 @@ export default function UniversitiesPage() {
                     className="px-4 py-16 text-center"
                   >
                     <div className="flex flex-col items-center gap-3">
-                      <Search className="h-8 w-8 text-gray-400" />
+                      <Search className="h-8 w-8 text-[var(--text-secondary)]" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{t('No data found')}</p>
-                        <p className="mt-0.5 text-xs text-gray-500">
+                        <p className="text-sm font-medium text-[var(--text-primary)]">
+                          {t('No data found')}
+                        </p>
+                        <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
                           {debouncedSearch || hasActiveFilters
                             ? t('Try changing your search or filters')
                             : t('No universities have been added yet')}
@@ -866,7 +874,7 @@ export default function UniversitiesPage() {
                       {!debouncedSearch && !hasActiveFilters && (
                         <button
                           onClick={() => navigate('/institutions/universities/create')}
-                          className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+                          className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
                         >
                           <Plus className="h-3.5 w-3.5" />
                           {t('Add')}
@@ -888,12 +896,12 @@ export default function UniversitiesPage() {
                   <tr
                     key={row.id}
                     onClick={() => handleRowClick(row.original.code)}
-                    className={`group/row cursor-pointer border-b border-gray-50 transition-colors hover:bg-slate-50 ${
+                    className={`group/row cursor-pointer border-b border-[var(--border-color-pro)] transition-colors hover:bg-[var(--hover-bg)] ${
                       row.getIsSelected()
                         ? 'bg-[var(--active-bg)]'
                         : rowIndex % 2 === 1
-                          ? 'bg-gray-50'
-                          : 'bg-white'
+                          ? 'bg-[var(--table-row-alt)]'
+                          : 'bg-[var(--card-bg)]'
                     }`}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -913,7 +921,7 @@ export default function UniversitiesPage() {
         </div>
 
         {/* ──── Pagination ──── */}
-        <div className="border-t border-gray-100 px-4">
+        <div className="border-t border-[var(--border-color-pro)] px-4">
           <DataTablePagination
             page={currentPage}
             totalPages={totalPages}
@@ -941,7 +949,7 @@ export default function UniversitiesPage() {
             <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteConfirm.code && handleDelete(deleteConfirm.code)}
-              className="border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+              className="border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40"
             >
               {t('Delete')}
             </AlertDialogAction>

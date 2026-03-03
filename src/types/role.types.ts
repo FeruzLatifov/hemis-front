@@ -16,3 +16,47 @@ export enum RoleCode {
   // Custom Roles (CUSTOM)
   REPORT_VIEWER = 'REPORT_VIEWER',
 }
+
+// ── Role CRUD Types ──
+
+export interface RoleAdmin {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  roleType: 'SYSTEM' | 'UNIVERSITY' | 'CUSTOM'
+  active: boolean
+  permissions: PermissionItem[]
+  usersCount: number
+  createdAt: string
+  updatedAt: string | null
+}
+
+export interface PermissionItem {
+  id: string
+  code: string
+  name: string
+  category: string | null
+  resource: string
+  action: string
+}
+
+export interface RoleCreateRequest {
+  code: string
+  name: string
+  description?: string
+  permissionIds?: string[]
+}
+
+export interface RoleUpdateRequest {
+  name?: string
+  description?: string
+  permissionIds?: string[]
+}
+
+export interface RolesParams {
+  page?: number
+  size?: number
+  sort?: string
+  search?: string
+}

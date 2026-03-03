@@ -65,7 +65,7 @@ export function CustomTagFilter({
 
   // Display text for trigger
   const displayText = () => {
-    if (!hasSelection) return <span className="text-gray-400">{t('All')}</span>
+    if (!hasSelection) return <span className="text-muted-foreground">{t('All')}</span>
     if (selectedNames.length === 1) {
       return (
         <span className="max-w-[140px] truncate font-medium text-[var(--primary)]">
@@ -84,11 +84,11 @@ export function CustomTagFilter({
   }
 
   return (
-    <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5">
+    <div className="border-border bg-card flex items-center gap-1.5 rounded-lg border px-2 py-1.5">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button className="inline-flex items-center gap-1.5 text-sm text-gray-600 transition-colors hover:text-gray-900">
-            <span className="text-xs font-medium text-gray-400">{label}:</span>
+          <button className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors">
+            <span className="text-muted-foreground text-xs font-medium">{label}:</span>
             {displayText()}
           </button>
         </PopoverTrigger>
@@ -97,7 +97,7 @@ export function CustomTagFilter({
             {/* Search */}
             <div className="border-b p-3">
               <div className="relative">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   placeholder={t('Search...')}
                   value={searchQuery}
@@ -113,10 +113,10 @@ export function CustomTagFilter({
             <div className="overflow-auto">
               {/* Show all option */}
               <button
-                className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 ${
+                className={`hover:bg-muted flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
                   !hasSelection
                     ? 'bg-[var(--active-bg)] font-medium text-[var(--primary)]'
-                    : 'text-gray-700'
+                    : 'text-foreground'
                 }`}
                 onClick={handleSelectAll}
               >
@@ -124,18 +124,20 @@ export function CustomTagFilter({
                 {!hasSelection && <Check className="h-4 w-4 text-[var(--primary)]" />}
               </button>
 
-              <div className="border-t border-gray-100" />
+              <div className="border-border border-t" />
 
               {filteredData.length === 0 ? (
-                <p className="py-6 text-center text-sm text-gray-500">{t('No results found')}</p>
+                <p className="text-muted-foreground py-6 text-center text-sm">
+                  {t('No results found')}
+                </p>
               ) : (
                 filteredData.map((item) => {
                   const isSelected = selectedSet.has(item.code)
                   return (
                     <button
                       key={item.code}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 ${
-                        isSelected ? 'font-medium text-[var(--primary)]' : 'text-gray-700'
+                      className={`hover:bg-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors ${
+                        isSelected ? 'font-medium text-[var(--primary)]' : 'text-foreground'
                       }`}
                       onClick={() => handleToggleItem(item.code)}
                     >
@@ -143,7 +145,7 @@ export function CustomTagFilter({
                         className={`flex h-4 w-4 shrink-0 items-center justify-center ${singleSelect ? 'rounded-full' : 'rounded'} border transition-colors ${
                           isSelected
                             ? 'border-[var(--primary)] bg-[var(--primary)] text-white'
-                            : 'border-gray-300 bg-white'
+                            : 'border-border bg-background'
                         }`}
                       >
                         {isSelected && <Check className="h-3 w-3" />}
@@ -162,7 +164,7 @@ export function CustomTagFilter({
       {hasSelection && (
         <button
           onClick={handleClear}
-          className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full p-0.5 transition-colors"
           title={t('Clear')}
         >
           <X className="h-3.5 w-3.5" />
@@ -172,7 +174,7 @@ export function CustomTagFilter({
       {!hasSelection && onClose && (
         <button
           onClick={onClose}
-          className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+          className="text-muted-foreground rounded-full p-0.5 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/20"
           title={t('Remove filter')}
         >
           <X className="h-3.5 w-3.5" />

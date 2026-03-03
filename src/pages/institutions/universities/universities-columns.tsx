@@ -31,7 +31,10 @@ const HighlightText = memo(function HighlightText({
     <>
       {parts.map((part, i) =>
         part.toLowerCase() === query.toLowerCase() ? (
-          <mark key={i} className="rounded-sm bg-yellow-100 px-0.5 text-yellow-900">
+          <mark
+            key={i}
+            className="rounded-sm bg-yellow-100 px-0.5 text-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-300"
+          >
             {part}
           </mark>
         ) : (
@@ -46,7 +49,7 @@ const HighlightText = memo(function HighlightText({
 
 /** Simple text cell with dash fallback */
 const TextCell = memo(function TextCell({ value }: { value: string | undefined }) {
-  return <span className="text-gray-500">{value || '—'}</span>
+  return <span className="text-[var(--text-secondary)]">{value || '—'}</span>
 })
 
 /** Truncated text cell with title tooltip */
@@ -56,7 +59,7 @@ const TruncatedTextCell = memo(function TruncatedTextCell({
   value: string | undefined
 }) {
   return (
-    <div className="overflow-hidden text-ellipsis text-gray-500" title={value || ''}>
+    <div className="overflow-hidden text-ellipsis text-[var(--text-secondary)]" title={value || ''}>
       {value || '—'}
     </div>
   )
@@ -74,10 +77,10 @@ const BooleanStatusCell = memo(function BooleanStatusCell({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 ${value ? 'text-emerald-600' : 'text-gray-400'}`}
+      className={`inline-flex items-center gap-1 ${value ? 'text-emerald-600' : 'text-[var(--text-secondary)]'}`}
     >
       <span
-        className={`inline-block h-1.5 w-1.5 rounded-full ${value ? 'bg-emerald-500' : 'bg-gray-300'}`}
+        className={`inline-block h-1.5 w-1.5 rounded-full ${value ? 'bg-emerald-500' : 'bg-[var(--border-color-pro)]'}`}
       />
       {value ? yesLabel : noLabel}
     </span>
@@ -97,9 +100,13 @@ const ActiveStatusCell = memo(function ActiveStatusCell({
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className={`inline-block h-1.5 w-1.5 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-300'}`}
+        className={`inline-block h-1.5 w-1.5 rounded-full ${active ? 'bg-emerald-500' : 'bg-[var(--border-color-pro)]'}`}
       />
-      <span className={active ? 'text-emerald-700' : 'text-gray-400'}>
+      <span
+        className={
+          active ? 'text-emerald-700 dark:text-emerald-400' : 'text-[var(--text-secondary)]'
+        }
+      >
         {active ? activeLabel : inactiveLabel}
       </span>
     </span>
@@ -108,14 +115,14 @@ const ActiveStatusCell = memo(function ActiveStatusCell({
 
 /** External link cell */
 const LinkCell = memo(function LinkCell({ url }: { url: string | undefined }) {
-  if (!url) return <span className="text-gray-400">—</span>
+  if (!url) return <span className="text-[var(--text-secondary)]">—</span>
   const href = url.startsWith('http') ? url : `https://${url}`
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-600 hover:underline"
+      className="text-blue-600 hover:underline dark:text-blue-400"
       onClick={(e) => e.stopPropagation()}
     >
       {url}
@@ -172,7 +179,7 @@ export function useUniversitiesColumns({
         id: 'rowNumber',
         header: '#',
         cell: ({ row }) => (
-          <span className="text-gray-400 tabular-nums">
+          <span className="text-[var(--text-secondary)] tabular-nums">
             {currentPage * pageSize + row.index + 1}
           </span>
         ),
@@ -189,7 +196,7 @@ export function useUniversitiesColumns({
         cell: ({ row }) => (
           <button
             type="button"
-            className="cursor-copy font-mono text-gray-500 transition-colors hover:text-[var(--primary)]"
+            className="cursor-copy font-mono text-[var(--text-secondary)] transition-colors hover:text-[var(--primary)]"
             onClick={(e) => {
               e.stopPropagation()
               handleCopyToClipboard(row.original.code)
@@ -209,7 +216,7 @@ export function useUniversitiesColumns({
         header: t('Name'),
         cell: ({ row }) => (
           <div
-            className="overflow-hidden font-medium text-ellipsis text-gray-900"
+            className="overflow-hidden font-medium text-ellipsis text-[var(--text-primary)]"
             title={row.original.name}
           >
             <HighlightText text={row.original.name} query={debouncedSearch} />
@@ -226,7 +233,7 @@ export function useUniversitiesColumns({
         cell: ({ row }) => (
           <button
             type="button"
-            className={`font-mono text-gray-500 ${row.original.tin ? 'cursor-copy transition-colors hover:text-[var(--primary)]' : ''}`}
+            className={`font-mono text-[var(--text-secondary)] ${row.original.tin ? 'cursor-copy transition-colors hover:text-[var(--primary)]' : ''}`}
             onClick={(e) => {
               if (row.original.tin) {
                 e.stopPropagation()

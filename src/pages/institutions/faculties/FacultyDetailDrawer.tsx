@@ -32,7 +32,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
     <div
       role="button"
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex items-center justify-end bg-gray-900/40 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -41,7 +41,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
       }}
     >
       <div
-        className="bg-background h-full w-full max-w-2xl overflow-y-auto border-l border-gray-200 duration-300"
+        className="bg-background h-full w-full max-w-2xl overflow-y-auto border-l border-[var(--border-color-pro)] duration-300"
         style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
       >
         {/* Header */}
@@ -79,7 +79,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
               ))}
             </div>
           ) : error ? (
-            <Card className="border-red-200 bg-red-50 p-6">
+            <Card className="border-red-200 bg-red-50 p-6 dark:border-red-900/30 dark:bg-red-950/20">
               <p className="text-red-600">
                 {t('Failed to load data')}:{' '}
                 {error instanceof Error ? error.message : t('Unknown error')}

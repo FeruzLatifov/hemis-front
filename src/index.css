@@ -63,6 +63,16 @@
   --danger: #ef4444;
   --active-bg: rgba(79, 127, 231, 0.06);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --table-row-alt: #f9fafb;
+  --table-header-bg: #f8fafc;
+  --hover-bg: #f1f5f9;
+  --emerald-bg: #ecfdf5;
+  --emerald-text: #065f46;
+  --emerald-border: #a7f3d0;
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --badge-muted-bg: #f1f5f9;
+  --badge-muted-text: #475569;
 }
 
 .dark {
@@ -71,6 +81,16 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --border-color-pro: #334155;
+  --table-row-alt: #1a2538;
+  --table-header-bg: #162032;
+  --hover-bg: #263348;
+  --emerald-bg: rgba(16, 185, 129, 0.1);
+  --emerald-text: #6ee7b7;
+  --emerald-border: rgba(16, 185, 129, 0.3);
+  --input-bg: #1e293b;
+  --input-border: #334155;
+  --badge-muted-bg: #334155;
+  --badge-muted-text: #cbd5e1;
 }
 
 /* Custom Animations for Login Page */
@@ -283,6 +303,18 @@ body {
   background: #94a3b8;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 /* Hide scrollbar utility (for horizontal tab nav) */
 .hide-scrollbar {
   -ms-overflow-style: none;
@@ -463,8 +495,16 @@ body {
   color: var(--primary);
 }
 
+.dark .sidebar-menu-item-child--active {
+  background-color: rgba(79, 127, 231, 0.1);
+}
+
 .sidebar-menu-item-child--active:hover {
   background-color: #eff6ff;
+}
+
+.dark .sidebar-menu-item-child--active:hover {
+  background-color: rgba(79, 127, 231, 0.15);
 }
 
 /* Layout components */
@@ -540,6 +580,10 @@ body {
   background-color: #fef2f2;
 }
 
+.dark .dropdown-item-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
 /* Badge styles */
 .badge-danger {
   background-color: var(--danger);
@@ -567,6 +611,14 @@ body {
   color: var(--primary);
 }
 
+.dark .lang-item--active {
+  background-color: rgba(79, 127, 231, 0.1);
+}
+
 .lang-item--active:hover {
   background-color: #eff6ff;
+}
+
+.dark .lang-item--active:hover {
+  background-color: rgba(79, 127, 231, 0.15);
 }

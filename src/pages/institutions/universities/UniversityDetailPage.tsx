@@ -48,9 +48,9 @@ function Field({
   children?: React.ReactNode
 }) {
   return (
-    <div className="grid grid-cols-[180px_1fr] gap-x-4 border-b border-gray-50 py-2.5 last:border-b-0">
-      <dt className="text-sm text-gray-500">{label}</dt>
-      <dd className="text-sm font-medium text-gray-900">{children ?? value ?? '—'}</dd>
+    <div className="grid grid-cols-[180px_1fr] gap-x-4 border-b border-[var(--border-color-pro)] py-2.5 last:border-b-0">
+      <dt className="text-sm text-[var(--text-secondary)]">{label}</dt>
+      <dd className="text-sm font-medium text-[var(--text-primary)]">{children ?? value ?? '—'}</dd>
     </div>
   )
 }
@@ -61,10 +61,10 @@ function BoolField({ label, value }: { label: string; value?: boolean }) {
   return (
     <Field label={label}>
       <span
-        className={`inline-flex items-center gap-1.5 ${value ? 'text-emerald-600' : 'text-gray-400'}`}
+        className={`inline-flex items-center gap-1.5 ${value ? 'text-emerald-600' : 'text-[var(--text-secondary)]'}`}
       >
         <span
-          className={`inline-block h-2 w-2 rounded-full ${value ? 'bg-emerald-500' : 'bg-gray-300'}`}
+          className={`inline-block h-2 w-2 rounded-full ${value ? 'bg-emerald-500' : 'bg-[var(--border-color-pro)]'}`}
         />
         {value ? t('Yes') : t('No')}
       </span>
@@ -85,7 +85,7 @@ function LinkField({ label, url }: { label: string; url?: string }) {
         href={sanitized}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline"
+        className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
       >
         {url}
         <ExternalLink className="h-3.5 w-3.5" />
@@ -105,10 +105,12 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white">
-      <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-3">
-        <span className="text-gray-400">{icon}</span>
-        <h3 className="text-sm font-medium tracking-wider text-gray-500 uppercase">{title}</h3>
+    <section className="rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
+      <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-5 py-3">
+        <span className="text-[var(--text-secondary)]">{icon}</span>
+        <h3 className="text-sm font-medium tracking-wider text-[var(--text-secondary)] uppercase">
+          {title}
+        </h3>
       </div>
       <dl className="px-5 py-1">{children}</dl>
     </section>
@@ -124,7 +126,10 @@ function DetailSkeleton() {
         <Skeleton className="h-6 w-64 rounded" />
       </div>
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-gray-200 bg-white p-5">
+        <div
+          key={i}
+          className="rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-5"
+        >
           <Skeleton className="mb-4 h-5 w-40 rounded" />
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, j) => (
@@ -153,13 +158,15 @@ export default function UniversityDetailPage() {
   if (isError || !university) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/20">
           <Building2 className="h-8 w-8 text-red-400" />
         </div>
-        <p className="text-sm font-medium text-gray-900">{t('University not found')}</p>
+        <p className="text-sm font-medium text-[var(--text-primary)]">
+          {t('University not found')}
+        </p>
         <button
           onClick={() => navigate('/institutions/universities')}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]"
         >
           <ArrowLeft className="h-4 w-4" />
           {t('Back to list')}
@@ -181,14 +188,14 @@ export default function UniversityDetailPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/institutions/universities')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]"
           >
             <ArrowLeft className="h-4 w-4" />
             {t('Back')}
           </button>
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">{university.name}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-lg font-semibold text-[var(--text-primary)]">{university.name}</h1>
+            <p className="text-sm text-[var(--text-secondary)]">
               {t('Code')}: {university.code}
             </p>
           </div>
@@ -196,14 +203,14 @@ export default function UniversityDetailPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/institutions/universities/${code}/edit`)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20"
           >
             <Pencil className="h-4 w-4" />
             {t('Edit')}
           </button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3.5 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100">
+              <button className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3.5 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20">
                 <Trash2 className="h-4 w-4" />
                 {t('Delete')}
               </button>
@@ -221,7 +228,7 @@ export default function UniversityDetailPage() {
                 <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
-                  className="border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                  className="border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40"
                 >
                   {t('Delete')}
                 </AlertDialogAction>
@@ -236,12 +243,12 @@ export default function UniversityDetailPage() {
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
             university.active
-              ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
-              : 'border border-gray-200 bg-gray-50 text-gray-500'
+              ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400'
+              : 'border border-[var(--border-color-pro)] bg-[var(--badge-muted-bg)] text-[var(--badge-muted-text)]'
           }`}
         >
           <span
-            className={`inline-block h-1.5 w-1.5 rounded-full ${university.active ? 'bg-emerald-500' : 'bg-gray-400'}`}
+            className={`inline-block h-1.5 w-1.5 rounded-full ${university.active ? 'bg-emerald-500' : 'bg-[var(--border-color-pro)]'}`}
           />
           {university.active ? t('Active') : t('Inactive')}
         </span>

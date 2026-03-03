@@ -45,7 +45,7 @@ function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+    <div className="bg-muted flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -63,21 +63,23 @@ function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
 
         <CardContent className="space-y-4">
           {/* Error Message */}
-          <div className="rounded-md bg-red-50 p-3">
-            <p className="text-sm font-medium text-red-800">{i18n.t('Error details')}:</p>
-            <p className="mt-1 text-sm text-red-700">
+          <div className="rounded-md bg-red-50 p-3 dark:bg-red-950/30">
+            <p className="text-sm font-medium text-red-800 dark:text-red-300">
+              {i18n.t('Error details')}:
+            </p>
+            <p className="mt-1 text-sm text-red-700 dark:text-red-400">
               {error instanceof Error ? error.message : String(error)}
             </p>
           </div>
 
           {/* Event ID for Support */}
           {eventId && (
-            <div className="rounded-md bg-blue-50 p-3">
-              <p className="text-sm font-medium text-blue-800">
+            <div className="rounded-md bg-blue-50 p-3 dark:bg-blue-950/30">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                 {i18n.t('Event ID (for support)')}:
               </p>
-              <p className="mt-1 font-mono text-sm text-blue-700">{eventId}</p>
-              <p className="mt-2 text-xs text-blue-600">
+              <p className="mt-1 font-mono text-sm text-blue-700 dark:text-blue-400">{eventId}</p>
+              <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
                 {i18n.t('Send this ID to the support team')}
               </p>
             </div>
@@ -85,11 +87,11 @@ function ErrorFallback({ error, eventId }: ErrorFallbackProps) {
 
           {/* Development Info */}
           {import.meta.env.DEV && error instanceof Error && (
-            <details className="rounded-md bg-gray-100 p-3">
-              <summary className="cursor-pointer text-sm font-medium text-gray-700">
+            <details className="bg-muted rounded-md p-3">
+              <summary className="text-foreground cursor-pointer text-sm font-medium">
                 {i18n.t('Technical details (development only)')}
               </summary>
-              <pre className="mt-2 overflow-auto text-xs text-gray-600">{error.stack}</pre>
+              <pre className="text-muted-foreground mt-2 overflow-auto text-xs">{error.stack}</pre>
             </details>
           )}
         </CardContent>

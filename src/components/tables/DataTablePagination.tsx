@@ -62,11 +62,11 @@ export function DataTablePagination({
       {/* Left: Page size + info */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-500">{t('Per page')}:</label>
+          <label className="text-muted-foreground text-sm">{t('Per page')}:</label>
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm transition-colors focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--active-bg)] focus:outline-none"
+            className="border-border bg-background rounded-lg border px-2.5 py-1.5 text-sm transition-colors focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--active-bg)] focus:outline-none"
           >
             {pageSizeOptions.map((size) => (
               <option key={size} value={size}>
@@ -75,16 +75,16 @@ export function DataTablePagination({
             ))}
           </select>
         </div>
-        <span className="text-sm text-gray-500">
+        <span className="text-muted-foreground text-sm">
           {from}–{to} / {t('Total')}:{' '}
-          <span className="font-medium text-gray-700">{totalElements}</span>
+          <span className="text-foreground font-medium">{totalElements}</span>
         </span>
       </div>
 
       {/* Right: Page buttons */}
       <div className="flex items-center gap-1">
         <button
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+          className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(0)}
           disabled={page === 0}
         >
@@ -92,7 +92,7 @@ export function DataTablePagination({
         </button>
 
         <button
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+          className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
         >
@@ -102,7 +102,7 @@ export function DataTablePagination({
         {/* Page numbers */}
         {visiblePages.map((p, idx) =>
           p === 'ellipsis' ? (
-            <span key={`ellipsis-${idx}`} className="px-1 text-sm text-gray-400">
+            <span key={`ellipsis-${idx}`} className="text-muted-foreground px-1 text-sm">
               ...
             </span>
           ) : (
@@ -111,7 +111,7 @@ export function DataTablePagination({
               className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors ${
                 p === page
                   ? 'pointer-events-none bg-[var(--primary)] text-white shadow-sm'
-                  : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                  : 'border-border bg-background text-foreground hover:bg-muted border'
               }`}
               onClick={() => onPageChange(p)}
             >
@@ -121,7 +121,7 @@ export function DataTablePagination({
         )}
 
         <button
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+          className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
         >
@@ -129,7 +129,7 @@ export function DataTablePagination({
         </button>
 
         <button
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+          className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(totalPages - 1)}
           disabled={page >= totalPages - 1}
         >

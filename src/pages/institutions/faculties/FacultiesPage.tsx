@@ -196,20 +196,20 @@ export default function FacultiesPage() {
       <div className="space-y-3 p-4">
         {/* Card container */}
         <div
-          className="rounded-md border border-gray-200 bg-white"
+          className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)]"
           style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
         >
           {/* Toolbar */}
-          <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-2.5">
+          <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
             {/* Search */}
             <div className="relative max-w-sm flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
               <input
                 type="text"
                 placeholder={t('Search...')}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full rounded-md border border-gray-200 bg-white py-1.5 pr-3 pl-9 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--active-bg)] focus:outline-none"
+                className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] py-1.5 pr-3 pl-9 text-sm text-[var(--text-primary)] transition-colors placeholder:text-[var(--text-secondary)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--active-bg)] focus:outline-none"
               />
             </div>
 
@@ -229,17 +229,18 @@ export default function FacultiesPage() {
             <div className="flex-1" />
 
             {/* Total count */}
-            <span className="text-xs text-gray-500 tabular-nums">
-              {t('Total')}: <span className="font-semibold text-gray-700">{totalElements}</span>
+            <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+              {t('Total')}:{' '}
+              <span className="font-semibold text-[var(--text-primary)]">{totalElements}</span>
             </span>
 
-            <div className="h-5 w-px bg-gray-200" />
+            <div className="h-5 w-px bg-[var(--border-color-pro)]" />
 
             {/* Refresh */}
             <button
               onClick={handleRefresh}
               disabled={isLoading}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               {t('Refresh')}
@@ -249,7 +250,7 @@ export default function FacultiesPage() {
             <button
               onClick={handleExport}
               disabled={exportMutation.isPending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
             >
               {exportMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -269,21 +270,21 @@ export default function FacultiesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="sticky top-0 z-10">
-                <tr className="border-b border-gray-200">
-                  <th className="w-10 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500" />
-                  <th className="bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                <tr className="border-b border-[var(--border-color-pro)]">
+                  <th className="w-10 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]" />
+                  <th className="bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                     {t('University name')}
                   </th>
-                  <th className="w-32 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                  <th className="w-32 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                     {t('Code')}
                   </th>
-                  <th className="w-64 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                  <th className="w-64 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                     {t('Faculty count')}
                   </th>
-                  <th className="w-28 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                  <th className="w-28 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                     {t('Status')}
                   </th>
-                  <th className="w-24 bg-gray-50 px-3 py-2.5 text-left text-sm font-medium text-gray-500">
+                  <th className="w-24 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                     {t('Actions')}
                   </th>
                 </tr>
@@ -291,7 +292,10 @@ export default function FacultiesPage() {
               <tbody>
                 {loading ? (
                   Array.from({ length: 8 }).map((_, i) => (
-                    <tr key={`skeleton-${i}`} className={i % 2 === 1 ? 'bg-gray-50' : ''}>
+                    <tr
+                      key={`skeleton-${i}`}
+                      className={i % 2 === 1 ? 'bg-[var(--table-row-alt)]' : ''}
+                    >
                       <td className="px-3 py-2" />
                       <td className="px-3 py-2">
                         <Skeleton className="h-4 w-full rounded" />
@@ -314,10 +318,12 @@ export default function FacultiesPage() {
                   <tr>
                     <td colSpan={6} className="px-4 py-16 text-center">
                       <div className="flex flex-col items-center gap-3">
-                        <Building2 className="h-8 w-8 text-gray-400" />
+                        <Building2 className="h-8 w-8 text-[var(--text-secondary)]" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{t('No data found')}</p>
-                          <p className="mt-0.5 text-xs text-gray-500">
+                          <p className="text-sm font-medium text-[var(--text-primary)]">
+                            {t('No data found')}
+                          </p>
+                          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
                             {hasFilters
                               ? t('Try changing your search or filters')
                               : t('No faculties have been added yet')}
@@ -349,27 +355,27 @@ export default function FacultiesPage() {
                       return (
                         <tr
                           key={`group-${group.universityCode}`}
-                          className={`cursor-pointer border-b border-gray-200 transition-colors hover:bg-gray-50 ${
-                            idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'
+                          className={`cursor-pointer border-b border-[var(--border-color-pro)] transition-colors hover:bg-[var(--hover-bg)] ${
+                            idx % 2 === 1 ? 'bg-[var(--table-row-alt)]' : 'bg-[var(--card-bg)]'
                           }`}
                           onClick={() => toggleExpand(group.universityCode)}
                         >
                           <td className="px-3 py-2">
                             {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                              <ChevronDown className="h-4 w-4 text-[var(--text-secondary)]" />
                             ) : (
-                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                              <ChevronRight className="h-4 w-4 text-[var(--text-secondary)]" />
                             )}
                           </td>
-                          <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                          <td className="px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
                             {group.universityName}
                           </td>
-                          <td className="px-3 py-2 text-sm text-gray-600">
+                          <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
                             {group.universityCode}
                           </td>
                           <td className="px-3 py-2 text-sm">
                             <span className="font-medium">{group.facultyCount}</span>
-                            <span className="ml-1 text-gray-500">
+                            <span className="ml-1 text-[var(--text-secondary)]">
                               ({t('Active')}: {group.activeFacultyCount} / {t('Inactive')}:{' '}
                               {group.inactiveFacultyCount})
                             </span>
@@ -385,11 +391,15 @@ export default function FacultiesPage() {
                     return (
                       <tr
                         key={`faculty-${faculty.code}`}
-                        className="border-b border-gray-200 bg-gray-50 transition-colors hover:bg-gray-100"
+                        className="border-b border-[var(--border-color-pro)] bg-[var(--table-row-alt)] transition-colors hover:bg-[var(--hover-bg)]"
                       >
                         <td className="px-3 py-2" />
-                        <td className="px-3 py-2 pl-9 text-sm text-gray-700">{faculty.nameUz}</td>
-                        <td className="px-3 py-2 text-sm text-gray-600">{faculty.code}</td>
+                        <td className="px-3 py-2 pl-9 text-sm text-[var(--text-primary)]">
+                          {faculty.nameUz}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
+                          {faculty.code}
+                        </td>
                         <td className="px-3 py-2" />
                         <td className="px-3 py-2">
                           <Badge variant={faculty.status ? 'default' : 'secondary'}>
@@ -399,7 +409,7 @@ export default function FacultiesPage() {
                         <td className="px-3 py-2">
                           <button
                             onClick={() => setSelectedFacultyCode(faculty.code)}
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             {t('View')}
@@ -414,7 +424,7 @@ export default function FacultiesPage() {
           </div>
 
           {/* Pagination */}
-          <div className="border-t border-gray-200 px-4">
+          <div className="border-t border-[var(--border-color-pro)] px-4">
             <DataTablePagination
               page={currentPage}
               totalPages={totalPages}

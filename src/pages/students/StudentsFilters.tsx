@@ -106,7 +106,7 @@ export function StudentsFilters({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="border-b border-gray-100 bg-gray-50/80 px-4 py-2.5">
+          <div className="border-b border-[var(--border-color-pro)] bg-[var(--table-row-alt)] px-4 py-2.5">
             <div className="flex flex-wrap items-center gap-2">
               {filterConfigs.map((fc) => (
                 <CustomTagFilter
@@ -123,7 +123,7 @@ export function StudentsFilters({
               {hasActiveFilters && (
                 <button
                   onClick={onClearFilters}
-                  className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400 transition-colors hover:text-red-500"
+                  className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-[var(--text-secondary)] transition-colors hover:text-red-500"
                 >
                   <X className="h-3 w-3" />
                   {t('Clear')}
@@ -136,7 +136,7 @@ export function StudentsFilters({
 
       {/* ──── Active filter chips (visible when panel is closed) ──── */}
       {!showPanel && hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-1.5 border-b border-gray-100 px-4 py-2">
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--border-color-pro)] px-4 py-2">
           {activeFilters.map((af) => (
             <span
               key={af.key}
@@ -154,7 +154,7 @@ export function StudentsFilters({
           ))}
           <button
             onClick={onClearFilters}
-            className="text-xs text-gray-400 transition-colors hover:text-red-500"
+            className="text-xs text-[var(--text-secondary)] transition-colors hover:text-red-500"
           >
             {t('Clear')}
           </button>

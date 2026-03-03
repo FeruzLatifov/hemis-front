@@ -77,7 +77,7 @@ const TranslationRow = memo(function TranslationRow({
           className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold shadow-sm transition-all ${
             translation.isActive
               ? 'bg-green-500 text-white hover:bg-green-600'
-              : 'bg-gray-400 text-white hover:bg-gray-500'
+              : 'bg-muted-foreground text-background hover:bg-muted-foreground/80'
           }`}
         >
           {translation.isActive ? '✓' : '○'}

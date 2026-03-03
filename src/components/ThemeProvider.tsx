@@ -9,34 +9,24 @@ type ThemeProviderProps = {
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'system',
+  defaultTheme = 'light',
   storageKey = 'ui-theme',
 }: ThemeProviderProps) {
-  // ✅ SSR-safe: Get initial theme
   const getInitialTheme = (): Theme => {
     if (typeof window === 'undefined') {
-      return defaultTheme // SSR default
+      return defaultTheme
     }
-    return (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    const stored = localStorage.getItem(storageKey)
+    // Migrate legacy 'system' value to 'light'
+    if (stored === 'system') return 'light'
+    return (stored as Theme) || defaultTheme
   }
 
   const [theme, setThemeState] = useState<Theme>(getInitialTheme)
 
   useEffect(() => {
-    // ✅ Only runs on client
     const root = window.document.documentElement
-
     root.classList.remove('light', 'dark')
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-
-      root.classList.add(systemTheme)
-      return
-    }
-
     root.classList.add(theme)
   }, [theme])
 

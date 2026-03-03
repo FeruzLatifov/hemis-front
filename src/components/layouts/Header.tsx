@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher'
+import ThemeToggle from '@/components/common/ThemeToggle'
 import { useClearCache } from '@/hooks/useClearCache'
 
 interface HeaderProps {
@@ -102,6 +103,9 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 
         {/* Language Switcher */}
         <LanguageSwitcher />
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         {/* Cache Clear Button */}
         <button

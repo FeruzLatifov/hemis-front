@@ -138,7 +138,7 @@ export default function Reports() {
           <h1 className="font-display text-4xl font-bold text-[var(--primary)] dark:text-blue-400">
             {t('Reports')}
           </h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">{t('Reports subtitle')}</p>
+          <p className="mt-1 text-[var(--text-secondary)]">{t('Reports subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2">
@@ -158,7 +158,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('General reports')}
                 </p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">156</p>
@@ -172,7 +172,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Monthly reports')}
                 </p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">24</p>
@@ -186,7 +186,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Downloaded')}
                 </p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">3,456</p>
@@ -200,7 +200,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
                   {t('Last update')}
                 </p>
                 <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
@@ -240,11 +240,13 @@ export default function Reports() {
               {category.reports.map((report, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                  className="flex items-center justify-between rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-slate-900 dark:text-white">{report.name}</p>
-                    <p className="mt-0.5 text-sm text-slate-500">{report.description}</p>
+                    <p className="font-medium text-[var(--text-primary)]">{report.name}</p>
+                    <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
+                      {report.description}
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge variant="secondary" className="text-xs">

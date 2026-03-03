@@ -11,11 +11,12 @@ import i18n from '@/i18n/config'
 /**
  * Hook to fetch paginated list of universities
  */
-export function useUniversities(params: UniversitiesParams = {}) {
+export function useUniversities(params: UniversitiesParams = {}, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.universities.list(params as Record<string, unknown>),
     queryFn: ({ signal }) => universitiesApi.getUniversities(params, signal),
     placeholderData: keepPreviousData,
+    ...(options?.enabled !== undefined && { enabled: options.enabled }),
   })
 }
 

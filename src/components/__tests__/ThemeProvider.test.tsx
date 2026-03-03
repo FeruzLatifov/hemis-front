@@ -14,46 +14,14 @@ function ThemeConsumer() {
       <button data-testid="set-light" onClick={() => setTheme('light')}>
         Light
       </button>
-      <button data-testid="set-system" onClick={() => setTheme('system')}>
-        System
-      </button>
     </div>
   )
 }
 
 describe('ThemeProvider', () => {
-  let originalMatchMedia: typeof window.matchMedia
-
   beforeEach(() => {
-    // Clear localStorage and document classes before each test
     localStorage.clear()
     document.documentElement.classList.remove('light', 'dark')
-
-    // Save original matchMedia
-    originalMatchMedia = window.matchMedia
-
-    // Default matchMedia mock: prefers light
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(prefers-color-scheme: dark)' ? false : false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    })
-  })
-
-  afterEach(() => {
-    // Restore original matchMedia
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: originalMatchMedia,
-    })
   })
 
   it('renders children correctly', () => {
@@ -65,14 +33,13 @@ describe('ThemeProvider', () => {
     expect(screen.getByTestId('child')).toHaveTextContent('Hello')
   })
 
-  it('applies the default theme (system) and resolves to light class when prefers-color-scheme is light', () => {
+  it('applies the default theme (light) and adds class to documentElement', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
       </ThemeProvider>,
     )
-    expect(screen.getByTestId('theme-value')).toHaveTextContent('system')
-    // matchMedia returns false for dark, so "light" class should be applied
+    expect(screen.getByTestId('theme-value')).toHaveTextContent('light')
     expect(document.documentElement.classList.contains('light')).toBe(true)
     expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
@@ -130,8 +97,8 @@ describe('ThemeProvider', () => {
       </ThemeProvider>,
     )
 
-    // Initially system (resolves to light)
-    expect(screen.getByTestId('theme-value')).toHaveTextContent('system')
+    // Initially light
+    expect(screen.getByTestId('theme-value')).toHaveTextContent('light')
 
     // Switch to dark
     act(() => {
@@ -154,36 +121,19 @@ describe('ThemeProvider', () => {
     expect(localStorage.getItem('ui-theme')).toBe('light')
   })
 
-  it('system theme uses matchMedia to detect dark preference', () => {
-    // Mock matchMedia to return dark preference
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(prefers-color-scheme: dark)',
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    })
+  it('migrates legacy "system" value from localStorage to "light"', () => {
+    localStorage.setItem('ui-theme', 'system')
 
     render(
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider>
         <ThemeConsumer />
       </ThemeProvider>,
     )
-
-    expect(screen.getByTestId('theme-value')).toHaveTextContent('system')
-    // matchMedia returns true for dark, so "dark" class should be applied
-    expect(document.documentElement.classList.contains('dark')).toBe(true)
-    expect(document.documentElement.classList.contains('light')).toBe(false)
+    expect(screen.getByTestId('theme-value')).toHaveTextContent('light')
+    expect(document.documentElement.classList.contains('light')).toBe(true)
   })
 
   it('useTheme throws an error when used outside of ThemeProvider', () => {
-    // Suppress the React error boundary console output
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     function BadConsumer() {

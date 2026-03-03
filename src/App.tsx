@@ -28,6 +28,11 @@ const TranslationsPage = lazy(() =>
 const TranslationFormPage = lazy(() =>
   import('./pages/system/translations').then((m) => ({ default: m.TranslationFormPage })),
 )
+const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
+const UsersPage = lazy(() => import('./pages/system/users').then((m) => ({ default: m.UsersPage })))
+const UserFormPage = lazy(() =>
+  import('./pages/system/users').then((m) => ({ default: m.UserFormPage })),
+)
 const UniversitiesPage = lazy(() =>
   import('./pages/institutions/universities').then((m) => ({ default: m.UniversitiesPage })),
 )
@@ -41,6 +46,12 @@ const FacultiesPage = lazy(() =>
   import('./pages/institutions/faculties').then((m) => ({ default: m.FacultiesPage })),
 )
 const ClassifierCategoryPage = lazy(() => import('./pages/classifiers/ClassifierCategoryPage'))
+const RolesPage = lazy(() => import('./pages/system/roles').then((m) => ({ default: m.RolesPage })))
+const RoleFormPage = lazy(() =>
+  import('./pages/system/roles').then((m) => ({ default: m.RoleFormPage })),
+)
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 // Loading fallback
@@ -152,6 +163,8 @@ function App() {
               <Routes>
                 {/* Auth Routes */}
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 {/* Protected Routes */}
                 <Route
@@ -379,12 +392,73 @@ function App() {
                         </RouteErrorBoundary>
                       }
                     />
-                    <Route path="users" element={<PlaceholderPage title={t('Users')} />} />
+                    <Route
+                      path="users"
+                      element={
+                        <ProtectedRoute permission="users.view">
+                          <RouteErrorBoundary>
+                            <UsersPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="users/new"
+                      element={
+                        <ProtectedRoute permission="users.view">
+                          <RouteErrorBoundary>
+                            <UserFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="users/:id/edit"
+                      element={
+                        <ProtectedRoute permission="users.view">
+                          <RouteErrorBoundary>
+                            <UserFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="roles"
+                      element={
+                        <ProtectedRoute permission="roles.manage">
+                          <RouteErrorBoundary>
+                            <RolesPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="roles/new"
+                      element={
+                        <ProtectedRoute permission="roles.manage">
+                          <RouteErrorBoundary>
+                            <RoleFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="roles/:id/edit"
+                      element={
+                        <ProtectedRoute permission="roles.manage">
+                          <RouteErrorBoundary>
+                            <RoleFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
                     <Route
                       path="logs"
                       element={
                         <ProtectedRoute permission="audit.view">
-                          <PlaceholderPage title={t('Logs')} />
+                          <RouteErrorBoundary>
+                            <LogsPage />
+                          </RouteErrorBoundary>
                         </ProtectedRoute>
                       }
                     />

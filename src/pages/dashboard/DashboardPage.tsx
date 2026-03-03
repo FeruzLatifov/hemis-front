@@ -49,7 +49,9 @@ export default function Dashboard() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <p className="mb-2 text-lg text-red-600">{t('Failed to load data')}</p>
-          <p className="mb-4 text-sm text-slate-600">{t('Please refresh the page')}</p>
+          <p className="mb-4 text-sm text-[var(--text-secondary)]">
+            {t('Please refresh the page')}
+          </p>
           <Button
             onClick={() => refetch()}
             variant="default"
@@ -179,7 +181,7 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold text-[var(--primary)] dark:text-blue-400">
             {t('STATISTICS')}
           </h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">
+          <p className="mt-1 text-[var(--text-secondary)]">
             {t('Monitoring and analysis of higher education system of the Republic of Uzbekistan')}
           </p>
         </div>
@@ -213,10 +215,8 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <p className="mb-1 text-sm font-medium text-slate-600 dark:text-slate-400">
-                {stat.name}
-              </p>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">
+              <p className="mb-1 text-sm font-medium text-[var(--text-secondary)]">{stat.name}</p>
+              <p className="text-3xl font-bold text-[var(--text-primary)]">
                 <CountUp end={stat.value} duration={2.5} separator="," />
               </p>
             </CardContent>
@@ -239,8 +239,8 @@ export default function Dashboard() {
                   <stat.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">{stat.name}</p>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white">
+                  <p className="text-xs text-[var(--text-secondary)]">{stat.name}</p>
+                  <p className="text-xl font-bold text-[var(--text-primary)]">
                     <CountUp end={stat.value} duration={2} separator="," />
                   </p>
                 </div>
@@ -274,17 +274,17 @@ export default function Dashboard() {
                       <type.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">{type.name}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="font-medium text-[var(--text-primary)]">{type.name}</p>
+                      <p className="text-sm text-[var(--text-secondary)]">
                         <CountUp end={type.count} duration={2} separator="," /> {t('student')}
                       </p>
                     </div>
                   </div>
-                  <span className="text-lg font-bold text-slate-900 dark:text-white">
+                  <span className="text-lg font-bold text-[var(--text-primary)]">
                     {type.percent}%
                   </span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--hover-bg)]">
                   <div
                     className={`h-full ${type.color} transition-all duration-1000 ease-out`}
                     style={{ width: `${type.percent}%` }}
@@ -311,7 +311,7 @@ export default function Dashboard() {
               {topUniversities.map((uni) => (
                 <div
                   key={uni.rank}
-                  className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                  className="group flex items-center justify-between rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex flex-1 items-center gap-4">
                     <div
@@ -329,15 +329,15 @@ export default function Dashboard() {
                       {uni.rank === 1 ? <Trophy className="h-6 w-6" /> : `#${uni.rank}`}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-slate-900 transition-colors group-hover:text-[var(--primary)] dark:text-white dark:group-hover:text-blue-400">
+                      <h4 className="font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary)] dark:group-hover:text-blue-400">
                         {uni.name}
                       </h4>
                       <div className="mt-1 flex items-center gap-4">
-                        <span className="text-sm text-slate-600 dark:text-slate-400">
+                        <span className="text-sm text-[var(--text-secondary)]">
                           <Users className="mr-1 inline h-4 w-4" />
                           {uni.studentCount.toLocaleString()} {t('student')}
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-[var(--text-secondary)]">
                           {t('Grant:')} {uni.grantCount.toLocaleString()}
                         </span>
                       </div>
@@ -368,7 +368,7 @@ export default function Dashboard() {
               {recentActivities.map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
+                  className="flex items-start gap-4 rounded-lg border border-[var(--border-color-pro)] bg-[var(--table-row-alt)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div
                     className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${activity.color} bg-opacity-10`}
@@ -376,14 +376,12 @@ export default function Dashboard() {
                     <activity.icon className={`h-5 w-5 ${activity.color}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
                       {activity.action}
                     </p>
-                    <p className="truncate text-sm text-slate-600 dark:text-slate-400">
-                      {activity.name}
-                    </p>
+                    <p className="truncate text-sm text-[var(--text-secondary)]">{activity.name}</p>
                   </div>
-                  <span className="flex-shrink-0 text-xs text-slate-500">
+                  <span className="flex-shrink-0 text-xs text-[var(--text-secondary)]">
                     {activity.timeFormatted}
                   </span>
                 </div>
@@ -401,12 +399,10 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border-2 border-green-200 bg-white p-4 dark:border-green-800 dark:bg-slate-900">
+            <div className="rounded-lg border-2 border-green-200 bg-[var(--card-bg)] p-4 dark:border-green-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {t('Grant students')}
-                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">{t('Grant students')}</p>
                   <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     <CountUp
                       end={dashboardData?.overview.grantStudents || 0}
@@ -419,12 +415,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-lg border-2 border-blue-200 bg-white p-4 dark:border-blue-800 dark:bg-slate-900">
+            <div className="rounded-lg border-2 border-blue-200 bg-[var(--card-bg)] p-4 dark:border-blue-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {t('Contract students')}
-                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">{t('Contract students')}</p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     <CountUp
                       end={dashboardData?.overview.contractStudents || 0}
@@ -437,12 +431,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-lg border-2 border-blue-200 bg-white p-4 dark:border-blue-800 dark:bg-slate-900">
+            <div className="rounded-lg border-2 border-blue-200 bg-[var(--card-bg)] p-4 dark:border-blue-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {t('Scientific projects')}
-                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">{t('Scientific projects')}</p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     <CountUp
                       end={dashboardData?.overview.totalProjects || 0}
@@ -455,10 +447,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-lg border-2 border-blue-200 bg-white p-4 dark:border-blue-800 dark:bg-slate-900">
+            <div className="rounded-lg border-2 border-blue-200 bg-[var(--card-bg)] p-4 dark:border-blue-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {t('Scientific publications')}
                   </p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">

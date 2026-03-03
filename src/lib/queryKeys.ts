@@ -67,6 +67,21 @@ export const queryKeys = {
     directionsSummary: ['students', 'directionsSummary'] as const,
   },
 
+  users: {
+    all: ['users'] as const,
+    list: (filters?: Record<string, unknown>) => ['users', 'list', filters] as const,
+    byId: (id: string) => ['users', id] as const,
+    roles: ['users', 'roles'] as const,
+    rolePermissions: (id: string) => ['users', 'roles', id, 'permissions'] as const,
+  },
+
+  roles: {
+    all: ['roles'] as const,
+    list: (filters?: Record<string, unknown>) => ['roles', 'list', filters] as const,
+    byId: (id: string) => ['roles', id] as const,
+    permissions: ['roles', 'permissions'] as const,
+  },
+
   classifiers: {
     all: ['classifiers'] as const,
     categories: ['classifiers', 'categories'] as const,

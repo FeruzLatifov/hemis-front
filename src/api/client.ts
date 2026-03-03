@@ -9,6 +9,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { captureError, addBreadcrumb } from '@/lib/sentry'
 import { toast } from 'sonner'
 import { env } from '@/env'
+import i18n from '@/i18n/config'
 
 /**
  * Standard API error response structure from backend
@@ -218,8 +219,8 @@ apiClient.interceptors.response.use(
         },
       })
 
-      toast.warning(errorMessage || "Juda ko'p so'rov yuborildi", {
-        description: `${waitTime} soniyadan keyin qayta urinib ko'ring`,
+      toast.warning(errorMessage || i18n.t('Too many requests'), {
+        description: i18n.t('Please try again after {{seconds}} seconds', { seconds: waitTime }),
         duration: 8000,
       })
     }
@@ -236,8 +237,8 @@ apiClient.interceptors.response.use(
         },
       })
 
-      toast.error(errorMessage || "Ruxsat yo'q", {
-        description: "Bu amalni bajarish uchun ruxsatingiz yo'q",
+      toast.error(errorMessage || i18n.t('Access denied'), {
+        description: i18n.t('You do not have permission to perform this action'),
         duration: 5000,
       })
     }

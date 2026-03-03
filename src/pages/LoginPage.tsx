@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
@@ -426,6 +426,12 @@ const Login = () => {
                   </button>
                 </div>
                 {passwordError && <p className="mt-1.5 text-xs text-red-500">{passwordError}</p>}
+              </div>
+
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                  {t('Forgot password?')}
+                </Link>
               </div>
 
               <div className="pt-1">

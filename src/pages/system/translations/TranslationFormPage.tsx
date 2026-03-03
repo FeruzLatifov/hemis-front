@@ -205,7 +205,7 @@ export default function TranslationFormPage() {
       <div className="p-6">
         <div className="py-12 text-center">
           <div className="mb-3 inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-          <p className="font-medium text-gray-600">{t('Loading...')}</p>
+          <p className="text-muted-foreground font-medium">{t('Loading...')}</p>
         </div>
       </div>
     )
@@ -216,24 +216,24 @@ export default function TranslationFormPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="mb-2 text-2xl font-bold">{t('Edit translation')}</h1>
-        <p className="text-gray-600">{t('Update existing translation')}</p>
+        <p className="text-muted-foreground">{t('Update existing translation')}</p>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-400">
           <strong>{t('Error')}:</strong> {error}
         </div>
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="rounded-lg bg-white shadow-lg">
+      <form onSubmit={handleSubmit} className="bg-card rounded-lg shadow-lg">
         <div className="space-y-6 p-6">
           {/* Category & Key Row */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Category */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="text-foreground mb-2 block text-sm font-medium">
                 {t('Category')} <span className="text-red-500">*</span>
               </label>
               <input
@@ -242,34 +242,34 @@ export default function TranslationFormPage() {
                 readOnly
                 aria-readonly="true"
                 placeholder="menu, button, label, error..."
-                className="w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-50 px-4 py-2"
+                className="border-border bg-muted w-full cursor-not-allowed rounded-lg border px-4 py-2"
                 disabled
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {t('Example: menu, button, label, error, validation')}
               </p>
             </div>
 
             {/* Message Key */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="text-foreground mb-2 block text-sm font-medium">
                 {t('Key')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.messageKey}
                 placeholder="Dashboard, Save, Students..."
-                className="w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-50 px-4 py-2"
+                className="border-border bg-muted w-full cursor-not-allowed rounded-lg border px-4 py-2"
                 readOnly
                 aria-readonly="true"
                 disabled
               />
-              <p className="mt-1 text-xs text-gray-500">⚠️ {t('Key cannot be changed')}</p>
+              <p className="text-muted-foreground mt-1 text-xs">⚠️ {t('Key cannot be changed')}</p>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="border-t border-gray-200"></div>
+          <div className="border-border border-t"></div>
 
           {/* Translations Section */}
           <div>
@@ -277,7 +277,7 @@ export default function TranslationFormPage() {
 
             {/* Uzbek (Latin) - Required */}
             <div className="mb-6">
-              <label htmlFor="messageUz" className="mb-2 block text-sm font-medium text-gray-700">
+              <label htmlFor="messageUz" className="text-foreground mb-2 block text-sm font-medium">
                 🇺🇿 O'zbek (lotin) <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -289,7 +289,7 @@ export default function TranslationFormPage() {
                 className={`w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
                   errors.messageUz
                     ? 'border-red-300 focus:ring-red-500'
-                    : 'border-gray-300 focus:ring-blue-500'
+                    : 'border-border focus:ring-blue-500'
                 }`}
                 disabled={loading}
               />
@@ -297,13 +297,10 @@ export default function TranslationFormPage() {
 
               {/* Similar translations warning */}
               {similarTranslations.length > 0 && (
-                <div
-                  className="mt-3 rounded-lg border p-3"
-                  style={{ backgroundColor: '#FFFBEB', borderColor: '#F59E0B' }}
-                >
+                <div className="mt-3 rounded-lg border border-amber-400 bg-amber-50 p-3 dark:border-amber-600 dark:bg-amber-950/20">
                   <div className="mb-2 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                    <span className="text-sm font-semibold text-yellow-800">
+                    <span className="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
                       {t('Similar translations found')} ({similarTranslations.length})
                     </span>
                   </div>
@@ -316,19 +313,21 @@ export default function TranslationFormPage() {
                         >
                           {item.category}
                         </span>
-                        <span className="font-mono font-medium text-yellow-900">
+                        <span className="font-mono font-medium text-yellow-900 dark:text-yellow-200">
                           {item.messageKey}
                         </span>
-                        <span className="text-yellow-700">= "{item.message}"</span>
+                        <span className="text-yellow-700 dark:text-yellow-400">
+                          = "{item.message}"
+                        </span>
                       </div>
                     ))}
                     {similarTranslations.length > 5 && (
-                      <p className="text-xs text-yellow-700">
+                      <p className="text-xs text-yellow-700 dark:text-yellow-400">
                         ...{t('and more')} {similarTranslations.length - 5}
                       </p>
                     )}
                   </div>
-                  <p className="mt-2 text-xs text-yellow-700">
+                  <p className="mt-2 text-xs text-yellow-700 dark:text-yellow-400">
                     {t('If existing translation fits your needs, use it instead of adding new')}
                   </p>
                 </div>
@@ -337,7 +336,7 @@ export default function TranslationFormPage() {
 
             {/* Uzbek (Cyrillic) - Optional */}
             <div className="mb-6">
-              <label htmlFor="messageOz" className="mb-2 block text-sm font-medium text-gray-700">
+              <label htmlFor="messageOz" className="text-foreground mb-2 block text-sm font-medium">
                 🇺🇿 Ўзбек (кирилл)
               </label>
               <textarea
@@ -346,14 +345,14 @@ export default function TranslationFormPage() {
                 onChange={(e) => handleChange('messageOz', e.target.value)}
                 placeholder={t('Cyrillic text (oz-UZ)')}
                 rows={3}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="border-border w-full rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 disabled={loading}
               />
             </div>
 
             {/* Russian - Optional */}
             <div className="mb-6">
-              <label htmlFor="messageRu" className="mb-2 block text-sm font-medium text-gray-700">
+              <label htmlFor="messageRu" className="text-foreground mb-2 block text-sm font-medium">
                 🇷🇺 Русский
               </label>
               <textarea
@@ -362,14 +361,14 @@ export default function TranslationFormPage() {
                 onChange={(e) => handleChange('messageRu', e.target.value)}
                 placeholder={t('Russian translation (ru-RU)')}
                 rows={3}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="border-border w-full rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 disabled={loading}
               />
             </div>
 
             {/* English - Optional */}
             <div className="mb-6">
-              <label htmlFor="messageEn" className="mb-2 block text-sm font-medium text-gray-700">
+              <label htmlFor="messageEn" className="text-foreground mb-2 block text-sm font-medium">
                 🇬🇧 English
               </label>
               <textarea
@@ -378,14 +377,14 @@ export default function TranslationFormPage() {
                 onChange={(e) => handleChange('messageEn', e.target.value)}
                 placeholder="English translation (en-US)"
                 rows={3}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="border-border w-full rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 disabled={loading}
               />
             </div>
           </div>
 
           {/* Divider */}
-          <div className="border-t border-gray-200"></div>
+          <div className="border-border border-t"></div>
 
           {/* Active Status */}
           <div>
@@ -394,25 +393,25 @@ export default function TranslationFormPage() {
                 type="checkbox"
                 checked={formData.active}
                 onChange={(e) => handleChange('active', e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="border-border h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
                 disabled={loading}
               />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-foreground text-sm font-medium">
                 {t('Active (ready for use)')}
               </span>
             </label>
-            <p className="mt-1 ml-8 text-xs text-gray-500">
+            <p className="text-muted-foreground mt-1 ml-8 text-xs">
               {t('If inactive, frontend will not see this translation')}
             </p>
           </div>
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div className="border-border bg-muted flex justify-end space-x-3 rounded-b-lg border-t px-6 py-4">
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-lg border border-gray-300 px-6 py-2 text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 focus:outline-none"
+            className="border-border text-foreground hover:bg-muted rounded-lg border px-6 py-2 focus:ring-2 focus:ring-gray-500 focus:outline-none"
             disabled={loading}
           >
             {t('Cancel')}
@@ -428,9 +427,11 @@ export default function TranslationFormPage() {
       </form>
 
       {/* Help Section */}
-      <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-        <h3 className="mb-2 text-sm font-semibold text-blue-900">{t('Help section')}</h3>
-        <ul className="space-y-1 text-sm text-blue-800">
+      <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-950/30">
+        <h3 className="mb-2 text-sm font-semibold text-blue-900 dark:text-blue-300">
+          {t('Help section')}
+        </h3>
+        <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-400">
           <li>
             • <strong>{t('Category')}:</strong>{' '}
             {t('For grouping translations (menu, button, label...)')}

@@ -37,16 +37,16 @@ export function SearchScopeSelector({
   const currentScope = scopes.find((s) => s.value === value)
 
   return (
-    <div className="flex items-center gap-0 overflow-hidden rounded-lg border border-gray-300 bg-white">
+    <div className="border-border bg-background flex items-center gap-0 overflow-hidden rounded-lg border">
       {/* Scope Selector */}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-[140px] rounded-none border-0 border-r border-gray-300 bg-white focus:ring-0 focus:ring-offset-0">
+        <SelectTrigger className="border-border bg-background w-[140px] rounded-none border-0 border-r focus:ring-0 focus:ring-offset-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600">{t('Search')}:</span>
+            <span className="text-muted-foreground text-xs font-medium">{t('Search')}:</span>
             <SelectValue />
           </div>
         </SelectTrigger>
-        <SelectContent className="!border-gray-300 !bg-white">
+        <SelectContent className="!border-border !bg-background">
           {scopes.map((scope) => (
             <SelectItem key={scope.value} value={scope.value}>
               <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export function SearchScopeSelector({
 
       {/* Search Input */}
       <div className="relative flex-1">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <input
           type="text"
           value={searchValue}
@@ -71,12 +71,12 @@ export function SearchScopeSelector({
             }
           }}
           placeholder={t('Search by {{field}}...', { field: currentScope?.label || t('All') })}
-          className="w-full border-0 bg-transparent py-2.5 pr-10 pl-10 text-sm placeholder:text-gray-400 focus:outline-none"
+          className="placeholder:text-muted-foreground w-full border-0 bg-transparent py-2.5 pr-10 pl-10 text-sm focus:outline-none"
         />
         {searchValue && (
           <button
             onClick={onClear}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+            className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

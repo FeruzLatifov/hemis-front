@@ -59,8 +59,11 @@ const ROUTE_LABELS: Record<string, string> = {
   universities: 'Universities',
   reports: 'Reports',
   system: 'System',
+  users: 'Users',
+  roles: 'Roles',
   translation: 'Translations',
   create: 'Create',
+  new: 'Create',
   edit: 'Edit',
 }
 

@@ -30,13 +30,13 @@ export function RegenerateFilesDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-white dark:bg-slate-900">
+      <DialogContent className="max-w-md bg-[var(--card-bg)]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-[var(--text-primary)]">
             <FileCode className="h-6 w-6" style={{ color: 'var(--primary)' }} />
             {t('Regenerate properties files')}
           </DialogTitle>
-          <DialogDescription className="mt-3 text-base leading-relaxed text-gray-600 dark:text-gray-300">
+          <DialogDescription className="mt-3 text-base leading-relaxed text-[var(--text-secondary)]">
             {t(
               'Do you want to regenerate properties files for all languages? This may take a few seconds.',
             )}
@@ -45,7 +45,7 @@ export function RegenerateFilesDialog({
         <DialogFooter className="mt-6 gap-3">
           <button
             onClick={() => onOpenChange(false)}
-            className="rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50"
+            className="rounded-lg border-2 border-[var(--border-color-pro)] px-6 py-3 font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--hover-bg)]"
           >
             {t('Cancel')}
           </button>

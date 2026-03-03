@@ -216,14 +216,11 @@ export default function ClassifierCategoryPage() {
   return (
     <div className="flex h-full flex-col p-4">
       {/* Top — classifier tabs (horizontal scrollable) */}
-      <div className="mb-4 rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <div className="mb-4 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
         <div className="flex flex-wrap gap-1 p-1.5">
           {isLoadingClassifiers ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-8 w-32 animate-pulse rounded-md bg-gray-100 dark:bg-gray-700"
-              />
+              <div key={i} className="h-8 w-32 animate-pulse rounded-md bg-[var(--hover-bg)]" />
             ))
           ) : classifiers && classifiers.length > 0 ? (
             classifiers.map((cls: ClassifierMetadata) => (
@@ -233,7 +230,7 @@ export default function ClassifierCategoryPage() {
                 className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
                   selectedApiKey === cls.apiKey
                     ? 'bg-blue-600 font-medium text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'
                 }`}
               >
                 <span className="whitespace-nowrap">{cls.titleUz}</span>
@@ -241,7 +238,7 @@ export default function ClassifierCategoryPage() {
                   className={`rounded-full px-1.5 py-0.5 text-xs ${
                     selectedApiKey === cls.apiKey
                       ? 'bg-blue-500 text-blue-100'
-                      : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                      : 'bg-[var(--hover-bg)] text-[var(--text-secondary)]'
                   }`}
                 >
                   {cls.itemCount}
@@ -249,7 +246,7 @@ export default function ClassifierCategoryPage() {
               </button>
             ))
           ) : (
-            <p className="px-3 py-2 text-sm text-gray-400">{t('No data found')}</p>
+            <p className="px-3 py-2 text-sm text-[var(--text-secondary)]">{t('No data found')}</p>
           )}
         </div>
       </div>
@@ -260,10 +257,10 @@ export default function ClassifierCategoryPage() {
           {/* Header */}
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                 {selectedClassifier.titleUz}
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--text-secondary)]">
                 {selectedClassifier.tableName}
                 {selectedClassifier.hierarchical && (
                   <span className="ml-2 rounded bg-purple-50 px-1.5 py-0.5 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
@@ -271,7 +268,7 @@ export default function ClassifierCategoryPage() {
                   </span>
                 )}
                 {!selectedClassifier.editable && (
-                  <span className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-gray-500 dark:bg-gray-700">
+                  <span className="ml-2 rounded bg-[var(--badge-muted-bg)] px-1.5 py-0.5 text-[var(--badge-muted-text)]">
                     {t('Read only')}
                   </span>
                 )}
@@ -280,13 +277,13 @@ export default function ClassifierCategoryPage() {
             <div className="flex items-center gap-2">
               {/* Search */}
               <div className="relative">
-                <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
                 <input
                   type="text"
                   placeholder={t('Search...')}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="h-9 w-56 rounded-lg border border-gray-200 bg-white pr-3 pl-8 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                  className="h-9 w-56 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] pr-3 pl-8 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
               {/* Add button */}
@@ -317,53 +314,53 @@ export default function ClassifierCategoryPage() {
               </DialogHeader>
               <div className="grid gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                     {t('Code')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     value={createForm.code}
                     onChange={(e) => setCreateForm((p) => ({ ...p, code: e.target.value }))}
                     placeholder={t('Code')}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                    className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                     {t('Name')}
                   </label>
                   <input
                     value={createForm.name}
                     onChange={(e) => setCreateForm((p) => ({ ...p, name: e.target.value }))}
                     placeholder={t('Name')}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                    className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                       {t('Name (Russian)')}
                     </label>
                     <input
                       value={createForm.nameRu}
                       onChange={(e) => setCreateForm((p) => ({ ...p, nameRu: e.target.value }))}
                       placeholder={t('Name (Russian)')}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                       {t('Name (English)')}
                     </label>
                     <input
                       value={createForm.nameEn}
                       onChange={(e) => setCreateForm((p) => ({ ...p, nameEn: e.target.value }))}
                       placeholder={t('Name (English)')}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                   </div>
                 </div>
-                <div className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2.5 dark:border-gray-600">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="flex items-center justify-between rounded-md border border-[var(--border-color-pro)] px-3 py-2.5">
+                  <label className="text-sm font-medium text-[var(--text-primary)]">
                     {t('Status')}
                   </label>
                   <button
@@ -372,7 +369,7 @@ export default function ClassifierCategoryPage() {
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       createForm.active
                         ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                        : 'bg-[var(--hover-bg)] text-[var(--text-secondary)]'
                     }`}
                   >
                     {createForm.active ? t('Active') : t('Inactive')}
@@ -382,7 +379,7 @@ export default function ClassifierCategoryPage() {
               <DialogFooter>
                 <button
                   onClick={() => setShowCreateForm(false)}
-                  className="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex h-9 items-center rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
                 >
                   {t('Cancel')}
                 </button>
@@ -418,52 +415,52 @@ export default function ClassifierCategoryPage() {
               </DialogHeader>
               <div className="grid gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                     {t('Code')}
                   </label>
                   <input
                     value={editingItem?.code ?? ''}
                     disabled
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                    className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--table-row-alt)] px-3 py-2 text-sm text-[var(--text-secondary)]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                     {t('Name')}
                   </label>
                   <input
                     value={editForm.name}
                     onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
                     placeholder={t('Name')}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                    className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                       {t('Name (Russian)')}
                     </label>
                     <input
                       value={editForm.nameRu}
                       onChange={(e) => setEditForm((p) => ({ ...p, nameRu: e.target.value }))}
                       placeholder={t('Name (Russian)')}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
                       {t('Name (English)')}
                     </label>
                     <input
                       value={editForm.nameEn}
                       onChange={(e) => setEditForm((p) => ({ ...p, nameEn: e.target.value }))}
                       placeholder={t('Name (English)')}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                      className="w-full rounded-md border border-[var(--border-color-pro)] bg-[var(--input-bg)] px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     />
                   </div>
                 </div>
-                <div className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2.5 dark:border-gray-600">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="flex items-center justify-between rounded-md border border-[var(--border-color-pro)] px-3 py-2.5">
+                  <label className="text-sm font-medium text-[var(--text-primary)]">
                     {t('Status')}
                   </label>
                   <button
@@ -472,7 +469,7 @@ export default function ClassifierCategoryPage() {
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       editForm.active
                         ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                        : 'bg-[var(--hover-bg)] text-[var(--text-secondary)]'
                     }`}
                   >
                     {editForm.active ? t('Active') : t('Inactive')}
@@ -482,7 +479,7 @@ export default function ClassifierCategoryPage() {
               <DialogFooter>
                 <button
                   onClick={() => setEditingItem(null)}
-                  className="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex h-9 items-center rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
                 >
                   {t('Cancel')}
                 </button>
@@ -503,71 +500,74 @@ export default function ClassifierCategoryPage() {
           </Dialog>
 
           {/* Table */}
-          <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+          <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
             <table className="w-full">
               <thead className="sticky top-0 z-10">
-                <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
-                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                <tr className="border-b border-[var(--border-color-pro)] bg-[var(--table-header-bg)]">
+                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Code')}
                   </th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Name')}
                   </th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Name (Russian)')}
                   </th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Name (English)')}
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="px-3 py-2.5 text-center text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Version')}
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="px-3 py-2.5 text-center text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Status')}
                   </th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="px-3 py-2.5 text-left text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                     {t('Updated at')}
                   </th>
                   {selectedClassifier.editable && (
-                    <th className="w-20 px-3 py-2.5 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="w-20 px-3 py-2.5 text-right text-xs font-medium tracking-wider text-[var(--text-secondary)] uppercase">
                       {t('Actions')}
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody className="divide-y divide-[var(--border-color-pro)]">
                 {isLoadingItems ? (
                   Array.from({ length: Math.min(pageSize, 10) }).map((_, i) => (
                     <tr key={i}>
                       {Array.from({ length: colCount }).map((_, j) => (
                         <td key={j} className="px-3 py-2.5">
-                          <div className="h-4 w-full max-w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                          <div className="h-4 w-full max-w-24 animate-pulse rounded bg-[var(--border-color-pro)]" />
                         </td>
                       ))}
                     </tr>
                   ))
                 ) : items.length === 0 ? (
                   <tr>
-                    <td colSpan={colCount} className="px-4 py-12 text-center text-sm text-gray-400">
+                    <td
+                      colSpan={colCount}
+                      className="px-4 py-12 text-center text-sm text-[var(--text-secondary)]"
+                    >
                       {t('No data found')}
                     </td>
                   </tr>
                 ) : (
                   items.map((item) => (
-                    <tr key={item.code} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                      <td className="px-3 py-2 font-mono text-sm text-gray-900 dark:text-gray-200">
+                    <tr key={item.code} className="hover:bg-[var(--hover-bg)]">
+                      <td className="px-3 py-2 font-mono text-sm text-[var(--text-primary)]">
                         {item.code}
                       </td>
-                      <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-200">
+                      <td className="px-3 py-2 text-sm text-[var(--text-primary)]">
                         {item.name || '—'}
                       </td>
-                      <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                      <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
                         {item.nameRu || '—'}
                       </td>
-                      <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                      <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
                         {item.nameEn || '—'}
                       </td>
-                      <td className="px-3 py-2 text-center text-sm text-gray-500">
+                      <td className="px-3 py-2 text-center text-sm text-[var(--text-secondary)]">
                         {item.version ?? '—'}
                       </td>
                       <td className="px-3 py-2 text-center">
@@ -575,13 +575,13 @@ export default function ClassifierCategoryPage() {
                           className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             item.active !== false
                               ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                              : 'bg-[var(--hover-bg)] text-[var(--text-secondary)]'
                           }`}
                         >
                           {item.active !== false ? t('Active') : t('Inactive')}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-xs whitespace-nowrap text-gray-500">
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-[var(--text-secondary)]">
                         {formatDateTime(item.updateTs || item.createTs)}
                       </td>
                       {selectedClassifier.editable && (
@@ -589,13 +589,13 @@ export default function ClassifierCategoryPage() {
                           <div className="flex justify-end gap-0.5">
                             <button
                               onClick={() => startEdit(item)}
-                              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700"
+                              className="rounded p-1 text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-blue-600"
                             >
                               <Pencil className="h-3.5 w-3.5" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(item.code)}
-                              className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
+                              className="rounded p-1 text-[var(--text-secondary)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -661,7 +661,7 @@ export default function ClassifierCategoryPage() {
         </div>
       ) : (
         <div className="flex h-64 items-center justify-center">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-secondary)]">
             {isLoadingClassifiers ? t('Loading...') : t('No data found')}
           </p>
         </div>

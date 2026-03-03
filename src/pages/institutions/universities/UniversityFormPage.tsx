@@ -110,10 +110,10 @@ function FormSection({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6">
+    <section className="rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-6">
       <div className="mb-5 flex items-center gap-2">
-        <span className="text-gray-400">{icon}</span>
-        <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+        <span className="text-[var(--text-secondary)]">{icon}</span>
+        <h2 className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
       </div>
       {children}
     </section>
@@ -126,7 +126,10 @@ function FormSkeleton() {
     <div className="mx-auto max-w-4xl space-y-4 p-4">
       <Skeleton className="h-8 w-48 rounded" />
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-gray-200 bg-white p-6">
+        <div
+          key={i}
+          className="rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-6"
+        >
           <Skeleton className="mb-4 h-5 w-36 rounded" />
           <div className="grid grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, j) => (
@@ -253,12 +256,12 @@ export default function UniversityFormPage() {
       <div className="mb-4 flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]"
         >
           <ArrowLeft className="h-4 w-4" />
           {t('Back')}
         </button>
-        <h1 className="text-lg font-semibold text-gray-900">
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
           {isEdit ? t('Edit HEI') : t('Add new HEI')}
         </h1>
       </div>
@@ -543,7 +546,7 @@ export default function UniversityFormPage() {
             ).map((setting) => (
               <div
                 key={setting.key}
-                className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-3 transition-colors hover:bg-gray-50"
+                className="flex items-center gap-3 rounded-lg border border-[var(--border-color-pro)] bg-[var(--table-row-alt)] p-3 transition-colors hover:bg-[var(--hover-bg)]"
               >
                 <Checkbox
                   id={setting.key}
@@ -552,7 +555,7 @@ export default function UniversityFormPage() {
                 />
                 <Label
                   htmlFor={setting.key}
-                  className="cursor-pointer text-sm font-medium text-gray-700"
+                  className="cursor-pointer text-sm font-medium text-[var(--text-primary)]"
                 >
                   {setting.label}
                 </Label>
@@ -586,19 +589,19 @@ export default function UniversityFormPage() {
         </FormSection>
 
         {/* Sticky Footer */}
-        <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-gray-200 bg-white px-6 py-4">
+        <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-[var(--border-color-pro)] bg-[var(--card-bg)] px-6 py-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
             disabled={isSaving}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
+            className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
           >
             {t('Cancel')}
           </button>
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-5 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-5 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50 dark:border-blue-900/30 dark:bg-blue-950/20"
           >
             {isSaving ? (
               <>

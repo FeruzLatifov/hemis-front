@@ -23,16 +23,16 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
     <Popover>
       <PopoverTrigger asChild>
         <button
-          className="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 transition-colors hover:bg-gray-50"
+          className="border-border bg-background text-foreground hover:bg-muted rounded-lg border p-2 transition-colors"
           title={t('Column settings')}
         >
           <Settings2 className="h-4 w-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="border-b border-gray-200 bg-gray-50 p-4">
-          <h4 className="text-sm font-semibold text-gray-900">{t('Column settings')}</h4>
-          <p className="mt-1 text-xs text-gray-600">
+        <div className="border-border bg-muted border-b p-4">
+          <h4 className="text-foreground text-sm font-semibold">{t('Column settings')}</h4>
+          <p className="text-muted-foreground mt-1 text-xs">
             {t('Shown')}: <span className="font-medium">{visibleCount}</span> / {columns.length}
           </p>
         </div>
@@ -42,7 +42,7 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
             {columns.map((column) => (
               <label
                 key={column.id}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-gray-50 ${
+                className={`hover:bg-muted flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                   !column.canHide ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 }`}
               >
@@ -52,9 +52,9 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
                   disabled={!column.canHide}
                   className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
                 />
-                <span className="flex-1 text-sm text-gray-700">{column.label}</span>
+                <span className="text-foreground flex-1 text-sm">{column.label}</span>
                 {!column.canHide && (
-                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                  <span className="bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs">
                     {t('Required')}
                   </span>
                 )}
@@ -63,7 +63,7 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
           </div>
         </div>
 
-        <div className="border-t border-gray-200 bg-gray-50 p-3">
+        <div className="border-border bg-muted border-t p-3">
           <button
             onClick={() => {
               columns.forEach((col) => {
@@ -72,7 +72,7 @@ export function ColumnSettingsPopover({ columns, onToggle }: ColumnSettingsPopov
                 }
               })
             }}
-            className="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+            className="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
           >
             {t('Show all')}
           </button>

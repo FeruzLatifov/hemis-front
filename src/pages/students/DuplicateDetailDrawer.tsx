@@ -70,7 +70,7 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
     <div
       role="button"
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex items-center justify-end bg-gray-900/40"
+      className="fixed inset-0 z-50 flex items-center justify-end bg-black/40"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -79,16 +79,16 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
       }}
     >
       <div
-        className="flex h-full w-full max-w-2xl flex-col border-l border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+        className="flex h-full w-full max-w-2xl flex-col border-l border-[var(--border-color-pro)] bg-[var(--card-bg)]"
         style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-slate-800">
+        <div className="flex items-center justify-between border-b border-[var(--border-color-pro)] px-6 py-4">
           <div>
-            <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-white">
+            <h2 className="font-display text-lg font-semibold text-[var(--text-primary)]">
               {t('Duplicate analysis')}
             </h2>
-            <p className="font-mono text-sm text-slate-500">PINFL: {pinfl}</p>
+            <p className="font-mono text-sm text-[var(--text-secondary)]">PINFL: {pinfl}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
@@ -107,10 +107,10 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
             <div className="space-y-5">
               {/* Student name */}
               <div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                <h3 className="text-xl font-semibold text-[var(--text-primary)]">
                   {detail.fullName}
                 </h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[var(--text-secondary)]">
                   {detail.count} {t('records')}, {detail.universityCount} {t('universities')},{' '}
                   {detail.activeCount} {t('active')}
                 </p>
@@ -125,7 +125,7 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
                       <p className={`font-medium ${reasonStyle.text}`}>
                         {detail.reasonDescription}
                       </p>
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
                         {detail.recommendation}
                       </p>
                     </div>
@@ -135,7 +135,7 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
 
               {/* Student cards */}
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-slate-500 uppercase dark:text-slate-400">
+                <h4 className="text-sm font-medium text-[var(--text-secondary)] uppercase">
                   {t('Enrollment records')}
                 </h4>
                 {detail.students.map((student) => (
@@ -145,14 +145,14 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 py-16">
-              <AlertTriangle className="h-12 w-12 text-slate-300" />
-              <p className="text-sm text-slate-500">{t('No data found')}</p>
+              <AlertTriangle className="h-12 w-12 text-[var(--border-color-pro)]" />
+              <p className="text-sm text-[var(--text-secondary)]">{t('No data found')}</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 px-6 py-3 dark:border-slate-800">
+        <div className="border-t border-[var(--border-color-pro)] px-6 py-3">
           <Button variant="outline" onClick={onClose} className="w-full">
             {t('Close')}
           </Button>
@@ -177,20 +177,20 @@ function StudentCard({
 
   return (
     <Card
-      className={`border ${isActive ? 'border-green-200 dark:border-green-900/30' : 'border-gray-200 dark:border-slate-800'}`}
+      className={`border ${isActive ? 'border-green-200 dark:border-green-900/30' : 'border-[var(--border-color-pro)]'}`}
     >
       <CardContent className="p-4">
         {/* University + status */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="font-medium text-slate-900 dark:text-white">{student.universityName}</p>
-            <p className="mt-0.5 font-mono text-xs text-slate-400">{student.code}</p>
+            <p className="font-medium text-[var(--text-primary)]">{student.universityName}</p>
+            <p className="mt-0.5 font-mono text-xs text-[var(--text-secondary)]">{student.code}</p>
           </div>
           <Badge
             className={
               isActive
                 ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400'
-                : 'bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-400'
+                : 'bg-[var(--badge-muted-bg)] text-[var(--badge-muted-text)]'
             }
           >
             {isActive ? (
@@ -225,8 +225,8 @@ function DetailItem({ label, value }: { label: string; value: string }) {
   if (!value) return null
   return (
     <div>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="text-slate-700 dark:text-slate-300">{value}</p>
+      <p className="text-xs text-[var(--text-secondary)]">{label}</p>
+      <p className="text-[var(--text-primary)]">{value}</p>
     </div>
   )
 }
