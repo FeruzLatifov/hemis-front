@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hemis-front.fullname" . }}-config
+  labels:
+    {{- include "hemis-front.labels" . | nindent 4 }}
+data:
+  VITE_API_URL: {{ .Values.config.apiUrl | quote }}
+  VITE_APP_NAME: {{ .Values.config.appName | quote }}
+  VITE_SENTRY_ENABLED: {{ .Values.config.sentryEnabled | quote }}
+  VITE_SENTRY_DSN: {{ .Values.config.sentryDsn | quote }}
+  VITE_SENTRY_ENVIRONMENT: {{ .Values.config.sentryEnvironment | quote }}

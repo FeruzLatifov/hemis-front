@@ -87,7 +87,7 @@ const editSchema = z.object({
 
 type CreateFormData = z.infer<typeof createSchema>
 type EditFormData = z.infer<typeof editSchema>
-type FormData = CreateFormData | EditFormData
+type FormData = Partial<CreateFormData> & EditFormData
 
 // ─── Change password schema ──────────────────────────────────────────────────
 const changePasswordSchema = z
@@ -693,9 +693,9 @@ export default function UserFormPage() {
                 <FormSection title={t('Account status')} icon={<Power className="h-4 w-4" />}>
                   <label className="flex cursor-pointer items-center gap-2.5 rounded-md px-1 py-1">
                     <Checkbox
-                      checked={watch('enabled' as keyof FormData) as boolean}
+                      checked={!!watch('enabled' as keyof FormData)}
                       onCheckedChange={(checked) =>
-                        setValue('enabled' as keyof FormData, !!checked, {
+                        setValue('enabled' as keyof FormData, !!checked as never, {
                           shouldValidate: true,
                         })
                       }

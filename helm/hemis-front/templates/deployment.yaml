@@ -20,6 +20,8 @@ spec:
     metadata:
       labels:
         {{- include "hemis-front.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -45,6 +47,9 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "hemis-front.fullname" . }}-config
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}

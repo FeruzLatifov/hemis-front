@@ -45,11 +45,13 @@ vi.mock('react-router-dom', async () => {
 const mockMenuItems = [
   {
     id: 'menu-1',
-    labelUz: 'Dashboard',
-    labelOz: 'Dashboard',
-    labelRu: 'Dashboard',
-    labelEn: 'Dashboard',
     label: 'Dashboard',
+    labels: {
+      'uz-UZ': 'Dashboard',
+      'oz-UZ': 'Dashboard',
+      'ru-RU': 'Dashboard',
+      'en-US': 'Dashboard',
+    },
     url: '/dashboard',
     icon: 'home',
     visible: true,
@@ -58,11 +60,13 @@ const mockMenuItems = [
   },
   {
     id: 'menu-2',
-    labelUz: 'Talabalar',
-    labelOz: 'Talabalar',
-    labelRu: 'Talabalar',
-    labelEn: 'Students',
     label: 'Talabalar',
+    labels: {
+      'uz-UZ': 'Talabalar',
+      'oz-UZ': 'Talabalar',
+      'ru-RU': 'Talabalar',
+      'en-US': 'Students',
+    },
     url: '/students',
     icon: 'users',
     visible: true,
@@ -71,11 +75,13 @@ const mockMenuItems = [
   },
   {
     id: 'menu-3',
-    labelUz: 'Hisobotlar',
-    labelOz: 'Hisobotlar',
-    labelRu: 'Hisobotlar',
-    labelEn: 'Reports',
     label: 'Hisobotlar',
+    labels: {
+      'uz-UZ': 'Hisobotlar',
+      'oz-UZ': 'Hisobotlar',
+      'ru-RU': 'Hisobotlar',
+      'en-US': 'Reports',
+    },
     url: '/reports',
     icon: 'bar-chart',
     visible: true,
@@ -113,7 +119,7 @@ vi.mock('@/utils/iconMapper', () => ({
 }))
 
 vi.mock('@/utils/menu.util', () => ({
-  getMenuLabel: (item: { labelUz: string }) => item.labelUz,
+  getMenuLabel: (item: { label?: string }) => item.label ?? '',
 }))
 
 import CommandPalette from '../CommandPalette'

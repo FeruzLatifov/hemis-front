@@ -68,11 +68,13 @@ vi.mock('react-router-dom', async () => {
 const mockMenuItems = [
   {
     id: 'menu-1',
-    labelUz: 'Dashboard',
-    labelOz: 'Dashboard',
-    labelRu: 'Dashboard',
-    labelEn: 'Dashboard',
     label: 'Dashboard',
+    labels: {
+      'uz-UZ': 'Dashboard',
+      'oz-UZ': 'Dashboard',
+      'ru-RU': 'Dashboard',
+      'en-US': 'Dashboard',
+    },
     url: '/dashboard',
     icon: 'home',
     visible: true,
@@ -81,11 +83,13 @@ const mockMenuItems = [
   },
   {
     id: 'menu-2',
-    labelUz: 'Talabalar',
-    labelOz: 'Talabalar',
-    labelRu: 'Talabalar',
-    labelEn: 'Students',
     label: 'Talabalar',
+    labels: {
+      'uz-UZ': 'Talabalar',
+      'oz-UZ': 'Talabalar',
+      'ru-RU': 'Talabalar',
+      'en-US': 'Students',
+    },
     url: '/students',
     icon: 'users',
     visible: true,
@@ -94,11 +98,13 @@ const mockMenuItems = [
   },
   {
     id: 'menu-3',
-    labelUz: 'Tizim',
-    labelOz: 'Tizim',
-    labelRu: 'Tizim',
-    labelEn: 'System',
     label: 'Tizim',
+    labels: {
+      'uz-UZ': 'Tizim',
+      'oz-UZ': 'Tizim',
+      'ru-RU': 'Tizim',
+      'en-US': 'System',
+    },
     url: undefined,
     icon: 'settings',
     visible: true,
@@ -106,11 +112,13 @@ const mockMenuItems = [
     items: [
       {
         id: 'menu-3-1',
-        labelUz: 'Tarjimalar',
-        labelOz: 'Tarjimalar',
-        labelRu: 'Tarjimalar',
-        labelEn: 'Translations',
         label: 'Tarjimalar',
+        labels: {
+          'uz-UZ': 'Tarjimalar',
+          'oz-UZ': 'Tarjimalar',
+          'ru-RU': 'Tarjimalar',
+          'en-US': 'Translations',
+        },
         url: '/system/translations',
         icon: 'languages',
         visible: true,
@@ -126,7 +134,7 @@ vi.mock('@/stores/menuStore', () => ({
 }))
 
 vi.mock('@/utils/menu.util', () => ({
-  getMenuLabel: (item: { labelUz: string }) => item.labelUz,
+  getMenuLabel: (item: { label?: string }) => item.label ?? '',
 }))
 
 import Breadcrumb from '../Breadcrumb'

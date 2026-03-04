@@ -28,7 +28,8 @@ const TranslationsPage = lazy(() =>
 const TranslationFormPage = lazy(() =>
   import('./pages/system/translations').then((m) => ({ default: m.TranslationFormPage })),
 )
-const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
+// TODO: LogsPage dependencies not ready (useAuditLogs, constants, components)
+// const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
 const UsersPage = lazy(() => import('./pages/system/users').then((m) => ({ default: m.UsersPage })))
 const UserFormPage = lazy(() =>
   import('./pages/system/users').then((m) => ({ default: m.UserFormPage })),
@@ -456,9 +457,7 @@ function App() {
                       path="logs"
                       element={
                         <ProtectedRoute permission="audit.view">
-                          <RouteErrorBoundary>
-                            <LogsPage />
-                          </RouteErrorBoundary>
+                          <PlaceholderPage title={t('Audit logs')} />
                         </ProtectedRoute>
                       }
                     />

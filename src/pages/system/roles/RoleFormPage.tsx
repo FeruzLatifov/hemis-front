@@ -38,7 +38,7 @@ const editSchema = z.object({
 
 type CreateFormData = z.infer<typeof createSchema>
 type EditFormData = z.infer<typeof editSchema>
-type FormData = CreateFormData | EditFormData
+type FormData = Partial<CreateFormData> & EditFormData
 
 // ─── Field → Tab mapping ─────────────────────────────────────────────────────
 const FIELD_TAB_MAP: Record<string, TabValue> = {

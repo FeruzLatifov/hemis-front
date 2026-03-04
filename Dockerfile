@@ -15,13 +15,7 @@ RUN yarn install --immutable
 # Copy source code
 COPY . .
 
-# Build args for environment variables
-ARG VITE_API_URL
-ARG VITE_APP_NAME="HEMIS Ministry"
-ARG VITE_SENTRY_ENABLED=false
-ARG VITE_SENTRY_DSN=""
-
-# Tarjimalarni backend dan olish (ishlamasa — mavjud JSON lardan davom etadi)
+# Build (env vars NOT needed — injected at runtime via ConfigMap)
 RUN yarn build:prod
 
 # Stage 2: Serve with nginx
@@ -34,6 +28,10 @@ COPY nginx-security-headers.conf /etc/nginx/conf.d/security-headers.conf
 # Copy built assets from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy runtime config entrypoint
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose port
 EXPOSE 80
 
@@ -41,4 +39,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -qO- http://localhost/health || exit 1
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

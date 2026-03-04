@@ -35,11 +35,13 @@ vi.mock('@/i18n/config', () => ({
 const mockMenuItems = [
   {
     id: 'menu-1',
-    labelUz: 'Dashboard',
-    labelOz: 'Dashboard',
-    labelRu: 'Dashboard',
-    labelEn: 'Dashboard',
     label: 'Dashboard',
+    labels: {
+      'uz-UZ': 'Dashboard',
+      'oz-UZ': 'Dashboard',
+      'ru-RU': 'Dashboard',
+      'en-US': 'Dashboard',
+    },
     url: '/dashboard',
     icon: 'home',
     visible: true,
@@ -48,11 +50,13 @@ const mockMenuItems = [
   },
   {
     id: 'menu-2',
-    labelUz: 'Talabalar',
-    labelOz: 'Talabalar',
-    labelRu: 'Talabalar',
-    labelEn: 'Students',
     label: 'Talabalar',
+    labels: {
+      'uz-UZ': 'Talabalar',
+      'oz-UZ': 'Talabalar',
+      'ru-RU': 'Talabalar',
+      'en-US': 'Students',
+    },
     url: undefined,
     icon: 'users',
     visible: true,
@@ -60,11 +64,13 @@ const mockMenuItems = [
     items: [
       {
         id: 'menu-2-1',
-        labelUz: "Talabalar ro'yxati",
-        labelOz: "Talabalar ro'yxati",
-        labelRu: "Talabalar ro'yxati",
-        labelEn: 'Students List',
         label: "Talabalar ro'yxati",
+        labels: {
+          'uz-UZ': "Talabalar ro'yxati",
+          'oz-UZ': "Talabalar ro'yxati",
+          'ru-RU': "Talabalar ro'yxati",
+          'en-US': 'Students List',
+        },
         url: '/students',
         icon: 'users',
         visible: true,
@@ -151,7 +157,7 @@ vi.mock('@/utils/iconMapper', () => ({
 }))
 
 vi.mock('@/utils/menu.util', () => ({
-  getMenuLabel: (item: { labelUz: string }) => item.labelUz,
+  getMenuLabel: (item: { label?: string }) => item.label ?? '',
 }))
 
 vi.mock('@/hooks/useFavorites', () => ({
@@ -161,7 +167,7 @@ vi.mock('@/hooks/useFavorites', () => ({
 
 interface MenuItem {
   id: string
-  labelUz: string
+  label?: string
   url?: string
   items?: MenuItem[]
 }

@@ -49,10 +49,12 @@ const mockMenuResponse: MenuResponse = {
     {
       id: '1',
       label: 'Dashboard',
-      labelUz: 'Bosh sahifa',
-      labelOz: 'Bosh sahifa',
-      labelRu: 'Glavnaya',
-      labelEn: 'Dashboard',
+      labels: {
+        'uz-UZ': 'Bosh sahifa',
+        'oz-UZ': 'Bosh sahifa',
+        'ru-RU': 'Glavnaya',
+        'en-US': 'Dashboard',
+      },
       url: '/dashboard',
       icon: 'home',
       active: true,
@@ -60,10 +62,12 @@ const mockMenuResponse: MenuResponse = {
     {
       id: '2',
       label: 'Students',
-      labelUz: 'Talabalar',
-      labelOz: 'Talabalar',
-      labelRu: 'Studenty',
-      labelEn: 'Students',
+      labels: {
+        'uz-UZ': 'Talabalar',
+        'oz-UZ': 'Talabalar',
+        'ru-RU': 'Studenty',
+        'en-US': 'Students',
+      },
       url: '/students',
       icon: 'users',
       active: true,

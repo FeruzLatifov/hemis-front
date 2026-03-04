@@ -17,10 +17,12 @@ function makeMenuItem(overrides: Partial<MenuItem> = {}): MenuItem {
   return {
     id: 'item-1',
     label: 'Dashboard',
-    labelUz: 'Bosh sahifa',
-    labelOz: 'Bош саhифа',
-    labelRu: 'Главная',
-    labelEn: 'Dashboard',
+    labels: {
+      'uz-UZ': 'Bosh sahifa',
+      'oz-UZ': 'Bош саhифа',
+      'ru-RU': 'Главная',
+      'en-US': 'Dashboard',
+    },
     ...overrides,
   }
 }

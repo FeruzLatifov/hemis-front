@@ -4,19 +4,23 @@ import type { MenuItem } from '@/api/menu.api'
 const mockItem: MenuItem = {
   id: '1',
   label: 'Test',
-  labelUz: 'Bosh sahifa',
-  labelOz: 'Бош саҳифа',
-  labelRu: 'Главная',
-  labelEn: 'Home',
+  labels: {
+    'uz-UZ': 'Bosh sahifa',
+    'oz-UZ': 'Бош саҳифа',
+    'ru-RU': 'Главная',
+    'en-US': 'Home',
+  },
 }
 
 const itemWithMissingTranslations: MenuItem = {
   id: '2',
   label: 'Partial',
-  labelUz: 'Faqat uzbekcha',
-  labelOz: '',
-  labelRu: '',
-  labelEn: '',
+  labels: {
+    'uz-UZ': 'Faqat uzbekcha',
+    'oz-UZ': '',
+    'ru-RU': '',
+    'en-US': '',
+  },
 }
 
 describe('getMenuLabel', () => {
@@ -40,15 +44,15 @@ describe('getMenuLabel', () => {
     expect(getMenuLabel(mockItem, 'fr')).toBe('Bosh sahifa')
   })
 
-  it('falls back to labelUz when oz is empty', () => {
+  it('falls back to uz-UZ when oz is empty', () => {
     expect(getMenuLabel(itemWithMissingTranslations, 'oz')).toBe('Faqat uzbekcha')
   })
 
-  it('falls back to labelUz when ru is empty', () => {
+  it('falls back to uz-UZ when ru is empty', () => {
     expect(getMenuLabel(itemWithMissingTranslations, 'ru')).toBe('Faqat uzbekcha')
   })
 
-  it('falls back to labelUz when en is empty', () => {
+  it('falls back to uz-UZ when en is empty', () => {
     expect(getMenuLabel(itemWithMissingTranslations, 'en')).toBe('Faqat uzbekcha')
   })
 })

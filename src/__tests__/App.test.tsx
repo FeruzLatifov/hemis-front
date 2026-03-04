@@ -102,7 +102,7 @@ vi.mock('@/utils/iconMapper', () => ({
 }))
 
 vi.mock('@/utils/menu.util', () => ({
-  getMenuLabel: (item: { labelUz?: string } | null) => item?.labelUz || '',
+  getMenuLabel: (item: { label?: string } | null) => item?.label ?? '',
 }))
 
 vi.mock('@/api/menu.api', () => ({

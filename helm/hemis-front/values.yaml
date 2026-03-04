@@ -1,3 +1,11 @@
+# Runtime config (injected via ConfigMap → docker-entrypoint.sh → config.js)
+config:
+  apiUrl: "https://new-ministry.hemis.uz"
+  appName: "HEMIS Ministry"
+  sentryEnabled: "false"
+  sentryDsn: ""
+  sentryEnvironment: "production"
+
 replicaCount: 2
 
 image:
