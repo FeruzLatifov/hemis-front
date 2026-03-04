@@ -16,7 +16,8 @@ RUN yarn install --immutable
 COPY . .
 
 # Build (env vars NOT needed — injected at runtime via ConfigMap)
-RUN yarn build:prod
+# Skip translation sync during Docker build — JSON files already in git
+RUN SKIP_TRANSLATION_SYNC=true yarn build:prod
 
 # Stage 2: Serve with nginx
 FROM nginx:1.27-alpine AS production
