@@ -5,21 +5,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Eye, EyeOff, Check, X } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { passwordResetApi } from '@/api/password-reset.api'
 import { extractApiErrorMessage } from '@/utils/error.util'
 import hemisLogo from '@/assets/images/hemis-logo-new.png'
 
 const resetSchema = z
   .object({
-    password: z
-      .string()
-      .min(8)
-      .max(100)
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
-        'Password must contain uppercase, lowercase, digit, and special character',
-      ),
+    password: z.string().min(6).max(100),
     confirmPassword: z.string().min(1),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -28,54 +21,6 @@ const resetSchema = z
   })
 
 type ResetFormData = z.infer<typeof resetSchema>
-
-function PasswordStrength({ password }: { password: string }) {
-  const { t } = useTranslation()
-  const checks = [
-    { label: t('8+ characters'), pass: password.length >= 8 },
-    { label: t('Uppercase letter'), pass: /[A-Z]/.test(password) },
-    { label: t('Lowercase letter'), pass: /[a-z]/.test(password) },
-    { label: t('Number'), pass: /\d/.test(password) },
-    { label: t('Special character'), pass: /[\W_]/.test(password) },
-  ]
-  const strength = checks.filter((c) => c.pass).length
-
-  if (!password) return null
-
-  return (
-    <div className="space-y-2 pt-1">
-      <div className="flex gap-1">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              strength >= i
-                ? strength <= 2
-                  ? 'bg-red-400'
-                  : strength <= 3
-                    ? 'bg-yellow-400'
-                    : 'bg-green-400'
-                : 'bg-[var(--border-color-pro)]'
-            }`}
-          />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-        {checks.map((check) => (
-          <span
-            key={check.label}
-            className={`inline-flex items-center gap-1 text-[11px] ${
-              check.pass ? 'text-green-600 dark:text-green-400' : 'text-[var(--text-secondary)]'
-            }`}
-          >
-            {check.pass ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-            {check.label}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation()
@@ -90,14 +35,11 @@ export default function ResetPasswordPage() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<ResetFormData>({
     resolver: zodResolver(resetSchema),
     defaultValues: { password: '', confirmPassword: '' },
   })
-
-  const passwordValue = watch('password') || ''
 
   const onSubmit = useCallback(
     async (data: ResetFormData) => {
@@ -193,10 +135,9 @@ export default function ResetPasswordPage() {
               </div>
               {errors.password && (
                 <p className="mt-1 text-xs text-red-500">
-                  {errors.password.message || t('Password must be at least 8 characters')}
+                  {errors.password.message || t('Password must be at least 6 characters')}
                 </p>
               )}
-              <PasswordStrength password={passwordValue} />
             </div>
 
             {/* Confirm password */}

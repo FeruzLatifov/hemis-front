@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { useFavoritesStore } from '@/stores/favoritesStore'
+import { useRecentMenuStore } from '@/stores/recentMenuStore'
 import { useMenu } from './useMenu'
 import { useFavoritesQuery } from './useFavorites'
 import { queryKeys } from '@/lib/queryKeys'
@@ -33,13 +34,26 @@ export const useMenuInit = () => {
 
   // Sync menu data to Zustand store (backward compatibility)
   const setMenuItems = useMenuStore((state) => state.setMenuItems)
+  const setLoading = useMenuStore((state) => state.setLoading)
+  const setError = useMenuStore((state) => state.setError)
   const clearMenu = useMenuStore((state) => state.clearMenu)
   const clearFavorites = useFavoritesStore((state) => state.clearFavorites)
+  const clearRecent = useRecentMenuStore((state) => state.clearRecent)
+
+  // Sync TanStack Query loading/error state to Zustand store
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading, setLoading])
+
+  useEffect(() => {
+    setError(error?.message ?? null)
+  }, [error, setError])
 
   useEffect(() => {
     if (!isAuthenticated) {
       clearMenu()
       clearFavorites()
+      clearRecent()
       queryClient.removeQueries({ queryKey: queryKeys.menu.all })
       queryClient.removeQueries({ queryKey: queryKeys.favorites.all })
       return
@@ -48,7 +62,7 @@ export const useMenuInit = () => {
     if (menuData?.menu) {
       setMenuItems(menuData.menu)
     }
-  }, [isAuthenticated, menuData, setMenuItems, clearMenu, clearFavorites, queryClient])
+  }, [isAuthenticated, menuData, setMenuItems, clearMenu, clearFavorites, clearRecent, queryClient])
 
   // Sync favorites data to Zustand store (backward compatibility)
   useEffect(() => {

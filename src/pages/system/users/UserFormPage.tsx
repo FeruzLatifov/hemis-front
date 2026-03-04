@@ -39,8 +39,6 @@ import {
   Building2,
   Eye,
   EyeOff,
-  Check,
-  X,
   Power,
   LockOpen,
 } from 'lucide-react'
@@ -57,14 +55,7 @@ const createSchema = z
       .min(3)
       .max(50)
       .regex(/^[a-zA-Z0-9_.-]+$/),
-    password: z
-      .string()
-      .min(8)
-      .max(100)
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
-        'Password must contain uppercase, lowercase, digit, and special character',
-      ),
+    password: z.string().min(6).max(100),
     confirmPassword: z.string().min(1),
     fullName: z.string().max(255).optional().or(z.literal('')),
     email: z.string().email().max(255).optional().or(z.literal('')),
@@ -101,14 +92,7 @@ type FormData = CreateFormData | EditFormData
 // ─── Change password schema ──────────────────────────────────────────────────
 const changePasswordSchema = z
   .object({
-    newPassword: z
-      .string()
-      .min(8)
-      .max(100)
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
-        'Password must contain uppercase, lowercase, digit, and special character',
-      ),
+    newPassword: z.string().min(6).max(100),
     confirmNewPassword: z.string().min(1),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
@@ -150,56 +134,6 @@ function FormSection({
       </div>
       {children}
     </section>
-  )
-}
-
-function PasswordStrength({ password }: { password: string }) {
-  const { t } = useTranslation()
-
-  const checks = [
-    { label: t('8+ characters'), pass: password.length >= 8 },
-    { label: t('Uppercase letter'), pass: /[A-Z]/.test(password) },
-    { label: t('Lowercase letter'), pass: /[a-z]/.test(password) },
-    { label: t('Number'), pass: /\d/.test(password) },
-    { label: t('Special character'), pass: /[\W_]/.test(password) },
-  ]
-
-  const strength = checks.filter((c) => c.pass).length
-
-  if (!password) return null
-
-  return (
-    <div className="space-y-2 pt-1">
-      <div className="flex gap-1">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              strength >= i
-                ? strength <= 2
-                  ? 'bg-red-400'
-                  : strength <= 3
-                    ? 'bg-yellow-400'
-                    : 'bg-green-400'
-                : 'bg-[var(--border-color-pro)]'
-            }`}
-          />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-        {checks.map((check) => (
-          <span
-            key={check.label}
-            className={`inline-flex items-center gap-1 text-[11px] ${
-              check.pass ? 'text-green-600 dark:text-green-400' : 'text-[var(--text-secondary)]'
-            }`}
-          >
-            {check.pass ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-            {check.label}
-          </span>
-        ))}
-      </div>
-    </div>
   )
 }
 
@@ -338,7 +272,6 @@ export default function UserFormPage() {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     reset: resetPassword,
-    watch: watchPassword,
     formState: { errors: passwordErrors },
   } = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
@@ -384,7 +317,6 @@ export default function UserFormPage() {
 
   // ─── Roles ───────────────────────────────────────────────────────────
   const selectedRoleIds = (watch('roleIds') as string[]) ?? []
-  const passwordValue = (!isEdit ? (watch('password' as keyof CreateFormData) as string) : '') || ''
 
   const toggleRole = (roleId: string) => {
     const current = selectedRoleIds
@@ -526,8 +458,6 @@ export default function UserFormPage() {
       </div>
     )
   }
-
-  const newPasswordValue = watchPassword('newPassword') || ''
 
   return (
     <div className="mx-auto max-w-4xl p-4">
@@ -742,11 +672,10 @@ export default function UserFormPage() {
                         onToggle={() => setShowPassword(!showPassword)}
                         placeholder="--------"
                         error={
-                          errors.password ? t('Password must be at least 8 characters') : undefined
+                          errors.password ? t('Password must be at least 6 characters') : undefined
                         }
                         {...register('password' as keyof FormData)}
                       />
-                      <PasswordStrength password={passwordValue} />
                     </div>
 
                     <PasswordField
@@ -792,12 +721,11 @@ export default function UserFormPage() {
                         placeholder="--------"
                         error={
                           passwordErrors.newPassword
-                            ? t('Password must be at least 8 characters')
+                            ? t('Password must be at least 6 characters')
                             : undefined
                         }
                         {...registerPassword('newPassword')}
                       />
-                      <PasswordStrength password={newPasswordValue} />
                     </div>
 
                     <PasswordField

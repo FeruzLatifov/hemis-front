@@ -12,28 +12,17 @@ const localeToBcp47: Record<string, string> = {
 
 /**
  * Get label for menu item based on current language.
- * Supports 4 languages: uz (Latin), oz (Cyrillic), ru (Russian), en (English)
  *
- * Priority: labels map (BCP-47) → labelXx fields → label → i18nKey → id
+ * Priority: labels map (BCP-47) → label → i18nKey → id
  */
 export function getMenuLabel(item: MenuItem, lang: string): string {
   const bcp47 = localeToBcp47[lang] || 'uz-UZ'
-  const fallbackBcp47 = 'uz-UZ'
 
-  // 1. Try labels map (backend returns this format)
+  // Primary: labels map (backend always provides this)
   if (item.labels) {
-    return item.labels[bcp47] || item.labels[fallbackBcp47] || item.label || item.i18nKey || item.id
+    return item.labels[bcp47] || item.labels['uz-UZ'] || item.label || item.i18nKey || item.id
   }
 
-  // 2. Fallback to flat fields (if mapped by frontend)
-  switch (lang) {
-    case 'oz':
-      return item.labelOz || item.labelUz || item.label || item.id
-    case 'ru':
-      return item.labelRu || item.labelUz || item.label || item.id
-    case 'en':
-      return item.labelEn || item.labelUz || item.label || item.id
-    default:
-      return item.labelUz || item.label || item.id
-  }
+  // Fallback: label field or i18nKey
+  return item.label || item.i18nKey || item.id
 }

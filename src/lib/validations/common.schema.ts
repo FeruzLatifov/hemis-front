@@ -80,13 +80,7 @@ export const optionalUrlField = z
 /**
  * Password field with strength requirements
  */
-export const passwordField = z
-  .string()
-  .min(8)
-  .max(128)
-  .refine((val) => /[A-Z]/.test(val))
-  .refine((val) => /[a-z]/.test(val))
-  .refine((val) => /[0-9]/.test(val))
+export const passwordField = z.string().min(6).max(128)
 
 /**
  * Simple password field (for login - no strength check)
