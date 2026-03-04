@@ -21,8 +21,8 @@ ARG VITE_APP_NAME="HEMIS Ministry"
 ARG VITE_SENTRY_ENABLED=false
 ARG VITE_SENTRY_DSN=""
 
-# Build production assets
-RUN yarn build
+# Tarjimalarni backend dan olish (ishlamasa — mavjud JSON lardan davom etadi)
+RUN yarn build:prod
 
 # Stage 2: Serve with nginx
 FROM nginx:1.27-alpine AS production
