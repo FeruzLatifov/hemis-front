@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Runtime config (injected by docker-entrypoint.sh via /config.js)
-const runtimeConfig = (window as Record<string, unknown>).__HEMIS_CONFIG__ as
+const runtimeConfig = (window as unknown as Record<string, unknown>).__HEMIS_CONFIG__ as
   | Record<string, string>
   | undefined
 
