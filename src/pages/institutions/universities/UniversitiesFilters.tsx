@@ -28,6 +28,11 @@ export interface UniversitiesFilterValues {
   addStudentFilter: string
   allowGroupingFilter: string
   allowTransferOutsideFilter: string
+  oneIdFilter: string
+  gradingSystemFilter: string
+  addForeignStudentFilter: string
+  addTransferStudentFilter: string
+  addAcademicMobileStudentFilter: string
 }
 
 // ─── Mapping from filter key to URL param key ─────────────────────
@@ -46,6 +51,11 @@ const FILTER_KEY_TO_URL_PARAM: Record<string, string> = {
   addStudentFilter: 'addStudent',
   allowGroupingFilter: 'allowGrouping',
   allowTransferOutsideFilter: 'allowTransferOutside',
+  oneIdFilter: 'oneId',
+  gradingSystemFilter: 'gradingSystem',
+  addForeignStudentFilter: 'addForeignStudent',
+  addTransferStudentFilter: 'addTransferStudent',
+  addAcademicMobileStudentFilter: 'addAcademicMobileStudent',
 }
 
 // ─── Mapping from filter key to dictionary lookup key ─────────────
@@ -64,6 +74,11 @@ const FILTER_KEY_TO_DICT_KEY: Record<string, keyof Dictionaries | null> = {
   addStudentFilter: null,
   allowGroupingFilter: null,
   allowTransferOutsideFilter: null,
+  oneIdFilter: null,
+  gradingSystemFilter: null,
+  addForeignStudentFilter: null,
+  addTransferStudentFilter: null,
+  addAcademicMobileStudentFilter: null,
 }
 
 // ─── Props ────────────────────────────────────────────────────────
@@ -141,6 +156,36 @@ export function UniversitiesFilters({
       {
         key: 'allowTransferOutsideFilter',
         label: t('Allow transfer outside'),
+        data: booleanData,
+        singleSelect: true,
+      },
+      {
+        key: 'oneIdFilter',
+        label: t('OneID login'),
+        data: booleanData,
+        singleSelect: true,
+      },
+      {
+        key: 'gradingSystemFilter',
+        label: t('Grading system'),
+        data: booleanData,
+        singleSelect: true,
+      },
+      {
+        key: 'addForeignStudentFilter',
+        label: t('Add foreign student'),
+        data: booleanData,
+        singleSelect: true,
+      },
+      {
+        key: 'addTransferStudentFilter',
+        label: t('Add transfer student'),
+        data: booleanData,
+        singleSelect: true,
+      },
+      {
+        key: 'addAcademicMobileStudentFilter',
+        label: t('Add academic mobile student'),
         data: booleanData,
         singleSelect: true,
       },

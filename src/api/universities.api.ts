@@ -48,6 +48,16 @@ interface UniversityBackendDTO {
   allowGrouping?: boolean
   allow_transfer_outside?: boolean
   allowTransferOutside?: boolean
+  one_id?: boolean
+  oneId?: boolean
+  grading_system?: boolean
+  gradingSystem?: boolean
+  add_foreign_student?: boolean
+  addForeignStudent?: boolean
+  add_transfer_student?: boolean
+  addTransferStudent?: boolean
+  add_academic_mobile_student?: boolean
+  addAcademicMobileStudent?: boolean
 
   // Other fields
   _university_version?: string
@@ -94,6 +104,11 @@ export interface UniversityRow {
   addStudent?: boolean
   allowGrouping?: boolean
   allowTransferOutside?: boolean
+  oneId?: boolean
+  gradingSystem?: boolean
+  addForeignStudent?: boolean
+  addTransferStudent?: boolean
+  addAcademicMobileStudent?: boolean
   contractCategory?: string
   contractCategoryCode?: string
   activityStatus?: string
@@ -140,6 +155,11 @@ export interface UniversitiesParams {
   addStudent?: string
   allowGrouping?: string
   allowTransferOutside?: string
+  oneId?: string
+  gradingSystem?: string
+  addForeignStudent?: string
+  addTransferStudent?: string
+  addAcademicMobileStudent?: string
 }
 
 export interface Dictionary {
@@ -198,6 +218,11 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
     addStudent: dto.add_student ?? dto.addStudent,
     allowGrouping: dto.allow_grouping ?? dto.allowGrouping,
     allowTransferOutside: dto.allow_transfer_outside ?? dto.allowTransferOutside,
+    oneId: dto.one_id ?? dto.oneId,
+    gradingSystem: dto.grading_system ?? dto.gradingSystem,
+    addForeignStudent: dto.add_foreign_student ?? dto.addForeignStudent,
+    addTransferStudent: dto.add_transfer_student ?? dto.addTransferStudent,
+    addAcademicMobileStudent: dto.add_academic_mobile_student ?? dto.addAcademicMobileStudent,
     active: dto.active,
 
     // Other fields
@@ -293,6 +318,11 @@ export const universitiesApi = {
         addStudent: data.addStudent ?? false,
         allowGrouping: data.allowGrouping ?? false,
         allowTransferOutside: data.allowTransferOutside ?? true,
+        oneId: data.oneId ?? false,
+        gradingSystem: data.gradingSystem ?? false,
+        addForeignStudent: data.addForeignStudent ?? false,
+        addTransferStudent: data.addTransferStudent ?? false,
+        addAcademicMobileStudent: data.addAcademicMobileStudent ?? false,
         activityStatus: emptyToUndefined(data.activityStatusCode),
         belongsTo: emptyToUndefined(data.belongsToCode),
         contractCategory: emptyToUndefined(data.contractCategoryCode),
@@ -333,6 +363,11 @@ export const universitiesApi = {
         addStudent: data.addStudent,
         allowGrouping: data.allowGrouping,
         allowTransferOutside: data.allowTransferOutside,
+        oneId: data.oneId,
+        gradingSystem: data.gradingSystem,
+        addForeignStudent: data.addForeignStudent,
+        addTransferStudent: data.addTransferStudent,
+        addAcademicMobileStudent: data.addAcademicMobileStudent,
         activityStatus: emptyToUndefined(data.activityStatusCode),
         belongsTo: emptyToUndefined(data.belongsToCode),
         contractCategory: emptyToUndefined(data.contractCategoryCode),

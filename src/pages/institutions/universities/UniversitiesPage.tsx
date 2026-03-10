@@ -86,6 +86,11 @@ export default function UniversitiesPage() {
   const addStudentFilter = searchParams.get('addStudent') || ''
   const allowGroupingFilter = searchParams.get('allowGrouping') || ''
   const allowTransferOutsideFilter = searchParams.get('allowTransferOutside') || ''
+  const oneIdFilter = searchParams.get('oneId') || ''
+  const gradingSystemFilter = searchParams.get('gradingSystem') || ''
+  const addForeignStudentFilter = searchParams.get('addForeignStudent') || ''
+  const addTransferStudentFilter = searchParams.get('addTransferStudent') || ''
+  const addAcademicMobileStudentFilter = searchParams.get('addAcademicMobileStudent') || ''
 
   // ─── Local UI state ───────────────────────────────────────────────
   const [searchInput, setSearchInput] = useState(searchFromUrl)
@@ -113,7 +118,12 @@ export default function UniversitiesPage() {
         accreditationEditFilter ||
         addStudentFilter ||
         allowGroupingFilter ||
-        allowTransferOutsideFilter
+        allowTransferOutsideFilter ||
+        oneIdFilter ||
+        gradingSystemFilter ||
+        addForeignStudentFilter ||
+        addTransferStudentFilter ||
+        addAcademicMobileStudentFilter
       ),
   )
 
@@ -266,6 +276,11 @@ export default function UniversitiesPage() {
       addStudentFilter,
       allowGroupingFilter,
       allowTransferOutsideFilter,
+      oneIdFilter,
+      gradingSystemFilter,
+      addForeignStudentFilter,
+      addTransferStudentFilter,
+      addAcademicMobileStudentFilter,
     }),
     [
       debouncedSearch,
@@ -284,6 +299,11 @@ export default function UniversitiesPage() {
       addStudentFilter,
       allowGroupingFilter,
       allowTransferOutsideFilter,
+      oneIdFilter,
+      gradingSystemFilter,
+      addForeignStudentFilter,
+      addTransferStudentFilter,
+      addAcademicMobileStudentFilter,
     ],
   )
 
@@ -389,7 +409,12 @@ export default function UniversitiesPage() {
     accreditationEditFilter ||
     addStudentFilter ||
     allowGroupingFilter ||
-    allowTransferOutsideFilter
+    allowTransferOutsideFilter ||
+    oneIdFilter ||
+    gradingSystemFilter ||
+    addForeignStudentFilter ||
+    addTransferStudentFilter ||
+    addAcademicMobileStudentFilter
   )
   const activeFilterCount = [
     regionId,
@@ -406,6 +431,11 @@ export default function UniversitiesPage() {
     addStudentFilter,
     allowGroupingFilter,
     allowTransferOutsideFilter,
+    oneIdFilter,
+    gradingSystemFilter,
+    addForeignStudentFilter,
+    addTransferStudentFilter,
+    addAcademicMobileStudentFilter,
     debouncedSearch,
   ].filter(Boolean).length
   const selectedRowCount = Object.keys(rowSelection).length
@@ -427,6 +457,11 @@ export default function UniversitiesPage() {
       addStudentFilter,
       allowGroupingFilter,
       allowTransferOutsideFilter,
+      oneIdFilter,
+      gradingSystemFilter,
+      addForeignStudentFilter,
+      addTransferStudentFilter,
+      addAcademicMobileStudentFilter,
     }),
     [
       regionId,
@@ -443,6 +478,11 @@ export default function UniversitiesPage() {
       addStudentFilter,
       allowGroupingFilter,
       allowTransferOutsideFilter,
+      oneIdFilter,
+      gradingSystemFilter,
+      addForeignStudentFilter,
+      addTransferStudentFilter,
+      addAcademicMobileStudentFilter,
     ],
   )
 
@@ -551,6 +591,11 @@ export default function UniversitiesPage() {
       addStudent: undefined,
       allowGrouping: undefined,
       allowTransferOutside: undefined,
+      oneId: undefined,
+      gradingSystem: undefined,
+      addForeignStudent: undefined,
+      addTransferStudent: undefined,
+      addAcademicMobileStudent: undefined,
       page: undefined,
     })
   }, [updateSearchParams])

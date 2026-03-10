@@ -26,6 +26,11 @@ export function buildFilterParams(filters: {
   addStudentFilter: string
   allowGroupingFilter: string
   allowTransferOutsideFilter: string
+  oneIdFilter: string
+  gradingSystemFilter: string
+  addForeignStudentFilter: string
+  addTransferStudentFilter: string
+  addAcademicMobileStudentFilter: string
 }): Omit<UniversitiesParams, 'page' | 'size' | 'sort'> {
   const params: Omit<UniversitiesParams, 'page' | 'size' | 'sort'> = {}
   if (filters.debouncedSearch) {
@@ -48,6 +53,12 @@ export function buildFilterParams(filters: {
   if (filters.allowGroupingFilter) params.allowGrouping = filters.allowGroupingFilter
   if (filters.allowTransferOutsideFilter)
     params.allowTransferOutside = filters.allowTransferOutsideFilter
+  if (filters.oneIdFilter) params.oneId = filters.oneIdFilter
+  if (filters.gradingSystemFilter) params.gradingSystem = filters.gradingSystemFilter
+  if (filters.addForeignStudentFilter) params.addForeignStudent = filters.addForeignStudentFilter
+  if (filters.addTransferStudentFilter) params.addTransferStudent = filters.addTransferStudentFilter
+  if (filters.addAcademicMobileStudentFilter)
+    params.addAcademicMobileStudent = filters.addAcademicMobileStudentFilter
 
   return params
 }
@@ -96,6 +107,11 @@ export async function exportToXlsx(
     [t('Add student')]: boolLabel(row.addStudent),
     [t('Allow grouping')]: boolLabel(row.allowGrouping),
     [t('Allow transfer outside')]: boolLabel(row.allowTransferOutside),
+    [t('OneID login')]: boolLabel(row.oneId),
+    [t('Grading system')]: boolLabel(row.gradingSystem),
+    [t('Add foreign student')]: boolLabel(row.addForeignStudent),
+    [t('Add transfer student')]: boolLabel(row.addTransferStudent),
+    [t('Add academic mobile student')]: boolLabel(row.addAcademicMobileStudent),
     [t('Bank info')]: row.bankInfo || '',
     [t('Accreditation info')]: row.accreditationInfo || '',
   }))

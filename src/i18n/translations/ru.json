@@ -617,5 +617,9 @@
   "Faculty list report": "Список факультетов",
   "Grant recipients": "Грантополучатели",
   "Pending": "В ожидании",
-  "Scientific registry": "Научный реестр"
+  "Scientific registry": "Научный реестр",
+  "OneID login": "Вход через OneID",
+  "Add foreign student": "Добавить иностранного студента",
+  "Add transfer student": "Добавить переводного студента",
+  "Add academic mobile student": "Добавить студента академической мобильности"
 }

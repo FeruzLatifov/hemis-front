@@ -491,6 +491,82 @@ export function useUniversitiesColumns({
         enableSorting: false,
       },
       {
+        id: 'oneId',
+        accessorKey: 'oneId',
+        header: t('OneID login'),
+        cell: ({ row }) => (
+          <BooleanStatusCell value={row.original.oneId} yesLabel={t('Yes')} noLabel={t('No')} />
+        ),
+        size: 110,
+        minSize: 80,
+        maxSize: 150,
+        enableSorting: false,
+      },
+      {
+        id: 'gradingSystem',
+        accessorKey: 'gradingSystem',
+        header: t('Grading system'),
+        cell: ({ row }) => (
+          <BooleanStatusCell
+            value={row.original.gradingSystem}
+            yesLabel={t('Yes')}
+            noLabel={t('No')}
+          />
+        ),
+        size: 120,
+        minSize: 80,
+        maxSize: 160,
+        enableSorting: false,
+      },
+      {
+        id: 'addForeignStudent',
+        accessorKey: 'addForeignStudent',
+        header: t('Add foreign student'),
+        cell: ({ row }) => (
+          <BooleanStatusCell
+            value={row.original.addForeignStudent}
+            yesLabel={t('Yes')}
+            noLabel={t('No')}
+          />
+        ),
+        size: 140,
+        minSize: 100,
+        maxSize: 180,
+        enableSorting: false,
+      },
+      {
+        id: 'addTransferStudent',
+        accessorKey: 'addTransferStudent',
+        header: t('Add transfer student'),
+        cell: ({ row }) => (
+          <BooleanStatusCell
+            value={row.original.addTransferStudent}
+            yesLabel={t('Yes')}
+            noLabel={t('No')}
+          />
+        ),
+        size: 140,
+        minSize: 100,
+        maxSize: 180,
+        enableSorting: false,
+      },
+      {
+        id: 'addAcademicMobileStudent',
+        accessorKey: 'addAcademicMobileStudent',
+        header: t('Add academic mobile student'),
+        cell: ({ row }) => (
+          <BooleanStatusCell
+            value={row.original.addAcademicMobileStudent}
+            yesLabel={t('Yes')}
+            noLabel={t('No')}
+          />
+        ),
+        size: 180,
+        minSize: 120,
+        maxSize: 220,
+        enableSorting: false,
+      },
+      {
         id: 'bankInfo',
         accessorKey: 'bankInfo',
         header: t('Bank info'),

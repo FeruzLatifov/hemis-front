@@ -617,5 +617,9 @@
   "Faculty list report": "Факультетлар рўйхати",
   "Grant recipients": "Грантлилар",
   "Pending": "Кутилмоқда",
-  "Scientific registry": "Илмий реестр"
+  "Scientific registry": "Илмий реестр",
+  "OneID login": "OneID орқали кириш",
+  "Add foreign student": "Хорижий талаба қўшиш",
+  "Add transfer student": "Кўчирма талаба қўшиш",
+  "Add academic mobile student": "Академик мобил талаба қўшиш"
 }

@@ -321,6 +321,14 @@ export default function UniversityDetailPage() {
         <BoolField label={t('Add student')} value={university.addStudent} />
         <BoolField label={t('Allow grouping')} value={university.allowGrouping} />
         <BoolField label={t('Allow transfer outside')} value={university.allowTransferOutside} />
+        <BoolField label={t('OneID login')} value={university.oneId} />
+        <BoolField label={t('Grading system')} value={university.gradingSystem} />
+        <BoolField label={t('Add foreign student')} value={university.addForeignStudent} />
+        <BoolField label={t('Add transfer student')} value={university.addTransferStudent} />
+        <BoolField
+          label={t('Add academic mobile student')}
+          value={university.addAcademicMobileStudent}
+        />
       </Section>
 
       {/* Qo'shimcha */}
