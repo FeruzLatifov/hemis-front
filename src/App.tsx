@@ -39,6 +39,7 @@ const UniversitiesPage = lazy(() =>
 const UniversityDetailPage = lazy(
   () => import('./pages/institutions/universities/UniversityDetailPage'),
 )
+const UniversityInfoPage = lazy(() => import('./pages/university/UniversityInfoPage'))
 const UniversityFormPage = lazy(
   () => import('./pages/institutions/universities/UniversityFormPage'),
 )
@@ -208,6 +209,14 @@ function App() {
                       element={
                         <RouteErrorBoundary>
                           <UniversityDetailPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="universities/:code/info"
+                      element={
+                        <RouteErrorBoundary>
+                          <UniversityInfoPage />
                         </RouteErrorBoundary>
                       }
                     />

@@ -1,14 +1,14 @@
 /**
  * Recent Menu Store - Zustand (Persisted in localStorage)
  *
- * Tracks recently visited menu pages (max 5).
+ * Tracks recently visited menu pages (max 3).
  * Used by Sidebar to show "Recently visited" section.
  */
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-const MAX_RECENT_ITEMS = 5
+const MAX_RECENT_ITEMS = 3
 
 interface RecentMenuItem {
   menuId: string

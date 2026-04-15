@@ -90,4 +90,14 @@ export const queryKeys = {
       ['classifiers', 'items', apiKey, filters] as const,
     byId: (apiKey: string, code: string) => ['classifiers', apiKey, code] as const,
   },
+
+  universityInfo: {
+    all: ['universityInfo'] as const,
+    dashboard: (code: string) => ['universityInfo', 'dashboard', code] as const,
+    legal: (code: string) => ['universityInfo', 'legal', code] as const,
+    founders: (code: string) => ['universityInfo', 'founders', code] as const,
+    lifecycle: (code: string) => ['universityInfo', 'lifecycle', code] as const,
+    cadastre: (code: string) => ['universityInfo', 'cadastre', code] as const,
+    profile: (code: string) => ['universityInfo', 'profile', code] as const,
+  },
 } as const

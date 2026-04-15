@@ -19,6 +19,7 @@ export {
 // Application hooks
 export { useClearCache } from './useClearCache'
 export { useMenuInit } from './useMenuInit'
+export { useMenuState } from './useMenuState'
 export { useTheme, ThemeProviderContext, type Theme, type ThemeProviderState } from './useTheme'
 
 // Form hooks

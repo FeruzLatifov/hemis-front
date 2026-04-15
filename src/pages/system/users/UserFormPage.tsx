@@ -1,21 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
-import {
-  useUserById,
-  useRoles,
-  useCreateUser,
-  useUpdateUser,
-  useChangePassword,
-  useToggleStatus,
-  useUnlockAccount,
-} from '@/hooks/useUsers'
-import { useUniversities } from '@/hooks/useUniversities'
-import { useAuthStore } from '@/stores/authStore'
-import { extractApiErrorMessage, getErrorStatus } from '@/utils/error.util'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,78 +25,10 @@ import {
   Power,
   LockOpen,
 } from 'lucide-react'
-import type { RoleSummary } from '@/types/user.types'
-
-// ─── Tabs ────────────────────────────────────────────────────────────────────
-type TabValue = 'general' | 'roles' | 'security'
-
-// ─── Schemas ─────────────────────────────────────────────────────────────────
-const createSchema = z
-  .object({
-    username: z
-      .string()
-      .min(3)
-      .max(50)
-      .regex(/^[a-zA-Z0-9_.-]+$/),
-    password: z.string().min(6).max(100),
-    confirmPassword: z.string().min(1),
-    fullName: z.string().max(255).optional().or(z.literal('')),
-    email: z.string().email().max(255).optional().or(z.literal('')),
-    phone: z
-      .string()
-      .regex(/^\+998[0-9]{9}$/, 'Invalid phone format')
-      .or(z.literal(''))
-      .optional(),
-    entityCode: z.string().max(255).optional().or(z.literal('')),
-    roleIds: z.array(z.string()).min(1),
-    enabled: z.boolean(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
-
-const editSchema = z.object({
-  fullName: z.string().max(255).optional().or(z.literal('')),
-  email: z.string().email().max(255).optional().or(z.literal('')),
-  phone: z
-    .string()
-    .regex(/^\+998[0-9]{9}$/, 'Invalid phone format')
-    .or(z.literal(''))
-    .optional(),
-  entityCode: z.string().max(255).optional().or(z.literal('')),
-  roleIds: z.array(z.string()).min(1),
-})
-
-type CreateFormData = z.infer<typeof createSchema>
-type EditFormData = z.infer<typeof editSchema>
-type FormData = Partial<CreateFormData> & EditFormData
-
-// ─── Change password schema ──────────────────────────────────────────────────
-const changePasswordSchema = z
-  .object({
-    newPassword: z.string().min(6).max(100),
-    confirmNewPassword: z.string().min(1),
-  })
-  .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmNewPassword'],
-  })
-
-type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
-
-// ─── Field → Tab mapping (for validation-driven tab switching) ───────────────
-const FIELD_TAB_MAP: Record<string, TabValue> = {
-  username: 'general',
-  fullName: 'general',
-  email: 'general',
-  phone: 'general',
-  entityCode: 'general',
-  roleIds: 'roles',
-  password: 'security',
-  confirmPassword: 'security',
-  enabled: 'security',
-}
+import { useUserFormLogic } from './useUserFormLogic'
+import type { FormData } from './useUserFormLogic'
+import PasswordChangeDialog from './PasswordChangeDialog'
+import RolesTabContent from './RolesTabContent'
 
 // ─── Reusable components ─────────────────────────────────────────────────────
 
@@ -204,239 +119,46 @@ function FormSkeleton() {
 
 export default function UserFormPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const { permissions } = useAuthStore()
+  const logic = useUserFormLogic()
 
-  const isEdit = !!id
-  const initialTab = (searchParams.get('tab') as TabValue) || 'general'
-  const [activeTab, setActiveTab] = useState<TabValue>(initialTab)
-
-  // ─── Permissions ─────────────────────────────────────────────────────
-  const canCreate = permissions.includes('users.create') || permissions.includes('users.manage')
-  const canEdit = permissions.includes('users.edit') || permissions.includes('users.manage')
-  const hasFullAccess =
-    (canEdit || canCreate) &&
-    (permissions.includes('universities.view') || permissions.includes('settings.view'))
-
-  // ─── Data fetching ───────────────────────────────────────────────────
-  const { data: user, isLoading: userLoading } = useUserById(id ?? '')
-  const { data: roles = [] } = useRoles()
-  const { data: universitiesData } = useUniversities(
-    { size: 1000, sort: 'name,asc' },
-    { enabled: hasFullAccess },
-  )
-  const universities = useMemo(() => universitiesData?.content ?? [], [universitiesData?.content])
-
-  // ─── Mutations ───────────────────────────────────────────────────────
-  const createMutation = useCreateUser()
-  const updateMutation = useUpdateUser()
-  const changePasswordMutation = useChangePassword()
-  const toggleStatusMutation = useToggleStatus()
-  const unlockAccountMutation = useUnlockAccount()
-
-  const isSaving = createMutation.isPending || updateMutation.isPending
-
-  // ─── Main form ───────────────────────────────────────────────────────
-  const schema = isEdit ? editSchema : createSchema
   const {
+    isEdit,
+    user,
+    userLoading,
+    navigate,
+    activeTab,
+    handleTabChange,
+    hasFullAccess,
+    universities,
+    groupedRoles,
+    roles,
+    selectedRoleIds,
     register,
     handleSubmit,
-    reset,
     setValue,
-    setError,
     watch,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: isEdit
-      ? { fullName: '', email: '', phone: '', entityCode: '', roleIds: [] }
-      : {
-          username: '',
-          password: '',
-          confirmPassword: '',
-          fullName: '',
-          email: '',
-          phone: '',
-          entityCode: '',
-          roleIds: [],
-          enabled: true,
-        },
-  })
-
-  // ─── Change password form (edit only) ────────────────────────────────
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
-  const {
-    register: registerPassword,
-    handleSubmit: handlePasswordSubmit,
-    reset: resetPassword,
-    formState: { errors: passwordErrors },
-  } = useForm<ChangePasswordFormData>({
-    resolver: zodResolver(changePasswordSchema),
-    defaultValues: { newPassword: '', confirmNewPassword: '' },
-  })
-
-  // ─── Create mode password visibility ─────────────────────────────────
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-
-  // ─── Populate form when user data loads ──────────────────────────────
-  useEffect(() => {
-    if (isEdit && user) {
-      reset({
-        fullName: user.fullName ?? '',
-        email: user.email ?? '',
-        phone: user.phone ?? '',
-        entityCode: user.entityCode ?? '',
-        roleIds: user.roles.map((r) => r.id),
-      })
-    }
-  }, [isEdit, user, reset])
-
-  // ─── Tab change handler (syncs URL) ──────────────────────────────────
-  const handleTabChange = useCallback(
-    (tab: string) => {
-      setActiveTab(tab as TabValue)
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev)
-          if (tab === 'general') {
-            next.delete('tab')
-          } else {
-            next.set('tab', tab)
-          }
-          return next
-        },
-        { replace: true },
-      )
-    },
-    [setSearchParams],
-  )
-
-  // ─── Roles ───────────────────────────────────────────────────────────
-  const selectedRoleIds = (watch('roleIds') as string[]) ?? []
-
-  const toggleRole = (roleId: string) => {
-    const current = selectedRoleIds
-    const next = current.includes(roleId)
-      ? current.filter((rid) => rid !== roleId)
-      : [...current, roleId]
-    setValue('roleIds', next, { shouldValidate: true })
-  }
-
-  const availableRoles = hasFullAccess ? roles : roles.filter((r) => r.roleType !== 'SYSTEM')
-
-  const groupedRoles = useMemo(() => {
-    const groups: Record<string, RoleSummary[]> = { SYSTEM: [], UNIVERSITY: [], CUSTOM: [] }
-    availableRoles.forEach((r) => {
-      if (groups[r.roleType]) {
-        groups[r.roleType].push(r)
-      } else {
-        groups.CUSTOM.push(r)
-      }
-    })
-    return groups
-  }, [availableRoles])
-
-  // ─── Form submit ─────────────────────────────────────────────────────
-  const onSubmit = useCallback(
-    (data: FormData) => {
-      const clean = (val: unknown) => (typeof val === 'string' && val.trim() ? val : undefined)
-
-      if (isEdit && id) {
-        const updateData = {
-          fullName: clean(data.fullName),
-          email: clean(data.email),
-          phone: clean(data.phone),
-          entityCode: clean(data.entityCode),
-          roleIds: data.roleIds,
-        }
-        updateMutation.mutate(
-          { id, data: updateData },
-          {
-            onSuccess: () => navigate('/system/users'),
-            onError: (error) => {
-              const status = getErrorStatus(error)
-              const message = extractApiErrorMessage(error, '')
-              if (status === 409 || message.toLowerCase().includes('email')) {
-                setError('email', { message: t('Email already in use') })
-                setActiveTab('general')
-              }
-            },
-          },
-        )
-      } else {
-        const createData = {
-          username: (data as CreateFormData).username,
-          password: (data as CreateFormData).password,
-          fullName: clean(data.fullName),
-          email: clean(data.email),
-          phone: clean(data.phone),
-          entityCode: clean(data.entityCode),
-          roleIds: data.roleIds,
-          enabled: (data as CreateFormData).enabled,
-        }
-        createMutation.mutate(createData, {
-          onSuccess: () => navigate('/system/users'),
-          onError: (error) => {
-            const status = getErrorStatus(error)
-            const message = extractApiErrorMessage(error, '')
-            if (status === 409 || message.toLowerCase().includes('username')) {
-              setError('username' as keyof FormData, { message: t('Username already exists') })
-              setActiveTab('general')
-            }
-          },
-        })
-      }
-    },
-    [isEdit, id, updateMutation, createMutation, navigate, setError, t],
-  )
-
-  // ─── Tab-aware validation: switch to first tab with error ────────────
-  const onInvalid = useCallback(
-    (fieldErrors: Record<string, unknown>) => {
-      for (const field of Object.keys(fieldErrors)) {
-        const tab = FIELD_TAB_MAP[field]
-        if (tab) {
-          handleTabChange(tab)
-          return
-        }
-      }
-    },
-    [handleTabChange],
-  )
-
-  // ─── Change password handler (edit security tab) ─────────────────────
-  const onChangePassword = useCallback(
-    (data: ChangePasswordFormData) => {
-      if (!id) return
-      changePasswordMutation.mutate(
-        { id, data: { newPassword: data.newPassword, confirmPassword: data.confirmNewPassword } },
-        {
-          onSuccess: () => {
-            resetPassword()
-            setShowNewPassword(false)
-            setShowConfirmNewPassword(false)
-          },
-        },
-      )
-    },
-    [id, changePasswordMutation, resetPassword],
-  )
-
-  // ─── Toggle status handler ───────────────────────────────────────────
-  const onToggleStatus = useCallback(() => {
-    if (!id) return
-    toggleStatusMutation.mutate(id)
-  }, [id, toggleStatusMutation])
-
-  // ─── Unlock handler ──────────────────────────────────────────────────
-  const onUnlockAccount = useCallback(() => {
-    if (!id) return
-    unlockAccountMutation.mutate(id)
-  }, [id, unlockAccountMutation])
+    errors,
+    isSaving,
+    onSubmit,
+    onInvalid,
+    toggleRole,
+    registerPassword,
+    passwordErrors,
+    showNewPassword,
+    setShowNewPassword,
+    showConfirmNewPassword,
+    setShowConfirmNewPassword,
+    changePasswordMutation,
+    onChangePassword,
+    showPassword,
+    setShowPassword,
+    showConfirm,
+    setShowConfirm,
+    toggleStatusMutation,
+    onToggleStatus,
+    unlockAccountMutation,
+    onUnlockAccount,
+  } = logic
 
   // ─── Loading state ───────────────────────────────────────────────────
   if (isEdit && userLoading) {
@@ -575,9 +297,9 @@ export default function UserFormPage() {
               <FormSection title={t('University')} icon={<Building2 className="h-4 w-4" />}>
                 <div className="max-w-sm space-y-1.5">
                   <Select
-                    value={watch('entityCode') || '__none__'}
+                    value={watch('universityCode') || '__none__'}
                     onValueChange={(val) =>
-                      setValue('entityCode', val === '__none__' ? '' : val, {
+                      setValue('universityCode', val === '__none__' ? '' : val, {
                         shouldValidate: true,
                       })
                     }
@@ -606,55 +328,13 @@ export default function UserFormPage() {
 
           {/* ════════════════════ ROLES TAB ════════════════════ */}
           <TabsContent value="roles" className="space-y-4">
-            <FormSection title={t('Roles')} icon={<Shield className="h-4 w-4" />}>
-              <div className="space-y-3">
-                <div className="max-h-96 space-y-2 overflow-y-auto rounded-md border border-[var(--border-color-pro)] bg-[var(--app-bg)] p-3">
-                  {Object.entries(groupedRoles).map(
-                    ([type, typeRoles]) =>
-                      typeRoles.length > 0 && (
-                        <div key={type}>
-                          <p className="mb-1.5 px-2 text-[10px] font-semibold tracking-wider text-[var(--text-secondary)] uppercase">
-                            {t(type)}
-                          </p>
-                          {typeRoles.map((role) => {
-                            const isChecked = selectedRoleIds.includes(role.id)
-                            return (
-                              // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                              <label
-                                key={role.id}
-                                className={`flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors ${
-                                  isChecked ? 'bg-[var(--active-bg)]' : 'hover:bg-[var(--hover-bg)]'
-                                }`}
-                              >
-                                <Checkbox
-                                  checked={isChecked}
-                                  onCheckedChange={() => toggleRole(role.id)}
-                                />
-                                <div className="min-w-0 flex-1">
-                                  <span className="text-sm font-medium text-[var(--text-primary)]">
-                                    {role.name}
-                                  </span>
-                                  <span className="ml-1.5 text-[10px] text-[var(--text-secondary)]">
-                                    ({role.code})
-                                  </span>
-                                </div>
-                              </label>
-                            )
-                          })}
-                        </div>
-                      ),
-                  )}
-                  {availableRoles.length === 0 && (
-                    <p className="px-2 py-3 text-center text-sm text-[var(--text-secondary)]">
-                      {t('No roles available')}
-                    </p>
-                  )}
-                </div>
-                {errors.roleIds && (
-                  <p className="text-xs text-red-500">{t('At least one role is required')}</p>
-                )}
-              </div>
-            </FormSection>
+            <RolesTabContent
+              groupedRoles={groupedRoles}
+              availableRolesCount={roles.length}
+              selectedRoleIds={selectedRoleIds}
+              onToggleRole={toggleRole}
+              hasError={!!errors.roleIds}
+            />
           </TabsContent>
 
           {/* ════════════════════ SECURITY TAB ════════════════════ */}
@@ -710,50 +390,16 @@ export default function UserFormPage() {
               /* ── EDIT MODE: Independent security actions ── */
               <>
                 {/* Change password */}
-                <FormSection title={t('Change password')} icon={<KeyRound className="h-4 w-4" />}>
-                  <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <PasswordField
-                        id="newPassword"
-                        label={t('New password')}
-                        show={showNewPassword}
-                        onToggle={() => setShowNewPassword(!showNewPassword)}
-                        placeholder="--------"
-                        error={
-                          passwordErrors.newPassword
-                            ? t('Password must be at least 6 characters')
-                            : undefined
-                        }
-                        {...registerPassword('newPassword')}
-                      />
-                    </div>
-
-                    <PasswordField
-                      id="confirmNewPassword"
-                      label={t('Confirm password')}
-                      show={showConfirmNewPassword}
-                      onToggle={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                      placeholder="--------"
-                      error={
-                        passwordErrors.confirmNewPassword ? t('Passwords do not match') : undefined
-                      }
-                      {...registerPassword('confirmNewPassword')}
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={changePasswordMutation.isPending}
-                      onClick={handlePasswordSubmit(onChangePassword)}
-                    >
-                      {changePasswordMutation.isPending && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      {t('Change password')}
-                    </Button>
-                  </div>
-                </FormSection>
+                <PasswordChangeDialog
+                  registerPassword={registerPassword}
+                  passwordErrors={passwordErrors}
+                  showNewPassword={showNewPassword}
+                  setShowNewPassword={setShowNewPassword}
+                  showConfirmNewPassword={showConfirmNewPassword}
+                  setShowConfirmNewPassword={setShowConfirmNewPassword}
+                  isPending={changePasswordMutation.isPending}
+                  onChangePassword={onChangePassword}
+                />
 
                 {/* Status */}
                 <FormSection title={t('Status')} icon={<Power className="h-4 w-4" />}>

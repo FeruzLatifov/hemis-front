@@ -169,7 +169,7 @@ export function useUsersColumns(options: UseUsersColumnsOptions) {
             className="truncate text-[var(--text-secondary)]"
             title={row.original.universityName ?? ''}
           >
-            {row.original.universityName ?? row.original.entityCode ?? '\u2014'}
+            {row.original.universityName ?? row.original.universityCode ?? '\u2014'}
           </span>
         ),
       },

@@ -91,6 +91,19 @@ vi.mock('@/stores/menuStore', () => ({
   ),
   useRootMenuItems: vi.fn(() => mockMenuItems),
   useMenuLoading: vi.fn(() => false),
+  useMenuError: vi.fn(() => null),
+}))
+
+vi.mock('@/stores/recentMenuStore', () => ({
+  useRecentMenuStore: vi.fn((selector?: (state: Record<string, unknown>) => unknown) => {
+    const state = {
+      recentItems: [],
+      addRecent: vi.fn(),
+      clearRecent: vi.fn(),
+    }
+    return typeof selector === 'function' ? selector(state) : state
+  }),
+  useRecentItems: vi.fn(() => []),
 }))
 
 vi.mock('@/stores/favoritesStore', () => ({
@@ -295,7 +308,7 @@ describe('Sidebar', () => {
     vi.mocked(useMenuLoading).mockReturnValue(true)
 
     render(<Sidebar {...defaultProps} />)
-    expect(screen.getByText('Menyu yuklanmoqda...')).toBeInTheDocument()
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
 
     vi.mocked(useMenuLoading).mockReturnValue(false)
   })
@@ -304,7 +317,7 @@ describe('Sidebar', () => {
     vi.mocked(useRootMenuItems).mockReturnValue([])
 
     render(<Sidebar {...defaultProps} />)
-    expect(screen.getByText('Menyu elementlari mavjud emas')).toBeInTheDocument()
+    expect(screen.getByText('No menu items available')).toBeInTheDocument()
 
     vi.mocked(useRootMenuItems).mockReturnValue(
       mockMenuItems as ReturnType<typeof useRootMenuItems>,

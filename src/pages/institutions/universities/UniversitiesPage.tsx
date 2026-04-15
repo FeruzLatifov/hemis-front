@@ -341,43 +341,23 @@ export default function UniversitiesPage() {
 
   const loading = isLoading && !isPlaceholderData
 
-  // ─── Code → Name resolution ───────────────────────────────────────
-  const resolvedData = useMemo(() => {
-    return universities.map((u) => ({
-      ...u,
-      regionName:
-        dictionaries.regions.find((r) => r.code === u.regionCode)?.name ?? u.regionCode ?? '',
-      ownershipName:
-        dictionaries.ownerships.find((o) => o.code === u.ownershipCode)?.name ??
-        u.ownershipCode ??
-        '',
-      typeName:
-        dictionaries.types.find((dt) => dt.code === u.universityTypeCode)?.name ??
-        u.universityTypeCode ??
-        '',
-      activityStatusName:
-        dictionaries.activityStatuses.find((s) => s.code === u.activityStatusCode)?.name ??
-        u.activityStatusCode ??
-        '',
-      belongsToName:
-        dictionaries.belongsToOptions.find((b) => b.code === u.belongsToCode)?.name ??
-        u.belongsToCode ??
-        '',
-      contractCategoryName:
-        dictionaries.contractCategories.find((c) => c.code === u.contractCategoryCode)?.name ??
-        u.contractCategoryCode ??
-        '',
-      versionTypeName:
-        dictionaries.versionTypes.find((v) => v.code === u.versionTypeCode)?.name ??
-        u.versionTypeCode ??
-        '',
-      soatoRegionName:
-        dictionaries.districts.find((d) => d.code === u.soatoRegion)?.name ??
-        dictionaries.regions.find((r) => r.code === u.soatoRegion)?.name ??
-        u.soatoRegion ??
-        '',
-    }))
-  }, [universities, dictionaries])
+  // Backend ClassifierLookupService already resolved code → name (single source of truth).
+  // Frontend simply passes the resolved names through to the table.
+  const resolvedData = useMemo(
+    () =>
+      universities.map((u) => ({
+        ...u,
+        regionName: u.region ?? '',
+        ownershipName: u.ownership ?? '',
+        typeName: u.universityType ?? '',
+        activityStatusName: u.activityStatus ?? '',
+        belongsToName: u.belongsTo ?? '',
+        contractCategoryName: u.contractCategory ?? '',
+        versionTypeName: u.versionType ?? '',
+        soatoRegionName: u.soatoRegionName ?? '',
+      })),
+    [universities],
+  )
 
   // ─── Search scopes ─────────────────────────────────────────────────
   const searchScopes = useMemo(

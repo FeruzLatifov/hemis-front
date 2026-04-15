@@ -4,7 +4,7 @@ export interface UserAdmin {
   fullName: string | null
   email: string | null
   phone: string | null
-  entityCode: string | null
+  universityCode: string | null
   universityName: string | null
   userType: 'SYSTEM' | 'UNIVERSITY' | 'MINISTRY' | 'ORGANIZATION' | null
   enabled: boolean
@@ -27,7 +27,7 @@ export interface UserCreateRequest {
   fullName?: string
   email?: string
   phone?: string
-  entityCode?: string
+  universityCode?: string
   roleIds: string[]
   enabled?: boolean
 }
@@ -36,7 +36,7 @@ export interface UserUpdateRequest {
   fullName?: string
   email?: string
   phone?: string
-  entityCode?: string
+  universityCode?: string
   roleIds?: string[]
 }
 
