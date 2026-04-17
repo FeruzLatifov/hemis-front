@@ -11,6 +11,7 @@ import {
   useUpdateUniversity,
 } from '@/hooks/useUniversities'
 import { universitiesApi, type Dictionary } from '@/api/universities.api'
+import { ACTIVITY_STATUSES, STATUS_EVENT_MAP, NEEDS_SUCCESSOR } from './activity-statuses'
 import { universityApi } from '@/api/university.api'
 import {
   useUniversityDashboard,
@@ -143,19 +144,6 @@ const DEFAULT_VALUES: FormData = {
   lifecycleDecreeDate: '',
   lifecycleNote: '',
 }
-
-// Status code → lifecycle event type (auto-mapped)
-const STATUS_EVENT_MAP: Record<string, string> = {
-  '10': 'REACTIVATED',
-  '11': 'CLOSED',
-  '12': 'MERGED',
-  '13': 'LICENSE_REVOKED',
-  '14': 'SUSPENDED',
-  '15': 'REORGANIZED',
-}
-
-// Statuses that require successor university
-const NEEDS_SUCCESSOR = new Set(['12', '15'])
 
 /** Render SelectItem list from dictionary (DRY helper for classifier selects) */
 function renderDictItems(items: Array<{ code: string; name: string }>) {
@@ -347,10 +335,12 @@ function UniversityFormPageInner() {
       addForeignStudent: university.addForeignStudent ?? false,
       addTransferStudent: university.addTransferStudent ?? false,
       addAcademicMobileStudent: university.addAcademicMobileStudent ?? false,
-      activityStatusCode: resolveByCodeOrName(
-        university.activityStatusCode,
-        dictionaries.activityStatuses,
-      ),
+      // Activity status is a hardcoded enum, not a classifier — resolve against it directly.
+      activityStatusCode:
+        university.activityStatusCode &&
+        ACTIVITY_STATUSES.some((s) => s.code === university.activityStatusCode)
+          ? university.activityStatusCode
+          : '',
       belongsToCode: resolveByCodeOrName(university.belongsToCode, dictionaries.belongsToOptions),
       contractCategoryCode: resolveByCodeOrName(
         university.contractCategoryCode,
@@ -699,7 +689,7 @@ function UniversityFormPageInner() {
                   <FormSelect
                     name="activityStatusCode"
                     control={form.control}
-                    items={dictionaries.activityStatuses}
+                    items={ACTIVITY_STATUSES.map((s) => ({ code: s.code, name: t(s.labelKey) }))}
                     placeholder={t('Select')}
                   />
                 </div>

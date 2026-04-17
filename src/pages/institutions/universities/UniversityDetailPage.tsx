@@ -6,6 +6,7 @@ import {
   useUniversityProfile,
 } from '@/hooks/useUniversity'
 import { sanitizeUrl } from '@/utils/url.util'
+import { ACTIVITY_STATUS_LABEL_KEY } from './activity-statuses'
 import { useTranslation } from 'react-i18next'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -218,7 +219,12 @@ export default function UniversityDetailPage() {
                 : ''
             }
           >
-            {university.activityStatus || '—'}
+            {(() => {
+              const key =
+                university.activityStatusCode &&
+                ACTIVITY_STATUS_LABEL_KEY[university.activityStatusCode]
+              return key ? t(key) : university.activityStatus || '—'
+            })()}
           </Badge>
         </div>
 
@@ -305,7 +311,15 @@ export default function UniversityDetailPage() {
           <Section title={t('HEMIS configuration')} icon={<Landmark className="h-4 w-4" />}>
             <Field label={t('HEMIS version')} value={university.versionType} />
             <Field label={t('Belongs to')} value={university.belongsTo} />
-            <Field label={t('Activity status')} value={university.activityStatus} />
+            <Field
+              label={t('Activity status')}
+              value={
+                university.activityStatusCode &&
+                ACTIVITY_STATUS_LABEL_KEY[university.activityStatusCode]
+                  ? t(ACTIVITY_STATUS_LABEL_KEY[university.activityStatusCode])
+                  : university.activityStatus
+              }
+            />
             <Field label={t('Contract category')} value={university.contractCategory} />
             <Field label={t('Main university')} value={university.parentUniversity} />
           </Section>

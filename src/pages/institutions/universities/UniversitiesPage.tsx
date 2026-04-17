@@ -45,6 +45,7 @@ import {
 
 import { type ResolvedRow, useUniversitiesColumns } from './universities-columns'
 import { UniversitiesFilters, type UniversitiesFilterValues } from './UniversitiesFilters'
+import { ACTIVITY_STATUS_LABEL_KEY } from './activity-statuses'
 import { buildFilterParams, handleExportAll, handleExportSelected } from './universities-export'
 
 type Density = 'compact' | 'comfortable'
@@ -350,13 +351,16 @@ export default function UniversitiesPage() {
         regionName: u.region ?? '',
         ownershipName: u.ownership ?? '',
         typeName: u.universityType ?? '',
-        activityStatusName: u.activityStatus ?? '',
+        activityStatusName:
+          (u.activityStatusCode && ACTIVITY_STATUS_LABEL_KEY[u.activityStatusCode]
+            ? t(ACTIVITY_STATUS_LABEL_KEY[u.activityStatusCode])
+            : u.activityStatus) ?? '',
         belongsToName: u.belongsTo ?? '',
         contractCategoryName: u.contractCategory ?? '',
         versionTypeName: u.versionType ?? '',
         soatoRegionName: u.soatoRegionName ?? '',
       })),
-    [universities],
+    [universities, t],
   )
 
   // ─── Search scopes ─────────────────────────────────────────────────
