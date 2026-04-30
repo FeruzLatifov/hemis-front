@@ -109,6 +109,7 @@ export function ActivityLogsTab({ search, dateFrom, dateTo }: ActivityLogsTabPro
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium">{t('Created at')}</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">{t('Username')}</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">{t('Full name')}</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">IP</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">{t('Action')}</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">{t('Entity')}</th>
@@ -120,20 +121,20 @@ export function ActivityLogsTab({ search, dateFrom, dateTo }: ActivityLogsTabPro
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td colSpan={7} className="px-4 py-3">
+                    <td colSpan={8} className="px-4 py-3">
                       <Skeleton className="h-8 w-full" />
                     </td>
                   </tr>
                 ))
               ) : error ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-red-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-red-500">
                     {t('Failed to load data')}
                   </td>
                 </tr>
               ) : !data?.content?.length ? (
                 <tr>
-                  <td colSpan={7} className="text-muted-foreground px-4 py-8 text-center">
+                  <td colSpan={8} className="text-muted-foreground px-4 py-8 text-center">
                     {t('No data found')}
                   </td>
                 </tr>
@@ -144,6 +145,7 @@ export function ActivityLogsTab({ search, dateFrom, dateTo }: ActivityLogsTabPro
                       {formatDate(row.createdAt)}
                     </td>
                     <td className="px-4 py-3 text-sm">{row.username ?? '-'}</td>
+                    <td className="px-4 py-3 text-sm">{row.fullName ?? '-'}</td>
                     <td className="px-4 py-3 font-mono text-xs">{row.userIp ?? '-'}</td>
                     <td className="px-4 py-3">
                       <span

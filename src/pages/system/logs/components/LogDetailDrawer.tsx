@@ -109,6 +109,10 @@ function ActivityDetail({ id }: { id: string }) {
           <span className="text-sm font-medium">{data.username ?? '-'}</span>
         </div>
         <div>
+          <span className="text-muted-foreground text-sm">{t('Full name')}:</span>{' '}
+          <span className="text-sm font-medium">{data.fullName ?? '-'}</span>
+        </div>
+        <div>
           <span className="text-muted-foreground text-sm">IP:</span>{' '}
           <span className="text-sm font-medium">{data.userIp ?? '-'}</span>
         </div>

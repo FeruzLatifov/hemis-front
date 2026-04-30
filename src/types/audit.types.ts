@@ -18,6 +18,7 @@ export interface ActivityLogRow {
   id: string
   userId: string | null
   username: string | null
+  fullName: string | null
   userIp: string | null
   action: AuditAction
   entityType: string | null
