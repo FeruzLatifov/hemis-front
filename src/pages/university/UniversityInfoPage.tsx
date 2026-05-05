@@ -289,22 +289,6 @@ function LifecycleTab({ lifecycle }: { lifecycle: UniversityLifecycle[] }) {
                 </span>
               </div>
 
-              {/* Name change */}
-              {(event.oldName || event.newName) && (
-                <div className="mb-2 rounded-lg border border-[var(--border-color-pro)] bg-[var(--hover-bg)] p-3 text-sm">
-                  {event.oldName && (
-                    <div className="text-[var(--text-secondary)]">
-                      <span className="font-medium">{t('From')}:</span> {event.oldName}
-                    </div>
-                  )}
-                  {event.newName && (
-                    <div className="text-[var(--text-primary)]">
-                      <span className="font-medium">{t('To')}:</span> {event.newName}
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Details */}
               <div className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                 {event.decreeNumber && (
@@ -321,22 +305,6 @@ function LifecycleTab({ lifecycle }: { lifecycle: UniversityLifecycle[] }) {
                     <span className="text-[var(--text-secondary)]">{t('Successor')}:</span>{' '}
                     <span className="font-medium text-[var(--text-primary)]">
                       {event.successorCode}
-                    </span>
-                  </div>
-                )}
-                {event.studentsCount != null && (
-                  <div>
-                    <span className="text-[var(--text-secondary)]">{t('Students')}:</span>{' '}
-                    <span className="font-medium text-[var(--text-primary)] tabular-nums">
-                      {formatNumber(event.studentsCount)}
-                    </span>
-                  </div>
-                )}
-                {event.employeesCount != null && (
-                  <div>
-                    <span className="text-[var(--text-secondary)]">{t('Employees')}:</span>{' '}
-                    <span className="font-medium text-[var(--text-primary)] tabular-nums">
-                      {formatNumber(event.employeesCount)}
                     </span>
                   </div>
                 )}

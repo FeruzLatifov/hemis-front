@@ -601,11 +601,9 @@ export function CadastreSection({
 const typeColors: Record<string, string> = {
   CLOSED: 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400',
   MERGED: 'bg-purple-100 text-purple-700 dark:bg-purple-950/20 dark:text-purple-400',
-  SPLIT: 'bg-orange-100 text-orange-700 dark:bg-orange-950/20 dark:text-orange-400',
   LICENSE_REVOKED: 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400',
   SUSPENDED: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/20 dark:text-yellow-400',
   REACTIVATED: 'bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-400',
-  RENAMED: 'bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400',
   REORGANIZED: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400',
 }
 

@@ -44,10 +44,6 @@ export interface UniversityLifecycle {
   successorCode: string | null
   decreeNumber: string | null
   decreeDate: string | null
-  studentsCount: number | null
-  employeesCount: number | null
-  oldName: string | null
-  newName: string | null
   note: string | null
   createdAt: string
   createdBy: string | null
