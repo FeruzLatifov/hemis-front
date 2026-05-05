@@ -88,12 +88,6 @@ function FoundersTab({ founders }: { founders: UniversityFounder[] }) {
               <th className="bg-[var(--table-row-alt)] px-4 py-2.5 text-right text-sm font-medium text-[var(--text-secondary)]">
                 {t('Share sum')}
               </th>
-              <th className="bg-[var(--table-row-alt)] px-4 py-2.5 text-center text-sm font-medium text-[var(--text-secondary)]">
-                {t('Status')}
-              </th>
-              <th className="bg-[var(--table-row-alt)] px-4 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
-                {t('Effective period')}
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -123,22 +117,6 @@ function FoundersTab({ founders }: { founders: UniversityFounder[] }) {
                 </td>
                 <td className="px-4 py-2.5 text-right text-sm text-[var(--text-primary)] tabular-nums">
                   {formatNumber(founder.shareSum)}
-                </td>
-                <td className="px-4 py-2.5 text-center text-sm">
-                  {founder.isCurrent ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400">
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      {t('Current')}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-color-pro)] bg-[var(--badge-muted-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--badge-muted-text)]">
-                      {t('Former')}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5 text-sm text-[var(--text-secondary)]">
-                  {formatDate(founder.effectiveFrom)}
-                  {founder.effectiveTo ? ` \u2014 ${formatDate(founder.effectiveTo)}` : ''}
                 </td>
               </tr>
             ))}

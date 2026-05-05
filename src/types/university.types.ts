@@ -31,9 +31,6 @@ export interface UniversityFounder {
   pinfl: string | null
   sharePercent: number | null
   shareSum: number | null
-  isCurrent: boolean
-  effectiveFrom: string | null
-  effectiveTo: string | null
   // Nested refs
   person: PersonRef | null
   organization: OrganizationRef | null

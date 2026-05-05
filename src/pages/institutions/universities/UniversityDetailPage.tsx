@@ -365,8 +365,7 @@ export function FoundersSection({
   founders: UniversityFounder[]
   t: (key: string) => string
 }) {
-  const current = founders.filter((f) => f.isCurrent)
-  if (current.length === 0)
+  if (founders.length === 0)
     return (
       <Section title={t('Founders')} icon={<Users className="h-4 w-4" />}>
         <p className="py-4 text-center text-sm text-[var(--text-secondary)]">
@@ -374,9 +373,9 @@ export function FoundersSection({
         </p>
       </Section>
     )
-  const totalPercent = current.reduce((sum, f) => sum + (f.sharePercent ?? 0), 0)
+  const totalPercent = founders.reduce((sum, f) => sum + (f.sharePercent ?? 0), 0)
   return (
-    <Section title={`${t('Founders')} (${current.length})`} icon={<Users className="h-4 w-4" />}>
+    <Section title={`${t('Founders')} (${founders.length})`} icon={<Users className="h-4 w-4" />}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -390,7 +389,7 @@ export function FoundersSection({
             </tr>
           </thead>
           <tbody>
-            {current.map((f, i) => (
+            {founders.map((f, i) => (
               <tr
                 key={`${f.founderType}-${f.tin ?? f.pinfl ?? i}`}
                 className="border-b border-[var(--border-color-pro)] last:border-b-0"
