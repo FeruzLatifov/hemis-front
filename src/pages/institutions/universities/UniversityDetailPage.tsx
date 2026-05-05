@@ -27,7 +27,6 @@ import {
   Share2,
 } from 'lucide-react'
 import type {
-  UniversityLegal,
   UniversityFounder,
   UniversityCadastre,
   UniversityLifecycle,
@@ -121,17 +120,6 @@ function DetailSkeleton() {
   )
 }
 
-function parseBanks(
-  raw: string | null,
-): Array<{ mfo?: string; paymentAccount?: string; status?: number; openDate?: string }> {
-  if (!raw) return []
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return []
-  }
-}
-
 function parseJsonArray(raw: string | null): Array<Record<string, unknown>> {
   if (!raw) return []
   try {
@@ -172,7 +160,6 @@ export default function UniversityDetailPage() {
   }
 
   const rector = extData?.rector
-  const director = extData?.legal
   const setTab = (tab: string) => setSearchParams({ tab })
 
   return (
@@ -237,10 +224,6 @@ export default function UniversityDetailPage() {
             </p>
           </div>
           <div>
-            <span className="text-xs text-[var(--text-secondary)]">{t('Director (legal)')}</span>
-            <p className="text-sm font-medium">{director?.director?.fullName || '—'}</p>
-          </div>
-          <div>
             <span className="text-xs text-[var(--text-secondary)]">{t('Region')}</span>
             <p className="text-sm font-medium">{university.region || '—'}</p>
           </div>
@@ -262,9 +245,9 @@ export default function UniversityDetailPage() {
             <Users className="h-4 w-4" />
             {t('Officials')}
           </TabsTrigger>
-          <TabsTrigger value="legal" className="gap-1.5">
+          <TabsTrigger value="founders" className="gap-1.5">
             <Landmark className="h-4 w-4" />
-            {t('Legal')}
+            {t('Founders')}
           </TabsTrigger>
           <TabsTrigger value="organization" className="gap-1.5">
             <Settings className="h-4 w-4" />
@@ -344,9 +327,8 @@ export default function UniversityDetailPage() {
           </Section>
         </TabsContent>
 
-        {/* ══ TAB: LEGAL ══ */}
-        <TabsContent value="legal" className="space-y-4">
-          <LegalSection legal={extData?.legal ?? null} t={t} />
+        {/* ══ TAB: FOUNDERS ══ */}
+        <TabsContent value="founders" className="space-y-4">
           <FoundersSection founders={extData?.founders ?? []} t={t} />
         </TabsContent>
 
@@ -375,137 +357,6 @@ export default function UniversityDetailPage() {
 }
 
 // ═══════════ TAB SECTIONS ═══════════
-
-export function LegalSection({
-  legal,
-  t,
-}: {
-  legal: UniversityLegal | null
-  t: (key: string) => string
-}) {
-  if (!legal)
-    return (
-      <Section title={t('Legal entity')} icon={<Landmark className="h-4 w-4" />}>
-        <p className="py-4 text-center text-sm text-[var(--text-secondary)]">
-          {t('No data. Use Sync in Edit page.')}
-        </p>
-      </Section>
-    )
-  // Backend ClassifierLookupService resolves SOATO → name. We just render.
-  const soatoDisplay = legal.billingSoatoName
-    ? `${legal.billingSoatoName} (${legal.billingSoato})`
-    : legal.billingSoato || '—'
-  const banks = parseBanks(legal.bankAccounts)
-  const director = legal.director
-  const accountant = legal.accountant
-  const opfMap: Record<number, string> = {
-    152: 'MCH',
-    270: 'DM',
-    143: 'AJ',
-    160: 'UK',
-    100: 'YaTT',
-  }
-  const kfsMap: Record<number, string> = { 100: 'Xususiy', 200: 'Davlat', 300: 'Xorijiy' }
-  const statusMap: Record<number, string> = { 0: 'Faol', 1: 'Tugatilgan', 2: "To'xtatilgan" }
-
-  return (
-    <>
-      <Section title={t('Legal entity')} icon={<Landmark className="h-4 w-4" />}>
-        <Field label={t('Full name')} value={legal.shortName} />
-        <Field label={t('INN')} value={legal.tin} />
-        {legal.opf != null && (
-          <Field
-            label={t('Legal form')}
-            value={`${opfMap[legal.opf] ?? legal.opf} (${legal.opf})`}
-          />
-        )}
-        {legal.kfs != null && (
-          <Field
-            label={t('Ownership form')}
-            value={`${kfsMap[legal.kfs] ?? legal.kfs} (${legal.kfs})`}
-          />
-        )}
-        <Field label={t('OKED')} value={legal.oked} />
-        <Field label={t('Registration number')} value={legal.registrationNumber} />
-        <Field label={t('Registration date')} value={legal.registrationDate} />
-        {legal.reregistrationDate && (
-          <Field label={t('Re-registration date')} value={legal.reregistrationDate} />
-        )}
-        {legal.status != null && (
-          <Field label={t('Status')} value={statusMap[legal.status] ?? String(legal.status)} />
-        )}
-        {legal.avgEmployees != null && (
-          <Field label={t('Average employees')} value={String(legal.avgEmployees)} />
-        )}
-        {legal.syncedAt && (
-          <Field label={t('Last synced')} value={new Date(legal.syncedAt).toLocaleString()} />
-        )}
-      </Section>
-
-      <Section title={t('Director (legal representative)')} icon={<Users className="h-4 w-4" />}>
-        <Field label={t('Full name')} value={director?.fullName} />
-        <Field label={t('PINFL')} value={director?.pinfl} />
-        {director?.tin ? <Field label={t('INN')} value={director.tin} /> : null}
-        {director?.passport ? <Field label={t('Passport')} value={director.passport} /> : null}
-        {director?.phone ? <Field label={t('Phone')} value={director.phone} /> : null}
-        {director?.email ? <Field label={t('Email')} value={director.email} /> : null}
-        {director?.address ? <Field label={t('Address')} value={director.address} /> : null}
-      </Section>
-
-      <Section title={t('Accountant')} icon={<Users className="h-4 w-4" />}>
-        <Field label={t('Full name')} value={accountant?.fullName} />
-        <Field label={t('PINFL')} value={accountant?.pinfl} />
-        {accountant?.tin ? <Field label={t('INN')} value={accountant.tin} /> : null}
-        {accountant?.passport ? <Field label={t('Passport')} value={accountant.passport} /> : null}
-        {accountant?.phone ? <Field label={t('Phone')} value={accountant.phone} /> : null}
-        {accountant?.email ? <Field label={t('Email')} value={accountant.email} /> : null}
-        {accountant?.address ? <Field label={t('Address')} value={accountant.address} /> : null}
-      </Section>
-
-      <Section title={t('Legal address')} icon={<MapPin className="h-4 w-4" />}>
-        <Field label={t('Address')} value={legal.billingStreet} />
-        <Field label={t('SOATO')} value={soatoDisplay} />
-        {legal.billingCadastre && <Field label={t('Cadastre')} value={legal.billingCadastre} />}
-        {legal.billingPostcode && <Field label={t('Postcode')} value={legal.billingPostcode} />}
-      </Section>
-
-      {banks.length > 0 && (
-        <Section
-          title={`${t('Bank accounts')} (${banks.length})`}
-          icon={<FileText className="h-4 w-4" />}
-        >
-          {banks.map((b, i) => (
-            <div
-              key={i}
-              className="border-b border-[var(--border-color-pro)] py-2.5 text-sm last:border-b-0"
-            >
-              <div className="grid grid-cols-[120px_1fr] gap-x-4">
-                <span className="text-[var(--text-secondary)]">MFO</span>
-                <span className="font-medium">{b.mfo || '—'}</span>
-              </div>
-              <div className="grid grid-cols-[120px_1fr] gap-x-4">
-                <span className="text-[var(--text-secondary)]">{t('Account')}</span>
-                <span className="font-mono font-medium">{b.paymentAccount || '—'}</span>
-              </div>
-              {b.openDate && (
-                <div className="grid grid-cols-[120px_1fr] gap-x-4">
-                  <span className="text-[var(--text-secondary)]">{t('Opened')}</span>
-                  <span>{b.openDate}</span>
-                </div>
-              )}
-              {b.status != null && (
-                <div className="grid grid-cols-[120px_1fr] gap-x-4">
-                  <span className="text-[var(--text-secondary)]">{t('Status')}</span>
-                  <span>{b.status === 0 ? t('Active') : t('Closed')}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </Section>
-      )}
-    </>
-  )
-}
 
 export function FoundersSection({
   founders,

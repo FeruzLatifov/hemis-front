@@ -94,7 +94,6 @@ export const queryKeys = {
   universityInfo: {
     all: ['universityInfo'] as const,
     dashboard: (code: string) => ['universityInfo', 'dashboard', code] as const,
-    legal: (code: string) => ['universityInfo', 'legal', code] as const,
     founders: (code: string) => ['universityInfo', 'founders', code] as const,
     lifecycle: (code: string) => ['universityInfo', 'lifecycle', code] as const,
     cadastre: (code: string) => ['universityInfo', 'cadastre', code] as const,

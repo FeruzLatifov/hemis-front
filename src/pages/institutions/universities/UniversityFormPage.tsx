@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useForm, Controller, type Control, type FieldPath } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { useDebounce } from '@/hooks/useDebounce'
 import {
   useUniversity,
   useUniversityDictionaries,
@@ -23,12 +24,7 @@ import {
   useUniversityProfile,
   useUpdateUniversityProfile,
 } from '@/hooks/useUniversity'
-import {
-  LegalSection,
-  FoundersSection,
-  CadastreSection,
-  LifecycleSection,
-} from './UniversityDetailPage'
+import { FoundersSection, CadastreSection, LifecycleSection } from './UniversityDetailPage'
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -494,9 +490,9 @@ function UniversityFormPageInner() {
                 {t('Officials')}
               </TabsTrigger>
             )}
-            <TabsTrigger value="legal" className="gap-1.5">
+            <TabsTrigger value="founders" className="gap-1.5">
               <Landmark className="h-4 w-4" />
-              {t('Legal')}
+              {t('Founders')}
             </TabsTrigger>
             <TabsTrigger value="organization" className="gap-1.5">
               <Settings className="h-4 w-4" />
@@ -834,8 +830,7 @@ function UniversityFormPageInner() {
             </FormSection>
           </TabsContent>
 
-          <TabsContent value="legal" className="space-y-4">
-            <LegalSection legal={extData?.legal ?? null} t={t} />
+          <TabsContent value="founders" className="space-y-4">
             <FoundersSection founders={extData?.founders ?? []} t={t} />
           </TabsContent>
 
@@ -937,47 +932,53 @@ function OfficialsTab({ code, t }: { code: string; t: (key: string) => string })
     setLookupStatus('idle')
   }
 
-  // PINFL kiritilganda — avval lokal bazadan qidiradi (document kerak emas)
-  // Topilmasa — document yoki birthDate bilan tashqi API dan qidiradi
-  useEffect(() => {
-    if (pinfl.length === 14 && lookupStatus === 'idle') {
-      setLookupStatus('loading')
-      universityApi
-        .lookupPerson(pinfl)
-        .then((person) => {
-          if (person) {
-            if (person.firstName) setFirstName(String(person.firstName))
-            if (person.lastName) setLastName(String(person.lastName))
-            if (person.middleName) setMiddleName(String(person.middleName))
-            if (person.phone) setPhone(String(person.phone))
-            setLookupStatus('found')
-          } else {
-            setLookupStatus('not_found')
-          }
-        })
-        .catch(() => setLookupStatus('not_found'))
-    }
-    if (pinfl.length < 14) setLookupStatus('idle')
-  }, [pinfl, lookupStatus])
+  // PINFL lookup mutation — declarative, with built-in loading/error state.
+  // Replaces the prior useEffect-based fetch (CLAUDE.md: no API calls in useEffect).
+  const lookupMutation = useMutation({
+    mutationFn: ({
+      pinfl: lookupPinfl,
+      document: lookupDocument,
+      birthDate: lookupBirthDate,
+    }: {
+      pinfl: string
+      document?: string
+      birthDate?: string
+    }) => universityApi.lookupPerson(lookupPinfl, lookupDocument, lookupBirthDate),
+    onMutate: () => setLookupStatus('loading'),
+    onSuccess: (person) => {
+      if (person) {
+        if (person.firstName) setFirstName(String(person.firstName))
+        if (person.lastName) setLastName(String(person.lastName))
+        if (person.middleName) setMiddleName(String(person.middleName))
+        if (person.phone) setPhone(String(person.phone))
+        setLookupStatus('found')
+      } else {
+        setLookupStatus('not_found')
+      }
+    },
+    onError: () => setLookupStatus('not_found'),
+  })
+  const { mutate: triggerLookup, reset: resetLookup } = lookupMutation
 
-  // Tashqi API qidirish (document yoki birthDate bilan)
+  // Auto-lookup on full PINFL — debounced 400ms to avoid mid-typing requests.
+  const debouncedPinfl = useDebounce(pinfl, 400)
+  useEffect(() => {
+    if (debouncedPinfl.length === 14) {
+      triggerLookup({ pinfl: debouncedPinfl })
+    } else {
+      resetLookup()
+      setLookupStatus('idle')
+    }
+  }, [debouncedPinfl, triggerLookup, resetLookup])
+
+  // Tashqi API qidirish (document yoki birthDate bilan) — same mutation, manual trigger.
   const handleExternalLookup = () => {
     if (pinfl.length !== 14 || (!document && !birthDate)) return
-    setLookupStatus('loading')
-    universityApi
-      .lookupPerson(pinfl, document || undefined, birthDate || undefined)
-      .then((person) => {
-        if (person) {
-          if (person.firstName) setFirstName(String(person.firstName))
-          if (person.lastName) setLastName(String(person.lastName))
-          if (person.middleName) setMiddleName(String(person.middleName))
-          if (person.phone) setPhone(String(person.phone))
-          setLookupStatus('found')
-        } else {
-          setLookupStatus('not_found')
-        }
-      })
-      .catch(() => setLookupStatus('not_found'))
+    triggerLookup({
+      pinfl,
+      document: document || undefined,
+      birthDate: birthDate || undefined,
+    })
   }
 
   const handleAppoint = () => {

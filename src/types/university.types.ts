@@ -24,37 +24,6 @@ export interface OrganizationRef {
   name: string | null
 }
 
-export interface UniversityLegal {
-  universityCode: string
-  shortName: string | null
-  opf: number | null
-  kfs: number | null
-  tin: string | null
-  oked: string | null
-  soogu: string | null
-  registrationDate: string | null
-  registrationNumber: string | null
-  reregistrationDate: string | null
-  status: number | null
-  statusUpdated: string | null
-  avgEmployees: number | null
-  // Billing address
-  billingCountryCode: number | null
-  billingSoato: string | null
-  /** District/region name resolved by backend ClassifierLookupService. */
-  billingSoatoName: string | null
-  billingStreet: string | null
-  billingPostcode: string | null
-  billingCadastre: string | null
-  // Director & Accountant — employee dan DTO orqali
-  director: PersonRef | null
-  accountant: PersonRef | null
-  // Bank accounts
-  bankAccounts: string | null
-  // Sync
-  syncedAt: string | null
-}
-
 export interface UniversityFounder {
   founderType: 'individual' | 'legal'
   name: string | null
@@ -195,7 +164,6 @@ export interface UniversityProfile {
 export type UniversityProfileRequest = Omit<UniversityProfile, 'universityCode'>
 
 export interface UniversityDashboard {
-  legal: UniversityLegal | null
   founders: UniversityFounder[]
   lifecycle: UniversityLifecycle[]
   cadastre: UniversityCadastre[]

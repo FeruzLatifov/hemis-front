@@ -11,65 +11,19 @@ import {
   Users,
   MapPin,
   History,
-  FileText,
   Calendar,
   CircleDot,
   Ban,
-  Landmark,
   RefreshCw,
   Loader2,
 } from 'lucide-react'
 import type {
-  UniversityLegal,
   UniversityFounder,
   UniversityLifecycle,
   UniversityCadastre,
 } from '@/types/university.types'
 
 // ── Helper Components ──────────────────────────────────────────────────
-
-/** Field row for key-value display */
-function Field({
-  label,
-  value,
-  children,
-}: {
-  label: string
-  value?: string | number | null
-  children?: React.ReactNode
-}) {
-  return (
-    <div className="grid grid-cols-[180px_1fr] gap-x-4 border-b border-[var(--border-color-pro)] py-2.5 last:border-b-0">
-      <dt className="text-sm text-[var(--text-secondary)]">{label}</dt>
-      <dd className="text-sm font-medium text-[var(--text-primary)]">
-        {children ?? (value != null && value !== '' ? String(value) : '\u2014')}
-      </dd>
-    </div>
-  )
-}
-
-/** Section card with icon header */
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title: string
-  icon: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <section className="rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
-      <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-5 py-3">
-        <span className="text-[var(--text-secondary)]">{icon}</span>
-        <h3 className="text-sm font-medium tracking-wider text-[var(--text-secondary)] uppercase">
-          {title}
-        </h3>
-      </div>
-      <dl className="px-5 py-1">{children}</dl>
-    </section>
-  )
-}
 
 /** Empty state for tabs with no data */
 function EmptyState({ icon, message }: { icon: React.ReactNode; message: string }) {
@@ -104,64 +58,6 @@ function formatNumber(value: number | null | undefined): string {
 }
 
 // ── Tab Components ─────────────────────────────────────────────────────
-
-/** Legal Info Tab */
-function LegalInfoTab({ legal }: { legal: UniversityLegal | null }) {
-  const { t } = useTranslation()
-
-  if (!legal) {
-    return <EmptyState icon={<Building2 className="h-6 w-6" />} message={t('No data available')} />
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* General Legal Info */}
-      <Section title={t('General information')} icon={<Building2 className="h-4 w-4" />}>
-        <Field label={t('Short name')} value={legal.shortName} />
-        <Field label={t('TIN')} value={legal.tin} />
-        <Field label={t('OKED')} value={legal.oked} />
-        <Field label={t('Registration date')} value={formatDate(legal.registrationDate)} />
-        <Field label={t('Registration number')} value={legal.registrationNumber} />
-        <Field label={t('Status')}>
-          <Badge variant={legal.status === 1 ? 'default' : 'secondary'} className="text-xs">
-            {legal.status === 1 ? t('Active') : t('Inactive')}
-          </Badge>
-        </Field>
-        <Field label={t('Last synced')} value={formatDate(legal.syncedAt)} />
-      </Section>
-
-      {/* Director */}
-      <Section title={t('Director')} icon={<Users className="h-4 w-4" />}>
-        <Field label={t('Full name')} value={legal.director?.fullName} />
-        <Field label={t('PINFL')} value={legal.director?.pinfl} />
-        <Field label={t('Phone')} value={legal.director?.phone} />
-      </Section>
-
-      {/* Accountant */}
-      <Section title={t('Chief accountant')} icon={<FileText className="h-4 w-4" />}>
-        <Field label={t('Full name')} value={legal.accountant?.fullName} />
-        <Field label={t('PINFL')} value={legal.accountant?.pinfl} />
-        <Field label={t('Phone')} value={legal.accountant?.phone} />
-      </Section>
-
-      {/* Billing Address */}
-      <Section title={t('Billing address')} icon={<MapPin className="h-4 w-4" />}>
-        <Field label={t('Street')} value={legal.billingStreet} />
-        <Field label={t('SOATO')} value={legal.billingSoato} />
-        <Field label={t('Postcode')} value={legal.billingPostcode} />
-      </Section>
-
-      {/* Bank Accounts */}
-      {legal.bankAccounts && (
-        <Section title={t('Bank accounts')} icon={<Landmark className="h-4 w-4" />}>
-          <p className="text-sm text-[var(--text-secondary)]">
-            {t('See bank details in university detail page')}
-          </p>
-        </Section>
-      )}
-    </div>
-  )
-}
 
 /** Founders Tab */
 function FoundersTab({ founders }: { founders: UniversityFounder[] }) {
@@ -550,7 +446,7 @@ function ErrorState() {
 export default function UniversityInfoPage() {
   const { code } = useParams<{ code: string }>()
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState('legal')
+  const [activeTab, setActiveTab] = useState('founders')
 
   const { data: dashboard, isLoading, isError } = useUniversityDashboard(code ?? '')
   const syncMutation = useSyncUniversityData(code ?? '')
@@ -559,10 +455,7 @@ export default function UniversityInfoPage() {
 
   if (isError) return <ErrorState />
 
-  const hasData =
-    dashboard?.legal ||
-    (dashboard?.founders?.length ?? 0) > 0 ||
-    (dashboard?.cadastre?.length ?? 0) > 0
+  const hasData = (dashboard?.founders?.length ?? 0) > 0 || (dashboard?.cadastre?.length ?? 0) > 0
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4">
@@ -598,10 +491,6 @@ export default function UniversityInfoPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="legal" className="gap-1.5">
-            <Building2 className="h-4 w-4" />
-            {t('Legal Info')}
-          </TabsTrigger>
           <TabsTrigger value="founders" className="gap-1.5">
             <Users className="h-4 w-4" />
             {t('Founders')}
@@ -615,10 +504,6 @@ export default function UniversityInfoPage() {
             {t('Lifecycle')}
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="legal" className="mt-4">
-          <LegalInfoTab legal={dashboard?.legal ?? null} />
-        </TabsContent>
 
         <TabsContent value="founders" className="mt-4">
           <FoundersTab founders={dashboard?.founders ?? []} />

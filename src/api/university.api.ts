@@ -1,7 +1,6 @@
 import apiClient from './client'
 import type {
   UniversityDashboard,
-  UniversityLegal,
   UniversityFounder,
   UniversityLifecycle,
   UniversityCadastre,
@@ -14,14 +13,6 @@ export const universityApi = {
   async getDashboard(code: string, signal?: AbortSignal): Promise<UniversityDashboard> {
     const response = await apiClient.get<{ success: boolean; data: UniversityDashboard }>(
       `/api/v1/web/university/${code}/dashboard`,
-      { signal },
-    )
-    return response.data.data
-  },
-
-  async getLegal(code: string, signal?: AbortSignal): Promise<UniversityLegal | null> {
-    const response = await apiClient.get<{ success: boolean; data: UniversityLegal | null }>(
-      `/api/v1/web/university/${code}/legal`,
       { signal },
     )
     return response.data.data

@@ -13,14 +13,6 @@ export function useUniversityDashboard(code: string) {
   })
 }
 
-export function useUniversityLegal(code: string) {
-  return useQuery({
-    queryKey: queryKeys.universityInfo.legal(code),
-    queryFn: ({ signal }) => universityApi.getLegal(code, signal),
-    enabled: !!code,
-  })
-}
-
 export function useUniversityFounders(code: string) {
   return useQuery({
     queryKey: queryKeys.universityInfo.founders(code),
