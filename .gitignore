@@ -39,3 +39,17 @@ secrets.json
 
 # Coverage reports (may contain sensitive paths)
 coverage/
+
+# Test/automation artifacts
+.playwright-mcp/
+playwright-report/
+test-results/
+
+# Local export downloads (CSV/XLSX exports land here if dev server is launched
+# from repo root — the export uses the browser download flow, so these files
+# are user-local artifacts, never source)
+*.xlsx
+*.csv
+
+# Build info
+tsconfig.tsbuildinfo
