@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useStableCallback } from '@/hooks/useStableCallback'
 import {
   type SortingState,
   type VisibilityState,
@@ -17,19 +18,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { PAGINATION, UI } from '@/constants'
-import {
-  SlidersHorizontal,
-  FileSpreadsheet,
-  RefreshCw,
-  Plus,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Search,
-  Rows3,
-} from 'lucide-react'
-import { SearchScopeSelector } from '@/components/filters/SearchScopeSelector'
-import { ColumnSettingsPopover } from '@/components/filters/ColumnSettingsPopover'
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -47,6 +36,9 @@ import { type ResolvedRow, useUniversitiesColumns } from './universities-columns
 import { UniversitiesFilters, type UniversitiesFilterValues } from './UniversitiesFilters'
 import { ACTIVITY_STATUS_LABEL_KEY } from './activity-statuses'
 import { buildFilterParams, handleExportAll, handleExportSelected } from './universities-export'
+import { UniversitiesToolbar } from './UniversitiesToolbar'
+import { UniversitiesBulkActionBar } from './UniversitiesBulkActionBar'
+import { UniversitiesEmptyState } from './UniversitiesEmptyState'
 
 type Density = 'compact' | 'comfortable'
 
@@ -193,12 +185,16 @@ export default function UniversitiesPage() {
     }
   }, [searchInput])
 
-  useEffect(() => {
+  // One-way sync from local state → URL via stable callback (latest values, stable identity).
+  const syncSearchToUrl = useStableCallback(() => {
     if (debouncedSearch !== searchFromUrl) {
       updateSearchParams({ q: debouncedSearch || undefined, page: undefined })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
+  })
+
+  useEffect(() => {
+    syncSearchToUrl()
+  }, [debouncedSearch, syncSearchToUrl])
 
   // ─── Sort param ───────────────────────────────────────────────────
   const sortParam = useMemo(() => {
@@ -206,12 +202,15 @@ export default function UniversitiesPage() {
     return `${sorting[0].id},${sorting[0].desc ? 'desc' : 'asc'}`
   }, [sorting])
 
-  useEffect(() => {
+  const syncSortToUrl = useStableCallback(() => {
     if (sortParam !== sortFromUrl) {
       updateSearchParams({ sort: sortParam === 'name,asc' ? undefined : sortParam })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortParam])
+  })
+
+  useEffect(() => {
+    syncSortToUrl()
+  }, [sortParam, syncSortToUrl])
 
   // ─── Persist to localStorage ──────────────────────────────────────
   useEffect(() => {
@@ -659,109 +658,26 @@ export default function UniversitiesPage() {
       {/* ──── Card Container ──── */}
       <div className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)]">
         {/* ──── Toolbar ──── */}
-        <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
-          {/* Filter Toggle */}
-          <button
-            onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-              showFiltersPanel || activeFilterCount > 0
-                ? 'border-[var(--primary)]/20 bg-[var(--active-bg)] text-[var(--primary)]'
-                : 'border-[var(--border-color-pro)] bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'
-            }`}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            <span>{t('Filters')}</span>
-            {activeFilterCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-
-          {/* Search */}
-          <div ref={searchContainerRef}>
-            <SearchScopeSelector
-              value={searchScope}
-              onChange={handleScopeChange}
-              scopes={searchScopes}
-              searchValue={searchInput}
-              onSearchChange={setSearchInput}
-              onSearch={handleSearch}
-              onClear={handleClearSearch}
-            />
-          </div>
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Total count */}
-          <span className="text-xs text-[var(--text-secondary)] tabular-nums">
-            {t('Total')}:{' '}
-            <span className="font-semibold text-[var(--text-primary)]">{totalElements}</span>
-          </span>
-
-          <div className="h-5 w-px bg-[var(--border-color-pro)]" />
-
-          {/* Density toggle */}
-          <button
-            onClick={() => setDensity((d) => (d === 'compact' ? 'comfortable' : 'compact'))}
-            className={`rounded-lg p-1.5 transition-colors ${
-              isCompact
-                ? 'bg-[var(--hover-bg)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
-            }`}
-            title={isCompact ? t('Comfortable view') : t('Compact view')}
-          >
-            <Rows3 className="h-4 w-4" />
-          </button>
-
-          {/* Refresh */}
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="rounded-lg p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)] disabled:opacity-40"
-            title={t('Refresh')}
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-
-          {/* Export Excel */}
-          <button
-            onClick={onExportAll}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            Excel
-          </button>
-
-          {/* Column Settings */}
-          <ColumnSettingsPopover
-            columns={table
-              .getAllLeafColumns()
-              .filter((col) => col.id !== 'rowNumber' && col.id !== 'select')
-              .map((col) => ({
-                id: col.id,
-                label: typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id,
-                visible: col.getIsVisible(),
-                canHide: col.id !== 'rowNumber' && col.id !== 'select',
-              }))}
-            onToggle={(columnId) => {
-              const column = table.getColumn(columnId)
-              if (column) column.toggleVisibility()
-            }}
-          />
-
-          <div className="h-5 w-px bg-[var(--border-color-pro)]" />
-
-          {/* Add Button */}
-          <button
-            onClick={() => navigate('/institutions/universities/create')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
-          >
-            <Plus className="h-4 w-4" />
-            {t('Add')}
-          </button>
-        </div>
+        <UniversitiesToolbar
+          showFiltersPanel={showFiltersPanel}
+          onToggleFiltersPanel={() => setShowFiltersPanel(!showFiltersPanel)}
+          activeFilterCount={activeFilterCount}
+          searchScope={searchScope}
+          onScopeChange={handleScopeChange}
+          searchScopes={searchScopes}
+          searchInput={searchInput}
+          onSearchInputChange={setSearchInput}
+          onSearch={handleSearch}
+          onClearSearch={handleClearSearch}
+          searchContainerRef={searchContainerRef}
+          totalElements={totalElements}
+          isLoading={isLoading}
+          density={density}
+          onDensityToggle={() => setDensity((d) => (d === 'compact' ? 'comfortable' : 'compact'))}
+          onRefresh={handleRefresh}
+          onExportAll={onExportAll}
+          table={table}
+        />
 
         {/* ──── Filters ──── */}
         <UniversitiesFilters
@@ -775,27 +691,11 @@ export default function UniversitiesPage() {
         />
 
         {/* ──── Bulk action bar ──── */}
-        {selectedRowCount > 0 && (
-          <div className="flex items-center gap-3 border-b border-[var(--primary)]/10 bg-[var(--active-bg)] px-4 py-2">
-            <span className="text-sm font-medium text-[var(--primary)]">
-              {selectedRowCount} {t('selected')}
-            </span>
-            <div className="h-4 w-px bg-[var(--primary)]/20" />
-            <button
-              onClick={onExportSelected}
-              className="inline-flex items-center gap-1 rounded-md bg-[var(--emerald-bg)] px-2 py-0.5 text-xs font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80"
-            >
-              <FileSpreadsheet className="h-3 w-3" />
-              {t('Export selected')}
-            </button>
-            <button
-              onClick={() => setRowSelection({})}
-              className="ml-auto text-xs text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-            >
-              {t('Clear')}
-            </button>
-          </div>
-        )}
+        <UniversitiesBulkActionBar
+          selectedCount={selectedRowCount}
+          onExportSelected={onExportSelected}
+          onClearSelection={() => setRowSelection({})}
+        />
 
         {/* ──── Progress bar ──── */}
         {(isLoading || isPlaceholderData) && (
@@ -888,36 +788,11 @@ export default function UniversitiesPage() {
                     colSpan={table.getVisibleLeafColumns().length}
                     className="px-4 py-16 text-center"
                   >
-                    <div className="flex flex-col items-center gap-3">
-                      <Search className="h-8 w-8 text-[var(--text-secondary)]" />
-                      <div>
-                        <p className="text-sm font-medium text-[var(--text-primary)]">
-                          {t('No data found')}
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                          {debouncedSearch || hasActiveFilters
-                            ? t('Try changing your search or filters')
-                            : t('No universities have been added yet')}
-                        </p>
-                      </div>
-                      {!debouncedSearch && !hasActiveFilters && (
-                        <button
-                          onClick={() => navigate('/institutions/universities/create')}
-                          className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                          {t('Add')}
-                        </button>
-                      )}
-                      {(debouncedSearch || hasActiveFilters) && (
-                        <button
-                          onClick={handleClearFilters}
-                          className="mt-1 text-xs text-[var(--primary)] transition-colors hover:underline"
-                        >
-                          {t('Clear')} {t('Filters').toLowerCase()}
-                        </button>
-                      )}
-                    </div>
+                    <UniversitiesEmptyState
+                      isFiltered={!!debouncedSearch || hasActiveFilters}
+                      onCreate={() => navigate('/institutions/universities/create')}
+                      onClearFilters={handleClearFilters}
+                    />
                   </td>
                 </tr>
               ) : (

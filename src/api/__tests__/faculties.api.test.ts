@@ -124,7 +124,7 @@ describe('facultiesApi.getFacultyDetail', () => {
 
     const result = await facultiesApi.getFacultyDetail('FAC001')
 
-    expect(mockGet).toHaveBeenCalledWith(`${BASE_URL}/FAC001`)
+    expect(mockGet).toHaveBeenCalledWith(`${BASE_URL}/FAC001`, { signal: undefined })
     expect(result.code).toBe('FAC001')
     expect(result.nameUz).toBe('Informatika fakulteti')
   })
@@ -147,7 +147,7 @@ describe('facultiesApi.getDictionaries', () => {
 
     const result = await facultiesApi.getDictionaries()
 
-    expect(mockGet).toHaveBeenCalledWith(`${BASE_URL}/dictionaries`)
+    expect(mockGet).toHaveBeenCalledWith(`${BASE_URL}/dictionaries`, { signal: undefined })
     expect(result.statuses).toHaveLength(2)
     expect(result.statuses[0].value).toBe(true)
   })

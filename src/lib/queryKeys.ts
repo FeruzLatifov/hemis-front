@@ -12,6 +12,8 @@ export const queryKeys = {
     byId: (id: string) => ['universities', id] as const,
     faculties: (id: string) => ['universities', id, 'faculties'] as const,
     dictionaries: ['universities', 'dictionaries'] as const,
+    terrains: (districtCode: string) => ['universities', 'terrains', districtCode] as const,
+    positions: ['universities', 'positions'] as const,
   },
 
   translations: {

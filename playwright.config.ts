@@ -25,6 +25,26 @@ export default defineConfig({
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
+    // Desktop Safari (WebKit). Catches Safari-only regressions: date input
+    // formatting, focus-visible behaviour, BroadcastChannel availability,
+    // sticky header z-index quirks. Run nightly in CI via:
+    //   `yarn e2e --project=webkit`
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    // Mobile coverage: Pixel 5 (Android Chrome) + iPhone 13 (Mobile Safari)
+    // catches the layout regressions desktop projects miss — burger menu,
+    // sidebar collapse, touch target sizes, viewport meta. Run with
+    // `yarn e2e --project=mobile-chrome` or `--project=mobile-safari`.
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 13'] },
+    },
   ],
 
   webServer: process.env.CI

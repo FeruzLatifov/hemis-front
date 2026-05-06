@@ -13,29 +13,18 @@ export default function NotFoundPage() {
   const navigate = useNavigate()
 
   return (
-    <div
-      className="flex min-h-screen flex-col items-center justify-center px-4"
-      style={{ backgroundColor: 'var(--app-bg)' }}
-    >
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--app-bg)] px-4">
       <div className="w-full max-w-lg text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
-          <div
-            className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full"
-            style={{ backgroundColor: 'var(--primary)', opacity: 0.1 }}
-          >
-            <Search className="h-16 w-16" style={{ color: 'var(--primary)' }} />
+          <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-[var(--primary)] opacity-10">
+            <Search className="h-16 w-16 text-[var(--primary)]" />
           </div>
-          <h1
-            className="mb-2 text-8xl font-bold tracking-tighter"
-            style={{ color: 'var(--primary)' }}
-          >
-            404
-          </h1>
-          <h2 className="mb-4 text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="mb-2 text-8xl font-bold tracking-tighter text-[var(--primary)]">404</h1>
+          <h2 className="mb-4 text-2xl font-semibold text-[var(--text-primary)]">
             {t('Page not found')}
           </h2>
-          <p className="text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-base leading-relaxed text-[var(--text-secondary)]">
             {t("Sorry, the page you're looking for doesn't exist or has been moved.")}
           </p>
         </div>
@@ -44,20 +33,14 @@ export default function NotFoundPage() {
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-semibold transition-all hover:shadow-md"
-            style={{
-              borderColor: 'var(--border-color-pro)',
-              backgroundColor: 'var(--card-bg)',
-              color: 'var(--text-primary)',
-            }}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[var(--border-color-pro)] bg-[var(--card-bg)] px-6 py-3 font-semibold text-[var(--text-primary)] transition-all hover:shadow-md"
           >
             <ArrowLeft className="h-5 w-5" />
             {t('Go back')}
           </button>
           <button
             onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
-            style={{ backgroundColor: 'var(--primary)' }}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-6 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
           >
             <Home className="h-5 w-5" />
             {t('Go to Dashboard')}
@@ -65,36 +48,20 @@ export default function NotFoundPage() {
         </div>
 
         {/* Help Section */}
-        <div
-          className="rounded-lg border p-6"
-          style={{
-            borderColor: 'var(--border-color-pro)',
-            backgroundColor: 'var(--card-bg)',
-          }}
-        >
+        <div className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-6">
           <div className="mb-3 flex items-center justify-center gap-2">
-            <HelpCircle className="h-5 w-5" style={{ color: 'var(--primary)' }} />
-            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {t('Need help?')}
-            </span>
+            <HelpCircle className="h-5 w-5 text-[var(--primary)]" />
+            <span className="font-semibold text-[var(--text-primary)]">{t('Need help?')}</span>
           </div>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm text-[var(--text-secondary)]">
             {t('If you believe this is an error, please contact the system administrator.')}
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm">
-            <a
-              href="mailto:support@hemis.uz"
-              className="hover:underline"
-              style={{ color: 'var(--primary)' }}
-            >
+            <a href="mailto:support@hemis.uz" className="text-[var(--primary)] hover:underline">
               support@hemis.uz
             </a>
-            <span style={{ color: 'var(--text-secondary)' }}>|</span>
-            <a
-              href="tel:+998712000000"
-              className="hover:underline"
-              style={{ color: 'var(--primary)' }}
-            >
+            <span className="text-[var(--text-secondary)]">|</span>
+            <a href="tel:+998712000000" className="text-[var(--primary)] hover:underline">
               +998 71 200 00 00
             </a>
           </div>

@@ -335,6 +335,127 @@ describe('Response Interceptor - 401 errors', () => {
     await expect(responseRejected(error)).rejects.toBe(error)
     expect(axios.post).not.toHaveBeenCalled()
   })
+
+  // Race-condition guard: when the user opens the dashboard and three
+  // independent widgets fire requests at the same time, the cookie
+  // expires while the first response is still in flight. All three end
+  // up with 401. Without debouncing the interceptor would call
+  // /auth/refresh three times — wasting requests, doubling latency, and
+  // (worst case) confusing the backend's refresh-token rotation. The
+  // contract under test:
+  //   1. Only one /auth/refresh hits the network.
+  //   2. The two queued requests resolve after the refresh completes,
+  //      each triggering a single retry of its own original URL.
+  it('debounces concurrent 401s into a single refresh and retries each request once', async () => {
+    // The refresh promise we control manually so we can fire all three
+    // 401 errors before it resolves.
+    let resolveRefresh: (value: unknown) => void = () => {}
+    ;(axios.post as Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRefresh = resolve
+        }),
+    )
+
+    // Each of the three retries returns its own deterministic payload.
+    mockApiClientCall
+      .mockResolvedValueOnce({ data: 'retry-A' })
+      .mockResolvedValueOnce({ data: 'retry-B' })
+      .mockResolvedValueOnce({ data: 'retry-C' })
+
+    const errA = makeAxiosError(401, {}, { url: '/api/v1/web/a' })
+    const errB = makeAxiosError(401, {}, { url: '/api/v1/web/b' })
+    const errC = makeAxiosError(401, {}, { url: '/api/v1/web/c' })
+
+    // Fire all three before the refresh resolves.
+    const pA = responseRejected(errA)
+    const pB = responseRejected(errB)
+    const pC = responseRejected(errC)
+
+    // Microtask flush so the interceptor can register pending calls.
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // Only the first 401 should have fired the refresh — the other two
+    // are queued waiting for the same in-flight refresh.
+    expect(axios.post).toHaveBeenCalledTimes(1)
+    expect(axios.post).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/web/auth/refresh'),
+      {},
+      { withCredentials: true },
+    )
+
+    // Now resolve the single refresh — every queued request should pick up.
+    resolveRefresh({ data: { success: true } })
+
+    const [resA, resB, resC] = await Promise.all([pA, pB, pC])
+
+    expect(resA).toEqual({ data: 'retry-A' })
+    expect(resB).toEqual({ data: 'retry-B' })
+    expect(resC).toEqual({ data: 'retry-C' })
+
+    // Each original URL retried exactly once — and crucially, /auth/refresh
+    // was *not* called a second or third time.
+    expect(axios.post).toHaveBeenCalledTimes(1)
+    expect(mockApiClientCall).toHaveBeenCalledTimes(3)
+    expect(mockApiClientCall).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ url: '/api/v1/web/a', _retry: true }),
+    )
+    expect(mockApiClientCall).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ url: '/api/v1/web/b' }),
+    )
+    expect(mockApiClientCall).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ url: '/api/v1/web/c' }),
+    )
+  })
+
+  it('rejects every queued request when the single refresh fails', async () => {
+    // Same setup as the success path, but the refresh rejects mid-flight.
+    // Contract: no retry happens, auth:logout fires for the originating
+    // request (so a single global redirect is enough), and *every* queued
+    // request rejects so the React Query layer can show error states.
+    let rejectRefresh: (reason: unknown) => void = () => {}
+    ;(axios.post as Mock).mockImplementationOnce(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectRefresh = reject
+        }),
+    )
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    const errA = makeAxiosError(401, {}, { url: '/api/v1/web/a' })
+    const errB = makeAxiosError(401, {}, { url: '/api/v1/web/b' })
+
+    // Attach catch handlers eagerly so vitest's unhandled-rejection
+    // watchdog doesn't fire while we orchestrate the test.
+    const pA = responseRejected(errA).catch((e: unknown) => e)
+    const pB = responseRejected(errB).catch((e: unknown) => e)
+
+    await Promise.resolve()
+    rejectRefresh(new Error('refresh failed'))
+
+    const [resA, resB] = await Promise.all([pA, pB])
+
+    // Originating request rejects with the *original* 401 (the interceptor
+    // returns `Promise.reject(error)` after the catch); queued requests
+    // reject with the refresh error since they were waiting on the queue.
+    expect(resA).toBe(errA)
+    expect(resB).toBeInstanceOf(Error)
+
+    // Logout dispatched at least once — global handler is idempotent.
+    const logoutCalls = dispatchSpy.mock.calls.filter(
+      ([e]) => (e as CustomEvent).type === 'auth:logout',
+    )
+    expect(logoutCalls.length).toBeGreaterThanOrEqual(1)
+
+    // No retry of the original URLs — refresh failed.
+    expect(mockApiClientCall).not.toHaveBeenCalled()
+
+    dispatchSpy.mockRestore()
+  })
 })
 
 // ===== Response Interceptor - 500 handling =====

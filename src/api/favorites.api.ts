@@ -27,8 +27,8 @@ export interface UserFavorite {
  *
  * @returns List of user favorites
  */
-export const getUserFavorites = async (): Promise<UserFavorite[]> => {
-  const response = await apiClient.get('/api/v1/web/favorites')
+export const getUserFavorites = async (signal?: AbortSignal): Promise<UserFavorite[]> => {
+  const response = await apiClient.get('/api/v1/web/favorites', { signal })
   return response.data.data
 }
 

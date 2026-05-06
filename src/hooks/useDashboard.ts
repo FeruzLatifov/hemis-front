@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { getDashboardStats } from '@/api/dashboard.api'
 import { queryKeys } from '@/lib/queryKeys'
+import { CACHE } from '@/constants/cache'
 
 /**
  * Hook to fetch dashboard statistics
@@ -9,7 +10,7 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: queryKeys.dashboard.stats,
     queryFn: ({ signal }) => getDashboardStats(signal),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+    staleTime: CACHE.SHORT,
+    refetchInterval: CACHE.SHORT, // Auto-refresh keeps stats live on idle dashboards.
   })
 }

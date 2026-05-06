@@ -10,7 +10,7 @@ import { useState, useMemo, useEffect, useCallback, useRef, memo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { GraduationCap, ChevronLeft, Menu, Star, Search, X, Clock } from 'lucide-react'
+import { ChevronLeft, Menu, Star, Search, X, Clock } from 'lucide-react'
 import { useRootMenuItems, useMenuLoading, useMenuError } from '@/stores/menuStore'
 import { useFavoritesList } from '@/stores/favoritesStore'
 import { useRecentMenuStore, useRecentItems } from '@/stores/recentMenuStore'
@@ -206,10 +206,7 @@ function Sidebar({ open, setOpen }: SidebarProps) {
         )}
       >
         {/* Header */}
-        <div
-          className="card-white flex h-14 items-center justify-between border-b px-3 md:h-16 md:px-4"
-          style={{ boxShadow: 'var(--shadow-sm)' }}
-        >
+        <div className="card-white flex h-14 items-center justify-between border-b px-3 shadow-[var(--shadow-sm)] md:h-16 md:px-4">
           {open ? (
             <div className="flex items-center gap-2.5 md:gap-3">
               <div className="layout-bg border-color-light flex h-9 w-9 items-center justify-center rounded-lg border p-2 md:h-10 md:w-10">
@@ -406,26 +403,19 @@ function Sidebar({ open, setOpen }: SidebarProps) {
           )}
         </nav>
 
-        {/* Footer */}
-        <div className="border-color-light border-t p-3 md:p-4">
-          {open ? (
-            <div className="layout-bg border-color-light flex items-center gap-2.5 rounded-lg border px-2.5 py-2 md:gap-3 md:px-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primary)] md:h-8 md:w-8">
-                <GraduationCap className="h-3.5 w-3.5 text-white md:h-4 md:w-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-color-primary text-xs font-medium">HEMIS Ministry</p>
-                <p className="text-color-secondary text-xs">v2.0.0</p>
-              </div>
-            </div>
-          ) : (
-            <div className="hidden justify-center md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)]">
-                <GraduationCap className="h-4 w-4 text-white" />
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Footer — version stamp only.
+            The product brand ("HEMIS / Ministry Portal") is already shown in
+            the sidebar header; repeating the same logo + name in a footer
+            card was visual noise. A muted version line is enough — it gives
+            ops a stamp to ask about ("which build are you on?") without
+            cluttering the chrome. */}
+        {open && (
+          <div className="border-color-light border-t px-4 py-2.5 md:py-3">
+            <p className="text-color-secondary text-center text-[11px] font-medium tracking-wide">
+              v2.0.0
+            </p>
+          </div>
+        )}
       </aside>
     </>
   )

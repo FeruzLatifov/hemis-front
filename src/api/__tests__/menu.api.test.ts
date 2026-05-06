@@ -48,7 +48,9 @@ describe('menu.api', () => {
 
       const result = await getUserMenu()
 
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/menu?locale=uz-UZ')
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/menu?locale=uz-UZ', {
+        signal: undefined,
+      })
       expect(result).toEqual(mockResponse)
       expect(result.menu).toHaveLength(1)
       expect(result.permissions).toContain('VIEW_DASHBOARD')
@@ -66,7 +68,9 @@ describe('menu.api', () => {
 
       const result = await getUserMenu('ru-RU')
 
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/menu?locale=ru-RU')
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/menu?locale=ru-RU', {
+        signal: undefined,
+      })
       expect(result.locale).toBe('ru-RU')
     })
 

@@ -5,6 +5,7 @@ import {
   type UniversityDetail,
 } from '@/api/universities.api'
 import { queryKeys } from '@/lib/queryKeys'
+import { CACHE } from '@/constants/cache'
 import { toast } from 'sonner'
 import i18n from '@/i18n/config'
 
@@ -27,7 +28,9 @@ export function useUniversity(code: string) {
   return useQuery({
     queryKey: queryKeys.universities.byId(code),
     queryFn: ({ signal }) => universitiesApi.getUniversity(code, signal),
-    enabled: !!code, // Only fetch if code exists
+    enabled: !!code,
+    // Backend caches 24h; LONG aligns with the dictionaries that drive this view.
+    staleTime: CACHE.LONG,
   })
 }
 
@@ -37,8 +40,8 @@ export function useUniversity(code: string) {
 export function useUniversityDictionaries() {
   return useQuery({
     queryKey: queryKeys.universities.dictionaries,
-    queryFn: () => universitiesApi.getDictionaries(),
-    staleTime: 1000 * 60 * 60, // 1 hour - dictionaries don't change often
+    queryFn: ({ signal }) => universitiesApi.getDictionaries(signal),
+    staleTime: CACHE.LONG,
   })
 }
 

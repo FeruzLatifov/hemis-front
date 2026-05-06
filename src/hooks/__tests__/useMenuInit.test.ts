@@ -47,16 +47,25 @@ vi.mock('@/stores/authStore', () => ({
     selector({ isAuthenticated: mockIsAuthenticated }),
 }))
 
-// Mock menu store
+// Mock menu store — covers every selector useMenuInit touches.
 const mockSetMenuItems = vi.fn()
+const mockSetLoading = vi.fn()
+const mockSetError = vi.fn()
 const mockClearMenu = vi.fn()
+type MenuStoreState = {
+  setMenuItems: typeof mockSetMenuItems
+  setLoading: typeof mockSetLoading
+  setError: typeof mockSetError
+  clearMenu: typeof mockClearMenu
+}
+const menuStoreState: MenuStoreState = {
+  setMenuItems: mockSetMenuItems,
+  setLoading: mockSetLoading,
+  setError: mockSetError,
+  clearMenu: mockClearMenu,
+}
 vi.mock('@/stores/menuStore', () => ({
-  useMenuStore: (
-    selector: (state: {
-      setMenuItems: typeof mockSetMenuItems
-      clearMenu: typeof mockClearMenu
-    }) => unknown,
-  ) => selector({ setMenuItems: mockSetMenuItems, clearMenu: mockClearMenu }),
+  useMenuStore: (selector: (state: MenuStoreState) => unknown) => selector(menuStoreState),
 }))
 
 // Mock favorites store
@@ -73,6 +82,13 @@ vi.mock('@/stores/favoritesStore', () => {
     ),
   }
 })
+
+// Mock recent menu store
+const mockClearRecent = vi.fn()
+vi.mock('@/stores/recentMenuStore', () => ({
+  useRecentMenuStore: (selector: (state: { clearRecent: typeof mockClearRecent }) => unknown) =>
+    selector({ clearRecent: mockClearRecent }),
+}))
 
 // Mock useMenu hook
 let mockMenuData: { menu: Array<{ id: string; label: string }> } | undefined = undefined

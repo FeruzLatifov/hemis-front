@@ -163,7 +163,7 @@ describe('CommandPalette', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
     // Press Escape in the search input
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     fireEvent.keyDown(input, { key: 'Escape' })
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -172,7 +172,7 @@ describe('CommandPalette', () => {
   it('shows search input when open', () => {
     render(<CommandPalette />)
     openPalette()
-    expect(screen.getByPlaceholderText('Sahifalarni qidirish...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search pages...')).toBeInTheDocument()
   })
 
   it('shows all menu items when no search query', () => {
@@ -188,7 +188,7 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    expect(screen.getByText('Barcha sahifalar')).toBeInTheDocument()
+    expect(screen.getByText('All pages')).toBeInTheDocument()
   })
 
   it('filters menu items based on search query', async () => {
@@ -196,7 +196,7 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     await user.type(input, 'Dashboard')
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
@@ -209,10 +209,10 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     await user.type(input, 'Dash')
 
-    expect(screen.getByText('Natijalar')).toBeInTheDocument()
+    expect(screen.getByText('Results')).toBeInTheDocument()
   })
 
   it('shows empty state when no results found', async () => {
@@ -220,10 +220,10 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     await user.type(input, 'xxxxxxxxxxx')
 
-    expect(screen.getByText('Natija topilmadi')).toBeInTheDocument()
+    expect(screen.getByText('No results found')).toBeInTheDocument()
   })
 
   it('navigates on item selection via click', async () => {
@@ -241,7 +241,7 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     fireEvent.keyDown(input, { key: 'Enter' })
 
     expect(mockNavigate).toHaveBeenCalled()
@@ -274,7 +274,7 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     fireEvent.keyDown(input, { key: 'ArrowDown' })
 
     // Should move active index, just ensure no error
@@ -285,7 +285,7 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    const input = screen.getByPlaceholderText('Sahifalarni qidirish...')
+    const input = screen.getByPlaceholderText('Search pages...')
     fireEvent.keyDown(input, { key: 'ArrowUp' })
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()

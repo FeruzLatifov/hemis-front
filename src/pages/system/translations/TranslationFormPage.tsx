@@ -59,7 +59,7 @@ export default function TranslationFormPage() {
   // Warn user about unsaved changes when navigating away
   useUnsavedChanges({
     isDirty,
-    message: t("Saqlanmagan o'zgarishlar bor. Sahifadan chiqmoqchimisiz?"),
+    message: t('You have unsaved changes. Are you sure you want to leave?'),
   })
 
   // Populate form when translation data loads
@@ -286,6 +286,8 @@ export default function TranslationFormPage() {
                 onChange={(e) => handleChange('messageUz', e.target.value)}
                 placeholder={t('Primary text (uz-UZ)')}
                 rows={3}
+                aria-invalid={!!errors.messageUz}
+                aria-describedby={errors.messageUz ? 'messageUz-error' : undefined}
                 className={`w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
                   errors.messageUz
                     ? 'border-red-300 focus:ring-red-500'
@@ -293,7 +295,11 @@ export default function TranslationFormPage() {
                 }`}
                 disabled={loading}
               />
-              {errors.messageUz && <p className="mt-1 text-sm text-red-600">{errors.messageUz}</p>}
+              {errors.messageUz && (
+                <p id="messageUz-error" role="alert" className="mt-1 text-sm text-red-600">
+                  {errors.messageUz}
+                </p>
+              )}
 
               {/* Similar translations warning */}
               {similarTranslations.length > 0 && (
@@ -307,10 +313,7 @@ export default function TranslationFormPage() {
                   <div className="space-y-1.5">
                     {similarTranslations.slice(0, 5).map((item) => (
                       <div key={item.id} className="flex items-center gap-2 text-xs">
-                        <span
-                          className="rounded px-1.5 py-0.5 font-bold text-white"
-                          style={{ backgroundColor: 'var(--primary)', fontSize: '10px' }}
-                        >
+                        <span className="rounded bg-[var(--primary)] px-1.5 py-0.5 text-[10px] font-bold text-white">
                           {item.category}
                         </span>
                         <span className="font-mono font-medium text-yellow-900 dark:text-yellow-200">

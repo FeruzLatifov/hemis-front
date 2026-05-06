@@ -141,12 +141,12 @@ describe('useFacultyGroups', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockGroupsResponse)
-    expect(mockGetGroups).toHaveBeenCalledWith({
-      q: undefined,
-      status: undefined,
-      page: 0,
-      size: 20,
-    })
+    // TanStack Query passes a fresh AbortSignal as the second arg; assert the
+    // payload separately to stay independent of that internal detail.
+    expect(mockGetGroups).toHaveBeenCalledWith(
+      { q: undefined, status: undefined, page: 0, size: 20 },
+      expect.any(AbortSignal),
+    )
   })
 
   it('passes search filter', async () => {
@@ -156,12 +156,10 @@ describe('useFacultyGroups', () => {
     renderHook(() => useFacultyGroups({ search: 'TATU', status: 'true', page: 0 }), { wrapper })
 
     await waitFor(() =>
-      expect(mockGetGroups).toHaveBeenCalledWith({
-        q: 'TATU',
-        status: true,
-        page: 0,
-        size: 20,
-      }),
+      expect(mockGetGroups).toHaveBeenCalledWith(
+        { q: 'TATU', status: true, page: 0, size: 20 },
+        expect.any(AbortSignal),
+      ),
     )
   })
 })
@@ -211,7 +209,7 @@ describe('useFacultyDetail', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockFacultyDetail)
-    expect(mockGetFacultyDetail).toHaveBeenCalledWith('FAC1')
+    expect(mockGetFacultyDetail).toHaveBeenCalledWith('FAC1', expect.any(AbortSignal))
   })
 
   it('does not fetch when code is null', () => {

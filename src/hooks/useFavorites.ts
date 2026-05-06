@@ -7,16 +7,17 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
+import { CACHE } from '@/constants/cache'
 import * as favoritesApi from '@/api/favorites.api'
 import type { UserFavorite } from '@/api/favorites.api'
 
 export function useFavoritesQuery(enabled = true) {
   return useQuery<UserFavorite[]>({
     queryKey: queryKeys.favorites.list,
-    queryFn: favoritesApi.getUserFavorites,
+    queryFn: ({ signal }) => favoritesApi.getUserFavorites(signal),
     enabled,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: CACHE.SHORT,
+    gcTime: CACHE.GC_DEFAULT,
   })
 }
 

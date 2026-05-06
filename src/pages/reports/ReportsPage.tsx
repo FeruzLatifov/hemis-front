@@ -19,114 +19,114 @@ export default function Reports() {
 
   const reportCategories = [
     {
-      name: t('Talabalar hisobotlari'),
+      name: t('Student reports'),
       icon: Users,
       color: 'bg-blue-500',
       bgColor: 'bg-blue-50 dark:bg-blue-950/20',
       reports: [
         {
-          name: t('Talabalar statistikasi'),
-          description: t('Umumiy talabalar soni va taqsimlash'),
-          count: t('12 parametr'),
+          name: t('Student statistics'),
+          description: t('Total students count and distribution'),
+          count: t('{{count}} parameters', { count: 12 }),
         },
         {
-          name: t("Ta'lim turlari bo'yicha"),
-          description: t('Bakalavr, Magistr, PhD taqsimlash'),
-          count: t('8 parametr'),
+          name: t('By education type'),
+          description: t('Bachelor, Master, PhD distribution'),
+          count: t('{{count}} parameters', { count: 8 }),
         },
         {
-          name: t("To'lov shakli bo'yicha"),
-          description: t('Grant va kontrakt talabalar'),
-          count: t('6 parametr'),
+          name: t('By payment type'),
+          description: t('Grant and contract students'),
+          count: t('{{count}} parameters', { count: 6 }),
         },
         {
-          name: t('Hududlar kesimida'),
-          description: t("Viloyatlar bo'yicha taqsimlash"),
-          count: t('14 parametr'),
+          name: t('By region'),
+          description: t('Distribution by regions'),
+          count: t('{{count}} parameters', { count: 14 }),
         },
       ],
     },
     {
-      name: t("O'qituvchilar hisobotlari"),
+      name: t('Teacher reports'),
       icon: GraduationCap,
       color: 'bg-blue-500',
       bgColor: 'bg-blue-50 dark:bg-blue-950/20',
       reports: [
         {
-          name: t('Ilmiy darajalar kesimida'),
-          description: t('Fan doktori, PhD, DSc'),
-          count: t('10 parametr'),
+          name: t('By scientific degrees'),
+          description: t('Doctor of Science, PhD, DSc'),
+          count: t('{{count}} parameters', { count: 10 }),
         },
         {
-          name: t("Ilmiy unvonlar bo'yicha"),
-          description: t('Professor, Dotsent statistikasi'),
-          count: t('8 parametr'),
+          name: t('By academic titles'),
+          description: t('Professor, Associate professor statistics'),
+          count: t('{{count}} parameters', { count: 8 }),
         },
         {
-          name: t("Tajriba bo'yicha"),
-          description: t('Ish staji kesimida'),
-          count: t('5 parametr'),
+          name: t('By experience'),
+          description: t('By work experience'),
+          count: t('{{count}} parameters', { count: 5 }),
         },
         {
-          name: t("Kafedralar bo'yicha"),
-          description: t('Kafedralardagi xodimlar'),
-          count: t('12 parametr'),
+          name: t('By departments'),
+          description: t('Department employees'),
+          count: t('{{count}} parameters', { count: 12 }),
         },
       ],
     },
     {
-      name: t('Universitetlar hisobotlari'),
+      name: t('University reports'),
       icon: Building2,
       color: 'bg-green-500',
       bgColor: 'bg-green-50 dark:bg-green-950/20',
       reports: [
         {
-          name: t("Umumiy ko'rsatkichlar"),
-          description: t('OTMlar asosiy statistikasi'),
-          count: t('15 parametr'),
+          name: t('General indicators'),
+          description: t('Main HEI statistics'),
+          count: t('{{count}} parameters', { count: 15 }),
         },
         {
-          name: t("Reyting bo'yicha"),
-          description: t('OTMlar reytingi va taqqoslash'),
-          count: t('20 parametr'),
+          name: t('By rating'),
+          description: t('HEI rating and comparison'),
+          count: t('{{count}} parameters', { count: 20 }),
         },
         {
-          name: t("Tashkiliy shakl bo'yicha"),
-          description: t('Institut, Universitet, Akademiya'),
-          count: t('8 parametr'),
+          name: t('By organizational form'),
+          description: t('Institute, University, Academy'),
+          count: t('{{count}} parameters', { count: 8 }),
         },
         {
-          name: t('Mulkchilik shakli'),
-          description: t("Davlat, Xususiy, Qo'shma"),
-          count: t('6 parametr'),
+          name: t('Form of ownership'),
+          description: t('State, Private, Joint'),
+          count: t('{{count}} parameters', { count: 6 }),
         },
       ],
     },
     {
-      name: t('Ilmiy faoliyat'),
+      name: t('Scientific activity'),
       icon: Target,
       color: 'bg-amber-500',
       bgColor: 'bg-amber-50 dark:bg-amber-950/20',
       reports: [
         {
-          name: t('Ilmiy nashrlar'),
-          description: t('Scopus, Web of Science nashrlari'),
-          count: t('18 parametr'),
+          name: t('Scientific publications'),
+          description: t('Scopus, Web of Science publications'),
+          count: t('{{count}} parameters', { count: 18 }),
         },
         {
-          name: t('Ilmiy loyihalar'),
-          description: t('Mahalliy va xalqaro loyihalar'),
-          count: t('12 parametr'),
+          name: t('Scientific projects'),
+          description: t('Local and international projects'),
+          count: t('{{count}} parameters', { count: 12 }),
         },
         {
-          name: t('Dissertasiya himoyalari'),
-          description: t('Fan nomzodi, Fan doktori'),
-          count: t('10 parametr'),
+          name: t('Dissertation defenses'),
+          description: t('Candidate of Sciences, Doctor of Sciences'),
+          count: t('{{count}} parameters', { count: 10 }),
         },
         {
-          name: t('Intellektual mulk'),
-          description: t('Patentlar, litsenziyalar'),
-          count: t('8 parametr'),
+          name: t('Intellectual property'),
+          description: t('Patents, licenses'),
+          count: t('{{count}} parameters', { count: 8 }),
         },
       ],
     },
@@ -204,7 +204,7 @@ export default function Reports() {
                   {t('Last update')}
                 </p>
                 <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                  Bugun, 08:00
+                  {t('Today, {{time}}', { time: '08:00' })}
                 </p>
               </div>
               <TrendingUp className="h-10 w-10 text-orange-500 opacity-50" />

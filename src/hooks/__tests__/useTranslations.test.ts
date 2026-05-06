@@ -159,15 +159,18 @@ describe('useTranslations', () => {
     )
 
     await waitFor(() =>
-      expect(mockGetTranslations).toHaveBeenCalledWith({
-        category: 'action',
-        search: 'Save',
-        active: true,
-        page: 0,
-        size: 20,
-        sortBy: 'category',
-        sortDir: 'ASC',
-      }),
+      expect(mockGetTranslations).toHaveBeenCalledWith(
+        {
+          category: 'action',
+          search: 'Save',
+          active: true,
+          page: 0,
+          size: 20,
+          sortBy: 'category',
+          sortDir: 'ASC',
+        },
+        expect.any(AbortSignal),
+      ),
     )
   })
 

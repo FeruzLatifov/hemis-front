@@ -48,16 +48,19 @@ export function useTranslations(params: {
       searchFilter: params.search,
       activeFilter: params.active,
     }),
-    queryFn: () =>
-      getTranslations({
-        category: params.category || undefined,
-        search: params.search || undefined,
-        active: params.active,
-        page: params.page,
-        size: params.size,
-        sortBy: 'category',
-        sortDir: 'ASC',
-      }),
+    queryFn: ({ signal }) =>
+      getTranslations(
+        {
+          category: params.category || undefined,
+          search: params.search || undefined,
+          active: params.active,
+          page: params.page,
+          size: params.size,
+          sortBy: 'category',
+          sortDir: 'ASC',
+        },
+        signal,
+      ),
   })
 }
 
@@ -67,7 +70,7 @@ export function useTranslations(params: {
 export function useTranslationById(id: string | undefined) {
   return useQuery({
     queryKey: queryKeys.translations.byId(id || ''),
-    queryFn: () => getTranslationById(id!),
+    queryFn: ({ signal }) => getTranslationById(id!, signal),
     enabled: !!id,
   })
 }

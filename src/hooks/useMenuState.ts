@@ -12,18 +12,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MenuItem as BackendMenuItem } from '@/api/menu.api'
 
-/**
- * Check if any item in tree is active (matches the given pathname)
- */
-function checkActiveInTree(item: BackendMenuItem, pathname: string): boolean {
-  if (item.url && (pathname === item.url || pathname.startsWith(item.url + '/'))) {
-    return true
-  }
-  if (item.items && item.items.length > 0) {
-    return item.items.some((child) => checkActiveInTree(child, pathname))
-  }
-  return false
-}
+import { checkActiveInTree } from '@/components/layouts/menu-tree.util'
 
 interface UseMenuStateOptions {
   /** Root-level menu items from the backend */

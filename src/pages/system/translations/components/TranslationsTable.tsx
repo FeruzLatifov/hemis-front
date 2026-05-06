@@ -36,41 +36,22 @@ const TranslationRow = memo(function TranslationRow({
   onEdit: (id: string) => void
   t: (key: string) => string
 }) {
+  // Row striping is index-driven (not :nth-child) because the table has no <thead>
+  // sibling that would offset CSS-based even/odd selectors after pagination.
+  const stripe = index % 2 === 0 ? 'bg-transparent' : 'bg-[rgba(102,126,234,0.02)]'
   return (
     <tr
-      className="border-b transition-colors"
-      style={{
-        borderColor: 'var(--border-color-pro)',
-        backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(102, 126, 234, 0.02)',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--active-bg)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor =
-          index % 2 === 0 ? 'transparent' : 'rgba(102, 126, 234, 0.02)'
-      }}
+      className={`border-b border-[var(--border-color-pro)] transition-colors hover:bg-[var(--active-bg)] ${stripe}`}
     >
       <td className="px-4 py-3 text-sm">
-        <span
-          className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold shadow-sm"
-          style={{
-            backgroundColor: 'var(--primary)',
-            color: 'white',
-          }}
-        >
+        <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-1 text-xs font-bold text-white shadow-sm">
           {translation.category}
         </span>
       </td>
-      <td
-        className="px-4 py-3 font-mono text-sm font-semibold"
-        style={{ color: 'var(--text-primary)' }}
-      >
+      <td className="px-4 py-3 font-mono text-sm font-semibold text-[var(--text-primary)]">
         {translation.messageKey}
       </td>
-      <td className="px-4 py-3 text-sm" style={{ color: 'var(--text-primary)' }}>
-        {translation.message}
-      </td>
+      <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{translation.message}</td>
       <td className="px-4 py-3 text-center">
         <button
           onClick={() => onToggleActive(translation.id)}
@@ -86,14 +67,7 @@ const TranslationRow = memo(function TranslationRow({
       <td className="px-4 py-3 text-center">
         <button
           onClick={() => onEdit(translation.id)}
-          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:shadow-md"
-          style={{ backgroundColor: 'var(--primary)' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--primary-hover)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--primary)'
-          }}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[var(--primary-hover)] hover:shadow-md"
         >
           <Edit className="h-3.5 w-3.5" />
           {t('Edit')}
@@ -128,13 +102,8 @@ export function TranslationsTable({
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center">
-          <div
-            className="mb-3 inline-block h-10 w-10 animate-spin rounded-full border-4 border-t-transparent"
-            style={{ borderColor: 'var(--primary)' }}
-          ></div>
-          <p className="font-semibold" style={{ color: 'var(--text-secondary)' }}>
-            {t('Loading...')}
-          </p>
+          <div className="mb-3 inline-block h-10 w-10 animate-spin rounded-full border-4 border-[var(--primary)] border-t-transparent"></div>
+          <p className="font-semibold text-[var(--text-secondary)]">{t('Loading...')}</p>
         </div>
       </div>
     )
@@ -143,7 +112,7 @@ export function TranslationsTable({
   if (isError) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="font-semibold" style={{ color: 'var(--danger)' }}>
+        <p className="font-semibold text-[var(--danger)]">
           {t('Error')}: {error?.message || t('Failed to load translations')}
         </p>
       </div>
@@ -153,9 +122,7 @@ export function TranslationsTable({
   if (translations.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="font-semibold" style={{ color: 'var(--text-secondary)' }}>
-          {t('No translations found')}
-        </p>
+        <p className="font-semibold text-[var(--text-secondary)]">{t('No translations found')}</p>
       </div>
     )
   }
@@ -166,13 +133,7 @@ export function TranslationsTable({
       <div className="flex-1 overflow-auto">
         <table className="w-full">
           {/* Sticky Table Header */}
-          <thead
-            className="sticky top-0 z-10"
-            style={{
-              backgroundColor: 'var(--primary)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
+          <thead className="sticky top-0 z-10 bg-[var(--primary)] shadow-[var(--shadow-sm)]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-bold tracking-wide text-white uppercase">
                 {t('Category')}
@@ -208,33 +169,15 @@ export function TranslationsTable({
       </div>
 
       {/* Sticky Pagination Footer */}
-      <div
-        className="sticky bottom-0 flex items-center justify-between border-t px-4 py-3"
-        style={{
-          backgroundColor: 'var(--card-bg)',
-          borderColor: 'var(--border-color-pro)',
-          boxShadow: '0 -1px 4px rgba(0,0,0,0.05)',
-        }}
-      >
-        <div
-          className="flex items-center gap-2 text-sm font-semibold"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          <span
-            className="rounded-md px-2.5 py-1 font-bold text-white"
-            style={{ backgroundColor: 'var(--primary)' }}
-          >
+      <div className="sticky bottom-0 flex items-center justify-between border-t border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 py-3 shadow-[0_-1px_4px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+          <span className="rounded-md bg-[var(--primary)] px-2.5 py-1 font-bold text-white">
             {totalItems}
           </span>
           <span>{t('items')}</span>
-          <span className="mx-1" style={{ color: 'var(--text-secondary)' }}>
-            •
-          </span>
+          <span className="mx-1 text-[var(--text-secondary)]">•</span>
           <span>{t('Page')}</span>
-          <span
-            className="rounded-md px-2.5 py-1 font-bold text-white"
-            style={{ backgroundColor: 'var(--primary)' }}
-          >
+          <span className="rounded-md bg-[var(--primary)] px-2.5 py-1 font-bold text-white">
             {currentPage + 1}
           </span>
           <span>/</span>
@@ -245,25 +188,22 @@ export function TranslationsTable({
           <button
             onClick={() => onPageChange(Math.max(0, currentPage - 1))}
             disabled={currentPage === 0}
-            className="rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30"
-            style={{
-              borderColor: currentPage === 0 ? 'var(--border-color-pro)' : 'var(--primary)',
-              backgroundColor: 'var(--card-bg)',
-              color: currentPage === 0 ? 'var(--text-secondary)' : 'var(--primary)',
-            }}
+            className={`rounded-lg border-2 bg-[var(--card-bg)] px-4 py-2 text-sm font-semibold transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30 ${
+              currentPage === 0
+                ? 'border-[var(--border-color-pro)] text-[var(--text-secondary)]'
+                : 'border-[var(--primary)] text-[var(--primary)]'
+            }`}
           >
             ← {t('Previous')}
           </button>
           <button
             onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
             disabled={currentPage >= totalPages - 1}
-            className="rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30"
-            style={{
-              borderColor:
-                currentPage >= totalPages - 1 ? 'var(--border-color-pro)' : 'var(--primary)',
-              backgroundColor: 'var(--card-bg)',
-              color: currentPage >= totalPages - 1 ? 'var(--text-secondary)' : 'var(--primary)',
-            }}
+            className={`rounded-lg border-2 bg-[var(--card-bg)] px-4 py-2 text-sm font-semibold transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30 ${
+              currentPage >= totalPages - 1
+                ? 'border-[var(--border-color-pro)] text-[var(--text-secondary)]'
+                : 'border-[var(--primary)] text-[var(--primary)]'
+            }`}
           >
             {t('Next')} →
           </button>

@@ -23,23 +23,13 @@ interface SkipLinkProps {
 export function SkipLink({ targetId = 'main-content', label }: SkipLinkProps) {
   const { t } = useTranslation()
 
+  // Visually hidden until keyboard focus reveals the link.
+  // Arbitrary clip utilities replace the prior inline-style + onFocus/onBlur DOM
+  // mutation, so the element stays purely declarative.
   return (
     <a
       href={`#${targetId}`}
-      className="fixed top-0 left-0 z-[9999] -translate-y-full transform bg-[var(--primary)] px-4 py-2 text-white transition-transform focus:translate-y-0"
-      style={{
-        // Only visible when focused
-        clip: 'rect(0 0 0 0)',
-        clipPath: 'inset(50%)',
-      }}
-      onFocus={(e) => {
-        e.currentTarget.style.clip = 'auto'
-        e.currentTarget.style.clipPath = 'none'
-      }}
-      onBlur={(e) => {
-        e.currentTarget.style.clip = 'rect(0 0 0 0)'
-        e.currentTarget.style.clipPath = 'inset(50%)'
-      }}
+      className="fixed top-0 left-0 z-[9999] -translate-y-full transform bg-[var(--primary)] px-4 py-2 text-white transition-transform [clip-path:inset(50%)] [clip:rect(0_0_0_0)] focus:translate-y-0 focus:[clip-path:none] focus:[clip:auto]"
     >
       {label || t('Skip to main content')}
     </a>

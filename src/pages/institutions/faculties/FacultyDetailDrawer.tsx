@@ -40,10 +40,7 @@ export default function FacultyDetailDrawer({ facultyCode, onClose }: FacultyDet
         if (e.key === 'Escape') onClose()
       }}
     >
-      <div
-        className="bg-background h-full w-full max-w-2xl overflow-y-auto border-l border-[var(--border-color-pro)] duration-300"
-        style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
-      >
+      <div className="bg-background h-full w-full max-w-2xl overflow-y-auto border-l border-[var(--border-color-pro)] shadow-[0_1px_2px_rgba(15,23,42,0.04)] duration-300">
         {/* Header */}
         <div className="bg-background sticky top-0 z-10 flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">

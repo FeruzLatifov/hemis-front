@@ -88,7 +88,7 @@ describe('getDashboardStats', () => {
 
     await getDashboardStats()
 
-    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/dashboard/stats')
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/dashboard/stats', { signal: undefined })
   })
 
   it('returns the response data', async () => {
@@ -122,7 +122,7 @@ describe('dashboardApi.getStats', () => {
 
     const result = await dashboardApi.getStats()
 
-    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/dashboard/stats')
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/dashboard/stats', { signal: undefined })
     expect(result).toEqual(mockStatsResponse)
   })
 })

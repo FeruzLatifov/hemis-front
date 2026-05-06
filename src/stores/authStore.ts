@@ -5,9 +5,11 @@
  */
 
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { AuthState, LoginRequest } from '@/types/auth.types'
 import * as authApi from '@/api/auth.api'
+import { setSentryUser } from '@/lib/sentry'
+import { authBroadcaster } from '@/lib/auth-broadcast'
 
 interface AuthStore extends AuthState {
   // Actions
@@ -39,6 +41,17 @@ export const useAuthStore = create<AuthStore>()(
           permissions: response.permissions,
           isAuthenticated: true,
         })
+
+        // Tag subsequent Sentry events with this user (id + username only —
+        // PII-safe; full profile is never sent to error monitoring).
+        setSentryUser({
+          id: response.user?.id ? String(response.user.id) : undefined,
+          username: response.user?.username,
+        })
+
+        // Tell every other open tab to re-fetch its session so the user
+        // doesn't see a stale "not logged in" UI in the next tab over.
+        authBroadcaster.publish({ type: 'login' })
       },
 
       // Logout action
@@ -54,6 +67,11 @@ export const useAuthStore = create<AuthStore>()(
             permissions: [],
             isAuthenticated: false,
           })
+          setSentryUser(null)
+          // Force every other tab to drop its session immediately.
+          // Critical on shared workstations: a logout in one tab must not
+          // leave authenticated state alive in another.
+          authBroadcaster.publish({ type: 'logout' })
         }
       },
 
@@ -66,6 +84,10 @@ export const useAuthStore = create<AuthStore>()(
             user: response.user,
             university: response.university,
             permissions: response.permissions,
+          })
+          setSentryUser({
+            id: response.user?.id ? String(response.user.id) : undefined,
+            username: response.user?.username,
           })
         } catch (error) {
           get().logout()
@@ -95,6 +117,10 @@ export const useAuthStore = create<AuthStore>()(
               university: response.university,
               permissions: response.permissions,
             })
+            setSentryUser({
+              id: response.user?.id ? String(response.user.id) : undefined,
+              username: response.user?.username,
+            })
           } catch {
             // Token expired or invalid — logout
             await get().logout()
@@ -104,6 +130,16 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
+      // Use sessionStorage instead of localStorage. Two reasons:
+      //   1) Reduces XSS blast radius — even with a successful injection,
+      //      the leaked user metadata dies with the tab.
+      //   2) Matches the actual auth boundary: the JWT lives in an
+      //      HTTPOnly cookie scoped to the session anyway, so persisting
+      //      user info beyond the tab serves no real product purpose.
+      // Logout-on-tab-close is acceptable for an admin tool; if we ever
+      // want "remember me", that goes through a backend refresh-token
+      // endpoint, not localStorage.
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         user: state.user,
         university: state.university,

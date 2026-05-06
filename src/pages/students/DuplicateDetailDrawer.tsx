@@ -78,10 +78,7 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
         if (e.key === 'Escape') onClose()
       }}
     >
-      <div
-        className="flex h-full w-full max-w-2xl flex-col border-l border-[var(--border-color-pro)] bg-[var(--card-bg)]"
-        style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
-      >
+      <div className="flex h-full w-full max-w-2xl flex-col border-l border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-color-pro)] px-6 py-4">
           <div>
@@ -90,8 +87,8 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
             </h2>
             <p className="font-mono text-sm text-[var(--text-secondary)]">PINFL: {pinfl}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label={t('Close')}>
+            <X className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
 

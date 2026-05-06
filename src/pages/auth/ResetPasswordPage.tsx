@@ -64,12 +64,9 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div
-        className="flex min-h-screen items-center justify-center px-4"
-        style={{ backgroundColor: 'var(--app-bg)' }}
-      >
+      <div className="flex min-h-screen items-center justify-center bg-[var(--app-bg)] px-4">
         <div className="text-center">
-          <p className="mb-4 text-sm" style={{ color: 'var(--text-primary)' }}>
+          <p className="mb-4 text-sm text-[var(--text-primary)]">
             {t('Invalid or missing reset token')}
           </p>
           <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:underline">
@@ -81,10 +78,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4"
-      style={{ backgroundColor: 'var(--app-bg)' }}
-    >
+    <div className="flex min-h-screen items-center justify-center bg-[var(--app-bg)] px-4">
       <div className="w-full max-w-[400px]">
         <div className="login-form-card">
           {/* Logo */}
@@ -95,10 +89,10 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="mb-6">
-            <h2 className="mb-1.5 text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+            <h2 className="mb-1.5 text-xl font-semibold text-[var(--text-primary)]">
               {t('Set new password')}
             </h2>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm text-[var(--text-secondary)]">
               {t('Enter your new password below')}
             </p>
           </div>
@@ -108,8 +102,7 @@ export default function ResetPasswordPage() {
             <div>
               <label
                 htmlFor="new-password"
-                className="mb-2 block text-[13px] font-medium"
-                style={{ color: 'var(--text-primary)' }}
+                className="mb-2 block text-[13px] font-medium text-[var(--text-primary)]"
               >
                 {t('New password')}
               </label>
@@ -117,24 +110,24 @@ export default function ResetPasswordPage() {
                 <input
                   id="new-password"
                   type={showPassword ? 'text' : 'password'}
-                  className={`login-input ${errors.password ? 'border-red-400' : ''}`}
-                  style={{ paddingRight: 40 }}
+                  className={`login-input pr-10 ${errors.password ? 'border-red-400' : ''}`}
                   autoComplete="new-password"
                   disabled={isLoading}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? 'new-password-error' : undefined}
                   {...register('password')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2"
-                  style={{ color: 'var(--text-secondary)', opacity: 0.4 }}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[var(--text-secondary)] opacity-40"
                   aria-label={showPassword ? t('Hide password') : t('Show password')}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-xs text-red-500">
+                <p id="new-password-error" role="alert" className="mt-1 text-xs text-red-500">
                   {errors.password.message || t('Password must be at least 6 characters')}
                 </p>
               )}
@@ -144,8 +137,7 @@ export default function ResetPasswordPage() {
             <div>
               <label
                 htmlFor="confirm-password"
-                className="mb-2 block text-[13px] font-medium"
-                style={{ color: 'var(--text-primary)' }}
+                className="mb-2 block text-[13px] font-medium text-[var(--text-primary)]"
               >
                 {t('Confirm password')}
               </label>
@@ -153,24 +145,26 @@ export default function ResetPasswordPage() {
                 <input
                   id="confirm-password"
                   type={showConfirm ? 'text' : 'password'}
-                  className={`login-input ${errors.confirmPassword ? 'border-red-400' : ''}`}
-                  style={{ paddingRight: 40 }}
+                  className={`login-input pr-10 ${errors.confirmPassword ? 'border-red-400' : ''}`}
                   autoComplete="new-password"
                   disabled={isLoading}
+                  aria-invalid={!!errors.confirmPassword}
+                  aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
                   {...register('confirmPassword')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2"
-                  style={{ color: 'var(--text-secondary)', opacity: 0.4 }}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[var(--text-secondary)] opacity-40"
                   aria-label={showConfirm ? t('Hide password') : t('Show password')}
                 >
                   {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-500">{t('Passwords do not match')}</p>
+                <p id="confirm-password-error" role="alert" className="mt-1 text-xs text-red-500">
+                  {t('Passwords do not match')}
+                </p>
               )}
             </div>
 

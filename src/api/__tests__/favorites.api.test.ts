@@ -48,7 +48,7 @@ describe('favorites.api', () => {
 
       const result = await getUserFavorites()
 
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/favorites')
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/favorites', { signal: undefined })
       expect(apiClient.get).toHaveBeenCalledTimes(1)
       expect(result).toEqual(mockFavorites)
       expect(result).toHaveLength(2)

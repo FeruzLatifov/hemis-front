@@ -63,12 +63,18 @@ i18n.use(initReactI18next).init({
 })
 
 // Add language change listener to sync with localStorage in BCP-47 format
+// Also keep the document <html lang="..."> attribute in sync so screen readers
+// and browser tooling pick up the active language (WCAG 3.1.1).
 i18n.on('languageChanged', (lng) => {
   const bcp47Locale = shortToBcp47[lng] || lng
-  // SSR-safe: Only access localStorage in browser
   if (typeof window !== 'undefined') {
     localStorage.setItem('locale', bcp47Locale)
+    document.documentElement.lang = lng
   }
 })
+
+if (typeof window !== 'undefined') {
+  document.documentElement.lang = savedLocale
+}
 
 export default i18n

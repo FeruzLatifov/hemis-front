@@ -1,4 +1,4 @@
-import { useMemo, memo } from 'react'
+import { useMemo } from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
 import i18n from '@/i18n/config'
 import type { RoleAdmin } from '@/types/role.types'
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Trash2, Pencil } from 'lucide-react'
+import { HighlightText } from './roles-cells'
 
 interface UseRolesColumnsOptions {
   t: (key: string) => string
@@ -21,22 +22,6 @@ interface UseRolesColumnsOptions {
   onDelete: (role: RoleAdmin) => void
   canManage: boolean
 }
-
-const HighlightText = memo(({ text, search }: { text: string; search: string }) => {
-  if (!search || !text) return <>{text}</>
-  const idx = text.toLowerCase().indexOf(search.toLowerCase())
-  if (idx === -1) return <>{text}</>
-  return (
-    <>
-      {text.slice(0, idx)}
-      <mark className="rounded bg-yellow-100 px-0.5 dark:bg-yellow-900/40">
-        {text.slice(idx, idx + search.length)}
-      </mark>
-      {text.slice(idx + search.length)}
-    </>
-  )
-})
-HighlightText.displayName = 'HighlightText'
 
 export function useRolesColumns(options: UseRolesColumnsOptions) {
   const { t, currentPage, pageSize, searchTerm, onEdit, onDelete, canManage } = options

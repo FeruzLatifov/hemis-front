@@ -58,10 +58,7 @@ export default function ForgotPasswordPage() {
   )
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4"
-      style={{ backgroundColor: 'var(--app-bg)' }}
-    >
+    <div className="flex min-h-screen items-center justify-center bg-[var(--app-bg)] px-4">
       <div className="w-full max-w-[400px]">
         <div className="login-form-card">
           {/* Logo */}
@@ -77,10 +74,10 @@ export default function ForgotPasswordPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
                 <Mail className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <h2 className="mb-2 text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="mb-2 text-xl font-semibold text-[var(--text-primary)]">
                 {t('Check your email')}
               </h2>
-              <p className="mb-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <p className="mb-6 text-sm text-[var(--text-secondary)]">
                 {t(
                   'We sent a password reset link to your email address. The link will expire in 15 minutes.',
                 )}
@@ -107,13 +104,10 @@ export default function ForgotPasswordPage() {
             /* Form state */
             <>
               <div className="mb-6">
-                <h2
-                  className="mb-1.5 text-xl font-semibold"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <h2 className="mb-1.5 text-xl font-semibold text-[var(--text-primary)]">
                   {t('Forgot password?')}
                 </h2>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm text-[var(--text-secondary)]">
                   {t('Enter your email and we will send you a reset link')}
                 </p>
               </div>
@@ -122,8 +116,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="reset-email"
-                    className="mb-2 block text-[13px] font-medium"
-                    style={{ color: 'var(--text-primary)' }}
+                    className="mb-2 block text-[13px] font-medium text-[var(--text-primary)]"
                   >
                     {t('Email')}
                   </label>

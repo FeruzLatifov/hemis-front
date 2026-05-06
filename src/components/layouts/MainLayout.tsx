@@ -7,15 +7,14 @@
 
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
 import CommandPalette from '../CommandPalette'
+import { SkipLink } from '../SkipLink'
 import { useMenuInit } from '@/hooks/useMenuInit'
 
 export default function MainLayout() {
-  const { t } = useTranslation()
   // Load menu items — only for authenticated users
   useMenuInit()
 
@@ -41,13 +40,7 @@ export default function MainLayout() {
 
   return (
     <div className="layout-bg flex h-screen overflow-hidden">
-      {/* Skip to content link for keyboard users */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-[var(--primary)] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
-      >
-        {t('Skip to content')}
-      </a>
+      <SkipLink targetId="main-content" />
 
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 

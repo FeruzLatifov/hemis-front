@@ -1,5 +1,6 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
+import { CACHE } from '@/constants/cache'
 import {
   studentsApi,
   type StudentsParams,
@@ -35,7 +36,7 @@ export function useStudentDictionaries() {
   return useQuery<StudentDictionaries>({
     queryKey: queryKeys.students.dictionaries,
     queryFn: ({ signal }) => studentsApi.getDictionaries(signal),
-    staleTime: 1000 * 60 * 60, // 1 hour - classifiers don't change often
+    staleTime: CACHE.LONG,
   })
 }
 
@@ -74,6 +75,6 @@ export function useSpecialitySummary() {
   return useQuery({
     queryKey: queryKeys.students.directionsSummary,
     queryFn: ({ signal }) => studentsApi.getDirectionsSummary(signal),
-    staleTime: 1000 * 60 * 30, // 30 min — speciality counts rarely change
+    staleTime: CACHE.MEDIUM,
   })
 }

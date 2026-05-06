@@ -85,7 +85,10 @@ vi.mock('@/api/universities.api', () => ({
       size: 20,
       number: 0,
     }),
-    exportUniversities: vi.fn().mockResolvedValue([]),
+    // Server-side CSV export now returns a Blob, not adapted rows.
+    exportUniversities: vi
+      .fn()
+      .mockResolvedValue(new Blob([''], { type: 'text/csv;charset=utf-8;' })),
     getDictionaries: vi.fn().mockResolvedValue({
       regions: [{ code: 'R1', name: 'Tashkent' }],
       ownerships: [{ code: 'O1', name: 'State' }],
@@ -343,7 +346,7 @@ describe('UniversitiesPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Filters')).toBeInTheDocument()
       expect(screen.getByText('Add')).toBeInTheDocument()
-      expect(screen.getByText('Excel')).toBeInTheDocument()
+      expect(screen.getAllByText('Export')[0]).toBeInTheDocument()
     })
   })
 
@@ -391,7 +394,7 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Excel')).toBeInTheDocument()
+      expect(screen.getAllByText('Export')[0]).toBeInTheDocument()
     })
   })
 
@@ -446,14 +449,15 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Excel')).toBeInTheDocument()
+      expect(screen.getAllByText('Export')[0]).toBeInTheDocument()
     })
 
-    await user.click(screen.getByText('Excel'))
+    await user.click(screen.getAllByText('Export')[0])
 
     await waitFor(() => {
       expect(universitiesApi.exportUniversities).toHaveBeenCalled()
-      expect(toast.success).toHaveBeenCalledWith('Excel file downloading...')
+      // Server-side CSV export — toast wording aligned with the new flow.
+      expect(toast.success).toHaveBeenCalledWith('CSV file downloaded')
     })
   })
 
@@ -465,10 +469,10 @@ describe('UniversitiesPage', () => {
     render(<UniversitiesPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Excel')).toBeInTheDocument()
+      expect(screen.getAllByText('Export')[0]).toBeInTheDocument()
     })
 
-    await user.click(screen.getByText('Excel'))
+    await user.click(screen.getAllByText('Export')[0])
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Export failed')

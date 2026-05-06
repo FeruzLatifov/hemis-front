@@ -63,91 +63,151 @@ export function buildFilterParams(filters: {
   return params
 }
 
-// ─── Export rows to XLSX ──────────────────────────────────────────
-export async function exportToXlsx(
+// ─── Helpers: blob download + RFC 4180 CSV escaping ──────────────
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Escape a single CSV field per RFC 4180:
+ * - wrap in double-quotes if it contains comma, newline, or double-quote
+ * - double any embedded double-quote
+ */
+function csvEscape(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  const str = String(value)
+  if (/[",\n\r]/.test(str)) return `"${str.replace(/"/g, '""')}"`
+  return str
+}
+
+/**
+ * Build a UTF-8 BOM CSV blob from a row of headers and an array of rows.
+ * The BOM makes Excel detect UTF-8 automatically; written as a unicode
+ * escape so ESLint's no-irregular-whitespace rule stays clean.
+ */
+function rowsToCsvBlob(headers: string[], rows: string[][]): Blob {
+  const bom = '﻿'
+  const body = [headers, ...rows].map((row) => row.map(csvEscape).join(',')).join('\r\n')
+  return new Blob([bom + body], { type: 'text/csv;charset=utf-8;' })
+}
+
+// ─── Build CSV row from a UniversityRow ──────────────────────────
+function buildUniversityCsv(
   rows: UniversityRow[],
   dictionaries: Dictionaries,
   t: TFunction,
-): Promise<void> {
-  const XLSX = await import('xlsx')
-
+): { headers: string[]; data: string[][] } {
   const resolveName = (code: string | undefined, list: { code: string; name: string }[]) =>
     list.find((item) => item.code === code)?.name ?? code ?? ''
 
   const boolLabel = (val?: boolean) => (val ? t('Yes') : val === false ? t('No') : '')
 
-  const wsData = rows.map((row, idx) => ({
-    '#': idx + 1,
-    [t('Code')]: row.code,
-    [t('Name')]: row.name,
-    [t('INN')]: row.tin || '',
-    [t('Region')]: resolveName(row.regionCode, dictionaries.regions),
-    [t('Ownership')]: resolveName(row.ownershipCode, dictionaries.ownerships),
-    [t('Type')]: resolveName(row.universityTypeCode, dictionaries.types),
-    [t('Activity status')]: resolveName(row.activityStatusCode, dictionaries.activityStatuses),
-    [t('Belongs to')]: resolveName(row.belongsToCode, dictionaries.belongsToOptions),
-    [t('Contract category')]: resolveName(
-      row.contractCategoryCode,
-      dictionaries.contractCategories,
-    ),
-    [t('HEMIS version')]: resolveName(row.versionTypeCode, dictionaries.versionTypes),
-    [t('Status')]: row.active ? t('Active') : t('Inactive'),
-    [t('District')]:
-      resolveName(row.soatoRegion, dictionaries.districts) ||
+  const headers = [
+    '#',
+    t('Code'),
+    t('Name'),
+    t('INN'),
+    t('Region'),
+    t('Ownership'),
+    t('Type'),
+    t('Activity status'),
+    t('Belongs to'),
+    t('Contract category'),
+    t('HEMIS version'),
+    t('Status'),
+    t('District'),
+    t('Address'),
+    t('Mail address'),
+    t('Cadastre'),
+    t('University URL'),
+    t('Student URL'),
+    t('Teacher URL'),
+    t('UZBMB URL'),
+    t('GPA edit'),
+    t('Accreditation edit'),
+    t('Add student'),
+    t('Allow grouping'),
+    t('Allow transfer outside'),
+    t('OneID login'),
+    t('Grading system'),
+    t('Add foreign student'),
+    t('Add transfer student'),
+    t('Add academic mobile student'),
+    t('Bank info'),
+    t('Accreditation info'),
+  ]
+
+  const data = rows.map((row, idx) => [
+    String(idx + 1),
+    row.code,
+    row.name,
+    row.tin || '',
+    resolveName(row.regionCode, dictionaries.regions),
+    resolveName(row.ownershipCode, dictionaries.ownerships),
+    resolveName(row.universityTypeCode, dictionaries.types),
+    resolveName(row.activityStatusCode, dictionaries.activityStatuses),
+    resolveName(row.belongsToCode, dictionaries.belongsToOptions),
+    resolveName(row.contractCategoryCode, dictionaries.contractCategories),
+    resolveName(row.versionTypeCode, dictionaries.versionTypes),
+    row.active ? t('Active') : t('Inactive'),
+    resolveName(row.soatoRegion, dictionaries.districts) ||
       resolveName(row.soatoRegion, dictionaries.regions),
-    [t('Address')]: row.address || '',
-    [t('Mail address')]: row.mailAddress || '',
-    [t('Cadastre')]: row.cadastre || '',
-    [t('University URL')]: row.universityUrl || '',
-    [t('Student URL')]: row.studentUrl || '',
-    [t('Teacher URL')]: row.teacherUrl || '',
-    [t('UZBMB URL')]: row.uzbmbUrl || '',
-    [t('GPA edit')]: boolLabel(row.gpaEdit),
-    [t('Accreditation edit')]: boolLabel(row.accreditationEdit),
-    [t('Add student')]: boolLabel(row.addStudent),
-    [t('Allow grouping')]: boolLabel(row.allowGrouping),
-    [t('Allow transfer outside')]: boolLabel(row.allowTransferOutside),
-    [t('OneID login')]: boolLabel(row.oneId),
-    [t('Grading system')]: boolLabel(row.gradingSystem),
-    [t('Add foreign student')]: boolLabel(row.addForeignStudent),
-    [t('Add transfer student')]: boolLabel(row.addTransferStudent),
-    [t('Add academic mobile student')]: boolLabel(row.addAcademicMobileStudent),
-    [t('Bank info')]: row.bankInfo || '',
-    [t('Accreditation info')]: row.accreditationInfo || '',
-  }))
+    row.address || '',
+    row.mailAddress || '',
+    row.cadastre || '',
+    row.universityUrl || '',
+    row.studentUrl || '',
+    row.teacherUrl || '',
+    row.uzbmbUrl || '',
+    boolLabel(row.gpaEdit),
+    boolLabel(row.accreditationEdit),
+    boolLabel(row.addStudent),
+    boolLabel(row.allowGrouping),
+    boolLabel(row.allowTransferOutside),
+    boolLabel(row.oneId),
+    boolLabel(row.gradingSystem),
+    boolLabel(row.addForeignStudent),
+    boolLabel(row.addTransferStudent),
+    boolLabel(row.addAcademicMobileStudent),
+    row.bankInfo || '',
+    row.accreditationInfo || '',
+  ])
 
-  const ws = XLSX.utils.json_to_sheet(wsData)
-
-  // Auto-fit column widths
-  if (wsData.length > 0) {
-    ws['!cols'] = Object.keys(wsData[0]).map((key) => ({
-      wch:
-        Math.max(key.length, ...wsData.map((r) => String(r[key as keyof typeof r] || '').length)) +
-        2,
-    }))
-  }
-
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, t('Universities'))
-  XLSX.writeFile(wb, `universities_${new Date().toISOString().slice(0, 10)}.xlsx`)
+  return { headers, data }
 }
 
+const todayStamp = () => new Date().toISOString().slice(0, 10)
+
 // ─── Export all universities with current filters ─────────────────
+//
+// Server-side: backend produces UTF-8 BOM CSV with all admin-relevant fields,
+// keeping the heavy `xlsx` package off the wire and eliminating its known
+// HIGH advisories (ReDoS + Prototype Pollution).
 export async function handleExportAll(
   filterParams: Omit<UniversitiesParams, 'page' | 'size' | 'sort'>,
-  dictionaries: Dictionaries,
+  _dictionaries: Dictionaries,
   t: TFunction,
 ): Promise<void> {
   try {
-    const rows = await universitiesApi.exportUniversities(filterParams)
-    await exportToXlsx(rows, dictionaries, t)
-    toast.success(t('Excel file downloading...'))
+    const blob = await universitiesApi.exportUniversities(filterParams)
+    downloadBlob(blob, `universities_${todayStamp()}.csv`)
+    toast.success(t('CSV file downloaded'))
   } catch (error) {
     toast.error(extractApiErrorMessage(error, t('Export failed')))
   }
 }
 
 // ─── Export selected rows ─────────────────────────────────────────
+//
+// Client-side CSV generator (no library, no CVE surface). Used only for the
+// "export selected rows" affordance — fewer rows, already in memory.
 export async function handleExportSelected(
   selectedRows: UniversityRow[],
   dictionaries: Dictionaries,
@@ -155,8 +215,9 @@ export async function handleExportSelected(
 ): Promise<void> {
   try {
     if (selectedRows.length === 0) return
-    await exportToXlsx(selectedRows, dictionaries, t)
-    toast.success(t('Excel file downloading...'))
+    const { headers, data } = buildUniversityCsv(selectedRows, dictionaries, t)
+    downloadBlob(rowsToCsvBlob(headers, data), `universities_selected_${todayStamp()}.csv`)
+    toast.success(t('CSV file downloaded'))
   } catch (error) {
     toast.error(extractApiErrorMessage(error, t('Export failed')))
   }

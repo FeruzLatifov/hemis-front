@@ -60,15 +60,12 @@ export function initSentry() {
         createRoutesFromChildren,
         matchRoutes,
       }),
-
-      // Replay integration (session recording)
-      Sentry.replayIntegration({
-        maskAllText: true, // Mask all text for privacy
-        blockAllMedia: true, // Block all media
-      }),
+      // Replay is attached lazily below — adding it here would pull the
+      // ~250 KB recorder into the initial Sentry chunk for every visitor,
+      // even when no error ever occurs.
     ],
 
-    // Replay Sample Rates
+    // Replay Sample Rates (used by lazy-attached replay integration)
     replaysSessionSampleRate: parseFloat(env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE),
     replaysOnErrorSampleRate: parseFloat(env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE),
 
@@ -134,6 +131,34 @@ export function initSentry() {
       return event
     },
   })
+
+  // Defer attaching the Replay integration until the browser is idle.
+  // The recorder ships ~250 KB of compressed JS; loading it eagerly hits
+  // every visitor on first paint. Done this way, the cost is paid only
+  // after the app is interactive, and only if Sentry itself is enabled.
+  if (
+    typeof window !== 'undefined' &&
+    parseFloat(env.VITE_SENTRY_REPLAY_SESSION_SAMPLE_RATE) +
+      parseFloat(env.VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE) >
+      0
+  ) {
+    const attachReplay = () => {
+      const client = Sentry.getClient()
+      if (!client) return
+      client.addIntegration(
+        Sentry.replayIntegration({
+          maskAllText: true,
+          blockAllMedia: true,
+        }),
+      )
+    }
+    if ('requestIdleCallback' in window) {
+      ;(window as Window & typeof globalThis).requestIdleCallback(attachReplay, { timeout: 5000 })
+    } else {
+      // Safari fallback: small timeout to yield to first paint.
+      setTimeout(attachReplay, 2000)
+    }
+  }
 }
 
 /**
@@ -177,6 +202,25 @@ export function addBreadcrumb(breadcrumb: {
   data?: Record<string, unknown>
 }) {
   Sentry.addBreadcrumb(breadcrumb)
+}
+
+/**
+ * Attach the current user's identity to subsequent Sentry events.
+ *
+ * We pass only PII-safe identifiers (user id + username) — no email,
+ * phone, or PINFL, even though the backend hands them to us. This
+ * matches the principle of least exposure: Sentry breaches must not
+ * leak personally identifying data.
+ */
+export function setSentryUser(user: { id?: string; username?: string } | null) {
+  if (!user) {
+    Sentry.setUser(null)
+    return
+  }
+  Sentry.setUser({
+    id: user.id,
+    username: user.username,
+  })
 }
 
 // Re-export Sentry for advanced use cases

@@ -63,13 +63,12 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-[6px] border border-[var(--border-color-pro)] bg-[var(--card-bg)] text-[var(--text-primary)]',
+        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-[6px] border border-[var(--border-color-pro)] bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]',
         position === 'popper' &&
           'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className,
       )}
       position={position}
-      style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
       {...props}
     >
       <SelectScrollUpButton />

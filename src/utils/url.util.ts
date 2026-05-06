@@ -5,6 +5,8 @@
  * SECURITY: Critical for preventing javascript: and data: URL attacks
  */
 
+import { addBreadcrumb } from '@/lib/sentry'
+
 const ALLOWED_PROTOCOLS = ['http:', 'https:']
 
 // ✅ SECURITY: Blocked dangerous patterns
@@ -17,6 +19,18 @@ const DANGEROUS_PATTERNS = [
   /<script/i,
   /on\w+=/i, // onclick=, onerror=, etc.
 ]
+
+// Record a blocked-URL event in Sentry without flooding the main error stream.
+// Breadcrumbs surface in the next captured exception, giving us forensic context
+// for genuine attacks while staying silent on benign noise.
+function reportBlockedUrl(reason: string, value: string): void {
+  addBreadcrumb({
+    category: 'security',
+    message: `[SECURITY] ${reason}`,
+    level: 'warning',
+    data: { value: value.substring(0, 50) },
+  })
+}
 
 /**
  * Sanitize a URL - returns null if the URL is invalid or potentially dangerous
@@ -31,7 +45,7 @@ export function sanitizeUrl(url: string | undefined | null): string | null {
   // Check for dangerous patterns before parsing
   for (const pattern of DANGEROUS_PATTERNS) {
     if (pattern.test(trimmed)) {
-      console.warn('[SECURITY] Blocked dangerous URL pattern:', trimmed.substring(0, 50))
+      reportBlockedUrl('Blocked dangerous URL pattern', trimmed)
       return null
     }
   }
@@ -41,7 +55,7 @@ export function sanitizeUrl(url: string | undefined | null): string | null {
 
     // ✅ SECURITY: Only allow http/https protocols
     if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
-      console.warn('[SECURITY] Blocked non-http(s) protocol:', parsed.protocol)
+      reportBlockedUrl(`Blocked non-http(s) protocol: ${parsed.protocol}`, trimmed)
       return null
     }
 
@@ -49,7 +63,7 @@ export function sanitizeUrl(url: string | undefined | null): string | null {
     const decodedPath = decodeURIComponent(parsed.pathname + parsed.search)
     for (const pattern of DANGEROUS_PATTERNS) {
       if (pattern.test(decodedPath)) {
-        console.warn('[SECURITY] Blocked dangerous encoded URL:', trimmed.substring(0, 50))
+        reportBlockedUrl('Blocked dangerous encoded URL', trimmed)
         return null
       }
     }

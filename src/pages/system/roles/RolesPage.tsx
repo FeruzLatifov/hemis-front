@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useStableCallback } from '@/hooks/useStableCallback'
 import {
   type SortingState,
   type VisibilityState,
@@ -85,12 +86,16 @@ export default function RolesPage() {
     }
   }, [searchInput])
 
-  useEffect(() => {
+  // One-way sync from local state → URL via stable callback (latest values, stable identity).
+  const syncSearchToUrl = useStableCallback(() => {
     if (debouncedSearch !== searchFromUrl) {
       updateSearchParams({ q: debouncedSearch || undefined, page: undefined })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
+  })
+
+  useEffect(() => {
+    syncSearchToUrl()
+  }, [debouncedSearch, syncSearchToUrl])
 
   // ─── Sort sync ─────────────────────────────────────────────────────
   const sortParam = useMemo(() => {
@@ -98,12 +103,15 @@ export default function RolesPage() {
     return `${sorting[0].id},${sorting[0].desc ? 'desc' : 'asc'}`
   }, [sorting])
 
-  useEffect(() => {
+  const syncSortToUrl = useStableCallback(() => {
     if (sortParam !== sortFromUrl) {
       updateSearchParams({ sort: sortParam === 'name,asc' ? undefined : sortParam })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortParam])
+  })
+
+  useEffect(() => {
+    syncSortToUrl()
+  }, [sortParam, syncSortToUrl])
 
   // ─── Persist column visibility ─────────────────────────────────────
   useEffect(() => {

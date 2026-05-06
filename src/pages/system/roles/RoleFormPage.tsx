@@ -162,7 +162,11 @@ export default function RoleFormPage() {
   )
 
   // ─── Permissions ───────────────────────────────────────────────────
-  const selectedPermissionIds = (watch('permissionIds') as string[]) ?? []
+  // Memoise the watched array so its reference is stable when the underlying
+  // value is unchanged — otherwise `?? []` produces a fresh array each render
+  // and invalidates every callback that depends on it.
+  const watchedPermissionIds = watch('permissionIds') as string[] | undefined
+  const selectedPermissionIds = useMemo(() => watchedPermissionIds ?? [], [watchedPermissionIds])
 
   const togglePermission = useCallback(
     (permissionId: string) => {
@@ -355,10 +359,12 @@ export default function RoleFormPage() {
                       placeholder="CUSTOM_ROLE"
                       autoComplete="off"
                       className={errors.code ? 'border-red-400' : ''}
+                      aria-invalid={!!errors.code}
+                      aria-describedby={errors.code ? 'code-error' : undefined}
                       {...register('code' as keyof FormData)}
                     />
                     {errors.code && (
-                      <p className="text-xs text-red-500">
+                      <p id="code-error" role="alert" className="text-xs text-red-500">
                         {errors.code.message ||
                           t('Code must be uppercase letters, digits, and underscores')}
                       </p>
@@ -374,10 +380,14 @@ export default function RoleFormPage() {
                     id="name"
                     placeholder={t('Role name')}
                     className={errors.name ? 'border-red-400' : ''}
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'name-error' : undefined}
                     {...register('name')}
                   />
                   {errors.name && (
-                    <p className="text-xs text-red-500">{t('Name must be 2-100 characters')}</p>
+                    <p id="name-error" role="alert" className="text-xs text-red-500">
+                      {t('Name must be 2-100 characters')}
+                    </p>
                   )}
                 </div>
 

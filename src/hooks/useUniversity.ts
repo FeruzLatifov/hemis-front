@@ -118,8 +118,12 @@ export function useSyncUniversityData(code: string) {
   return useMutation({
     mutationFn: () => universityApi.syncAll(code),
     onSuccess: () => {
-      // Invalidate both external data AND university detail (address, bank_info updated)
-      queryClient.invalidateQueries({ queryKey: queryKeys.universityInfo.dashboard(code) })
+      // Sync writes back to multiple slices server-side (university record,
+      // dashboard, profile, officials) — invalidate the whole `universityInfo`
+      // namespace plus the `universities` list/detail. Anything narrower
+      // leaves at least one tab on stale data, which is exactly the "synced
+      // but not showing" bug we previously had.
+      queryClient.invalidateQueries({ queryKey: queryKeys.universityInfo.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.universities.all })
       toast.success(i18n.t('External data synced successfully'))
     },

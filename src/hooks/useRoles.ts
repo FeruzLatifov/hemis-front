@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { rolesApi } from '@/api/roles.api'
 import { queryKeys } from '@/lib/queryKeys'
+import { CACHE } from '@/constants/cache'
 import { toast } from 'sonner'
 import i18n from '@/i18n/config'
 import { extractApiErrorMessage } from '@/utils/error.util'
@@ -26,7 +27,7 @@ export function useAllPermissions() {
   return useQuery({
     queryKey: queryKeys.roles.permissions,
     queryFn: ({ signal }) => rolesApi.getAllPermissions(signal),
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: CACHE.MEDIUM,
   })
 }
 

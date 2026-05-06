@@ -136,193 +136,97 @@ const Login = () => {
   return (
     <div className="flex min-h-screen flex-col overflow-hidden lg:flex-row">
       {/* ═══════ CHAP PANEL ═══════ */}
-      <div
-        className="relative flex shrink-0 flex-col items-center justify-center overflow-hidden px-8 py-14 lg:w-[52%] lg:py-0"
-        style={{ backgroundColor: '#0F1E36' }}
-      >
-        {/* ——— Animated Blobs ——— */}
-        {/* Blob 1: katta navy — yuqori-o'ng */}
-        <div
-          className="login-blob"
-          style={{
-            width: 380,
-            height: 380,
-            background: '#2B5EA7',
-            opacity: 0.3,
-            top: '-5%',
-            right: '-8%',
-            animation: 'blob-drift-1 22s ease-in-out infinite',
-          }}
-        />
-        {/* Blob 2: yashil — pastki-chap (logotip rangi) */}
-        <div
-          className="login-blob"
-          style={{
-            width: 300,
-            height: 300,
-            background: '#3D8B2F',
-            opacity: 0.2,
-            bottom: '5%',
-            left: '-5%',
-            animation: 'blob-drift-2 26s ease-in-out infinite',
-          }}
-        />
-        {/* Blob 3: och navy — markaz */}
-        <div
-          className="login-blob"
-          style={{
-            width: 260,
-            height: 260,
-            background: '#1E5090',
-            opacity: 0.25,
-            top: '45%',
-            left: '55%',
-            animation: 'blob-drift-3 18s ease-in-out infinite',
-          }}
-        />
-        {/* Blob 4: kichik yashil aksent — yuqori-chap */}
-        <div
-          className="login-blob"
-          style={{
-            width: 160,
-            height: 160,
-            background: '#5A9E35',
-            opacity: 0.15,
-            top: '20%',
-            left: '15%',
-            animation: 'blob-drift-1 30s ease-in-out infinite 8s',
-          }}
-        />
+      <div className="relative flex shrink-0 flex-col items-center justify-center overflow-hidden bg-[var(--login-bg)] px-8 py-14 lg:w-[52%] lg:py-0">
+        {/* ——— Animated Blobs (sizes/positions in index.css) ——— */}
+        <div className="login-blob login-blob-1" />
+        <div className="login-blob login-blob-2" />
+        <div className="login-blob login-blob-3" />
+        <div className="login-blob login-blob-4" />
 
         {/* Kontent */}
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Logotip — oq doira, rasmiy muhr */}
-          <div className="login-stagger mb-10" style={{ animationDelay: '0s' }}>
+          <div className="login-stagger mb-10 [animation-delay:0s]">
             <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-white p-5 shadow-lg lg:h-40 lg:w-40">
               <img src={hemisLogo} alt="HEMIS" className="h-full w-full object-contain" />
             </div>
           </div>
 
           {/* Sarlavha */}
-          <h1
-            className="login-stagger font-display mb-4 text-2xl font-bold text-white lg:text-3xl"
-            style={{ animationDelay: '0.1s', letterSpacing: '0.06em' }}
-          >
+          <h1 className="login-stagger font-display mb-4 text-2xl font-bold tracking-[0.06em] text-white [animation-delay:0.1s] lg:text-3xl">
             HEMIS
           </h1>
 
           {/* Tavsif */}
-          <p
-            className="login-stagger mb-12 max-w-[280px] text-sm leading-relaxed lg:text-[15px]"
-            style={{ color: 'rgba(255,255,255,0.55)', animationDelay: '0.2s' }}
-          >
+          <p className="login-stagger mb-12 max-w-[280px] text-sm leading-relaxed text-white/55 [animation-delay:0.2s] lg:text-[15px]">
             {t('Higher Education Management Information System')}
           </p>
 
           {/* Statistika — faqat desktop */}
           <div className="mb-12 hidden flex-col gap-4 lg:flex">
-            <div
-              className="login-stagger flex items-center gap-3"
-              style={{ animationDelay: '0.3s' }}
-            >
-              <Building2 className="h-[18px] w-[18px] shrink-0" style={{ color: '#7CB342' }} />
-              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            <div className="login-stagger flex items-center gap-3 [animation-delay:0.3s]">
+              <Building2 className="h-[18px] w-[18px] shrink-0 text-[var(--login-accent)]" />
+              <span className="text-sm text-white/70">
                 {t('226+ higher education institutions')}
               </span>
             </div>
-            <div
-              className="login-stagger flex items-center gap-3"
-              style={{ animationDelay: '0.4s' }}
-            >
-              <Users className="h-[18px] w-[18px] shrink-0" style={{ color: '#7CB342' }} />
-              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                {t('1,000,000+ users')}
-              </span>
+            <div className="login-stagger flex items-center gap-3 [animation-delay:0.4s]">
+              <Users className="h-[18px] w-[18px] shrink-0 text-[var(--login-accent)]" />
+              <span className="text-sm text-white/70">{t('1,000,000+ users')}</span>
             </div>
-            <div
-              className="login-stagger flex items-center gap-3"
-              style={{ animationDelay: '0.5s' }}
-            >
-              <BookOpen className="h-[18px] w-[18px] shrink-0" style={{ color: '#7CB342' }} />
-              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                {t('4 management modules')}
-              </span>
+            <div className="login-stagger flex items-center gap-3 [animation-delay:0.5s]">
+              <BookOpen className="h-[18px] w-[18px] shrink-0 text-[var(--login-accent)]" />
+              <span className="text-sm text-white/70">{t('4 management modules')}</span>
             </div>
           </div>
 
           {/* Vazirliq nomi */}
-          <p
-            className="login-stagger hidden max-w-[260px] text-xs leading-relaxed lg:block"
-            style={{ color: 'rgba(255,255,255,0.3)', animationDelay: '0.6s' }}
-          >
+          <p className="login-stagger hidden max-w-[260px] text-xs leading-relaxed text-white/30 [animation-delay:0.6s] lg:block">
             {t('Ministry of Higher Education, Science and Innovations')}
           </p>
         </div>
       </div>
 
       {/* ═══════ O'NG PANEL ═══════ */}
-      <div
-        className="relative flex flex-1 flex-col items-center justify-center px-6 py-12 lg:py-0"
-        style={{ backgroundColor: 'var(--app-bg)' }}
-      >
+      <div className="relative flex flex-1 flex-col items-center justify-center bg-[var(--app-bg)] px-6 py-12 lg:py-0">
         {/* Til tanlash */}
         <div className="absolute top-5 right-5 z-20">
           <div className="relative" ref={langDropdownRef}>
             <button
               type="button"
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
-              style={{
-                backgroundColor: 'var(--card-bg)',
-                borderWidth: '1px',
-                borderColor: 'var(--border-color-pro)',
-                boxShadow: 'var(--shadow-sm)',
-              }}
+              className="flex items-center gap-2 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-2 shadow-[var(--shadow-sm)] transition-all"
               disabled={isLoading}
             >
-              <Globe className="h-4 w-4" style={{ color: 'var(--text-secondary)' }} />
-              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              <Globe className="h-4 w-4 text-[var(--text-secondary)]" />
+              <span className="text-sm font-medium text-[var(--text-primary)]">
                 {SUPPORTED_LANGUAGES.find((l) => l.code === currentLang)?.name}
               </span>
               <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
-                style={{ color: 'var(--text-secondary)' }}
+                className={`h-3.5 w-3.5 text-[var(--text-secondary)] transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
             {isLangDropdownOpen && (
-              <div
-                className="absolute top-full right-0 mt-1.5 w-44 overflow-hidden rounded-lg"
-                style={{
-                  backgroundColor: 'var(--card-bg)',
-                  borderWidth: '1px',
-                  borderColor: 'var(--border-color-pro)',
-                  boxShadow: '0 4px 16px rgba(15, 23, 42, 0.12)',
-                }}
-              >
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className="flex w-full items-center px-4 py-2.5 transition-colors"
-                    style={{
-                      backgroundColor: currentLang === lang.code ? '#1B3A6B' : 'var(--card-bg)',
-                      color: currentLang === lang.code ? 'white' : 'var(--text-primary)',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (currentLang !== lang.code)
-                        e.currentTarget.style.backgroundColor = 'var(--active-bg)'
-                    }}
-                    onMouseLeave={(e) => {
-                      if (currentLang !== lang.code)
-                        e.currentTarget.style.backgroundColor = 'var(--card-bg)'
-                    }}
-                    disabled={isLoading}
-                  >
-                    <span className="text-sm font-medium">{lang.name}</span>
-                  </button>
-                ))}
+              <div className="absolute top-full right-0 mt-1.5 w-44 overflow-hidden rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_4px_16px_rgba(15,23,42,0.12)]">
+                {SUPPORTED_LANGUAGES.map((lang) => {
+                  const isActive = currentLang === lang.code
+                  return (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`flex w-full items-center px-4 py-2.5 transition-colors ${
+                        isActive
+                          ? 'bg-[var(--login-active)] text-white'
+                          : 'bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--active-bg)]'
+                      }`}
+                      disabled={isLoading}
+                    >
+                      <span className="text-sm font-medium">{lang.name}</span>
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -332,13 +236,10 @@ const Login = () => {
         <div className="animate-slide-up w-full max-w-[400px]">
           <div className="login-form-card">
             <div className="mb-8">
-              <h2
-                className="font-display mb-1.5 text-xl font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h2 className="font-display mb-1.5 text-xl font-semibold text-[var(--text-primary)]">
                 {t('Sign in to system')}
               </h2>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm text-[var(--text-secondary)]">
                 {t('Enter your credentials to continue')}
               </p>
             </div>
@@ -347,8 +248,7 @@ const Login = () => {
               <div>
                 <label
                   htmlFor="login-username"
-                  className="mb-2 block text-[13px] font-medium"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="mb-2 block text-[13px] font-medium text-[var(--text-primary)]"
                 >
                   {t('Username')}
                 </label>
@@ -366,26 +266,26 @@ const Login = () => {
                       setUsernameError(validateField(e.target.value, 3, t('Username')))
                     }
                     aria-invalid={!!usernameError}
+                    aria-describedby={usernameError ? 'login-username-error' : undefined}
                     placeholder={t('Login')}
-                    className="login-input"
-                    style={{ paddingRight: 40 }}
+                    className="login-input pr-10"
                     autoComplete="username"
                     required
                     disabled={isLoading}
                   />
-                  <User
-                    className="absolute top-1/2 right-3 h-[18px] w-[18px] -translate-y-1/2"
-                    style={{ color: 'var(--text-secondary)', opacity: 0.4 }}
-                  />
+                  <User className="absolute top-1/2 right-3 h-[18px] w-[18px] -translate-y-1/2 text-[var(--text-secondary)] opacity-40" />
                 </div>
-                {usernameError && <p className="mt-1.5 text-xs text-red-500">{usernameError}</p>}
+                {usernameError && (
+                  <p id="login-username-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                    {usernameError}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label
                   htmlFor="login-password"
-                  className="mb-2 block text-[13px] font-medium"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="mb-2 block text-[13px] font-medium text-[var(--text-primary)]"
                 >
                   {t('Password')}
                 </label>
@@ -403,9 +303,9 @@ const Login = () => {
                       setPasswordError(validateField(e.target.value, 6, t('Password')))
                     }
                     aria-invalid={!!passwordError}
+                    aria-describedby={passwordError ? 'login-password-error' : undefined}
                     placeholder={t('Password')}
-                    className="login-input"
-                    style={{ paddingRight: 40 }}
+                    className="login-input pr-10"
                     autoComplete="current-password"
                     required
                     disabled={isLoading}
@@ -413,8 +313,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-                    style={{ color: 'var(--text-secondary)', opacity: 0.4 }}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-[var(--text-secondary)] opacity-40 transition-colors"
                     disabled={isLoading}
                     aria-label={showPassword ? t('Hide password') : t('Show password')}
                   >
@@ -425,7 +324,11 @@ const Login = () => {
                     )}
                   </button>
                 </div>
-                {passwordError && <p className="mt-1.5 text-xs text-red-500">{passwordError}</p>}
+                {passwordError && (
+                  <p id="login-password-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                    {passwordError}
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-end">
@@ -449,10 +352,7 @@ const Login = () => {
             </form>
           </div>
 
-          <p
-            className="mt-6 text-center text-xs"
-            style={{ color: 'var(--text-secondary)', opacity: 0.6 }}
-          >
+          <p className="mt-6 text-center text-xs text-[var(--text-secondary)] opacity-60">
             &copy; {new Date().getFullYear()} {t('HEMIS. All rights reserved.')}
           </p>
         </div>

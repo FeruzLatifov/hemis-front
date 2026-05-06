@@ -242,10 +242,12 @@ export default function UserFormPage() {
                       placeholder="john_doe"
                       autoComplete="off"
                       className={errors.username ? 'border-red-400' : ''}
+                      aria-invalid={!!errors.username}
+                      aria-describedby={errors.username ? 'username-error' : undefined}
                       {...register('username' as keyof FormData)}
                     />
                     {errors.username && (
-                      <p className="text-xs text-red-500">
+                      <p id="username-error" role="alert" className="text-xs text-red-500">
                         {errors.username.message ||
                           t('Username must be 3-50 characters, letters, digits, _, ., -')}
                       </p>
@@ -265,10 +267,12 @@ export default function UserFormPage() {
                     type="email"
                     placeholder="user@example.com"
                     className={errors.email ? 'border-red-400' : ''}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
                     {...register('email')}
                   />
                   {errors.email && (
-                    <p className="text-xs text-red-500">
+                    <p id="email-error" role="alert" className="text-xs text-red-500">
                       {errors.email.message || t('Invalid email format')}
                     </p>
                   )}
@@ -281,10 +285,12 @@ export default function UserFormPage() {
                     placeholder="+998901234567"
                     maxLength={13}
                     className={errors.phone ? 'border-red-400' : ''}
+                    aria-invalid={!!errors.phone}
+                    aria-describedby={errors.phone ? 'phone-error' : undefined}
                     {...register('phone')}
                   />
                   {errors.phone && (
-                    <p className="text-xs text-red-500">
+                    <p id="phone-error" role="alert" className="text-xs text-red-500">
                       {t('Phone number must be in format +998XXXXXXXXX')}
                     </p>
                   )}

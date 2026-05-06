@@ -253,12 +253,16 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
     mailAddress: dto.mail_address ?? dto.mailAddress,
     bankInfo: dto.bank_info ?? dto.bankInfo,
     accreditationInfo: dto.accreditation_info ?? dto.accreditationInfo,
-    contractCategory: dto._university_contract_category_name ?? dto._university_contract_category,
-    contractCategoryCode: dto._university_contract_category,
-    activityStatus: dto._university_activity_status_name ?? dto._university_activity_status,
-    activityStatusCode: dto._university_activity_status,
-    belongsTo: dto._university_belongs_to_name ?? dto._university_belongs_to,
-    belongsToCode: dto._university_belongs_to,
+    contractCategory:
+      dto._university_contract_category_name ??
+      dto._university_contract_category ??
+      dto.contractCategory,
+    contractCategoryCode: dto._university_contract_category ?? dto.contractCategory,
+    activityStatus:
+      dto._university_activity_status_name ?? dto._university_activity_status ?? dto.activityStatus,
+    activityStatusCode: dto._university_activity_status ?? dto.activityStatus,
+    belongsTo: dto._university_belongs_to_name ?? dto._university_belongs_to ?? dto.belongsTo,
+    belongsToCode: dto._university_belongs_to ?? dto.belongsTo,
   }
 }
 
@@ -292,28 +296,28 @@ export const universitiesApi = {
   },
 
   async exportUniversities(params: Omit<UniversitiesParams, 'page' | 'size' | 'sort'>) {
-    // Fetch all matching universities (no pagination)
-    const response = await apiClient.get<{
-      success: boolean
-      data: PagedResponse<UniversityBackendDTO>
-    }>('/api/v1/web/registry/universities', {
-      params: { ...params, page: 0, size: 10000 },
+    // Server-side CSV export. Backend produces UTF-8 BOM CSV that Excel
+    // opens natively, eliminating the need for the (CVE-laden) `xlsx`
+    // package on the client.
+    const response = await apiClient.post<Blob>('/api/v1/web/registry/universities/export', null, {
+      params,
+      responseType: 'blob',
     })
-    const rows = (response.data.data.content ?? []).map(adaptDTO)
-    return rows
+    return response.data
   },
 
-  async getDictionaries() {
+  async getDictionaries(signal?: AbortSignal) {
     const response = await apiClient.get<{ success: boolean; data: Dictionaries }>(
       '/api/v1/web/registry/universities/dictionaries',
+      { signal },
     )
     return response.data.data
   },
 
-  async getTerrains(soato: string): Promise<Dictionary[]> {
+  async getTerrains(soato: string, signal?: AbortSignal): Promise<Dictionary[]> {
     const response = await apiClient.get<{ success: boolean; data: Dictionary[] }>(
       '/api/v1/web/registry/universities/terrains',
-      { params: { soato } },
+      { params: { soato }, signal },
     )
     return response.data.data
   },

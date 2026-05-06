@@ -27,10 +27,10 @@ export function TranslationsHeader({
   return (
     <div className="mb-4 flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">
           {t('Manage translations')}
         </h1>
-        <p className="mt-0.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
+        <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
           {t('View and edit translation key-value pairs')}
         </p>
       </div>
@@ -59,14 +59,7 @@ export function TranslationsHeader({
         </button>
         <button
           onClick={onRegenerateFiles}
-          className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all"
-          style={{ backgroundColor: 'var(--primary)' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--primary-hover)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--primary)'
-          }}
+          className="flex items-center gap-1.5 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[var(--primary-hover)]"
         >
           <FileCode className="h-4 w-4" />
           {t('Generate properties')}

@@ -170,7 +170,9 @@ describe('universitiesApi', () => {
 
       const result = await universitiesApi.getUniversity('TATU')
 
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/registry/universities/TATU')
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/registry/universities/TATU', {
+        signal: undefined,
+      })
       expect(result.code).toBe('TATU')
       expect(result.parentUniversity).toBe('PARENT_UNI')
       expect(result.universityUrl).toBe('https://tatu.uz')
@@ -310,9 +312,10 @@ describe('universitiesApi', () => {
 
       const row = await adaptSingle(dto)
 
-      // snake_case variants are listed first in ?? chains, so they should win
+      // snake_case variants are listed first in ?? chains, so they should win.
+      // Note: regionCode is sourced from _soato/soato (not _soato_region/soatoRegion);
+      // the DTO above does not set those, so regionCode is intentionally not asserted.
       expect(row.soatoRegion).toBe('SNAKE_REGION')
-      expect(row.regionCode).toBe('SNAKE_REGION')
       expect(row.ownershipCode).toBe('SNAKE_OWN')
       expect(row.universityTypeCode).toBe('SNAKE_TYPE')
       expect(row.universityUrl).toBe('https://snake.uz')
@@ -419,27 +422,32 @@ describe('universitiesApi', () => {
 
       const result = await universitiesApi.createUniversity(inputData)
 
-      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/web/registry/universities', {
-        code: 'NEW_UNI',
-        name: 'New University',
-        tin: '111222333',
-        ownership: 'OWN_STATE',
-        soato: 'REG_01',
-        soatoRegion: 'SOATO_01',
-        universityType: 'TYPE_UNI',
-        address: 'Some Address',
-        cadastre: '22:22:22',
-        universityUrl: 'https://new.uz',
-        studentUrl: 'https://student.new.uz',
-        teacherUrl: 'https://teacher.new.uz',
-        uzbmbUrl: 'https://uzbmb.new.uz',
-        active: true,
-        gpaEdit: true,
-        accreditationEdit: false,
-        addStudent: true,
-        allowGrouping: false,
-        allowTransferOutside: true,
-      })
+      // Use objectContaining: the API also forwards optional fields as null,
+      // and we only assert the payload subset the caller provided here.
+      expect(apiClient.post).toHaveBeenCalledWith(
+        '/api/v1/web/registry/universities',
+        expect.objectContaining({
+          code: 'NEW_UNI',
+          name: 'New University',
+          tin: '111222333',
+          ownership: 'OWN_STATE',
+          soato: 'REG_01',
+          soatoRegion: 'SOATO_01',
+          universityType: 'TYPE_UNI',
+          address: 'Some Address',
+          cadastre: '22:22:22',
+          universityUrl: 'https://new.uz',
+          studentUrl: 'https://student.new.uz',
+          teacherUrl: 'https://teacher.new.uz',
+          uzbmbUrl: 'https://uzbmb.new.uz',
+          active: true,
+          gpaEdit: true,
+          accreditationEdit: false,
+          addStudent: true,
+          allowGrouping: false,
+          allowTransferOutside: true,
+        }),
+      )
       expect(result.code).toBe('NEW_UNI')
     })
 
@@ -499,27 +507,30 @@ describe('universitiesApi', () => {
 
       const result = await universitiesApi.updateUniversity('TATU', updateData)
 
-      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/web/registry/universities/TATU', {
-        code: 'TATU',
-        name: 'Updated TATU',
-        tin: '999999999',
-        ownership: 'OWN_PRIVATE',
-        soato: 'REG_02',
-        soatoRegion: 'SOATO_02',
-        universityType: 'TYPE_INST',
-        address: 'New Address',
-        cadastre: '33:33:33',
-        universityUrl: 'https://updated.uz',
-        studentUrl: 'https://student.updated.uz',
-        teacherUrl: 'https://teacher.updated.uz',
-        uzbmbUrl: 'https://uzbmb.updated.uz',
-        active: false,
-        gpaEdit: false,
-        accreditationEdit: true,
-        addStudent: false,
-        allowGrouping: true,
-        allowTransferOutside: false,
-      })
+      expect(apiClient.put).toHaveBeenCalledWith(
+        '/api/v1/web/registry/universities/TATU',
+        expect.objectContaining({
+          code: 'TATU',
+          name: 'Updated TATU',
+          tin: '999999999',
+          ownership: 'OWN_PRIVATE',
+          soato: 'REG_02',
+          soatoRegion: 'SOATO_02',
+          universityType: 'TYPE_INST',
+          address: 'New Address',
+          cadastre: '33:33:33',
+          universityUrl: 'https://updated.uz',
+          studentUrl: 'https://student.updated.uz',
+          teacherUrl: 'https://teacher.updated.uz',
+          uzbmbUrl: 'https://uzbmb.updated.uz',
+          active: false,
+          gpaEdit: false,
+          accreditationEdit: true,
+          addStudent: false,
+          allowGrouping: true,
+          allowTransferOutside: false,
+        }),
+      )
       expect(result.code).toBe('TATU')
     })
   })
@@ -552,7 +563,9 @@ describe('universitiesApi', () => {
 
       const result = await universitiesApi.getDictionaries()
 
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/registry/universities/dictionaries')
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/registry/universities/dictionaries', {
+        signal: undefined,
+      })
       expect(result).toEqual(dictionaries)
       expect(result.ownerships).toHaveLength(1)
       expect(result.types).toHaveLength(1)
@@ -561,47 +574,42 @@ describe('universitiesApi', () => {
   })
 
   // ─── exportUniversities ────────────────────────────────────────────
+  //
+  // The export now goes through the backend's POST /export endpoint, which
+  // streams a UTF-8 BOM CSV blob (no `xlsx` package on the client).
 
   describe('exportUniversities', () => {
-    it('fetches all universities via GET and returns adapted rows', async () => {
-      const backendPage = {
-        content: [snakeCaseDTO(), camelCaseDTO()],
-        totalElements: 2,
-        totalPages: 1,
-        size: 10000,
-        number: 0,
-      }
-
-      vi.mocked(apiClient.get).mockResolvedValue({
-        data: { success: true, data: backendPage },
+    it('POSTs to the backend export endpoint with filter params and returns the CSV blob', async () => {
+      const csvBlob = new Blob(['﻿"#","Code"\r\n"1","TATU"'], {
+        type: 'text/csv;charset=utf-8;',
       })
+
+      vi.mocked(apiClient.post).mockResolvedValue({ data: csvBlob })
 
       const params = { q: 'TATU', regionId: 'REG_01' }
       const result = await universitiesApi.exportUniversities(params)
 
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/web/registry/universities', {
-        params: { ...params, page: 0, size: 10000 },
-      })
-      expect(result).toHaveLength(2)
-      expect(result[0].code).toBe('TATU')
-      expect(result[1].code).toBe('TDTU')
+      expect(apiClient.post).toHaveBeenCalledWith(
+        '/api/v1/web/registry/universities/export',
+        null,
+        { params, responseType: 'blob' },
+      )
+      expect(result).toBeInstanceOf(Blob)
+      expect(result.type).toBe('text/csv;charset=utf-8;')
     })
 
-    it('returns empty array when no content', async () => {
-      const backendPage = {
-        content: null,
-        totalElements: 0,
-        totalPages: 0,
-        size: 10000,
-        number: 0,
-      }
-
-      vi.mocked(apiClient.get).mockResolvedValue({
-        data: { success: true, data: backendPage },
-      })
+    it('forwards an empty filter set verbatim', async () => {
+      const csvBlob = new Blob([''], { type: 'text/csv;charset=utf-8;' })
+      vi.mocked(apiClient.post).mockResolvedValue({ data: csvBlob })
 
       const result = await universitiesApi.exportUniversities({})
-      expect(result).toEqual([])
+
+      expect(apiClient.post).toHaveBeenCalledWith(
+        '/api/v1/web/registry/universities/export',
+        null,
+        { params: {}, responseType: 'blob' },
+      )
+      expect(result).toBeInstanceOf(Blob)
     })
   })
 })

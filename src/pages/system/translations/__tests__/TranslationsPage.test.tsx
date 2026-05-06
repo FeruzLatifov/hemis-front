@@ -16,6 +16,21 @@ vi.mock('react-i18next', () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
+// Mock the singleton `i18n` instance too — hooks call `i18n.t(...)` directly
+// inside mutation callbacks (where the React `useTranslation` hook isn't
+// available). Without this mock the real i18n loads uz translations and
+// our key-equals-text assertions break.
+vi.mock('@/i18n/config', () => ({
+  default: {
+    t: (key: string) => key,
+    language: 'uz',
+    changeLanguage: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
+  shortToBcp47: { uz: 'uz-UZ', oz: 'oz-UZ', ru: 'ru-RU', en: 'en-US' },
+}))
+
 // Mock react-router-dom
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')

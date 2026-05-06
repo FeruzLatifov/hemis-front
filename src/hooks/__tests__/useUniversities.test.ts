@@ -121,7 +121,7 @@ describe('useUniversities', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockPagedResponse)
-    expect(mockGetUniversities).toHaveBeenCalledWith({})
+    expect(mockGetUniversities).toHaveBeenCalledWith({}, expect.any(AbortSignal))
   })
 
   it('passes params to API call', async () => {
@@ -131,7 +131,9 @@ describe('useUniversities', () => {
     const params = { page: 1, size: 20, q: 'TATU' }
     renderHook(() => useUniversities(params), { wrapper })
 
-    await waitFor(() => expect(mockGetUniversities).toHaveBeenCalledWith(params))
+    await waitFor(() =>
+      expect(mockGetUniversities).toHaveBeenCalledWith(params, expect.any(AbortSignal)),
+    )
   })
 
   it('handles API error', async () => {
@@ -160,7 +162,7 @@ describe('useUniversity', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockUniversityDetail)
-    expect(mockGetUniversity).toHaveBeenCalledWith('TATU')
+    expect(mockGetUniversity).toHaveBeenCalledWith('TATU', expect.any(AbortSignal))
   })
 
   it('does not fetch when code is empty string', async () => {

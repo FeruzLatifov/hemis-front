@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { toast } from 'sonner'
 import i18n from '@/i18n/config'
 import { queryKeys } from '@/lib/queryKeys'
+import { CACHE } from '@/constants/cache'
 import {
   classifiersApi,
   type ClassifierItemsParams,
@@ -9,11 +10,14 @@ import {
   type ClassifierItemUpdate,
 } from '@/api/classifiers.api'
 
+// Classifiers (categories, metadata, items) change rarely — backend bounds
+// freshness at hours, not minutes. CACHE.LONG matches that contract.
+
 export function useClassifierCategories() {
   return useQuery({
     queryKey: queryKeys.classifiers.categories,
     queryFn: ({ signal }) => classifiersApi.getCategories(signal),
-    staleTime: 1000 * 60 * 60, // 1 hour — categories rarely change
+    staleTime: CACHE.LONG,
   })
 }
 
@@ -22,6 +26,7 @@ export function useClassifiersByCategory(category: string) {
     queryKey: queryKeys.classifiers.byCategory(category),
     queryFn: ({ signal }) => classifiersApi.getClassifiersByCategory(category, signal),
     enabled: !!category,
+    staleTime: CACHE.LONG,
   })
 }
 
@@ -31,6 +36,7 @@ export function useClassifierItems(apiKey: string, params: ClassifierItemsParams
     queryFn: ({ signal }) => classifiersApi.getClassifierItems(apiKey, params, signal),
     enabled: !!apiKey,
     placeholderData: keepPreviousData,
+    staleTime: CACHE.LONG,
   })
 }
 

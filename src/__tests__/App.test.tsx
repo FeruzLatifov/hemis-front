@@ -60,14 +60,17 @@ vi.mock('@/stores/menuStore', () => ({
     const state = {
       menuItems: [],
       isLoading: false,
+      error: null,
       setMenuItems: vi.fn(),
       setLoading: vi.fn(),
+      setError: vi.fn(),
       clearMenu: vi.fn(),
     }
     return typeof selector === 'function' ? selector(state) : state
   }),
   useRootMenuItems: vi.fn(() => []),
   useMenuLoading: vi.fn(() => false),
+  useMenuError: vi.fn(() => null),
 }))
 
 vi.mock('@/stores/favoritesStore', () => ({
@@ -157,6 +160,10 @@ vi.mock('@/components/ErrorBoundary', () => ({
 
 vi.mock('@/components/ThemeProvider', () => ({
   ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
+vi.mock('@/hooks/useTheme', () => ({
+  useTheme: () => ({ theme: 'light' as const, setTheme: vi.fn() }),
 }))
 
 vi.mock('sonner', () => ({

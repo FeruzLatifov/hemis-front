@@ -57,8 +57,8 @@ vi.mock('@/hooks/useClearCache', () => ({
   }),
 }))
 
-vi.mock('@/components/common/LanguageSwitcher', () => ({
-  default: () => <div data-testid="language-switcher">LanguageSwitcher</div>,
+vi.mock('@/hooks/useTheme', () => ({
+  useTheme: () => ({ theme: 'light' as const, setTheme: vi.fn() }),
 }))
 
 import Header from '../Header'
@@ -101,11 +101,6 @@ describe('Header', () => {
     expect(screen.getByText('TestAdmin')).toBeInTheDocument()
   })
 
-  it('renders the language switcher component', () => {
-    render(<Header setSidebarOpen={mockSetSidebarOpen} />)
-    expect(screen.getByTestId('language-switcher')).toBeInTheDocument()
-  })
-
   it('renders the notifications button', () => {
     render(<Header setSidebarOpen={mockSetSidebarOpen} />)
     expect(screen.getByLabelText('Notifications')).toBeInTheDocument()
@@ -116,23 +111,50 @@ describe('Header', () => {
     expect(screen.getByLabelText('Search pages (Ctrl+K)')).toBeInTheDocument()
   })
 
-  it('renders the clear cache button', () => {
+  it('does not show language/theme/cache as top-level toolbar buttons', () => {
+    // Senior-design pass: these are settings, not toolbar actions. They
+    // belong inside the user dropdown so the toolbar stays at three items
+    // and a destructive "clear cache" can't be hit by accident.
     render(<Header setSidebarOpen={mockSetSidebarOpen} />)
-    expect(screen.getByLabelText('Clear cache')).toBeInTheDocument()
+    // Cache live label is "Clear cache" — must NOT exist outside the closed dropdown.
+    expect(screen.queryByLabelText('Clear cache')).not.toBeInTheDocument()
+    // Theme live label is "Toggle theme" — must NOT exist outside the closed dropdown.
+    expect(screen.queryByLabelText('Toggle theme')).not.toBeInTheDocument()
   })
 
-  it('opens user dropdown on click', async () => {
+  it('opens user dropdown on click and exposes preferences', async () => {
     const user = userEvent.setup()
     render(<Header setSidebarOpen={mockSetSidebarOpen} />)
 
     const userMenuButton = screen.getByLabelText('User menu')
     await user.click(userMenuButton)
 
-    // Dropdown should be visible with menu items
+    // Account section
     expect(screen.getByRole('menu')).toBeInTheDocument()
     expect(screen.getByText('Profile')).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
+    // Preferences section — moved here from toolbar
+    expect(screen.getByText('Language')).toBeInTheDocument()
+    expect(screen.getByText('Clear cache')).toBeInTheDocument()
+    // Logout
     expect(screen.getByText('Logout')).toBeInTheDocument()
+  })
+
+  it('opens language sub-menu and shows the four supported languages', async () => {
+    const user = userEvent.setup()
+    render(<Header setSidebarOpen={mockSetSidebarOpen} />)
+
+    await user.click(screen.getByLabelText('User menu'))
+    await user.click(screen.getByText('Language'))
+
+    // Sub-menu uses role=menuitemradio for each locale option.
+    // Querying by role keeps us robust to the language label appearing
+    // twice (once as the current-selection summary on the parent row).
+    const radios = screen.getAllByRole('menuitemradio')
+    expect(radios).toHaveLength(4)
+    expect(radios.some((r) => r.textContent?.includes('Ўзбек'))).toBe(true)
+    expect(radios.some((r) => r.textContent?.includes('Русский'))).toBe(true)
+    expect(radios.some((r) => r.textContent?.includes('English'))).toBe(true)
   })
 
   it('shows user info in dropdown header', async () => {

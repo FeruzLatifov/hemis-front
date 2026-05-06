@@ -102,7 +102,7 @@ describe('MainLayout', () => {
 
   it('renders skip-to-content link for accessibility', () => {
     render(<MainLayout />)
-    expect(screen.getByText('Skip to content')).toBeInTheDocument()
+    expect(screen.getByText('Skip to main content')).toBeInTheDocument()
   })
 
   it('sidebar is open by default on desktop (width >= 768)', () => {

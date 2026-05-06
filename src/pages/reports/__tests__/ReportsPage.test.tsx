@@ -69,44 +69,44 @@ describe('ReportsPage', () => {
     expect(screen.getByText('Downloaded')).toBeInTheDocument()
     expect(screen.getByText('3,456')).toBeInTheDocument()
     expect(screen.getByText('Last update')).toBeInTheDocument()
-    expect(screen.getByText('Bugun, 08:00')).toBeInTheDocument()
+    expect(screen.getByText('Today, 08:00')).toBeInTheDocument()
   })
 
   it('renders student reports category', () => {
     render(<Reports />)
-    expect(screen.getByText('Talabalar hisobotlari')).toBeInTheDocument()
-    expect(screen.getByText('Talabalar statistikasi')).toBeInTheDocument()
-    expect(screen.getByText('Umumiy talabalar soni va taqsimlash')).toBeInTheDocument()
-    expect(screen.getByText("Ta'lim turlari bo'yicha")).toBeInTheDocument()
-    expect(screen.getByText("To'lov shakli bo'yicha")).toBeInTheDocument()
-    expect(screen.getByText('Hududlar kesimida')).toBeInTheDocument()
+    expect(screen.getByText('Student reports')).toBeInTheDocument()
+    expect(screen.getByText('Student statistics')).toBeInTheDocument()
+    expect(screen.getByText('Total students count and distribution')).toBeInTheDocument()
+    expect(screen.getByText('By education type')).toBeInTheDocument()
+    expect(screen.getByText('By payment type')).toBeInTheDocument()
+    expect(screen.getByText('By region')).toBeInTheDocument()
   })
 
   it('renders teacher reports category', () => {
     render(<Reports />)
-    expect(screen.getByText("O'qituvchilar hisobotlari")).toBeInTheDocument()
-    expect(screen.getByText('Ilmiy darajalar kesimida')).toBeInTheDocument()
-    expect(screen.getByText("Ilmiy unvonlar bo'yicha")).toBeInTheDocument()
-    expect(screen.getByText("Tajriba bo'yicha")).toBeInTheDocument()
-    expect(screen.getByText("Kafedralar bo'yicha")).toBeInTheDocument()
+    expect(screen.getByText('Teacher reports')).toBeInTheDocument()
+    expect(screen.getByText('By scientific degrees')).toBeInTheDocument()
+    expect(screen.getByText('By academic titles')).toBeInTheDocument()
+    expect(screen.getByText('By experience')).toBeInTheDocument()
+    expect(screen.getByText('By departments')).toBeInTheDocument()
   })
 
   it('renders university reports category', () => {
     render(<Reports />)
-    expect(screen.getByText('Universitetlar hisobotlari')).toBeInTheDocument()
-    expect(screen.getByText("Umumiy ko'rsatkichlar")).toBeInTheDocument()
-    expect(screen.getByText("Reyting bo'yicha")).toBeInTheDocument()
-    expect(screen.getByText("Tashkiliy shakl bo'yicha")).toBeInTheDocument()
-    expect(screen.getByText('Mulkchilik shakli')).toBeInTheDocument()
+    expect(screen.getByText('University reports')).toBeInTheDocument()
+    expect(screen.getByText('General indicators')).toBeInTheDocument()
+    expect(screen.getByText('By rating')).toBeInTheDocument()
+    expect(screen.getByText('By organizational form')).toBeInTheDocument()
+    expect(screen.getByText('Form of ownership')).toBeInTheDocument()
   })
 
   it('renders scientific activity category', () => {
     render(<Reports />)
-    expect(screen.getByText('Ilmiy faoliyat')).toBeInTheDocument()
-    expect(screen.getByText('Ilmiy nashrlar')).toBeInTheDocument()
-    expect(screen.getByText('Ilmiy loyihalar')).toBeInTheDocument()
-    expect(screen.getByText('Dissertasiya himoyalari')).toBeInTheDocument()
-    expect(screen.getByText('Intellektual mulk')).toBeInTheDocument()
+    expect(screen.getByText('Scientific activity')).toBeInTheDocument()
+    expect(screen.getByText('Scientific publications')).toBeInTheDocument()
+    expect(screen.getByText('Scientific projects')).toBeInTheDocument()
+    expect(screen.getByText('Dissertation defenses')).toBeInTheDocument()
+    expect(screen.getByText('Intellectual property')).toBeInTheDocument()
   })
 
   it('renders report count badges for each category', () => {
@@ -119,9 +119,9 @@ describe('ReportsPage', () => {
   it('renders parameter count badges for reports', () => {
     render(<Reports />)
     // Various parameter counts appear as badges
-    expect(screen.getAllByText('12 parametr').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('8 parametr').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('6 parametr').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('12 parameters').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('8 parameters').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('6 parameters').length).toBeGreaterThan(0)
   })
 
   it('renders view buttons for each report', () => {
@@ -134,11 +134,11 @@ describe('ReportsPage', () => {
 
   it('renders report descriptions', () => {
     render(<Reports />)
-    expect(screen.getByText('Bakalavr, Magistr, PhD taqsimlash')).toBeInTheDocument()
-    expect(screen.getByText('Grant va kontrakt talabalar')).toBeInTheDocument()
-    expect(screen.getByText("Viloyatlar bo'yicha taqsimlash")).toBeInTheDocument()
-    expect(screen.getByText('Fan doktori, PhD, DSc')).toBeInTheDocument()
-    expect(screen.getByText('Scopus, Web of Science nashrlari')).toBeInTheDocument()
-    expect(screen.getByText('Patentlar, litsenziyalar')).toBeInTheDocument()
+    expect(screen.getByText('Bachelor, Master, PhD distribution')).toBeInTheDocument()
+    expect(screen.getByText('Grant and contract students')).toBeInTheDocument()
+    expect(screen.getByText('Distribution by regions')).toBeInTheDocument()
+    expect(screen.getByText('Doctor of Science, PhD, DSc')).toBeInTheDocument()
+    expect(screen.getByText('Scopus, Web of Science publications')).toBeInTheDocument()
+    expect(screen.getByText('Patents, licenses')).toBeInTheDocument()
   })
 })

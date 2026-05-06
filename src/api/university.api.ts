@@ -9,13 +9,34 @@ import type {
   UniversityProfileRequest,
 } from '@/types/university.types'
 
+// Backend dashboard payload shape — historical name is `buildings` for the
+// real-estate slice; the rest of the frontend (form, detail page, sections)
+// already speaks `cadastre`. We normalize at the API edge so callers see one
+// consistent shape regardless of which key the server emits.
+interface DashboardResponse {
+  founders?: UniversityDashboard['founders']
+  lifecycle?: UniversityDashboard['lifecycle']
+  cadastre?: UniversityDashboard['cadastre']
+  buildings?: UniversityDashboard['cadastre']
+  rector?: UniversityDashboard['rector']
+}
+
+function normalizeDashboard(raw: DashboardResponse): UniversityDashboard {
+  return {
+    founders: raw.founders ?? [],
+    lifecycle: raw.lifecycle ?? [],
+    cadastre: raw.cadastre ?? raw.buildings ?? [],
+    rector: raw.rector ?? null,
+  }
+}
+
 export const universityApi = {
   async getDashboard(code: string, signal?: AbortSignal): Promise<UniversityDashboard> {
-    const response = await apiClient.get<{ success: boolean; data: UniversityDashboard }>(
+    const response = await apiClient.get<{ success: boolean; data: DashboardResponse }>(
       `/api/v1/web/university/${code}/dashboard`,
       { signal },
     )
-    return response.data.data
+    return normalizeDashboard(response.data.data)
   },
 
   async getFounders(code: string, signal?: AbortSignal): Promise<UniversityFounder[]> {
@@ -43,10 +64,10 @@ export const universityApi = {
   },
 
   async syncAll(code: string): Promise<UniversityDashboard> {
-    const response = await apiClient.post<{ success: boolean; data: UniversityDashboard }>(
+    const response = await apiClient.post<{ success: boolean; data: DashboardResponse }>(
       `/api/v1/web/university/${code}/sync`,
     )
-    return response.data.data
+    return normalizeDashboard(response.data.data)
   },
 
   async getOfficials(
@@ -102,11 +123,11 @@ export const universityApi = {
     return response.data.data
   },
 
-  async getPositions(): Promise<Array<{ code: string; name: string }>> {
+  async getPositions(signal?: AbortSignal): Promise<Array<{ code: string; name: string }>> {
     const response = await apiClient.get<{
       success: boolean
       data: Array<{ code: string; name: string }>
-    }>('/api/v1/web/university/positions')
+    }>('/api/v1/web/university/positions', { signal })
     return response.data.data
   },
 

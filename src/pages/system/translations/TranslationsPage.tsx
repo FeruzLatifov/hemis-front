@@ -122,15 +122,9 @@ export default function TranslationsPage() {
   }, [])
 
   return (
-    <div className="flex h-screen flex-col" style={{ backgroundColor: 'var(--app-bg)' }}>
+    <div className="flex h-screen flex-col bg-[var(--app-bg)]">
       {/* Sticky Header + Filters */}
-      <div
-        className="sticky top-0 z-30 shadow-md"
-        style={{
-          backgroundColor: 'var(--card-bg)',
-          borderBottom: '2px solid var(--border-color-pro)',
-        }}
-      >
+      <div className="sticky top-0 z-30 border-b-2 border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-md">
         <div className="px-6 py-4">
           <TranslationsHeader
             loadingDuplicates={findDuplicatesMutation.isPending}
@@ -160,13 +154,7 @@ export default function TranslationsPage() {
 
       {/* Table Container */}
       <div className="flex-1 overflow-hidden px-6 py-4">
-        <div
-          className="flex h-full flex-col overflow-hidden rounded-lg border shadow-lg"
-          style={{
-            borderColor: 'var(--border-color-pro)',
-            backgroundColor: 'var(--card-bg)',
-          }}
-        >
+        <div className="flex h-full flex-col overflow-hidden rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-lg">
           <TranslationsTable
             translations={translations}
             loading={loading}

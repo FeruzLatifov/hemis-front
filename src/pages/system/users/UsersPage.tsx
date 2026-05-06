@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useStableCallback } from '@/hooks/useStableCallback'
 import {
   type SortingState,
   type VisibilityState,
@@ -112,12 +113,18 @@ export default function UsersPage() {
     }
   }, [searchInput])
 
-  useEffect(() => {
+  // One-way sync from local state → URL. The stable callback closes over
+  // the latest URL value so we never reach for a stale searchFromUrl while
+  // keeping the dependency array exhaustive.
+  const syncSearchToUrl = useStableCallback(() => {
     if (debouncedSearch !== searchFromUrl) {
       updateSearchParams({ q: debouncedSearch || undefined, page: undefined })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
+  })
+
+  useEffect(() => {
+    syncSearchToUrl()
+  }, [debouncedSearch, syncSearchToUrl])
 
   // ─── Sort sync ─────────────────────────────────────────────────────
   const sortParam = useMemo(() => {
@@ -125,12 +132,15 @@ export default function UsersPage() {
     return `${sorting[0].id},${sorting[0].desc ? 'desc' : 'asc'}`
   }, [sorting])
 
-  useEffect(() => {
+  const syncSortToUrl = useStableCallback(() => {
     if (sortParam !== sortFromUrl) {
       updateSearchParams({ sort: sortParam === 'username,asc' ? undefined : sortParam })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortParam])
+  })
+
+  useEffect(() => {
+    syncSortToUrl()
+  }, [sortParam, syncSortToUrl])
 
   // ─── Persist column visibility ─────────────────────────────────────
   useEffect(() => {

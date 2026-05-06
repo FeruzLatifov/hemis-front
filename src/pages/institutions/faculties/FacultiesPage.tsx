@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useStableCallback } from '@/hooks/useStableCallback'
 import {
   ChevronRight,
   ChevronDown,
@@ -73,13 +74,16 @@ export default function FacultiesPage() {
     [setSearchParams],
   )
 
-  // Sync debounced search to URL
-  useEffect(() => {
+  // One-way sync from local state → URL via stable callback (latest values, stable identity).
+  const syncSearchToUrl = useStableCallback(() => {
     if (debouncedSearch !== searchFromUrl) {
       updateSearchParams({ q: debouncedSearch || undefined, page: undefined })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
+  })
+
+  useEffect(() => {
+    syncSearchToUrl()
+  }, [debouncedSearch, syncSearchToUrl])
 
   // Handlers
   const handlePageChange = useCallback(
@@ -195,10 +199,7 @@ export default function FacultiesPage() {
     <>
       <div className="space-y-3 p-4">
         {/* Card container */}
-        <div
-          className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)]"
-          style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
-        >
+        <div className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           {/* Toolbar */}
           <div className="flex items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
             {/* Search */}

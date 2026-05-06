@@ -15,14 +15,14 @@ import type {
 export function useActivityLogs(params: ActivityLogFilter = {}) {
   return useQuery({
     queryKey: queryKeys.audit.activities(params as Record<string, unknown>),
-    queryFn: () => auditApi.getActivities(params),
+    queryFn: ({ signal }) => auditApi.getActivities(params, signal),
   })
 }
 
 export function useActivityDetail(id: string) {
   return useQuery({
     queryKey: queryKeys.audit.activityDetail(id),
-    queryFn: () => auditApi.getActivityDetail(id),
+    queryFn: ({ signal }) => auditApi.getActivityDetail(id, signal),
     enabled: !!id,
   })
 }
@@ -33,14 +33,14 @@ export function useActivityDetail(id: string) {
 export function useErrorLogs(params: ErrorLogFilter = {}) {
   return useQuery({
     queryKey: queryKeys.audit.errors(params as Record<string, unknown>),
-    queryFn: () => auditApi.getErrors(params),
+    queryFn: ({ signal }) => auditApi.getErrors(params, signal),
   })
 }
 
 export function useErrorDetail(id: string) {
   return useQuery({
     queryKey: queryKeys.audit.errorDetail(id),
-    queryFn: () => auditApi.getErrorDetail(id),
+    queryFn: ({ signal }) => auditApi.getErrorDetail(id, signal),
     enabled: !!id,
   })
 }
@@ -51,7 +51,7 @@ export function useErrorDetail(id: string) {
 export function useLoginLogs(params: LoginLogFilter = {}) {
   return useQuery({
     queryKey: queryKeys.audit.logins(params as Record<string, unknown>),
-    queryFn: () => auditApi.getLogins(params),
+    queryFn: ({ signal }) => auditApi.getLogins(params, signal),
   })
 }
 
@@ -62,7 +62,8 @@ export function useEntityHistory(entityType: string, entityId: string, size = 50
   const [page, setPage] = useState(0)
   const query = useQuery({
     queryKey: queryKeys.audit.entityHistory(entityType, entityId, { page, size }),
-    queryFn: () => auditApi.getEntityHistory(entityType, entityId, { page, size }),
+    queryFn: ({ signal }) =>
+      auditApi.getEntityHistory(entityType, entityId, { page, size }, signal),
     enabled: !!entityType && !!entityId,
   })
   return { ...query, page, setPage }
@@ -74,6 +75,6 @@ export function useEntityHistory(entityType: string, entityId: string, size = 50
 export function useAuditStats(params: StatsFilter = {}) {
   return useQuery({
     queryKey: queryKeys.audit.stats(params as Record<string, unknown>),
-    queryFn: () => auditApi.getStats(params),
+    queryFn: ({ signal }) => auditApi.getStats(params, signal),
   })
 }

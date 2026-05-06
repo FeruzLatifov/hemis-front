@@ -113,9 +113,11 @@ describe('sentry', () => {
           dsn: 'https://abc123@sentry.io/456',
           environment: 'staging',
           tracesSampleRate: 0.5,
+          // BrowserTracing ships with the initial init() call. Replay is now
+          // attached lazily via requestIdleCallback (see sentry.ts) to keep
+          // ~250 KB of recorder JS off the critical first-paint path.
           integrations: expect.arrayContaining([
             expect.objectContaining({ name: 'BrowserTracing' }),
-            expect.objectContaining({ name: 'Replay' }),
           ]),
           ignoreErrors: expect.arrayContaining(['NetworkError', 'Network request failed']),
         }),

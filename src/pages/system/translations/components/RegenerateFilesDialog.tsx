@@ -33,7 +33,7 @@ export function RegenerateFilesDialog({
       <DialogContent className="max-w-md bg-[var(--card-bg)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-[var(--text-primary)]">
-            <FileCode className="h-6 w-6" style={{ color: 'var(--primary)' }} />
+            <FileCode className="h-6 w-6 text-[var(--primary)]" />
             {t('Regenerate properties files')}
           </DialogTitle>
           <DialogDescription className="mt-3 text-base leading-relaxed text-[var(--text-secondary)]">
@@ -51,14 +51,7 @@ export function RegenerateFilesDialog({
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-lg px-6 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
-            style={{ backgroundColor: 'var(--primary)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--primary-hover)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--primary)'
-            }}
+            className="rounded-lg bg-[var(--primary)] px-6 py-3 font-semibold text-white shadow-lg transition-all hover:bg-[var(--primary-hover)] hover:shadow-xl"
           >
             {t('Yes, generate')}
           </button>

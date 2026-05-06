@@ -108,10 +108,7 @@ export default function LanguageSwitcher() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div
-          className="card-white absolute top-full right-0 z-50 mt-2 w-56 overflow-hidden rounded-lg border"
-          style={{ boxShadow: '0 4px 6px rgba(15, 23, 42, 0.1)' }}
-        >
+        <div className="card-white absolute top-full right-0 z-50 mt-2 w-56 overflow-hidden rounded-lg border shadow-[0_4px_6px_rgba(15,23,42,0.1)]">
           {/* Header */}
           <div className="layout-bg border-color-light border-b px-4 py-2">
             <p className="text-color-secondary text-xs font-semibold">{t('Select language')}</p>

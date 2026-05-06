@@ -159,7 +159,8 @@ describe('FacultyDetailDrawer', () => {
     render(<FacultyDetailDrawer {...defaultProps} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Close')).toBeInTheDocument()
+      // Drawer renders both a header X-button and a footer "Close" — assert at least one.
+      expect(screen.getAllByText('Close').length).toBeGreaterThan(0)
     })
   })
 
@@ -186,8 +187,8 @@ describe('FacultyDetailDrawer', () => {
 
     render(<FacultyDetailDrawer {...defaultProps} />)
 
-    // Component should at least render the drawer container with close button
-    expect(screen.getByText('Close')).toBeInTheDocument()
+    // Component should at least render the drawer container with close button(s).
+    expect(screen.getAllByText('Close').length).toBeGreaterThan(0)
   })
 
   it('shows error state on failure', async () => {

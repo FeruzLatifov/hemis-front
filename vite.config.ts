@@ -1,10 +1,37 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Upload source maps to Sentry **only** when an auth token is present —
+    // typically that's CI with `SENTRY_AUTH_TOKEN`/`SENTRY_ORG`/`SENTRY_PROJECT`
+    // configured. Local builds and PR previews stay free of any Sentry side
+    // effect, so devs and CI remain decoupled. See:
+    // https://docs.sentry.io/platforms/javascript/sourcemaps/uploading/vite/
+    ...(process.env.SENTRY_AUTH_TOKEN
+      ? [
+          sentryVitePlugin({
+            org: process.env.SENTRY_ORG,
+            project: process.env.SENTRY_PROJECT,
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            sourcemaps: {
+              // We generate maps in this build, ship the gzipped versions, and
+              // delete them after upload — production users never download
+              // .map files (privacy + bandwidth).
+              filesToDeleteAfterUpload: ['./dist/**/*.map'],
+            },
+            release: {
+              name: process.env.VITE_SENTRY_RELEASE,
+            },
+            telemetry: false,
+          }),
+        ]
+      : []),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -33,7 +60,11 @@ export default defineConfig({
     },
   },
   build: {
-    sourcemap: false,
+    // Source maps are produced for every build; the Sentry plugin (when
+    // configured in CI) uploads them to Sentry and then deletes the local
+    // `.map` files so they never reach production users. Without an auth
+    // token the maps stay on disk — useful for staging/preview deploys.
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {

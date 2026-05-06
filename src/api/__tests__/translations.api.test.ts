@@ -177,7 +177,9 @@ describe('getTranslationById', () => {
 
     const result = await getTranslationById('42')
 
-    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/system/translation/42')
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/system/translation/42', {
+      signal: undefined,
+    })
     expect(result).toEqual(translation)
   })
 })
@@ -246,7 +248,9 @@ describe('getTranslationStatistics', () => {
 
     const result = await getTranslationStatistics()
 
-    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/system/translation/stats')
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/web/system/translation/stats', {
+      signal: undefined,
+    })
     expect(result).toEqual(stats)
   })
 })

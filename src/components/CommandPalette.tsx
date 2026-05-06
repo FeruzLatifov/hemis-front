@@ -286,12 +286,9 @@ export default function CommandPalette() {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label={t('Tezkor qidiruv')}
+      aria-label={t('Quick search')}
     >
-      <div
-        className="card-white mx-4 w-full max-w-lg overflow-hidden rounded-lg border"
-        style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
-      >
+      <div className="card-white mx-4 w-full max-w-lg overflow-hidden rounded-lg border shadow-2xl">
         {/* Search Input */}
         <div className="border-color-light flex items-center gap-3 border-b px-4">
           <Search className="text-color-secondary h-4 w-4 shrink-0" />
@@ -301,7 +298,7 @@ export default function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('Sahifalarni qidirish...')}
+            placeholder={t('Search pages...')}
             className="text-color-primary placeholder:text-color-secondary w-full bg-transparent py-3 text-sm outline-none"
           />
           <kbd className="border-color-light text-color-secondary hidden h-5 items-center gap-1 rounded border px-1.5 text-[10px] font-medium sm:inline-flex">
@@ -315,7 +312,7 @@ export default function CommandPalette() {
           {hasRecentPages && (
             <>
               <div className="text-color-secondary px-4 py-2 text-xs font-semibold tracking-wider uppercase">
-                {t("So'nggi")}
+                {t('Recent')}
               </div>
               {recentPages.map((page, idx) => {
                 const currentIndex = recentStartIndex + idx
@@ -354,7 +351,7 @@ export default function CommandPalette() {
           {hasFilteredItems && (
             <>
               <div className="text-color-secondary px-4 py-2 text-xs font-semibold tracking-wider uppercase">
-                {query.trim() ? t('Natijalar') : t('Barcha sahifalar')}
+                {query.trim() ? t('Results') : t('All pages')}
               </div>
               {filteredItems.map((item, idx) => {
                 const currentIndex = filteredStartIndex + idx
@@ -388,7 +385,7 @@ export default function CommandPalette() {
           {/* Empty State */}
           {!hasRecentPages && !hasFilteredItems && (
             <div className="px-4 py-8 text-center">
-              <p className="text-color-secondary text-sm">{t('Natija topilmadi')}</p>
+              <p className="text-color-secondary text-sm">{t('No results found')}</p>
             </div>
           )}
         </div>

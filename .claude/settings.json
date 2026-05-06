@@ -1,39 +1,66 @@
 {
   "permissions": {
     "allow": [
-      "Bash(yarn install:*)",
-      "Bash(npm install:*)",
-      "Bash(yarn dev:*)",
-      "Bash(npm run dev:*)",
-      "Bash(yarn build:*)",
-      "Bash(npm run build:*)",
-      "Bash(yarn preview:*)",
-      "Bash(yarn test:*)",
-      "Bash(npm run test:*)",
-      "Bash(yarn lint:*)",
-      "Bash(npm run lint:*)",
+      "Bash(yarn:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
       "WebSearch",
       "WebFetch(domain:react.dev)",
       "WebFetch(domain:tailwindcss.com)",
       "WebFetch(domain:ui.shadcn.com)",
-      "WebFetch(domain:developer.mozilla.org)",
-      "Read(src/**/*)",
-      "Read(.env.example)"
+      "WebFetch(domain:tanstack.com)",
+      "WebFetch(domain:zod.dev)",
+      "WebFetch(domain:react-hook-form.com)",
+      "WebFetch(domain:zustand.docs.pmnd.rs)",
+      "WebFetch(domain:vitest.dev)",
+      "WebFetch(domain:playwright.dev)",
+      "WebFetch(domain:developer.mozilla.org)"
     ],
     "deny": [
-      "Read(.env)",
-      "Read(.env.local)",
-      "Read(secrets/**)",
-      "Bash(rm -rf:*)",
-      "Bash(rm:*)",
-      "Bash(sudo:*)"
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials*)",
+      "Read(**/*.pem)",
+      "Read(**/*.p12)",
+      "Read(**/*.jks)",
+      "Read(**/keystore*)",
+      "Read(**/private*.key)",
+      "Read(**/.npmrc)",
+      "Read(**/.yarnrc.yml)"
     ],
-    "ask": ["Bash(git push:*)", "Bash(docker run:*)", "Bash(npm publish:*)", "Bash(yarn publish:*)"]
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(sudo:*)",
+      "Bash(git push:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git rebase:*)",
+      "Bash(docker run:*)",
+      "Bash(npm publish:*)",
+      "Bash(yarn publish:*)",
+      "Bash(yarn version:*)",
+      "Bash(npm version:*)"
+    ]
   },
   "testsEnabled": false,
   "companyAnnouncements": [
-    "Remember to use the defined education colour palette (blue, green, purple, gold) with no gradients or glass effects.",
-    "Limit accent colours to two per page and include text on buttons even when icons are present.",
-    "Base API requests off import.meta.env.VITE_API_URL and never hard‑code endpoints."
+    "Backend: hemis-back (Spring Boot) — REST API base = import.meta.env.VITE_API_URL.",
+    "i18n MAJBURIY: barcha UI matnlari t('English key') orqali. Hardcoded matn taqiq.",
+    "API: faqat src/api/client.ts orqali (apiClient axios). Direct fetch/axios.create taqiq.",
+    "State: Server state → TanStack Query, UI state → Zustand. API javoblarni Zustand'da saqlamang.",
+    "useEffect ichida API call TAQIQ — useQuery/useMutation ishlating.",
+    "Inline style TAQIQ — Tailwind utility class yoki @theme CSS variable.",
+    "DOM manipulation (document.querySelector, e.currentTarget.style) TAQIQ — React refs/state.",
+    "Form: React Hook Form + Zod. Boshqa form library yo'q.",
+    "Toast: sonner. Error: Sentry orqali capture (RouteErrorBoundary mavjud).",
+    "shadcn/ui (Radix UI primitives) afzal — boshqa UI kit qo'shmang."
   ]
 }

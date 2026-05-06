@@ -324,10 +324,12 @@ describe('Sidebar', () => {
     )
   })
 
-  it('shows footer with version info when open', () => {
+  it('shows version stamp in footer when open', () => {
+    // Footer is intentionally minimal — the brand already lives in the
+    // sidebar header, so we only stamp the version here.
     render(<Sidebar {...defaultProps} />)
-    expect(screen.getByText('HEMIS Ministry')).toBeInTheDocument()
     expect(screen.getByText('v2.0.0')).toBeInTheDocument()
+    expect(screen.queryByText('HEMIS Ministry')).not.toBeInTheDocument()
   })
 
   it('renders mobile overlay when open', () => {

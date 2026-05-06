@@ -305,8 +305,8 @@ export function LogDetailDrawer({ id, type, onClose }: LogDetailDrawerProps) {
               {type === 'activity' ? t('Activity details') : t('Error details')}
             </h2>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label={t('Close')}>
+            <X className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
 

@@ -110,20 +110,10 @@ describe('passwordField', () => {
     expect(passwordField.parse('Abc12345')).toBeTruthy()
   })
 
-  it('rejects password shorter than 8 characters', () => {
+  it('rejects password shorter than 6 characters', () => {
+    // Frontend only enforces minimum length; backend owns the policy and
+    // composes the localized error message via i18n.
     expect(() => passwordField.parse('Ab1')).toThrow()
-  })
-
-  it('rejects password without uppercase', () => {
-    expect(() => passwordField.parse('abc12345')).toThrow()
-  })
-
-  it('rejects password without lowercase', () => {
-    expect(() => passwordField.parse('ABC12345')).toThrow()
-  })
-
-  it('rejects password without number', () => {
-    expect(() => passwordField.parse('Abcdefgh')).toThrow()
   })
 })
 

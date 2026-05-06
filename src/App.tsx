@@ -1,6 +1,8 @@
-import { lazy, Suspense, useEffect, useCallback } from 'react'
+import { Suspense, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { captureError } from './lib/sentry'
+import { lazyWithRetry } from './lib/lazy-with-retry'
+import { authBroadcaster } from './lib/auth-broadcast'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster, toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
@@ -14,46 +16,52 @@ import { useIdleTimeout } from './hooks/useIdleTimeout'
 import './i18n/config'
 
 // Lazy-loaded pages
-const LoginPage = lazy(() => import('./pages/LoginPage'))
-const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'))
-const StudentsLayout = lazy(() => import('./pages/students/StudentsLayout'))
-const StudentsPage = lazy(() => import('./pages/students/StudentsPage'))
-const StudentDuplicatesPage = lazy(() => import('./pages/students/StudentDuplicatesPage'))
-const StudentDirectionsPage = lazy(() => import('./pages/students/StudentDirectionsPage'))
-const TeachersPage = lazy(() => import('./pages/teachers/TeachersPage'))
-const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'))
-const TranslationsPage = lazy(() =>
+const LoginPage = lazyWithRetry(() => import('./pages/LoginPage'))
+const DashboardPage = lazyWithRetry(() => import('./pages/dashboard/DashboardPage'))
+const StudentsLayout = lazyWithRetry(() => import('./pages/students/StudentsLayout'))
+const StudentsPage = lazyWithRetry(() => import('./pages/students/StudentsPage'))
+const StudentDuplicatesPage = lazyWithRetry(() => import('./pages/students/StudentDuplicatesPage'))
+const StudentDirectionsPage = lazyWithRetry(() => import('./pages/students/StudentDirectionsPage'))
+const TeachersPage = lazyWithRetry(() => import('./pages/teachers/TeachersPage'))
+const ReportsPage = lazyWithRetry(() => import('./pages/reports/ReportsPage'))
+const TranslationsPage = lazyWithRetry(() =>
   import('./pages/system/translations').then((m) => ({ default: m.TranslationsPage })),
 )
-const TranslationFormPage = lazy(() =>
+const TranslationFormPage = lazyWithRetry(() =>
   import('./pages/system/translations').then((m) => ({ default: m.TranslationFormPage })),
 )
-const LogsPage = lazy(() => import('./pages/system/logs/LogsPage'))
-const UsersPage = lazy(() => import('./pages/system/users').then((m) => ({ default: m.UsersPage })))
-const UserFormPage = lazy(() =>
+const LogsPage = lazyWithRetry(() => import('./pages/system/logs/LogsPage'))
+const UsersPage = lazyWithRetry(() =>
+  import('./pages/system/users').then((m) => ({ default: m.UsersPage })),
+)
+const UserFormPage = lazyWithRetry(() =>
   import('./pages/system/users').then((m) => ({ default: m.UserFormPage })),
 )
-const UniversitiesPage = lazy(() =>
+const UniversitiesPage = lazyWithRetry(() =>
   import('./pages/institutions/universities').then((m) => ({ default: m.UniversitiesPage })),
 )
-const UniversityDetailPage = lazy(
+const UniversityDetailPage = lazyWithRetry(
   () => import('./pages/institutions/universities/UniversityDetailPage'),
 )
-const UniversityInfoPage = lazy(() => import('./pages/university/UniversityInfoPage'))
-const UniversityFormPage = lazy(
+const UniversityInfoPage = lazyWithRetry(() => import('./pages/university/UniversityInfoPage'))
+const UniversityFormPage = lazyWithRetry(
   () => import('./pages/institutions/universities/UniversityFormPage'),
 )
-const FacultiesPage = lazy(() =>
+const FacultiesPage = lazyWithRetry(() =>
   import('./pages/institutions/faculties').then((m) => ({ default: m.FacultiesPage })),
 )
-const ClassifierCategoryPage = lazy(() => import('./pages/classifiers/ClassifierCategoryPage'))
-const RolesPage = lazy(() => import('./pages/system/roles').then((m) => ({ default: m.RolesPage })))
-const RoleFormPage = lazy(() =>
+const ClassifierCategoryPage = lazyWithRetry(
+  () => import('./pages/classifiers/ClassifierCategoryPage'),
+)
+const RolesPage = lazyWithRetry(() =>
+  import('./pages/system/roles').then((m) => ({ default: m.RolesPage })),
+)
+const RoleFormPage = lazyWithRetry(() =>
   import('./pages/system/roles').then((m) => ({ default: m.RoleFormPage })),
 )
-const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'))
-const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'))
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const ForgotPasswordPage = lazyWithRetry(() => import('./pages/auth/ForgotPasswordPage'))
+const ResetPasswordPage = lazyWithRetry(() => import('./pages/auth/ResetPasswordPage'))
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'))
 
 // Loading fallback
 const PageLoader = () => {
@@ -154,6 +162,29 @@ function App() {
     window.addEventListener('auth:logout', handleForceLogout)
     return () => window.removeEventListener('auth:logout', handleForceLogout)
   }, [logout])
+
+  // Cross-tab auth sync. When another tab signs in/out, mirror that here
+  // so a single logout closes every open tab and a login in tab A makes
+  // tab B stop showing the "Please sign in" screen on next render.
+  useEffect(() => {
+    return authBroadcaster.subscribe((event) => {
+      if (event.type === 'logout') {
+        // Local-only — don't re-broadcast, don't call /auth/logout (the
+        // originating tab already did).
+        useAuthStore.setState({
+          user: null,
+          university: null,
+          permissions: [],
+          isAuthenticated: false,
+        })
+      } else if (event.type === 'login' || event.type === 'refresh') {
+        // Pull fresh server state — cookie is shared across tabs.
+        refresh().catch(() => {
+          // Silent: if refresh fails, the logout-on-401 path will fire.
+        })
+      }
+    })
+  }, [refresh])
 
   return (
     <QueryClientProvider client={queryClient}>

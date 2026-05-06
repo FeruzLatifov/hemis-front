@@ -29,9 +29,17 @@ describe('queryClient', () => {
       expect(defaults.queries?.gcTime).toBe(1000 * 60 * 30)
     })
 
-    it('has retry set to 1 for queries', () => {
+    it('has retry as a function that skips 4xx errors', () => {
       const defaults = queryClient.getDefaultOptions()
-      expect(defaults.queries?.retry).toBe(1)
+      // queryClient.ts uses a function so 4xx client errors don't retry but transient
+      // failures get up to 2 attempts (CLAUDE.md rule). Verify the shape + behaviour.
+      expect(typeof defaults.queries?.retry).toBe('function')
+      const retryFn = defaults.queries?.retry as (failureCount: number, error: unknown) => boolean
+      const error4xx = { response: { status: 404 } }
+      const error5xx = { response: { status: 500 } }
+      expect(retryFn(0, error4xx)).toBe(false)
+      expect(retryFn(0, error5xx)).toBe(true)
+      expect(retryFn(2, error5xx)).toBe(false)
     })
 
     it('has refetchOnWindowFocus disabled', () => {

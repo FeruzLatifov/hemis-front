@@ -2,10 +2,7 @@ import type { Config } from 'tailwindcss'
 
 export default {
   darkMode: ['class'],
-  content: [
-    './index.html',
-    './src/**/*.{ts,tsx,js,jsx}',
-  ],
+  content: ['./index.html', './src/**/*.{ts,tsx,js,jsx}'],
   theme: {
     extend: {
       colors: {
@@ -51,29 +48,11 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
-      keyframes: {
-        'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(139, 92, 246, 0.6)' },
-        },
-        'float': {
-          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
-          '25%': { transform: 'translateY(-20px) rotate(5deg)' },
-          '50%': { transform: 'translateY(0px) rotate(0deg)' },
-          '75%': { transform: 'translateY(20px) rotate(-5deg)' },
-        },
-      },
-      animation: {
-        'fade-in': 'fade-in 0.5s ease-out',
-        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-        'float': 'float 8s ease-in-out infinite',
-      },
+      // NOTE: animations are owned by `src/index.css` to keep the design
+      // system in one place. The `pulse-glow` (purple shadow) and `float`
+      // (rotating translation) keyframes were never referenced anywhere in
+      // the app, so they have been removed.
     },
   },
   plugins: [],
 } satisfies Config
-

@@ -1,0 +1,139 @@
+# Dependabot configuration — automatic dependency updates.
+#
+# Why grouped: opening 50 PRs every Monday is unmanageable. We bundle
+# updates into a handful of curated groups (security, react, sentry, etc.)
+# so the team reviews ~5 PRs/week instead.
+#
+# Major version bumps stay separate — they almost always need manual
+# follow-up (changelogs, breaking changes), so we let Dependabot file
+# them one at a time.
+version: 2
+updates:
+  # ─── npm (frontend dependencies) ──────────────────────────────────
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
+      timezone: 'Asia/Tashkent'
+    open-pull-requests-limit: 8
+    reviewers:
+      - 'FeruzLatifov'
+    commit-message:
+      prefix: 'deps'
+      prefix-development: 'deps-dev'
+      include: 'scope'
+    labels:
+      - 'dependencies'
+    groups:
+      # Group 1 — anything with a known CVE: prioritised, merged ASAP.
+      security:
+        applies-to: security-updates
+        patterns:
+          - '*'
+      # Group 2 — React + Router + DOM bindings move together.
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - 'react-router*'
+          - '@types/react*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 3 — TanStack ecosystem (query + table) ships in lockstep.
+      tanstack:
+        patterns:
+          - '@tanstack/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 4 — Radix primitives travel together.
+      radix:
+        patterns:
+          - '@radix-ui/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 5 — Sentry SDK + plugin.
+      sentry:
+        patterns:
+          - '@sentry/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 6 — Tooling: vite, eslint, vitest, prettier, typescript.
+      tooling:
+        patterns:
+          - 'vite*'
+          - '@vitejs/*'
+          - 'eslint*'
+          - '@eslint/*'
+          - 'typescript*'
+          - 'vitest*'
+          - '@vitest/*'
+          - 'prettier*'
+          - 'globals'
+          - 'jsdom'
+          - 'msw'
+          - '@testing-library/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 7 — i18n stack.
+      i18n:
+        patterns:
+          - 'i18next*'
+          - 'react-i18next'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 8 — Tailwind + PostCSS + design utilities.
+      styling:
+        patterns:
+          - 'tailwindcss*'
+          - '@tailwindcss/*'
+          - 'postcss*'
+          - 'autoprefixer'
+          - 'tailwind-merge'
+          - 'clsx'
+          - 'class-variance-authority'
+          - 'prettier-plugin-tailwindcss'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group 9 — Husky / lint-staged / commitlint (commit hooks).
+      git-hooks:
+        patterns:
+          - 'husky'
+          - 'lint-staged'
+          - '@commitlint/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+    ignore:
+      # Pin Node-typed @types separately from runtime React.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+
+  # ─── GitHub Actions ───────────────────────────────────────────────
+  # Workflow versions need bumps too; less frequent, monthly is enough.
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '06:00'
+      timezone: 'Asia/Tashkent'
+    open-pull-requests-limit: 4
+    commit-message:
+      prefix: 'ci'
+      include: 'scope'
+    labels:
+      - 'dependencies'
+      - 'ci'
+    groups:
+      actions:
+        patterns:
+          - '*'

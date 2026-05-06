@@ -92,6 +92,13 @@ jobs:
         run: yarn build
         env:
           VITE_API_URL: https://api.example.com
+          # Sentry source-maps upload — only happens when these are set as
+          # repository secrets. Without them the build still succeeds; the
+          # plugin no-ops. Keeps PRs from forks safe (no leaked tokens).
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          VITE_SENTRY_RELEASE: ${{ github.sha }}
 
   e2e:
     name: E2E Tests (Playwright)

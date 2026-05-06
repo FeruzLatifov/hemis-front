@@ -31,7 +31,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  ArrowLeft,
   Loader2,
   Save,
   Building2,
@@ -290,21 +289,34 @@ function UniversityFormPageInner() {
     }
   }, [isEdit, university, dictionaries])
 
-  // Outer page guarantees `university` + `dictionaries` are loaded before mounting
-  // this inner component, so `initialValues` is fully resolved on first render.
-  // Pass it as `defaultValues` — RHF (and Radix Select) initialise correctly without
-  // needing a deferred reset.
+  // `values: initialValues` (not `defaultValues`) — load-bearing bit for the
+  // "Sync external data" flow:
+  //   - User clicks Sync → mutation invalidates `universities.byId` and
+  //     `universityInfo.*`.
+  //   - TanStack Query refetches → `university` ref changes → useMemo gives
+  //     us a fresh `initialValues` reference.
+  //   - With `values` prop, RHF detects the change and resets form state.
+  //     Without `keepDirtyValues: false` the reset would *preserve* the
+  //     user's local edits — that is the upstream "synced but inputs didn't
+  //     change" bug we just diagnosed: the user expects sync to be the
+  //     authoritative refresh, not a no-op merge.
+  // We accept the tradeoff: pressing Sync discards any unsaved local edits,
+  // because sync is an explicit "give me the server state" gesture. If a
+  // user has typed into a field and presses Sync, that's effectively the
+  // same intent as Reset.
   const form = useForm<FormData>({
     resolver: zodResolver(universitySchema),
-    defaultValues: initialValues,
+    values: initialValues,
+    resetOptions: { keepDirtyValues: false, keepDirty: false, keepErrors: false },
   })
 
   const {
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     setValue,
     watch,
     register,
+    reset,
   } = form
 
   const selectedRegionCode = watch('regionCode')
@@ -313,7 +325,7 @@ function UniversityFormPageInner() {
   // Terrain (neighborhoods) filtered by district SOATO
   const { data: terrains = [] } = useQuery({
     queryKey: queryKeys.universities.terrains(selectedDistrict ?? ''),
-    queryFn: () => universitiesApi.getTerrains(selectedDistrict!),
+    queryFn: ({ signal }) => universitiesApi.getTerrains(selectedDistrict!, signal),
     enabled: !!selectedDistrict,
   })
 
@@ -373,41 +385,51 @@ function UniversityFormPageInner() {
   const [formTab, setFormTab] = useState('general')
 
   return (
-    <div className="mx-auto max-w-4xl p-4">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t('Back')}
-          </button>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">
-            {isEdit ? (university?.name ?? '') : t('Add new HEI')}
-          </h1>
-        </div>
+    // `min-h-full flex flex-col` makes the page container fill the scrollable
+    // <main> region. Without this, when form content is shorter than the
+    // viewport, `sticky bottom-0` collapses against the form footer instead
+    // of the actual screen edge — the bug we saw where the save bar floated
+    // mid-page. Now the form stretches to fill, so sticky lands where the
+    // user expects: pinned to the screen bottom regardless of form length.
+    <div className="mx-auto flex min-h-full max-w-4xl flex-col p-4">
+      {/* Page header — breadcrumb owns "back" navigation, so we drop the
+          redundant <- Back button. Sync becomes a small secondary action. */}
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <h1
+          className="line-clamp-2 text-lg font-semibold text-[var(--text-primary)]"
+          title={isEdit ? (university?.name ?? '') : t('Add new HEI')}
+        >
+          {isEdit ? (university?.name ?? '') : t('Add new HEI')}
+        </h1>
         {isEdit && (
           <button
             type="button"
             onClick={() => syncMutation.mutate()}
             disabled={syncMutation.isPending}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3.5 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
           >
             {syncMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-3.5 w-3.5" />
             )}
             {syncMutation.isPending ? t('Syncing...') : t('Sync external data')}
           </button>
         )}
       </div>
 
-      <form key={university?.code ?? 'new'} onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Tabs value={formTab} onValueChange={setFormTab}>
-          <TabsList className="mb-4">
+      <form
+        key={university?.code ?? 'new'}
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-1 flex-col space-y-4"
+      >
+        <Tabs value={formTab} onValueChange={setFormTab} className="flex-1">
+          {/* Tab strip — frequency-grouped order:
+              [Core data] General · Profile · Property
+              [People]    Officials · Founders
+              [Meta]      Settings · History
+              `overflow-x-auto` lets narrow viewports scroll instead of wrapping. */}
+          <TabsList className="mb-4 w-full justify-start overflow-x-auto">
             <TabsTrigger value="general" className="gap-1.5">
               <Building2 className="h-4 w-4" />
               {t('General')}
@@ -418,6 +440,10 @@ function UniversityFormPageInner() {
                 {t('Profile')}
               </TabsTrigger>
             )}
+            <TabsTrigger value="property" className="gap-1.5">
+              <MapPin className="h-4 w-4" />
+              {t('Property')}
+            </TabsTrigger>
             {isEdit && (
               <TabsTrigger value="officials" className="gap-1.5">
                 <Users className="h-4 w-4" />
@@ -431,10 +457,6 @@ function UniversityFormPageInner() {
             <TabsTrigger value="organization" className="gap-1.5">
               <Settings className="h-4 w-4" />
               {t('Settings')}
-            </TabsTrigger>
-            <TabsTrigger value="property" className="gap-1.5">
-              <MapPin className="h-4 w-4" />
-              {t('Property')}
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-1.5">
               <History className="h-4 w-4" />
@@ -456,9 +478,15 @@ function UniversityFormPageInner() {
                     readOnly={isEdit}
                     placeholder="00001"
                     maxLength={255}
+                    aria-invalid={!!errors.code}
+                    aria-describedby={errors.code ? 'university-code-error' : undefined}
                     className={`${errors.code ? 'border-red-300 focus:border-red-400' : ''} ${isEdit ? 'cursor-not-allowed bg-[var(--table-row-alt)] text-[var(--text-secondary)]' : ''}`}
                   />
-                  {errors.code && <p className="text-xs text-red-500">{t('Code is required')}</p>}
+                  {errors.code && (
+                    <p id="university-code-error" role="alert" className="text-xs text-red-500">
+                      {t('Code is required')}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="tin">{t('INN')}</Label>
@@ -473,9 +501,15 @@ function UniversityFormPageInner() {
                     {...register('name')}
                     placeholder={t('Full name of HEI')}
                     maxLength={1024}
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'university-name-error' : undefined}
                     className={errors.name ? 'border-red-300 focus:border-red-400' : ''}
                   />
-                  {errors.name && <p className="text-xs text-red-500">{t('Name is required')}</p>}
+                  {errors.name && (
+                    <p id="university-name-error" role="alert" className="text-xs text-red-500">
+                      {t('Name is required')}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t('Ownership')}</Label>
@@ -785,34 +819,50 @@ function UniversityFormPageInner() {
           </TabsContent>
         </Tabs>
 
-        {/* Sticky Footer — editable tablarda ko'rinadi (general, organization). Legal/Officials/Property/History — read-only yoki inline action */}
-        {(!isEdit || formTab === 'general' || formTab === 'organization') && (
-          <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-[var(--border-color-pro)] bg-[var(--card-bg)] px-6 py-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              disabled={isSaving}
-              className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
-            >
-              {t('Cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-5 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50 dark:border-blue-900/30 dark:bg-blue-950/20"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t('Saving...')}
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  {isEdit ? t('Save') : t('Create')}
-                </>
-              )}
-            </button>
+        {/* Sticky save bar — Notion/Linear/GitHub pattern: only present when
+            the form is dirty.
+              - Read-only browsing of tabs is silent (no chrome).
+              - Any edit slides the bar in from the bottom.
+              - "Reset" reverts to the loaded values (form.reset()) — it does
+                NOT navigate away. Closing the page is the breadcrumb's job.
+              - The amber pulse dot is the language-free "unsaved" signal,
+                identical idea to GitHub's yellow "Unsaved" pill.
+            Only mounts on tabs that this RHF form owns (general / organization
+            in edit mode, every tab in create mode). Profile lives in its own
+            form and renders its own bar via the same primitive. */}
+        {(!isEdit || formTab === 'general' || formTab === 'organization') && isDirty && (
+          <div className="sticky bottom-0 z-10 -mx-4 flex items-center gap-3 border-t border-[var(--border-color-pro)] bg-[var(--card-bg)] px-6 py-4 shadow-[0_-4px_6px_-4px_rgba(15,23,42,0.06)]">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+            </span>
+            <div className="ml-auto flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => reset()}
+                disabled={isSaving}
+                className="rounded-lg border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
+              >
+                {t('Reset')}
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-5 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50 dark:border-blue-900/30 dark:bg-blue-950/20"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('Saving...')}
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    {isEdit ? t('Save') : t('Create')}
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
       </form>

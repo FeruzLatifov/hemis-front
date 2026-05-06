@@ -73,6 +73,11 @@
   --input-border: #e2e8f0;
   --badge-muted-bg: #f1f5f9;
   --badge-muted-text: #475569;
+
+  /* Login page palette — deep navy + green accent */
+  --login-bg: #0f1e36;
+  --login-active: #1b3a6b;
+  --login-accent: #7cb342;
 }
 
 .dark {
@@ -173,6 +178,46 @@
   pointer-events: none;
   will-change: transform;
   filter: blur(70px);
+}
+
+/* Animated decorative blobs for the login page left panel.
+   Each variant is one specific blob; positions are page-specific so they live
+   here instead of being expressed via 5+ Tailwind arbitrary utilities. */
+.login-blob-1 {
+  width: 380px;
+  height: 380px;
+  background: #2b5ea7;
+  opacity: 0.3;
+  top: -5%;
+  right: -8%;
+  animation: blob-drift-1 22s ease-in-out infinite;
+}
+.login-blob-2 {
+  width: 300px;
+  height: 300px;
+  background: #3d8b2f;
+  opacity: 0.2;
+  bottom: 5%;
+  left: -5%;
+  animation: blob-drift-2 26s ease-in-out infinite;
+}
+.login-blob-3 {
+  width: 260px;
+  height: 260px;
+  background: #1e5090;
+  opacity: 0.25;
+  top: 45%;
+  left: 55%;
+  animation: blob-drift-3 18s ease-in-out infinite;
+}
+.login-blob-4 {
+  width: 160px;
+  height: 160px;
+  background: #5a9e35;
+  opacity: 0.15;
+  top: 20%;
+  left: 15%;
+  animation: blob-drift-1 30s ease-in-out infinite 8s;
 }
 
 .login-stagger {
@@ -621,4 +666,22 @@ body {
 
 .dark .lang-item--active:hover {
   background-color: rgba(79, 127, 231, 0.15);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Reduced motion (WCAG 2.3.3 — Animation from Interactions)
+   Honour the user's OS-level preference: animations and scroll
+   behaviour collapse to ~0ms while staying technically present
+   so JS that listens for animation/transition end events keeps
+   working.
+   ─────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -91,7 +91,7 @@ describe('useMenu', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockMenuResponse)
-    expect(mockGetUserMenu).toHaveBeenCalledWith('uz-UZ')
+    expect(mockGetUserMenu).toHaveBeenCalledWith('uz-UZ', expect.any(AbortSignal))
   })
 
   it('calls getUserMenu with the provided locale', async () => {
@@ -100,7 +100,9 @@ describe('useMenu', () => {
 
     renderHook(() => useMenu('ru-RU'), { wrapper })
 
-    await waitFor(() => expect(mockGetUserMenu).toHaveBeenCalledWith('ru-RU'))
+    await waitFor(() =>
+      expect(mockGetUserMenu).toHaveBeenCalledWith('ru-RU', expect.any(AbortSignal)),
+    )
   })
 
   it('does not fetch when enabled is false', async () => {
