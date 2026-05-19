@@ -59,6 +59,12 @@ const RolesPage = lazyWithRetry(() =>
 const RoleFormPage = lazyWithRetry(() =>
   import('./pages/system/roles').then((m) => ({ default: m.RoleFormPage })),
 )
+const WebhooksPage = lazyWithRetry(() =>
+  import('./pages/system/webhooks').then((m) => ({ default: m.WebhooksPage })),
+)
+const OutboxPage = lazyWithRetry(() =>
+  import('./pages/system/outbox').then((m) => ({ default: m.OutboxPage })),
+)
 const ForgotPasswordPage = lazyWithRetry(() => import('./pages/auth/ForgotPasswordPage'))
 const ResetPasswordPage = lazyWithRetry(() => import('./pages/auth/ResetPasswordPage'))
 const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'))
@@ -498,6 +504,26 @@ function App() {
                         <ProtectedRoute permission="audit.view">
                           <RouteErrorBoundary>
                             <LogsPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="webhooks"
+                      element={
+                        <ProtectedRoute permission="webhook.view">
+                          <RouteErrorBoundary>
+                            <WebhooksPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="outbox"
+                      element={
+                        <ProtectedRoute permission="outbox.view">
+                          <RouteErrorBoundary>
+                            <OutboxPage />
                           </RouteErrorBoundary>
                         </ProtectedRoute>
                       }

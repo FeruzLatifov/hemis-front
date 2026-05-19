@@ -67,8 +67,72 @@ export function ActivityLogsTab({ search, dateFrom, dateTo }: ActivityLogsTabPro
     }).format(new Date(dateString))
   }
 
+  const quickFilters: Array<{
+    key: string
+    label: string
+    entityType: string
+    action: string
+  }> = [
+    { key: 'all', label: t('All entities'), entityType: '', action: 'all' },
+    {
+      key: 'employee-sync',
+      label: t('Employee sync from Univer'),
+      entityType: 'Employee',
+      action: 'UPDATE',
+    },
+    {
+      key: 'webhook',
+      label: t('Webhook targets'),
+      entityType: 'WebhookTarget',
+      action: 'all',
+    },
+    {
+      key: 'classifier',
+      label: t('Classifiers'),
+      entityType: 'Classifier',
+      action: 'all',
+    },
+    {
+      key: 'university',
+      label: t('Universities'),
+      entityType: 'University',
+      action: 'all',
+    },
+  ]
+
+  const activeQuickFilter =
+    quickFilters.find((qf) => qf.entityType === entityType && qf.action === action)?.key ?? 'custom'
+
   return (
     <>
+      {/* Quick filter chips */}
+      <div className="flex flex-wrap items-center gap-2 pt-4">
+        <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+          {t('Quick filters')}:
+        </span>
+        {quickFilters.map((qf) => {
+          const isActive = activeQuickFilter === qf.key
+          return (
+            <button
+              key={qf.key}
+              type="button"
+              onClick={() => {
+                setEntityType(qf.entityType)
+                setAction(qf.action)
+                setPage(0)
+              }}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                isActive
+                  ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950/30 dark:text-blue-300'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+              }`}
+            >
+              {qf.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap gap-3 py-4">
         <Select

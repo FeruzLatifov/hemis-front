@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
-import { Search, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Search, Plus, Pencil, Trash2, Activity } from 'lucide-react'
+import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -275,6 +276,8 @@ export default function ClassifierCategoryPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Sync events link */}
+              <SyncEventsLink />
               {/* Search */}
               <div className="relative">
                 <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
@@ -667,5 +670,21 @@ export default function ClassifierCategoryPage() {
         </div>
       )}
     </div>
+  )
+}
+
+function SyncEventsLink() {
+  const { t } = useTranslation()
+  const { permissions } = useAuthStore()
+  if (!permissions.includes('outbox.view')) return null
+  return (
+    <Link
+      to="/system/outbox?aggregateType=classifier"
+      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      title={t('View sync events for classifiers (outbox queue)')}
+    >
+      <Activity className="h-4 w-4" />
+      {t('Sync events')}
+    </Link>
   )
 }

@@ -101,4 +101,22 @@ export const queryKeys = {
     cadastre: (code: string) => ['universityInfo', 'cadastre', code] as const,
     profile: (code: string) => ['universityInfo', 'profile', code] as const,
   },
+
+  webhooks: {
+    all: ['webhooks'] as const,
+    list: ['webhooks', 'list'] as const,
+    byId: (id: string) => ['webhooks', id] as const,
+    byUniversity: (code: string) => ['webhooks', 'by-university', code] as const,
+    deliveries: (id: string, filters?: Record<string, unknown>) =>
+      ['webhooks', id, 'deliveries', filters] as const,
+    deliveriesByEvent: (eventId: string) => ['webhooks', 'events', eventId, 'deliveries'] as const,
+    dlq: (filters?: Record<string, unknown>) => ['webhooks', 'dlq', filters] as const,
+  },
+
+  outbox: {
+    all: ['outbox'] as const,
+    list: (filters?: Record<string, unknown>) => ['outbox', 'list', filters] as const,
+    byId: (id: string) => ['outbox', id] as const,
+    stats: ['outbox', 'stats'] as const,
+  },
 } as const
