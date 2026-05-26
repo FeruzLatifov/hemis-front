@@ -111,6 +111,10 @@ export const queryKeys = {
       ['webhooks', id, 'deliveries', filters] as const,
     deliveriesByEvent: (eventId: string) => ['webhooks', 'events', eventId, 'deliveries'] as const,
     dlq: (filters?: Record<string, unknown>) => ['webhooks', 'dlq', filters] as const,
+    applyResults: (filters?: Record<string, unknown>) =>
+      ['webhooks', 'apply-results', filters] as const,
+    applyResultsByEvent: (eventId: string) =>
+      ['webhooks', 'events', eventId, 'apply-results'] as const,
   },
 
   outbox: {

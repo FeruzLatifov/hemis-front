@@ -7,6 +7,8 @@ import type {
   WebhookSecretResponse,
   WebhookDeliveryLogDto,
   WebhookDeliveriesParams,
+  WebhookApplyResultDto,
+  WebhookApplyResultsParams,
 } from '@/types/webhook.types'
 
 const BASE = '/api/v1/web/admin/webhooks'
@@ -101,6 +103,29 @@ export const webhooksApi = {
       success: boolean
       data: PagedResponse<WebhookDeliveryLogDto>
     }>(`${BASE}/dlq`, { params, signal })
+    return response.data.data
+  },
+
+  // K2: univer apply natijalari ("delivered != applied")
+  async listApplyResults(
+    params: WebhookApplyResultsParams = {},
+    signal?: AbortSignal,
+  ): Promise<PagedResponse<WebhookApplyResultDto>> {
+    const response = await apiClient.get<{
+      success: boolean
+      data: PagedResponse<WebhookApplyResultDto>
+    }>(`${BASE}/apply-results`, { params, signal })
+    return response.data.data
+  },
+
+  async listApplyResultsByEvent(
+    eventId: string,
+    signal?: AbortSignal,
+  ): Promise<WebhookApplyResultDto[]> {
+    const response = await apiClient.get<{
+      success: boolean
+      data: WebhookApplyResultDto[]
+    }>(`${BASE}/events/${eventId}/apply-results`, { signal })
     return response.data.data
   },
 }

@@ -69,3 +69,21 @@ export interface WebhookDeliveriesParams {
   size?: number
   sort?: string
 }
+
+// K2: univer-side apply natijasi ("delivered != applied" — qaysi OTM da apply fail bo'ldi)
+// Backend: uz.hemis.common.dto.webhook.WebhookApplyResultDto
+export interface WebhookApplyResultDto {
+  eventId: string
+  universityCode: string
+  status: string // 'applied' | 'failed'
+  appliedAt: string | null
+  errorMessage: string | null
+  reportedAt: string | null
+}
+
+export interface WebhookApplyResultsParams {
+  status?: string
+  page?: number
+  size?: number
+  sort?: string
+}

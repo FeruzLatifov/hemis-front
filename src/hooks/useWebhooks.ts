@@ -8,6 +8,7 @@ import type {
   WebhookTargetCreateRequest,
   WebhookTargetUpdateRequest,
   WebhookDeliveriesParams,
+  WebhookApplyResultsParams,
 } from '@/types/webhook.types'
 
 export function useWebhooksList() {
@@ -40,6 +41,23 @@ export function useWebhookDlq(params: WebhookDeliveriesParams = {}) {
     queryKey: queryKeys.webhooks.dlq(params as Record<string, unknown>),
     queryFn: ({ signal }) => webhooksApi.listDlq(params, signal),
     placeholderData: keepPreviousData,
+  })
+}
+
+// K2: univer apply natijalari ("delivered != applied")
+export function useWebhookApplyResults(params: WebhookApplyResultsParams = {}) {
+  return useQuery({
+    queryKey: queryKeys.webhooks.applyResults(params as Record<string, unknown>),
+    queryFn: ({ signal }) => webhooksApi.listApplyResults(params, signal),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useWebhookApplyResultsByEvent(eventId: string) {
+  return useQuery({
+    queryKey: queryKeys.webhooks.applyResultsByEvent(eventId),
+    queryFn: ({ signal }) => webhooksApi.listApplyResultsByEvent(eventId, signal),
+    enabled: !!eventId,
   })
 }
 

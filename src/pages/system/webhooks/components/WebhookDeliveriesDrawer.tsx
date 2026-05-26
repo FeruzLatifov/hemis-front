@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useWebhookDeliveries } from '@/hooks/useWebhooks'
+import { useWebhookDeliveries, useWebhookApplyResultsByEvent } from '@/hooks/useWebhooks'
 import type { WebhookTargetDto, WebhookDeliveryLogDto } from '@/types/webhook.types'
 
 interface Props {
@@ -71,6 +71,7 @@ export default function WebhookDeliveriesDrawer({ target, onClose }: Props) {
             <thead className="bg-slate-50 text-left text-[11px] font-medium tracking-wider text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2">{t('Status')}</th>
+                <th className="px-3 py-2">{t('Apply')}</th>
                 <th className="px-3 py-2">{t('Event')}</th>
                 <th className="px-3 py-2">{t('Attempt')}</th>
                 <th className="px-3 py-2">{t('HTTP')}</th>
@@ -82,7 +83,7 @@ export default function WebhookDeliveriesDrawer({ target, onClose }: Props) {
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
                   <tr key={i}>
-                    {Array.from({ length: 6 }).map((_, j) => (
+                    {Array.from({ length: 7 }).map((_, j) => (
                       <td key={j} className="px-3 py-2">
                         <Skeleton className="h-4 w-full" />
                       </td>
@@ -91,12 +92,14 @@ export default function WebhookDeliveriesDrawer({ target, onClose }: Props) {
                 ))
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-3 py-10 text-center text-slate-500">
+                  <td colSpan={7} className="px-3 py-10 text-center text-slate-500">
                     {t('No delivery attempts yet')}
                   </td>
                 </tr>
               ) : (
-                items.map((d) => <DeliveryRow key={d.id} d={d} />)
+                items.map((d) => (
+                  <DeliveryRow key={d.id} d={d} universityCode={target.universityCode} />
+                ))
               )}
             </tbody>
           </table>
@@ -158,7 +161,7 @@ function StatBlock({
   )
 }
 
-function DeliveryRow({ d }: { d: WebhookDeliveryLogDto }) {
+function DeliveryRow({ d, universityCode }: { d: WebhookDeliveryLogDto; universityCode: string }) {
   const status = (d.status ?? '').toUpperCase()
   const tone =
     status === 'SUCCESS'
@@ -186,6 +189,9 @@ function DeliveryRow({ d }: { d: WebhookDeliveryLogDto }) {
         </Badge>
       </td>
       <td className="px-3 py-2">
+        <ApplyStatusCell eventId={d.eventId} universityCode={universityCode} />
+      </td>
+      <td className="px-3 py-2">
         <div className="text-xs font-medium">{d.eventType ?? '—'}</div>
         <div className="font-mono text-[11px] text-slate-400">{d.eventId?.slice(0, 8)}…</div>
       </td>
@@ -198,5 +204,29 @@ function DeliveryRow({ d }: { d: WebhookDeliveryLogDto }) {
         {d.dispatchedAt ? new Date(d.dispatchedAt).toLocaleString() : '—'}
       </td>
     </tr>
+  )
+}
+
+// K2: "delivered != applied" — univer apply natijasi (ack). Event bo'yicha olib, OTM ga mos qatorni topadi.
+function ApplyStatusCell({ eventId, universityCode }: { eventId: string; universityCode: string }) {
+  const { t } = useTranslation()
+  const { data, isLoading } = useWebhookApplyResultsByEvent(eventId)
+
+  if (isLoading) return <Skeleton className="h-4 w-14" />
+
+  const result = data?.find((r) => r.universityCode === universityCode)
+  if (!result) {
+    // Yetkazildi, lekin univer hali apply natijasini qaytarmagan (ack kutilmoqda)
+    return <span className="text-[11px] text-slate-400">{t('No ack')}</span>
+  }
+
+  const applied = result.status === 'applied'
+  const cls = applied
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : 'border-red-200 bg-red-50 text-red-700'
+  return (
+    <Badge variant="outline" className={cls} title={result.errorMessage ?? undefined}>
+      {applied ? t('Applied') : t('Apply failed')}
+    </Badge>
   )
 }
