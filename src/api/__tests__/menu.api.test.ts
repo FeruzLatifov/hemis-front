@@ -197,9 +197,7 @@ describe('menu.api', () => {
           icon: 'home',
           permission: 'VIEW_FULL',
           active: true,
-          visible: true,
           order: 1,
-          orderNum: 1,
         }),
       ]
 

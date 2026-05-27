@@ -139,7 +139,7 @@ export default function CommandPalette() {
   const searchableItems = useMemo((): SearchableItem[] => {
     const flat = flattenMenuTree(menuItems)
     return flat
-      .filter((item) => item.url && item.visible !== false)
+      .filter((item) => item.url && item.active !== false)
       .map((item) => ({
         id: item.id,
         label: getMenuLabel(item, currentLang),

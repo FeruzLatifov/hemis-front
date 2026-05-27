@@ -20,9 +20,7 @@ export interface MenuItem {
   permission?: string
   menuType?: 'main' | 'system' // Menu classification (default: 'main')
   active?: boolean
-  visible?: boolean // Frontend compatibility (alias for active)
   order?: number
-  orderNum?: number // Frontend compatibility
   items?: MenuItem[] // Children menu items
 }
 

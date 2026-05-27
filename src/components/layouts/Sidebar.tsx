@@ -7,20 +7,22 @@
  */
 
 import { useState, useMemo, useEffect, useCallback, useRef, memo } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { ChevronLeft, Menu, Star, Search, X, Clock } from 'lucide-react'
+import { ChevronLeft, Menu } from 'lucide-react'
 import { useRootMenuItems, useMenuLoading, useMenuError } from '@/stores/menuStore'
 import { useFavoritesList } from '@/stores/favoritesStore'
 import { useRecentMenuStore, useRecentItems } from '@/stores/recentMenuStore'
 import { useAddFavorite, useRemoveFavorite } from '@/hooks/useFavorites'
-import { getIcon } from '@/utils/iconMapper'
 import type { MenuItem as BackendMenuItem } from '@/api/menu.api'
 import { flattenMenuTree } from '@/api/menu.api'
 import { getMenuLabel } from '@/utils/menu.util'
 import hemisLogo from '@/assets/images/hemis-logo-new.png'
 import MenuItemComponent from './SidebarMenuItem'
+import SidebarSearchBox from './SidebarSearchBox'
+import SidebarFavoritesSection from './SidebarFavoritesSection'
+import SidebarRecentSection from './SidebarRecentSection'
 import { useMenuState } from '@/hooks/useMenuState'
 
 interface SidebarProps {
@@ -122,12 +124,8 @@ function Sidebar({ open, setOpen }: SidebarProps) {
   // Sort and filter menu items
   const sortedMenuItems = useMemo(() => {
     return [...rootMenuItems]
-      .filter((item) => item.visible !== false)
-      .sort((a, b) => {
-        const aOrder = a.orderNum ?? 999
-        const bOrder = b.orderNum ?? 999
-        return aOrder - bOrder
-      })
+      .filter((item) => item.active !== false)
+      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
   }, [rootMenuItems])
 
   // Separate system menu from regular menus (driven by backend menuType field)
@@ -253,106 +251,23 @@ function Sidebar({ open, setOpen }: SidebarProps) {
             </div>
           ) : (
             <>
-              {/* Search Input */}
+              {open && <SidebarSearchBox value={searchQuery} onChange={setSearchQuery} />}
+
               {open && (
-                <div className="relative mb-3">
-                  <Search className="text-color-secondary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('Search menu...')}
-                    className="border-color-light layout-bg text-color-primary placeholder:text-color-secondary w-full rounded-lg border py-2 pr-8 pl-9 text-sm outline-none focus:border-[var(--primary)]"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="text-color-secondary hover:text-color-primary absolute top-1/2 right-2 -translate-y-1/2"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
+                <SidebarFavoritesSection
+                  items={favoriteItems}
+                  currentLang={currentLang}
+                  location={location}
+                />
               )}
 
-              {/* Favorites Section */}
-              {open && favoriteItems.length > 0 && (
-                <div className="mb-3">
-                  <div className="mb-1 flex items-center gap-2 px-3 py-1.5">
-                    <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
-                    <span className="text-color-secondary text-xs font-semibold tracking-wider uppercase">
-                      {t('Quick links')}
-                    </span>
-                  </div>
-                  <div className="space-y-0.5">
-                    {favoriteItems.map((item) => {
-                      const Icon = getIcon(item.icon)
-                      const label = getMenuLabel(item, currentLang)
-                      const isActive = item.url
-                        ? location.pathname === item.url ||
-                          location.pathname.startsWith(item.url + '/')
-                        : false
-                      return (
-                        <Link
-                          key={`fav-${item.id}`}
-                          to={item.url || '#'}
-                          className={cn(
-                            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
-                            isActive
-                              ? 'sidebar-menu-item-child--active'
-                              : 'sidebar-menu-item-child',
-                          )}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="flex-1 font-medium">{label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                  {/* Separator */}
-                  <div className="mt-3 mb-2 h-px bg-[var(--border-color-pro)]" />
-                </div>
-              )}
-
-              {/* Recently Visited Section */}
-              {open && recentMenuItems.length > 0 && !searchQuery && (
-                <div className="mb-3">
-                  <div className="mb-1 flex items-center gap-2 px-3 py-1.5">
-                    <Clock className="text-color-secondary h-3.5 w-3.5" />
-                    <span className="text-color-secondary text-xs font-semibold tracking-wider uppercase">
-                      {t('Recently visited')}
-                    </span>
-                  </div>
-                  <div className="space-y-0.5">
-                    {recentMenuItems.map((item) => {
-                      const Icon = getIcon(item.icon)
-                      const label = getMenuLabel(item, currentLang)
-                      const isActive = item.url
-                        ? location.pathname === item.url ||
-                          location.pathname.startsWith(item.url + '/')
-                        : false
-                      return (
-                        <Link
-                          key={`recent-${item.id}`}
-                          to={item.url || '#'}
-                          className={cn(
-                            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
-                            isActive
-                              ? 'sidebar-menu-item-child--active'
-                              : 'sidebar-menu-item-child',
-                          )}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="flex-1 font-medium">{label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                  {/* Separator (only if no favorites separator above) */}
-                  {favoriteItems.length === 0 && (
-                    <div className="mt-3 mb-2 h-px bg-[var(--border-color-pro)]" />
-                  )}
-                </div>
+              {open && !searchQuery && (
+                <SidebarRecentSection
+                  items={recentMenuItems}
+                  currentLang={currentLang}
+                  location={location}
+                  showSeparator={favoriteItems.length === 0}
+                />
               )}
 
               {/* Main Menu Items */}

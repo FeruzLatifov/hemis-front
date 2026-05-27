@@ -145,8 +145,8 @@ const MenuItemComponent = memo(function MenuItemComponent({
         {open && isExpanded && (
           <div className={cn('mt-1 space-y-1', level === 0 ? 'ml-3' : 'ml-4')}>
             {item
-              .items!.filter((child) => child.visible !== false)
-              .sort((a, b) => (a.orderNum || a.order || 0) - (b.orderNum || b.order || 0))
+              .items!.filter((child) => child.active !== false)
+              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
               .map((child) => (
                 <MenuItemComponent
                   key={child.id}

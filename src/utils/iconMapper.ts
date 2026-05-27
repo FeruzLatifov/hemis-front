@@ -54,7 +54,7 @@ import {
   List,
   Briefcase,
   type LucideIcon,
-} from 'lucide-react';
+} from 'lucide-react'
 
 const iconMap: Record<string, LucideIcon> = {
   // =====================================================
@@ -62,60 +62,60 @@ const iconMap: Record<string, LucideIcon> = {
   // =====================================================
 
   // Root Level Menu Icons
-  'home': Home,
-  'HOME': Home,
-  'database': Database,
-  'DATABASE': Database,
+  home: Home,
+  HOME: Home,
+  database: Database,
+  DATABASE: Database,
   'line-chart': LineChart,
-  'LINE_CHART': LineChart,
-  'book': Book,
-  'BOOK': Book,
+  LINE_CHART: LineChart,
+  book: Book,
+  BOOK: Book,
   'bar-chart': BarChart,
-  'BAR_CHART_O': BarChart,
-  'settings': Settings,
-  'GEAR': Settings,
-  'languages': Languages,
-  'LANGUAGE': Languages,
+  BAR_CHART_O: BarChart,
+  settings: Settings,
+  GEAR: Settings,
+  languages: Languages,
+  LANGUAGE: Languages,
 
   // Level 2-3 Menu Icons
   'graduation-cap': GraduationCap,
-  'GRADUATION_CAP': GraduationCap,
-  'MORTAR_BOARD': GraduationCap,
-  'building': Building,
-  'BUILDING': Building,
+  GRADUATION_CAP: GraduationCap,
+  MORTAR_BOARD: GraduationCap,
+  building: Building,
+  BUILDING: Building,
   'building-2': Building2,
-  'BUILDING_O': Building2,
-  'users': Users,
-  'USERS': Users,
+  BUILDING_O: Building2,
+  users: Users,
+  USERS: Users,
   'layout-dashboard': LayoutDashboard,
-  'DASHBOARD': LayoutDashboard,
-  'send': Send,
-  'PAPER_PLANE': Send,
-  'lightbulb': Lightbulb,
-  'PRODUCT_HUNT': Lightbulb,
-  'trophy': Trophy,
-  'SOCCER_BALL_O': Trophy,
+  DASHBOARD: LayoutDashboard,
+  send: Send,
+  PAPER_PLANE: Send,
+  lightbulb: Lightbulb,
+  PRODUCT_HUNT: Lightbulb,
+  trophy: Trophy,
+  SOCCER_BALL_O: Trophy,
   'file-text': FileText,
-  'WPFORMS': FileText,
+  WPFORMS: FileText,
   'share-2': Share2,
-  'SHARE_ALT': Share2,
+  SHARE_ALT: Share2,
   'user-circle': UserCircle,
-  'USER_CIRCLE': UserCircle,
-  'edit': Edit,
-  'PENCIL_SQUARE': Edit,
+  USER_CIRCLE: UserCircle,
+  edit: Edit,
+  PENCIL_SQUARE: Edit,
   'pie-chart': PieChart,
-  'PIE_CHART': PieChart,
-  'flask': TestTube,
-  'FLASK': TestTube,
-  'banknote': Banknote,
-  'MONEY': Banknote,
+  PIE_CHART: PieChart,
+  flask: TestTube,
+  FLASK: TestTube,
+  banknote: Banknote,
+  MONEY: Banknote,
   'shield-check': ShieldCheck,
   'refresh-cw': RefreshCw,
-  'award': Award,
-  'list': List,
-  'LIST': List,
-  'briefcase': Briefcase,
-  'BRIEFCASE': Briefcase,
+  award: Award,
+  list: List,
+  LIST: List,
+  briefcase: Briefcase,
+  BRIEFCASE: Briefcase,
 
   // =====================================================
   // Semantic Names (for backwards compatibility)
@@ -191,7 +191,7 @@ const iconMap: Record<string, LucideIcon> = {
   // Help
   HelpCircle,
   Help: HelpCircle,
-};
+}
 
 /**
  * Get Lucide icon component by name
@@ -199,24 +199,36 @@ const iconMap: Record<string, LucideIcon> = {
  * @param iconName Icon name from backend
  * @returns Lucide icon component or default icon
  */
+const warnedIcons = new Set<string>()
+
 export const getIcon = (iconName?: string): LucideIcon => {
   if (!iconName) {
-    return FolderOpen; // Default icon
+    return FolderOpen // Default icon
   }
 
   // Try exact match
-  const icon = iconMap[iconName];
+  const icon = iconMap[iconName]
   if (icon) {
-    return icon;
+    return icon
   }
 
   // Try with first letter uppercase
-  const capitalizedName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
-  const capitalizedIcon = iconMap[capitalizedName];
+  const capitalizedName = iconName.charAt(0).toUpperCase() + iconName.slice(1)
+  const capitalizedIcon = iconMap[capitalizedName]
   if (capitalizedIcon) {
-    return capitalizedIcon;
+    return capitalizedIcon
   }
 
-  // Default icon
-  return FolderOpen;
-};
+  // Missing icon — warn once per name in dev (silent fallback in prod).
+  // Helps catch backend typos (e.g., menu seed with non-existent icon).
+  if (import.meta.env.DEV && !warnedIcons.has(iconName)) {
+    warnedIcons.add(iconName)
+
+    console.warn(
+      `[iconMapper] Unknown icon "${iconName}" — using FolderOpen fallback. ` +
+        `Add it to iconMap or fix backend menu seed.`,
+    )
+  }
+
+  return FolderOpen
+}
