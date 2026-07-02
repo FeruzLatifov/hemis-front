@@ -1208,5 +1208,17 @@
   "By age": "Yosh bo'yicha",
   "By university": "OTM bo'yicha",
   "Teachers count": "O'qituvchilar soni",
-  "No report data available": "Hisobot ma'lumotlari yo'q"
+  "No report data available": "Hisobot ma'lumotlari yo'q",
+  "Average attendance": "O'rtacha davomat",
+  "Universities covered": "Qamrab olingan OTMlar",
+  "Top universities by average score": "O'rtacha ball bo'yicha yetakchi OTMlar",
+  "Per-university academic performance": "OTM bo'yicha o'zlashtirish",
+  "Absentee students": "Davomati past talabalar",
+  "Total graduates": "Jami bitiruvchilar",
+  "Laboratories": "Laboratoriyalar",
+  "ICT equipment": "AKT jihozlari",
+  "Graduates by year": "Yillar bo'yicha bitiruvchilar",
+  "By workplace compatibility": "Ish joyi mosligi bo'yicha",
+  "Top universities by graduate count": "Bitiruvchilar soni bo'yicha yetakchi OTMlar",
+  "Laboratories by university": "OTM bo'yicha laboratoriyalar"
 }

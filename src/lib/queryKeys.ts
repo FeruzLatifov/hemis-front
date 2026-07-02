@@ -151,6 +151,8 @@ export const queryKeys = {
       ['reports', 'institutions', params] as const,
     scientific: (params?: Record<string, unknown>) => ['reports', 'scientific', params] as const,
     teachers: (params?: Record<string, unknown>) => ['reports', 'teachers', params] as const,
+    academic: (params?: Record<string, unknown>) => ['reports', 'academic', params] as const,
+    economic: (params?: Record<string, unknown>) => ['reports', 'economic', params] as const,
   },
 
   ratings: {

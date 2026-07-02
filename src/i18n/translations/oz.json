@@ -1208,5 +1208,17 @@
   "By age": "Ёш бўйича",
   "By university": "ОТМ бўйича",
   "Teachers count": "Ўқитувчилар сони",
-  "No report data available": "Ҳисобот маълумотлари йўқ"
+  "No report data available": "Ҳисобот маълумотлари йўқ",
+  "Average attendance": "Ўртача давомат",
+  "Universities covered": "Қамраб олинган ОТМлар",
+  "Top universities by average score": "Ўртача балл бўйича етакчи ОТМлар",
+  "Per-university academic performance": "ОТМ бўйича ўзлаштириш",
+  "Absentee students": "Давомати паст талабалар",
+  "Total graduates": "Жами битирувчилар",
+  "Laboratories": "Лабораториялар",
+  "ICT equipment": "АКТ жиҳозлари",
+  "Graduates by year": "Йиллар бўйича битирувчилар",
+  "By workplace compatibility": "Иш жойи мослиги бўйича",
+  "Top universities by graduate count": "Битирувчилар сони бўйича етакчи ОТМлар",
+  "Laboratories by university": "ОТМ бўйича лабораториялар"
 }

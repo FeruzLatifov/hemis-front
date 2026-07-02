@@ -1208,5 +1208,17 @@
   "By age": "По возрасту",
   "By university": "По вузам",
   "Teachers count": "Количество преподавателей",
-  "No report data available": "Нет данных отчёта"
+  "No report data available": "Нет данных отчёта",
+  "Average attendance": "Средняя посещаемость",
+  "Universities covered": "Охваченные вузы",
+  "Top universities by average score": "Ведущие вузы по среднему баллу",
+  "Per-university academic performance": "Успеваемость по вузам",
+  "Absentee students": "Студенты с пропусками",
+  "Total graduates": "Всего выпускников",
+  "Laboratories": "Лаборатории",
+  "ICT equipment": "ИКТ оборудование",
+  "Graduates by year": "Выпускники по годам",
+  "By workplace compatibility": "По соответствию месту работы",
+  "Top universities by graduate count": "Ведущие вузы по числу выпускников",
+  "Laboratories by university": "Лаборатории по вузам"
 }

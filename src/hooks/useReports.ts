@@ -4,10 +4,14 @@ import {
   getInstitutionsReport,
   getScientificReport,
   getTeachersReport,
+  getAcademicReport,
+  getEconomicReport,
   type StudentsReportParams,
   type InstitutionsReportParams,
   type ScientificReportParams,
   type TeachersReportParams,
+  type AcademicReportParams,
+  type EconomicReportParams,
 } from '@/api/reports.api'
 import { queryKeys } from '@/lib/queryKeys'
 import { CACHE } from '@/constants/cache'
@@ -47,6 +51,22 @@ export function useTeachersReport(params: TeachersReportParams = {}) {
   return useQuery({
     queryKey: queryKeys.reports.teachers(params as Record<string, unknown>),
     queryFn: ({ signal }) => getTeachersReport(params, signal),
+    staleTime: CACHE.MEDIUM,
+  })
+}
+
+export function useAcademicReport(params: AcademicReportParams = {}) {
+  return useQuery({
+    queryKey: queryKeys.reports.academic(params as Record<string, unknown>),
+    queryFn: ({ signal }) => getAcademicReport(params, signal),
+    staleTime: CACHE.MEDIUM,
+  })
+}
+
+export function useEconomicReport(params: EconomicReportParams = {}) {
+  return useQuery({
+    queryKey: queryKeys.reports.economic(params as Record<string, unknown>),
+    queryFn: ({ signal }) => getEconomicReport(params, signal),
     staleTime: CACHE.MEDIUM,
   })
 }

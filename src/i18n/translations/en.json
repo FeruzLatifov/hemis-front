@@ -1208,5 +1208,17 @@
   "By age": "By age",
   "By university": "By university",
   "Teachers count": "Teachers count",
-  "No report data available": "No report data available"
+  "No report data available": "No report data available",
+  "Average attendance": "Average attendance",
+  "Universities covered": "Universities covered",
+  "Top universities by average score": "Top universities by average score",
+  "Per-university academic performance": "Per-university academic performance",
+  "Absentee students": "Absentee students",
+  "Total graduates": "Total graduates",
+  "Laboratories": "Laboratories",
+  "ICT equipment": "ICT equipment",
+  "Graduates by year": "Graduates by year",
+  "By workplace compatibility": "By workplace compatibility",
+  "Top universities by graduate count": "Top universities by graduate count",
+  "Laboratories by university": "Laboratories by university"
 }

@@ -79,6 +79,12 @@ const ScientificReportPage = lazyWithRetry(() =>
 const TeachersReportPage = lazyWithRetry(() =>
   import('./pages/reports/teachers').then((m) => ({ default: m.TeachersReportPage })),
 )
+const AcademicReportPage = lazyWithRetry(() =>
+  import('./pages/reports/academic').then((m) => ({ default: m.AcademicReportPage })),
+)
+const EconomicReportPage = lazyWithRetry(() =>
+  import('./pages/reports/economic').then((m) => ({ default: m.EconomicReportPage })),
+)
 const AdministrativeRatingPage = lazyWithRetry(() =>
   import('./pages/ratings/administrative').then((m) => ({ default: m.AdministrativeRatingPage })),
 )
@@ -551,7 +557,11 @@ function App() {
                   />
                   <Route
                     path="reports/academic"
-                    element={<PlaceholderPage title={t('Academic report')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <AcademicReportPage />
+                      </RouteErrorBoundary>
+                    }
                   />
                   <Route
                     path="reports/research"
@@ -563,7 +573,11 @@ function App() {
                   />
                   <Route
                     path="reports/economic"
-                    element={<PlaceholderPage title={t('Economic report')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <EconomicReportPage />
+                      </RouteErrorBoundary>
+                    }
                   />
 
                   {/* Rating */}

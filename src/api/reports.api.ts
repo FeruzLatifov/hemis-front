@@ -81,6 +81,12 @@ export interface TeachersReportParams extends ReportBaseParams {
   academicDegree?: string
 }
 
+export interface AcademicReportParams extends ReportBaseParams {
+  educationType?: string
+}
+
+export type EconomicReportParams = ReportBaseParams
+
 // ---------------------------------------------------------------------------
 // Response envelope (backend wraps payload in ResponseWrapper<T>)
 // ---------------------------------------------------------------------------
@@ -115,9 +121,17 @@ export const getScientificReport = (params: ScientificReportParams = {}, signal?
 export const getTeachersReport = (params: TeachersReportParams = {}, signal?: AbortSignal) =>
   fetchReport('teachers', params, signal)
 
+export const getAcademicReport = (params: AcademicReportParams = {}, signal?: AbortSignal) =>
+  fetchReport('academic', params, signal)
+
+export const getEconomicReport = (params: EconomicReportParams = {}, signal?: AbortSignal) =>
+  fetchReport('economic', params, signal)
+
 export const reportsApi = {
   students: getStudentsReport,
   institutions: getInstitutionsReport,
   scientific: getScientificReport,
   teachers: getTeachersReport,
+  academic: getAcademicReport,
+  economic: getEconomicReport,
 }
