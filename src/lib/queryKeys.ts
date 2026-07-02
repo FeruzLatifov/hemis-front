@@ -30,8 +30,136 @@ export const queryKeys = {
     byId: (code: string) => ['faculties', code] as const,
   },
 
+  departments: {
+    all: ['departments'] as const,
+    groups: (filters?: Record<string, unknown>) => ['department-groups', filters] as const,
+    byUniversity: (codes: string[], filters?: Record<string, unknown>) =>
+      ['departments-by-university', codes, filters] as const,
+    byId: (code: string) => ['departments', code] as const,
+  },
+
+  groups: {
+    all: ['student-groups'] as const,
+    groups: (filters?: Record<string, unknown>) => ['student-group-roots', filters] as const,
+    byUniversity: (codes: string[], filters?: Record<string, unknown>) =>
+      ['student-groups-by-university', codes, filters] as const,
+    byId: (id: string) => ['student-groups', id] as const,
+    dictionaries: ['student-groups', 'dictionaries'] as const,
+  },
+
+  diplomas: {
+    all: ['diplomas'] as const,
+    list: (filters?: Record<string, unknown>) => ['diplomas', 'list', filters] as const,
+    byId: (id: string) => ['diplomas', id] as const,
+    dictionaries: ['diplomas', 'dictionaries'] as const,
+  },
+
+  researchers: {
+    all: ['researchers'] as const,
+    list: (filters?: Record<string, unknown>) => ['researchers', 'list', filters] as const,
+    byId: (id: string) => ['researchers', id] as const,
+    dictionaries: ['researchers', 'dictionaries'] as const,
+  },
+
+  scientificProjects: {
+    all: ['scientific-projects'] as const,
+    list: (filters?: Record<string, unknown>) => ['scientific-projects', 'list', filters] as const,
+    byId: (id: string) => ['scientific-projects', id] as const,
+    dictionaries: ['scientific-projects', 'dictionaries'] as const,
+  },
+
+  publications: {
+    all: ['publications'] as const,
+    list: (filters?: Record<string, unknown>) => ['publications', 'list', filters] as const,
+    byId: (id: string) => ['publications', id] as const,
+    dictionaries: ['publications', 'dictionaries'] as const,
+  },
+
+  methodical: {
+    all: ['methodical'] as const,
+    list: (filters?: Record<string, unknown>) => ['methodical', 'list', filters] as const,
+    byId: (id: string) => ['methodical', id] as const,
+    dictionaries: ['methodical', 'dictionaries'] as const,
+  },
+
+  scholarships: {
+    all: ['scholarships'] as const,
+    list: (filters?: Record<string, unknown>) => ['scholarships', 'list', filters] as const,
+    byId: (id: string) => ['scholarships', id] as const,
+    dictionaries: ['scholarships', 'dictionaries'] as const,
+  },
+
+  certificates: {
+    all: ['certificates'] as const,
+    list: (filters?: Record<string, unknown>) => ['certificates', 'list', filters] as const,
+    byId: (id: string) => ['certificates', id] as const,
+    dictionaries: ['certificates', 'dictionaries'] as const,
+  },
+
+  attachedSpecialities: {
+    all: ['attached-specialities'] as const,
+    list: (filters?: Record<string, unknown>) =>
+      ['attached-specialities', 'list', filters] as const,
+    byId: (id: string) => ['attached-specialities', id] as const,
+    dictionaries: ['attached-specialities', 'dictionaries'] as const,
+  },
+
+  employeeJobs: {
+    all: ['employee-jobs'] as const,
+    list: (filters?: Record<string, unknown>) => ['employee-jobs', 'list', filters] as const,
+    byId: (id: string) => ['employee-jobs', id] as const,
+    dictionaries: ['employee-jobs', 'dictionaries'] as const,
+  },
+
+  universitySpecialities: {
+    all: ['university-specialities'] as const,
+    list: (filters?: Record<string, unknown>) =>
+      ['university-specialities', 'list', filters] as const,
+    byId: (id: string) => ['university-specialities', id] as const,
+    dictionaries: ['university-specialities', 'dictionaries'] as const,
+  },
+
+  dissertationDefense: {
+    all: ['dissertation-defense'] as const,
+    list: (filters?: Record<string, unknown>) => ['dissertation-defense', 'list', filters] as const,
+    byId: (id: string) => ['dissertation-defense', id] as const,
+    dictionaries: ['dissertation-defense', 'dictionaries'] as const,
+  },
+
+  intellectual: {
+    all: ['intellectual'] as const,
+    list: (filters?: Record<string, unknown>) => ['intellectual', 'list', filters] as const,
+    byId: (id: string) => ['intellectual', id] as const,
+    dictionaries: ['intellectual', 'dictionaries'] as const,
+  },
+
+  researchActivity: {
+    all: ['research-activity'] as const,
+    list: (filters?: Record<string, unknown>) => ['research-activity', 'list', filters] as const,
+    byId: (id: string) => ['research-activity', id] as const,
+    dictionaries: ['research-activity', 'dictionaries'] as const,
+  },
+
   dashboard: {
     stats: ['dashboardStats'] as const,
+  },
+
+  reports: {
+    all: ['reports'] as const,
+    students: (params?: Record<string, unknown>) => ['reports', 'students', params] as const,
+    institutions: (params?: Record<string, unknown>) =>
+      ['reports', 'institutions', params] as const,
+    scientific: (params?: Record<string, unknown>) => ['reports', 'scientific', params] as const,
+    teachers: (params?: Record<string, unknown>) => ['reports', 'teachers', params] as const,
+  },
+
+  ratings: {
+    all: ['ratings'] as const,
+    administrative: (params?: Record<string, unknown>) =>
+      ['ratings', 'administrative', params] as const,
+    academic: (params?: Record<string, unknown>) => ['ratings', 'academic', params] as const,
+    scientific: (params?: Record<string, unknown>) => ['ratings', 'scientific', params] as const,
+    gpa: (params?: Record<string, unknown>) => ['ratings', 'gpa', params] as const,
   },
 
   menu: {

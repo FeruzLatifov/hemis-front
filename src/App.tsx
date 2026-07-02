@@ -22,8 +22,75 @@ const StudentsLayout = lazyWithRetry(() => import('./pages/students/StudentsLayo
 const StudentsPage = lazyWithRetry(() => import('./pages/students/StudentsPage'))
 const StudentDuplicatesPage = lazyWithRetry(() => import('./pages/students/StudentDuplicatesPage'))
 const StudentDirectionsPage = lazyWithRetry(() => import('./pages/students/StudentDirectionsPage'))
+const GroupsPage = lazyWithRetry(() =>
+  import('./pages/students/groups').then((m) => ({ default: m.GroupsPage })),
+)
+const DiplomasPage = lazyWithRetry(() =>
+  import('./pages/students/diplomas').then((m) => ({ default: m.DiplomasPage })),
+)
+const ScholarshipsPage = lazyWithRetry(() =>
+  import('./pages/students/scholarships').then((m) => ({ default: m.ScholarshipsPage })),
+)
+const CertificatesPage = lazyWithRetry(() =>
+  import('./pages/students/certificates').then((m) => ({ default: m.CertificatesPage })),
+)
+const ResearchersPage = lazyWithRetry(() =>
+  import('./pages/science/researchers').then((m) => ({ default: m.ResearchersPage })),
+)
+const ScientificProjectsPage = lazyWithRetry(() =>
+  import('./pages/science/projects').then((m) => ({ default: m.ScientificProjectsPage })),
+)
+const PublicationsPage = lazyWithRetry(() =>
+  import('./pages/science/publications').then((m) => ({ default: m.PublicationsPage })),
+)
+const MethodicalPage = lazyWithRetry(() =>
+  import('./pages/science/methodical').then((m) => ({ default: m.MethodicalPage })),
+)
+const IntellectualPropertyPage = lazyWithRetry(() =>
+  import('./pages/science/intellectual').then((m) => ({ default: m.IntellectualPropertyPage })),
+)
+const DissertationDefensePage = lazyWithRetry(() =>
+  import('./pages/science/dissertation-defense').then((m) => ({
+    default: m.DissertationDefensePage,
+  })),
+)
+const ResearchActivityPage = lazyWithRetry(() =>
+  import('./pages/science/research-activity').then((m) => ({ default: m.ResearchActivityPage })),
+)
+const EmployeeJobsPage = lazyWithRetry(() =>
+  import('./pages/teachers/employee-jobs').then((m) => ({ default: m.EmployeeJobsPage })),
+)
+const UniversitySpecialitiesPage = lazyWithRetry(() =>
+  import('./pages/institutions/university-specialities').then((m) => ({
+    default: m.UniversitySpecialitiesPage,
+  })),
+)
 const TeachersPage = lazyWithRetry(() => import('./pages/teachers/TeachersPage'))
 const ReportsPage = lazyWithRetry(() => import('./pages/reports/ReportsPage'))
+const StudentsReportPage = lazyWithRetry(() =>
+  import('./pages/reports/students').then((m) => ({ default: m.StudentsReportPage })),
+)
+const InstitutionsReportPage = lazyWithRetry(() =>
+  import('./pages/reports/institutions').then((m) => ({ default: m.InstitutionsReportPage })),
+)
+const ScientificReportPage = lazyWithRetry(() =>
+  import('./pages/reports/scientific').then((m) => ({ default: m.ScientificReportPage })),
+)
+const TeachersReportPage = lazyWithRetry(() =>
+  import('./pages/reports/teachers').then((m) => ({ default: m.TeachersReportPage })),
+)
+const AdministrativeRatingPage = lazyWithRetry(() =>
+  import('./pages/ratings/administrative').then((m) => ({ default: m.AdministrativeRatingPage })),
+)
+const AcademicRatingPage = lazyWithRetry(() =>
+  import('./pages/ratings/academic').then((m) => ({ default: m.AcademicRatingPage })),
+)
+const ScientificRatingPage = lazyWithRetry(() =>
+  import('./pages/ratings/scientific').then((m) => ({ default: m.ScientificRatingPage })),
+)
+const GpaRatingPage = lazyWithRetry(() =>
+  import('./pages/ratings/gpa').then((m) => ({ default: m.GpaRatingPage })),
+)
 const TranslationsPage = lazyWithRetry(() =>
   import('./pages/system/translations').then((m) => ({ default: m.TranslationsPage })),
 )
@@ -50,9 +117,19 @@ const UniversityFormPage = lazyWithRetry(
 const FacultiesPage = lazyWithRetry(() =>
   import('./pages/institutions/faculties').then((m) => ({ default: m.FacultiesPage })),
 )
+const DepartmentsPage = lazyWithRetry(() =>
+  import('./pages/institutions/departments').then((m) => ({ default: m.DepartmentsPage })),
+)
+const AttachedSpecialitiesPage = lazyWithRetry(() =>
+  import('./pages/institutions/attached-specialities').then((m) => ({
+    default: m.AttachedSpecialitiesPage,
+  })),
+)
 const ClassifierCategoryPage = lazyWithRetry(
   () => import('./pages/classifiers/ClassifierCategoryPage'),
 )
+const PositionsPage = lazyWithRetry(() => import('./pages/teachers/positions'))
+const QualificationsPage = lazyWithRetry(() => import('./pages/teachers/qualifications'))
 const RolesPage = lazyWithRetry(() =>
   import('./pages/system/roles').then((m) => ({ default: m.RolesPage })),
 )
@@ -275,11 +352,27 @@ function App() {
                     />
                     <Route
                       path="departments"
-                      element={<PlaceholderPage title={t('Departments')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <DepartmentsPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="attached-specialities"
-                      element={<PlaceholderPage title={t('University directions')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <AttachedSpecialitiesPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="university-specialities"
+                      element={
+                        <RouteErrorBoundary>
+                          <UniversitySpecialitiesPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                   </Route>
 
@@ -295,15 +388,37 @@ function App() {
                     <Route index element={<StudentsPage />} />
                     <Route path="duplicates" element={<StudentDuplicatesPage />} />
                     <Route path="directions" element={<StudentDirectionsPage />} />
-                    <Route path="groups" element={<PlaceholderPage title={t('Groups')} />} />
-                    <Route path="diplomas" element={<PlaceholderPage title={t('Diplomas')} />} />
+                    <Route
+                      path="groups"
+                      element={
+                        <RouteErrorBoundary>
+                          <GroupsPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="diplomas"
+                      element={
+                        <RouteErrorBoundary>
+                          <DiplomasPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
                     <Route
                       path="scholarships"
-                      element={<PlaceholderPage title={t('Scholarships')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <ScholarshipsPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="certificates"
-                      element={<PlaceholderPage title={t('Certificates')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <CertificatesPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                   </Route>
 
@@ -318,34 +433,86 @@ function App() {
                   />
                   <Route
                     path="teachers/positions"
-                    element={<PlaceholderPage title={t('Positions')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <PositionsPage />
+                      </RouteErrorBoundary>
+                    }
                   />
                   <Route
                     path="teachers/qualifications"
-                    element={<PlaceholderPage title={t('Qualifications')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <QualificationsPage />
+                      </RouteErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="teachers/employee-jobs"
+                    element={
+                      <RouteErrorBoundary>
+                        <EmployeeJobsPage />
+                      </RouteErrorBoundary>
+                    }
                   />
 
                   {/* Science */}
                   <Route path="science">
                     <Route
                       path="researchers"
-                      element={<PlaceholderPage title={t('Researchers')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <ResearchersPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="projects"
-                      element={<PlaceholderPage title={t('Scientific projects')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <ScientificProjectsPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="publications"
-                      element={<PlaceholderPage title={t('Publications')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <PublicationsPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="methodical"
-                      element={<PlaceholderPage title={t('Methodical works')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <MethodicalPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="intellectual"
-                      element={<PlaceholderPage title={t('Intellectual property')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <IntellectualPropertyPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="dissertation-defense"
+                      element={
+                        <RouteErrorBoundary>
+                          <DissertationDefensePage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="research-activity"
+                      element={
+                        <RouteErrorBoundary>
+                          <ResearchActivityPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                   </Route>
 
@@ -360,15 +527,27 @@ function App() {
                   />
                   <Route
                     path="reports/students"
-                    element={<PlaceholderPage title={t('Students report')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <StudentsReportPage />
+                      </RouteErrorBoundary>
+                    }
                   />
                   <Route
                     path="reports/teachers"
-                    element={<PlaceholderPage title={t('Teachers report')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <TeachersReportPage />
+                      </RouteErrorBoundary>
+                    }
                   />
                   <Route
                     path="reports/institutions"
-                    element={<PlaceholderPage title={t('Institutions report')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <InstitutionsReportPage />
+                      </RouteErrorBoundary>
+                    }
                   />
                   <Route
                     path="reports/academic"
@@ -376,7 +555,11 @@ function App() {
                   />
                   <Route
                     path="reports/research"
-                    element={<PlaceholderPage title={t('Scientific report')} />}
+                    element={
+                      <RouteErrorBoundary>
+                        <ScientificReportPage />
+                      </RouteErrorBoundary>
+                    }
                   />
                   <Route
                     path="reports/economic"
@@ -387,17 +570,36 @@ function App() {
                   <Route path="rating">
                     <Route
                       path="administrative"
-                      element={<PlaceholderPage title={t('Administrative rating')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <AdministrativeRatingPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="academic"
-                      element={<PlaceholderPage title={t('Academic rating')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <AcademicRatingPage />
+                        </RouteErrorBoundary>
+                      }
                     />
                     <Route
                       path="scientific"
-                      element={<PlaceholderPage title={t('Scientific rating')} />}
+                      element={
+                        <RouteErrorBoundary>
+                          <ScientificRatingPage />
+                        </RouteErrorBoundary>
+                      }
                     />
-                    <Route path="gpa" element={<PlaceholderPage title={t('GPA rating')} />} />
+                    <Route
+                      path="gpa"
+                      element={
+                        <RouteErrorBoundary>
+                          <GpaRatingPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
                   </Route>
 
                   {/* Classifiers */}
