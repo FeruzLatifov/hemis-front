@@ -131,6 +131,16 @@ const AttachedSpecialitiesPage = lazyWithRetry(() =>
     default: m.AttachedSpecialitiesPage,
   })),
 )
+const DiplomaBlanksPage = lazyWithRetry(() =>
+  import('./pages/institutions/diploma-blanks').then((m) => ({
+    default: m.DiplomaBlanksPage,
+  })),
+)
+const DiplomaBlankDistributionPage = lazyWithRetry(() =>
+  import('./pages/institutions/diploma-blank-distribution').then((m) => ({
+    default: m.DistributionPage,
+  })),
+)
 const ClassifierCategoryPage = lazyWithRetry(
   () => import('./pages/classifiers/ClassifierCategoryPage'),
 )
@@ -369,6 +379,22 @@ function App() {
                       element={
                         <RouteErrorBoundary>
                           <AttachedSpecialitiesPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="diploma-blanks"
+                      element={
+                        <RouteErrorBoundary>
+                          <DiplomaBlanksPage />
+                        </RouteErrorBoundary>
+                      }
+                    />
+                    <Route
+                      path="diploma-blank-distribution"
+                      element={
+                        <RouteErrorBoundary>
+                          <DiplomaBlankDistributionPage />
                         </RouteErrorBoundary>
                       }
                     />

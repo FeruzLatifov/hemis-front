@@ -104,6 +104,21 @@ export const queryKeys = {
     dictionaries: ['attached-specialities', 'dictionaries'] as const,
   },
 
+  diplomaBlanks: {
+    all: ['diploma-blanks'] as const,
+    list: (filters?: Record<string, unknown>) => ['diploma-blanks', 'list', filters] as const,
+    byId: (id: string) => ['diploma-blanks', id] as const,
+    dictionaries: ['diploma-blanks', 'dictionaries'] as const,
+  },
+
+  diplomaBlankDistribution: {
+    all: ['diploma-blank-distribution'] as const,
+    list: (filters?: Record<string, unknown>) =>
+      ['diploma-blank-distribution', 'list', filters] as const,
+    byId: (id: string) => ['diploma-blank-distribution', id] as const,
+    dictionaries: ['diploma-blank-distribution', 'dictionaries'] as const,
+  },
+
   employeeJobs: {
     all: ['employee-jobs'] as const,
     list: (filters?: Record<string, unknown>) => ['employee-jobs', 'list', filters] as const,
