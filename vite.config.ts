@@ -1,7 +1,13 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import path from 'path'
+
+// Dev/preview server port — read from FRONTEND_PORT (.env file or shell env),
+// default 43434 (a distinctive, rarely-used port). Override it via FRONTEND_PORT
+// without editing this file; strictPort makes a busy port fail loudly.
+const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), '')
+const port = Number(env.FRONTEND_PORT ?? process.env.FRONTEND_PORT) || 43434
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -45,7 +51,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port, // FRONTEND_PORT env (default 43434)
+    strictPort: true,
     host: true,
     headers: {
       // Security headers for development
@@ -58,6 +65,11 @@ export default defineConfig({
       'Content-Security-Policy':
         "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: http://localhost:* http://172.18.9.1:* https://*.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
     },
+  },
+  preview: {
+    port,
+    strictPort: true,
+    host: true,
   },
   build: {
     // Source maps are produced for every build; the Sentry plugin (when
