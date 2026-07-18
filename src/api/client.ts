@@ -85,6 +85,15 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
+    // ⭐ Ignore canceled/aborted requests — NOT real errors.
+    // TanStack Query aborts in-flight requests on unmount, query-key change, or
+    // React 19 StrictMode double-mount. These reject with a CanceledError that has
+    // no `error.response`, so without this guard they would fall into the
+    // `!error.response` branch below and fire a bogus "Network error" toast.
+    if (axios.isCancel(error) || error.code === 'ERR_CANCELED') {
+      return Promise.reject(error)
+    }
+
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean
     }
@@ -239,6 +248,21 @@ apiClient.interceptors.response.use(
 
       toast.error(errorMessage || i18n.t('Access denied'), {
         description: i18n.t('You do not have permission to perform this action'),
+        duration: 5000,
+      })
+    }
+
+    // ⭐ Network failure / timeout (no response) or gateway errors (502/503/504).
+    // Without this, data pages silently render an empty "No data" state on a real outage.
+    if (!error.response) {
+      const isTimeout = error.code === 'ECONNABORTED' || /timeout/i.test(error.message ?? '')
+      toast.error(isTimeout ? i18n.t('Request timed out') : i18n.t('Network error'), {
+        description: i18n.t('Please check your connection and try again'),
+        duration: 5000,
+      })
+    } else if ([502, 503, 504].includes(error.response.status)) {
+      toast.error(i18n.t('Server is temporarily unavailable'), {
+        description: i18n.t('Please try again in a moment'),
         duration: 5000,
       })
     }
