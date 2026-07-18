@@ -170,6 +170,8 @@ export async function logAuditEvent(
 
   // Console log in development
   if (options.consoleLog) {
+    // Intentional dev-only audit logger, gated behind options.consoleLog.
+    // eslint-disable-next-line no-console
     const logFn = severity === 'error' || severity === 'critical' ? console.error : console.log
     logFn(`[AUDIT] ${type}:`, message, metadata || '')
   }

@@ -26,6 +26,16 @@ export default defineConfig([
         'warn',
         { allowConstantExport: true },
       ],
+      // Enforce the "no console.log in production" rule (was documented but not
+      // enforced). warn/error stay allowed for genuine diagnostics.
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
+    // Test files may use console freely for debugging.
+    files: ['**/*.test.{ts,tsx}', 'src/test/**'],
+    rules: {
+      'no-console': 'off',
     },
   },
 ])
