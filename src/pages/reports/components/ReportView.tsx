@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import { Loader2, RefreshCw, RotateCcw } from 'lucide-react'
+import { Loader2, RefreshCw, RotateCcw, Download } from 'lucide-react'
+import { downloadCsv } from '@/utils/csv'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -107,6 +108,35 @@ export function ReportView({
 
   const resetFilters = () => setSearchParams({}, { replace: true })
 
+  const handleExport = () => {
+    if (!data) return
+    const rows: (string | number)[][] = []
+
+    if (data.kpis.length) {
+      rows.push([t('Name'), t('Value')])
+      for (const kpi of data.kpis) rows.push([t(kpi.label), kpi.value])
+      rows.push([])
+    }
+
+    for (const block of data.blocks) {
+      if (block.viz === 'table' && block.columns && block.rows) {
+        rows.push([t(block.title)])
+        rows.push(block.columns.map((c) => t(c.label)))
+        for (const row of block.rows) {
+          rows.push(block.columns.map((c) => row[c.key] ?? ''))
+        }
+        rows.push([])
+      } else if ((block.viz === 'bar' || block.viz === 'pie') && block.categories) {
+        rows.push([t(block.title)])
+        rows.push([t('Category'), t('Value')])
+        for (const cat of block.categories) rows.push([cat.label, cat.value])
+        rows.push([])
+      }
+    }
+
+    downloadCsv(`${t(title)}-${selectedYear}`, rows)
+  }
+
   return (
     <div className="animate-fade-in space-y-6">
       <h1 className="font-display text-2xl font-bold text-[var(--text-primary)]">{t(title)}</h1>
@@ -167,6 +197,16 @@ export function ReportView({
             {t('Reset')}
           </Button>
         )}
+
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          disabled={!data || isLoading}
+          className="ml-auto"
+        >
+          <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+          {t('Export')}
+        </Button>
       </div>
 
       {isLoading && (

@@ -7,7 +7,7 @@ import {
   GraduationCap,
   MoreHorizontal,
   Eye,
-  Edit,
+  RefreshCw,
   CheckCircle,
   XCircle,
   Clock,
@@ -38,6 +38,7 @@ import { useTranslation } from 'react-i18next'
 import { PAGINATION, UI } from '@/constants'
 import { useStudents, useStudentStats, useStudentDictionaries } from '@/hooks/useStudents'
 import type { StudentsParams, StudentRow } from '@/api/students.api'
+import StudentDetailDrawer from './StudentDetailDrawer'
 import { StudentsFilters, STUDENT_FILTER_KEYS, type StudentsFilterValues } from './StudentsFilters'
 
 export default function Students() {
@@ -68,6 +69,7 @@ export default function Students() {
   // =====================================================
   const [searchInput, setSearchInput] = useState(searchFromUrl)
   const [searchField, setSearchField] = useState<'code' | 'pinfl'>(searchFieldFromUrl)
+  const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null)
   const [debouncedSearch, setDebouncedSearch] = useState(searchFromUrl)
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null)
   const [showFiltersPanel, setShowFiltersPanel] = useState(
@@ -194,7 +196,7 @@ export default function Students() {
   // =====================================================
   // Data fetching
   // =====================================================
-  const { data: pagedData, isLoading } = useStudents(queryParams)
+  const { data: pagedData, isLoading, isError, refetch } = useStudents(queryParams)
   const { data: stats, isLoading: statsLoading } = useStudentStats()
   const { data: dictionaries } = useStudentDictionaries()
 
@@ -565,6 +567,20 @@ export default function Students() {
                     ))}
                   </TableRow>
                 ))
+              ) : isError ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="py-12 text-center">
+                    <div className="flex flex-col items-center gap-3" role="alert">
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        {t('Failed to load data')}
+                      </p>
+                      <Button variant="outline" size="sm" onClick={() => refetch()}>
+                        <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+                        {t('Retry')}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ) : students.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="py-12 text-center">
@@ -642,13 +658,9 @@ export default function Students() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedStudent(student)}>
                             <Eye className="mr-2 h-4 w-4" />
                             {t('View')}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            {t('Edit')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -674,6 +686,14 @@ export default function Students() {
           </div>
         )}
       </div>
+
+      {selectedStudent && (
+        <StudentDetailDrawer
+          student={selectedStudent}
+          resolveName={resolveName}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   )
 }

@@ -202,15 +202,15 @@ export default function Dashboard() {
         {stats.map((stat, index) => (
           <Card
             key={stat.name}
-            className="group relative overflow-hidden border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            className="group relative overflow-hidden border border-[var(--border-color-pro)] shadow-sm transition-shadow duration-200 hover:shadow-md"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div
-                  className={`flex h-14 w-14 items-center justify-center rounded-xl ${stat.color} text-white shadow-lg`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-[6px] ${stat.color} text-white`}
                 >
-                  <stat.icon className="h-7 w-7" />
+                  <stat.icon className="h-5 w-5" />
                 </div>
               </div>
             </CardHeader>
@@ -227,16 +227,13 @@ export default function Dashboard() {
       {/* Secondary Stats */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {secondaryStats.map((stat) => (
-          <Card
-            key={stat.name}
-            className="border-0 shadow-md transition-all duration-200 hover:shadow-lg"
-          >
+          <Card key={stat.name} className="border border-[var(--border-color-pro)] shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color} text-white shadow-md`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-[6px] ${stat.color} text-white`}
                 >
-                  <stat.icon className="h-6 w-6" />
+                  <stat.icon className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-xs text-[var(--text-secondary)]">{stat.name}</p>
@@ -253,7 +250,7 @@ export default function Dashboard() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Education Types */}
-        <Card className="border-0 shadow-lg lg:col-span-1">
+        <Card className="border border-[var(--border-color-pro)] shadow-sm lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
@@ -269,7 +266,7 @@ export default function Dashboard() {
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-lg ${type.color} text-white shadow-md`}
+                      className={`flex h-10 w-10 items-center justify-center rounded-[6px] ${type.color} text-white`}
                     >
                       <type.icon className="h-5 w-5" />
                     </div>
@@ -296,7 +293,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Top Universities */}
-        <Card className="border-0 shadow-lg lg:col-span-2">
+        <Card className="border border-[var(--border-color-pro)] shadow-sm lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500 text-white">
@@ -311,7 +308,7 @@ export default function Dashboard() {
               {topUniversities.map((uni) => (
                 <div
                   key={uni.rank}
-                  className="group flex items-center justify-between rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="group flex items-center justify-between rounded-xl border border-[var(--border-color-pro)] bg-[var(--card-bg)] p-4 transition-shadow hover:shadow-sm"
                 >
                   <div className="flex flex-1 items-center gap-4">
                     <div
@@ -353,7 +350,7 @@ export default function Dashboard() {
       {/* Recent Activity & Quick Actions */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Activity */}
-        <Card className="border-0 shadow-lg lg:col-span-2">
+        <Card className="border border-[var(--border-color-pro)] shadow-sm lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
@@ -368,7 +365,7 @@ export default function Dashboard() {
               {recentActivities.map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-4 rounded-lg border border-[var(--border-color-pro)] bg-[var(--table-row-alt)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="flex items-start gap-4 rounded-lg border border-[var(--border-color-pro)] bg-[var(--table-row-alt)] p-4 transition-shadow hover:shadow-sm"
                 >
                   <div
                     className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${activity.color} bg-opacity-10`}
@@ -391,7 +388,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Quick Stats */}
-        <Card className="border-0 bg-blue-50 shadow-lg dark:bg-blue-950/20">
+        <Card className="border border-[var(--border-color-pro)] bg-blue-50 shadow-sm dark:bg-blue-950/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
