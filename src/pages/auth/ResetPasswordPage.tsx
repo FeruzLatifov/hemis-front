@@ -127,7 +127,11 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
               {errors.password && (
-                <p id="new-password-error" role="alert" className="mt-1 text-xs text-red-500">
+                <p
+                  id="new-password-error"
+                  role="alert"
+                  className="mt-1 text-xs text-red-600 dark:text-red-400"
+                >
                   {errors.password.message || t('Password must be at least 6 characters')}
                 </p>
               )}
@@ -162,7 +166,11 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p id="confirm-password-error" role="alert" className="mt-1 text-xs text-red-500">
+                <p
+                  id="confirm-password-error"
+                  role="alert"
+                  className="mt-1 text-xs text-red-600 dark:text-red-400"
+                >
                   {t('Passwords do not match')}
                 </p>
               )}

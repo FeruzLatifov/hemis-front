@@ -204,7 +204,7 @@ export function OfficialsTab({ code, t }: OfficialsTabProps) {
                       <button
                         type="button"
                         onClick={() => setDismissId(o.metaId)}
-                        className="text-xs text-red-500 hover:text-red-700"
+                        className="text-xs text-red-600 hover:text-red-700 dark:text-red-400"
                       >
                         {t('Dismiss')}
                       </button>

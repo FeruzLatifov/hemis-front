@@ -75,6 +75,9 @@ const MenuItemComponent = memo(function MenuItemComponent({
                 if (!open && level === 0) setOpen(true)
                 if (!isExpanded) toggleSubmenu(item.id)
               }}
+              aria-current={isParentActive ? 'page' : undefined}
+              aria-label={!open ? label : undefined}
+              title={!open ? label : undefined}
               className={cn(
                 'relative flex flex-1 items-center gap-3 rounded-lg px-3 transition-all duration-200',
                 level === 0 ? 'py-2.5' : 'py-2 text-sm',
@@ -94,6 +97,10 @@ const MenuItemComponent = memo(function MenuItemComponent({
           ) : (
             // No URL — just toggle submenu
             <button
+              type="button"
+              aria-expanded={isExpanded}
+              aria-label={!open ? label : undefined}
+              title={!open ? label : undefined}
               onClick={() => {
                 if (!open && level === 0) setOpen(true)
                 toggleSubmenu(item.id)
@@ -127,6 +134,9 @@ const MenuItemComponent = memo(function MenuItemComponent({
           {/* Chevron toggle for parents with URL (separate from Link) */}
           {parentHasUrl && open && (
             <button
+              type="button"
+              aria-expanded={isExpanded}
+              aria-label={t('Toggle submenu')}
               onClick={(e) => {
                 e.stopPropagation()
                 toggleSubmenu(item.id)
@@ -181,6 +191,9 @@ const MenuItemComponent = memo(function MenuItemComponent({
         key={item.id}
         to={item.url || '#'}
         data-active={isActive || undefined}
+        aria-current={isActive ? 'page' : undefined}
+        aria-label={!open ? label : undefined}
+        title={!open ? label : undefined}
         className={cn(
           'relative flex items-center gap-3 rounded-lg px-3 transition-all duration-200',
           level === 0 ? 'py-2.5' : 'py-2 text-sm',

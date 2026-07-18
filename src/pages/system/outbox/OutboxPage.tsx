@@ -13,7 +13,7 @@ import {
   PlayCircle,
 } from 'lucide-react'
 import { useOutboxList, useOutboxStats, useOutboxRetry, useOutboxDiscard } from '@/hooks/useOutbox'
-import { useAuthStore } from '@/stores/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -49,10 +49,10 @@ const PAGE_SIZE = 25
 
 export default function OutboxPage() {
   const { t } = useTranslation()
-  const { permissions } = useAuthStore()
+  const { can } = usePermission()
 
-  const canView = permissions.includes('outbox.view')
-  const canManage = permissions.includes('outbox.manage')
+  const canView = can('outbox.view')
+  const canManage = can('outbox.manage')
 
   const [searchParams, setSearchParams] = useSearchParams()
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || 'all')

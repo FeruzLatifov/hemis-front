@@ -243,7 +243,9 @@ function Sidebar({ open, setOpen }: SidebarProps) {
             </div>
           ) : menuError ? (
             <div className="flex items-center justify-center py-8">
-              <div className="text-sm text-red-500">{t('Something went wrong')}</div>
+              <div className="text-sm text-red-600 dark:text-red-400">
+                {t('Something went wrong')}
+              </div>
             </div>
           ) : sortedMenuItems.length === 0 ? (
             <div className="flex items-center justify-center py-8">

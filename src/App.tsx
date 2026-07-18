@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useCallback } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { captureError } from './lib/sentry'
 import { lazyWithRetry } from './lib/lazy-with-retry'
 import { authBroadcaster } from './lib/auth-broadcast'
@@ -11,6 +11,8 @@ import { queryClient } from './lib/queryClient'
 import MainLayout from './components/layouts/MainLayout'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { RouteErrorBoundary } from './components/RouteErrorBoundary'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { PageLoader } from './components/PageLoader'
 import { useAuthStore } from './stores/authStore'
 import { useIdleTimeout } from './hooks/useIdleTimeout'
 import './i18n/config'
@@ -144,6 +146,7 @@ const DiplomaBlankDistributionPage = lazyWithRetry(() =>
 const ClassifierCategoryPage = lazyWithRetry(
   () => import('./pages/classifiers/ClassifierCategoryPage'),
 )
+const SpecialityClassifierPage = lazyWithRetry(() => import('./pages/classifiers/speciality'))
 const PositionsPage = lazyWithRetry(() => import('./pages/teachers/positions'))
 const QualificationsPage = lazyWithRetry(() => import('./pages/teachers/qualifications'))
 const RolesPage = lazyWithRetry(() =>
@@ -162,19 +165,6 @@ const ForgotPasswordPage = lazyWithRetry(() => import('./pages/auth/ForgotPasswo
 const ResetPasswordPage = lazyWithRetry(() => import('./pages/auth/ResetPasswordPage'))
 const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'))
 
-// Loading fallback
-const PageLoader = () => {
-  const { t } = useTranslation()
-  return (
-    <div className="flex h-64 items-center justify-center">
-      <div className="text-center">
-        <div className="mb-3 inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-        <p className="text-color-secondary text-sm">{t('Loading...')}</p>
-      </div>
-    </div>
-  )
-}
-
 // Placeholder page for new routes
 const PlaceholderPage = ({ title }: { title: string }) => {
   const { t } = useTranslation()
@@ -186,29 +176,6 @@ const PlaceholderPage = ({ title }: { title: string }) => {
       </div>
     </div>
   )
-}
-
-// Protected Route Wrapper
-const ProtectedRoute = ({
-  children,
-  permission,
-}: {
-  children: React.ReactNode
-  permission?: string
-}) => {
-  const { isAuthenticated, permissions } = useAuthStore()
-  const location = useLocation()
-
-  if (!isAuthenticated) {
-    // Save the current location for redirect after login
-    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />
-  }
-
-  if (permission && !permissions.includes(permission)) {
-    return <Navigate to="/dashboard" replace />
-  }
-
-  return <>{children}</>
 }
 
 function App() {
@@ -321,25 +288,31 @@ function App() {
                     <Route
                       path="universities"
                       element={
-                        <RouteErrorBoundary>
-                          <UniversitiesPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.universities.view">
+                          <RouteErrorBoundary>
+                            <UniversitiesPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="universities/create"
                       element={
-                        <RouteErrorBoundary>
-                          <UniversityFormPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.universities.view">
+                          <RouteErrorBoundary>
+                            <UniversityFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="universities/:code"
                       element={
-                        <RouteErrorBoundary>
-                          <UniversityDetailPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.universities.view">
+                          <RouteErrorBoundary>
+                            <UniversityDetailPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
@@ -353,57 +326,71 @@ function App() {
                     <Route
                       path="universities/:code/edit"
                       element={
-                        <RouteErrorBoundary>
-                          <UniversityFormPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.universities.view">
+                          <RouteErrorBoundary>
+                            <UniversityFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="faculties"
                       element={
-                        <RouteErrorBoundary>
-                          <FacultiesPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.faculties.view">
+                          <RouteErrorBoundary>
+                            <FacultiesPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="departments"
                       element={
-                        <RouteErrorBoundary>
-                          <DepartmentsPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.departments.view">
+                          <RouteErrorBoundary>
+                            <DepartmentsPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="attached-specialities"
                       element={
-                        <RouteErrorBoundary>
-                          <AttachedSpecialitiesPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.attached-specialities.view">
+                          <RouteErrorBoundary>
+                            <AttachedSpecialitiesPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="diploma-blanks"
                       element={
-                        <RouteErrorBoundary>
-                          <DiplomaBlanksPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.diploma-blanks.view">
+                          <RouteErrorBoundary>
+                            <DiplomaBlanksPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="diploma-blank-distribution"
                       element={
-                        <RouteErrorBoundary>
-                          <DiplomaBlankDistributionPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.diploma-blank-distribution.view">
+                          <RouteErrorBoundary>
+                            <DiplomaBlankDistributionPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="university-specialities"
                       element={
-                        <RouteErrorBoundary>
-                          <UniversitySpecialitiesPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="institutions.university-specialities.view">
+                          <RouteErrorBoundary>
+                            <UniversitySpecialitiesPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                   </Route>
@@ -412,9 +399,11 @@ function App() {
                   <Route
                     path="students"
                     element={
-                      <RouteErrorBoundary>
-                        <StudentsLayout />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="students.view">
+                        <RouteErrorBoundary>
+                          <StudentsLayout />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   >
                     <Route index element={<StudentsPage />} />
@@ -458,33 +447,41 @@ function App() {
                   <Route
                     path="teachers"
                     element={
-                      <RouteErrorBoundary>
-                        <TeachersPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="teachers.view">
+                        <RouteErrorBoundary>
+                          <TeachersPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="teachers/positions"
                     element={
-                      <RouteErrorBoundary>
-                        <PositionsPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="teachers.view">
+                        <RouteErrorBoundary>
+                          <PositionsPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="teachers/qualifications"
                     element={
-                      <RouteErrorBoundary>
-                        <QualificationsPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="teachers.view">
+                        <RouteErrorBoundary>
+                          <QualificationsPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="teachers/employee-jobs"
                     element={
-                      <RouteErrorBoundary>
-                        <EmployeeJobsPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="teachers.view">
+                        <RouteErrorBoundary>
+                          <EmployeeJobsPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
 
@@ -493,57 +490,71 @@ function App() {
                     <Route
                       path="researchers"
                       element={
-                        <RouteErrorBoundary>
-                          <ResearchersPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <ResearchersPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="projects"
                       element={
-                        <RouteErrorBoundary>
-                          <ScientificProjectsPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <ScientificProjectsPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="publications"
                       element={
-                        <RouteErrorBoundary>
-                          <PublicationsPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <PublicationsPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="methodical"
                       element={
-                        <RouteErrorBoundary>
-                          <MethodicalPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <MethodicalPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="intellectual"
                       element={
-                        <RouteErrorBoundary>
-                          <IntellectualPropertyPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <IntellectualPropertyPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="dissertation-defense"
                       element={
-                        <RouteErrorBoundary>
-                          <DissertationDefensePage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <DissertationDefensePage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="research-activity"
                       element={
-                        <RouteErrorBoundary>
-                          <ResearchActivityPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="science.view">
+                          <RouteErrorBoundary>
+                            <ResearchActivityPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                   </Route>
@@ -552,57 +563,71 @@ function App() {
                   <Route
                     path="reports"
                     element={
-                      <RouteErrorBoundary>
-                        <ReportsPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.view">
+                        <RouteErrorBoundary>
+                          <ReportsPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="reports/students"
                     element={
-                      <RouteErrorBoundary>
-                        <StudentsReportPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.students.view">
+                        <RouteErrorBoundary>
+                          <StudentsReportPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="reports/teachers"
                     element={
-                      <RouteErrorBoundary>
-                        <TeachersReportPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.teachers.view">
+                        <RouteErrorBoundary>
+                          <TeachersReportPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="reports/institutions"
                     element={
-                      <RouteErrorBoundary>
-                        <InstitutionsReportPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.institutions.view">
+                        <RouteErrorBoundary>
+                          <InstitutionsReportPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="reports/academic"
                     element={
-                      <RouteErrorBoundary>
-                        <AcademicReportPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.academic.view">
+                        <RouteErrorBoundary>
+                          <AcademicReportPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="reports/research"
                     element={
-                      <RouteErrorBoundary>
-                        <ScientificReportPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.research.view">
+                        <RouteErrorBoundary>
+                          <ScientificReportPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="reports/economic"
                     element={
-                      <RouteErrorBoundary>
-                        <EconomicReportPage />
-                      </RouteErrorBoundary>
+                      <ProtectedRoute permission="reports.economic.view">
+                        <RouteErrorBoundary>
+                          <EconomicReportPage />
+                        </RouteErrorBoundary>
+                      </ProtectedRoute>
                     }
                   />
 
@@ -611,33 +636,41 @@ function App() {
                     <Route
                       path="administrative"
                       element={
-                        <RouteErrorBoundary>
-                          <AdministrativeRatingPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="rating.administrative.view">
+                          <RouteErrorBoundary>
+                            <AdministrativeRatingPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="academic"
                       element={
-                        <RouteErrorBoundary>
-                          <AcademicRatingPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="rating.academic.view">
+                          <RouteErrorBoundary>
+                            <AcademicRatingPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="scientific"
                       element={
-                        <RouteErrorBoundary>
-                          <ScientificRatingPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="rating.scientific.view">
+                          <RouteErrorBoundary>
+                            <ScientificRatingPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="gpa"
                       element={
-                        <RouteErrorBoundary>
-                          <GpaRatingPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="rating.gpa.view">
+                          <RouteErrorBoundary>
+                            <GpaRatingPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                   </Route>
@@ -645,11 +678,23 @@ function App() {
                   {/* Classifiers */}
                   <Route path="classifiers">
                     <Route
+                      path="speciality"
+                      element={
+                        <ProtectedRoute permission="classifiers.speciality.view">
+                          <RouteErrorBoundary>
+                            <SpecialityClassifierPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
                       path=":category"
                       element={
-                        <RouteErrorBoundary>
-                          <ClassifierCategoryPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="classifiers.view">
+                          <RouteErrorBoundary>
+                            <ClassifierCategoryPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                   </Route>
@@ -659,25 +704,31 @@ function App() {
                     <Route
                       path="translations"
                       element={
-                        <RouteErrorBoundary>
-                          <TranslationsPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="system.translation.view">
+                          <RouteErrorBoundary>
+                            <TranslationsPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="translation/create"
                       element={
-                        <RouteErrorBoundary>
-                          <TranslationFormPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="system.translation.view">
+                          <RouteErrorBoundary>
+                            <TranslationFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
                       path="translation/:id/edit"
                       element={
-                        <RouteErrorBoundary>
-                          <TranslationFormPage />
-                        </RouteErrorBoundary>
+                        <ProtectedRoute permission="system.translation.view">
+                          <RouteErrorBoundary>
+                            <TranslationFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
                       }
                     />
                     <Route
@@ -772,7 +823,11 @@ function App() {
                     />
                     <Route
                       path="report-updates"
-                      element={<PlaceholderPage title={t('Report updates')} />}
+                      element={
+                        <ProtectedRoute permission="system.report-update.view">
+                          <PlaceholderPage title={t('Report updates')} />
+                        </ProtectedRoute>
+                      }
                     />
                   </Route>
 

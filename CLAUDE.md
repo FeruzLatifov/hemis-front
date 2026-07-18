@@ -9,7 +9,7 @@ Spring Boot backend (hemis-back) bilan REST API orqali bog'lanadi.
 
 ```bash
 yarn install          # Dependency o'rnatish
-yarn dev              # Dev server (port 3000)
+yarn dev              # Dev server (port 43434, FRONTEND_PORT env)
 yarn build            # Production build
 yarn preview          # Built fayllarni ko'rish
 yarn build:prod       # sync:translations + tsc + vite build
@@ -54,7 +54,7 @@ API URL va secretlarni hardcode qilmang. Faqat `VITE_` prefiksli variablelar bro
 
 - **Base URL:** `import.meta.env.VITE_API_URL` — hardcode qilmang
 - **Client:** `src/api/client.ts` dagi `apiClient` (Axios) — `Authorization` va `Accept-Language` headerlari avtomatik
-- **Token:** `localStorage` da `accessToken`/`refreshToken`. Interceptor avtomatik refresh qiladi. Refresh muvaffaqiyatsiz bo'lsa `auth:logout` event dispatch qilinadi
+- **Token:** JWT **HTTPOnly cookie**da (backend `CookieJwtAuthenticationFilter` o'qiydi) — web storage'da token yo'q. `apiClient` `withCredentials: true`. 401 da interceptor `/auth/refresh` (cookie) chaqiradi; refresh muvaffaqiyatsiz bo'lsa `auth:logout` event dispatch qilinadi
 - **Permission:** `/api/v1/web/auth/me` dan olinadi → `useAuthStore.isAuthenticated` + `hasPermission()` (`services/auth.service.ts:146`) orqali UI nazorat
 - **Error:** Axios interceptor → `sonner` toast. Backend xato xabarlarini foydalanuvchiga ko'rsatmang
 - **Timeout:** 30s. GET so'rovlarda `retry: 2` (TanStack Query)
@@ -118,7 +118,7 @@ src/
 | --------- | ------------------------------------------------------------------ |
 | Tillar    | `uz`, `oz`, `ru`, `en` (4 ta)                                      |
 | Fallback  | `en` (inglizcha)                                                   |
-| Kalitlar  | Inglizcha matn (~479 ta)                                           |
+| Kalitlar  | Inglizcha matn (~1097 ta)                                          |
 | Config    | `src/i18n/config.ts` (`keySeparator: false`, `nsSeparator: false`) |
 | Saqlash   | `localStorage`                                                     |
 

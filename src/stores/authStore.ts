@@ -28,6 +28,7 @@ export const useAuthStore = create<AuthStore>()(
       university: null,
       permissions: [],
       isAuthenticated: false,
+      isInitializing: true,
 
       // Login action
       login: async (credentials: LoginRequest) => {
@@ -126,6 +127,9 @@ export const useAuthStore = create<AuthStore>()(
             await get().logout()
           }
         }
+        // Fresh permissions are now loaded (or the session was cleared); gated
+        // routes can stop waiting and evaluate hasPermission for real.
+        set({ isInitializing: false })
       },
     }),
     {

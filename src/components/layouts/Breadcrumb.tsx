@@ -159,13 +159,16 @@ export default function Breadcrumb() {
               <span className="text-color-primary font-medium" aria-current="page">
                 {item.label}
               </span>
-            ) : (
+            ) : item.url ? (
               <Link
-                to={item.url || '#'}
+                to={item.url}
                 className="text-color-secondary transition-colors hover:text-[var(--primary)]"
               >
                 {item.label}
               </Link>
+            ) : (
+              // No URL → plain text, not a dead <Link to="#"> that scrolls/clears state.
+              <span className="text-color-secondary">{item.label}</span>
             )}
           </span>
         )

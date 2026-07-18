@@ -58,6 +58,10 @@ interface UniversityBackendDTO {
   addTransferStudent?: boolean
   add_academic_mobile_student?: boolean
   addAcademicMobileStudent?: boolean
+  allow_academic_import?: boolean
+  allowAcademicImport?: boolean
+  is_financial_independent?: boolean
+  isFinancialIndependent?: boolean
 
   // Other fields
   _university_version?: string
@@ -124,6 +128,8 @@ export interface UniversityRow {
   addForeignStudent?: boolean
   addTransferStudent?: boolean
   addAcademicMobileStudent?: boolean
+  allowAcademicImport?: boolean
+  isFinancialIndependent?: boolean
   contractCategory?: string
   contractCategoryCode?: string
   activityStatus?: string
@@ -243,6 +249,8 @@ function adaptDTO(dto: UniversityBackendDTO): UniversityRow {
     addForeignStudent: dto.add_foreign_student ?? dto.addForeignStudent,
     addTransferStudent: dto.add_transfer_student ?? dto.addTransferStudent,
     addAcademicMobileStudent: dto.add_academic_mobile_student ?? dto.addAcademicMobileStudent,
+    allowAcademicImport: dto.allow_academic_import ?? dto.allowAcademicImport,
+    isFinancialIndependent: dto.is_financial_independent ?? dto.isFinancialIndependent,
     active: dto.active,
 
     // Other fields — codes paired with backend-resolved names
@@ -357,6 +365,8 @@ export const universitiesApi = {
         addForeignStudent: data.addForeignStudent ?? false,
         addTransferStudent: data.addTransferStudent ?? false,
         addAcademicMobileStudent: data.addAcademicMobileStudent ?? false,
+        allowAcademicImport: data.allowAcademicImport ?? false,
+        isFinancialIndependent: data.isFinancialIndependent ?? false,
         activityStatus: emptyToNull(data.activityStatusCode),
         belongsTo: emptyToNull(data.belongsToCode),
         contractCategory: emptyToNull(data.contractCategoryCode),
@@ -403,6 +413,8 @@ export const universitiesApi = {
         addForeignStudent: data.addForeignStudent,
         addTransferStudent: data.addTransferStudent,
         addAcademicMobileStudent: data.addAcademicMobileStudent,
+        allowAcademicImport: data.allowAcademicImport,
+        isFinancialIndependent: data.isFinancialIndependent,
         activityStatus: emptyToNull(data.activityStatusCode),
         belongsTo: emptyToNull(data.belongsToCode),
         contractCategory: emptyToNull(data.contractCategoryCode),

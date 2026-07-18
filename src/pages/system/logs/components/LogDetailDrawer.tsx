@@ -299,7 +299,7 @@ export function LogDetailDrawer({ id, type, onClose }: LogDetailDrawerProps) {
             {type === 'activity' ? (
               <Activity className="text-primary h-6 w-6" />
             ) : (
-              <AlertTriangle className="h-6 w-6 text-red-500" />
+              <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
             )}
             <h2 className="text-xl font-semibold">
               {type === 'activity' ? t('Activity details') : t('Error details')}

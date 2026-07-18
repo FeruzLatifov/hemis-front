@@ -19,7 +19,7 @@ import {
   useRegenerateWebhookSecret,
   useSendWebhookTest,
 } from '@/hooks/useWebhooks'
-import { useAuthStore } from '@/stores/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,13 +56,13 @@ type DialogState =
 
 export default function WebhooksPage() {
   const { t } = useTranslation()
-  const { permissions } = useAuthStore()
+  const { can } = usePermission()
 
-  const canView = permissions.includes('webhook.view')
-  const canCreate = permissions.includes('webhook.create')
-  const canUpdate = permissions.includes('webhook.update')
-  const canDelete = permissions.includes('webhook.delete')
-  const canManage = permissions.includes('webhook.manage')
+  const canView = can('webhook.view')
+  const canCreate = can('webhook.create')
+  const canUpdate = can('webhook.update')
+  const canDelete = can('webhook.delete')
+  const canManage = can('webhook.manage')
 
   const { data, isLoading, refetch, isFetching } = useWebhooksList()
   const deleteMutation = useDeleteWebhook()

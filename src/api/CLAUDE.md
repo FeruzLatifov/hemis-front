@@ -24,7 +24,7 @@ const { data } = await apiClient.get<StudentDto[]>('/api/v1/web/students')
 
 **Sabab:** `apiClient` ichida:
 
-- `Authorization: Bearer <token>` avto-header
+- Auth JWT **HTTPOnly cookie**da (`withCredentials: true`) — `Authorization` header qo'shilmaydi
 - `Accept-Language` (i18n locale)
 - 401 → automatic refresh token retry
 - Refresh fail → `auth:logout` event dispatch

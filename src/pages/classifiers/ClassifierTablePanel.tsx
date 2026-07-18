@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
 import { Search, Plus, Pencil, Trash2, Activity } from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -271,7 +271,7 @@ export default function ClassifierTablePanel({
           <div className="grid gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium text-[var(--text-primary)]">
-                {t('Code')} <span className="text-red-500">*</span>
+                {t('Code')} <span className="text-red-600 dark:text-red-400">*</span>
               </label>
               <input
                 value={createForm.code}
@@ -616,8 +616,8 @@ export default function ClassifierTablePanel({
 
 function SyncEventsLink() {
   const { t } = useTranslation()
-  const { permissions } = useAuthStore()
-  if (!permissions.includes('outbox.view')) return null
+  const { can } = usePermission()
+  if (!can('outbox.view')) return null
   return (
     <Link
       to="/system/outbox?aggregateType=classifier"

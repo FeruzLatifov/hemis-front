@@ -7,12 +7,12 @@
 
 ## Mavjud Stores
 
-| Store             | Maqsad                             | Persisted?              |
-| ----------------- | ---------------------------------- | ----------------------- |
-| `authStore`       | User, accessToken, isAuthenticated | localStorage            |
-| `menuStore`       | Sidebar menu structure             | yo'q (refetch)          |
-| `recentMenuStore` | So'nggi ko'rilgan sahifalar        | localStorage            |
-| `favoritesStore`  | User favorite pages                | localStorage (sync API) |
+| Store             | Maqsad                                         | Persisted?              |
+| ----------------- | ---------------------------------------------- | ----------------------- |
+| `authStore`       | User, isAuthenticated (JWT HTTPOnly cookie'da) | sessionStorage          |
+| `menuStore`       | Sidebar menu structure                         | yo'q (refetch)          |
+| `recentMenuStore` | So'nggi ko'rilgan sahifalar                    | localStorage            |
+| `favoritesStore`  | User favorite pages                            | localStorage (sync API) |
 
 ---
 
@@ -124,7 +124,7 @@ persist(storeImpl, {
 
 **Diqqat:**
 
-- Sensitive data (`accessToken`) — localStorage'da. XSS xavfi bor (DOMPurify ishlatiladi). Kelajakda `httpOnly` cookie tavsiya etiladi.
+- JWT **HTTPOnly cookie**da (web storage'da token yo'q — XSS blast-radius kam). authStore faqat `user`/`isAuthenticated`ni `sessionStorage`da saqlaydi; `permissions` persist qilinmaydi (har `initialize()`da yangi olinadi).
 - `user` ma'lumotini persist qilmang — har sessionda `/auth/me`'dan freshly olinsin.
 
 ### 6. Cross-Store Communication

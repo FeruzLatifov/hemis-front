@@ -234,6 +234,11 @@ export default function UniversityDetailPage() {
               label={t('Add academic mobile student')}
               value={university.addAcademicMobileStudent}
             />
+            <BoolField label={t('Allow academic import')} value={university.allowAcademicImport} />
+            <BoolField
+              label={t('Financially independent')}
+              value={university.isFinancialIndependent}
+            />
           </Section>
         </TabsContent>
 

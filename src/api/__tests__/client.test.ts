@@ -56,6 +56,9 @@ vi.mock('axios', () => {
     default: {
       create: actualCreate,
       post: vi.fn(),
+      // Cancel guard in the response interceptor calls axios.isCancel();
+      // real errors under test are not cancellations.
+      isCancel: vi.fn(() => false),
     },
     // Named exports that client.ts might reference at type level
     AxiosError: class AxiosError extends Error {},
@@ -590,8 +593,18 @@ describe('Response Interceptor - 400/404 errors', () => {
     )
   })
 
-  it('does not call captureError or toast for 400/404', async () => {
+  it('toasts the localized message for 400 but never captures to Sentry', async () => {
     const error = makeAxiosError(400, { message: 'Bad request' })
+    await expect(responseRejected(error)).rejects.toBe(error)
+
+    // 400 (and 409/422) surface the backend's already-localized message so
+    // business-rule / bad-request failures are not silent.
+    expect(toast.error).toHaveBeenCalledWith('Bad request', expect.any(Object))
+    expect(captureError).not.toHaveBeenCalled()
+  })
+
+  it('does not toast or capture for 404 (pages handle "not found")', async () => {
+    const error = makeAxiosError(404, { message: 'Not found' })
     await expect(responseRejected(error)).rejects.toBe(error)
 
     expect(captureError).not.toHaveBeenCalled()

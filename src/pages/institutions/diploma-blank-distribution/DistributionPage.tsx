@@ -33,8 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { useStableCallback } from '@/hooks/useStableCallback'
 import { useDebounce } from '@/hooks/useDebounce'
-import { useAuthStore } from '@/stores/authStore'
-import { hasPermission } from '@/services/auth.service'
+import { usePermission } from '@/hooks/usePermission'
 import { PAGINATION, UI } from '@/constants'
 import { toast } from 'sonner'
 import type { DiplomaBlankDistributionRow } from '@/api/diplomaBlankDistribution.api'
@@ -51,10 +50,10 @@ export default function DistributionPage() {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const permissions = useAuthStore((state) => state.permissions)
-  const canCreate = hasPermission(permissions, 'institutions.diploma-blank-distribution.create')
-  const canEdit = hasPermission(permissions, 'institutions.diploma-blank-distribution.edit')
-  const canDelete = hasPermission(permissions, 'institutions.diploma-blank-distribution.delete')
+  const { can } = usePermission()
+  const canCreate = can('institutions.diploma-blank-distribution.create')
+  const canEdit = can('institutions.diploma-blank-distribution.edit')
+  const canDelete = can('institutions.diploma-blank-distribution.delete')
 
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)
   const pageSize = Math.max(

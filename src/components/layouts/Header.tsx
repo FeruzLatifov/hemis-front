@@ -129,12 +129,7 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           aria-label={t('Notifications')}
         >
           <Bell className="text-color-secondary h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />
-          <span
-            className="badge-danger absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-xs font-semibold md:h-5 md:w-5"
-            aria-hidden="true"
-          >
-            3
-          </span>
+          {/* No fake unread badge — a real count belongs here once a notifications feed exists. */}
         </button>
 
         {/* User Menu — Lang, Theme, Cache, Logout all nested here */}

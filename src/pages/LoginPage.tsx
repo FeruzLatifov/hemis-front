@@ -276,7 +276,11 @@ const Login = () => {
                   <User className="absolute top-1/2 right-3 h-[18px] w-[18px] -translate-y-1/2 text-[var(--text-secondary)] opacity-40" />
                 </div>
                 {usernameError && (
-                  <p id="login-username-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                  <p
+                    id="login-username-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-600 dark:text-red-400"
+                  >
                     {usernameError}
                   </p>
                 )}
@@ -325,7 +329,11 @@ const Login = () => {
                   </button>
                 </div>
                 {passwordError && (
-                  <p id="login-password-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                  <p
+                    id="login-password-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-600 dark:text-red-400"
+                  >
                     {passwordError}
                   </p>
                 )}

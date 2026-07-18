@@ -71,7 +71,11 @@ export default function RolesTabContent({
             </p>
           )}
         </div>
-        {hasError && <p className="text-xs text-red-500">{t('At least one role is required')}</p>}
+        {hasError && (
+          <p className="text-xs text-red-600 dark:text-red-400">
+            {t('At least one role is required')}
+          </p>
+        )}
       </div>
     </section>
   )

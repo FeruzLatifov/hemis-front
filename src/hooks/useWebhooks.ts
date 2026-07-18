@@ -129,7 +129,7 @@ export function useSendWebhookTest() {
   return useMutation({
     mutationFn: (id: string) => webhooksApi.sendTestEvent(id),
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.webhooks.deliveries(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.webhooks.deliveriesFor(id) })
       toast.success(i18n.t('Test event dispatched'))
     },
     onError: (error: Error) => {

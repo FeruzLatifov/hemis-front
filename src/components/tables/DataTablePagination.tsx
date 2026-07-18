@@ -66,6 +66,7 @@ export function DataTablePagination({
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
+            aria-label={t('Per page')}
             className="border-border bg-background rounded-lg border px-2.5 py-1.5 text-sm transition-colors focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--active-bg)] focus:outline-none"
           >
             {pageSizeOptions.map((size) => (
@@ -82,21 +83,25 @@ export function DataTablePagination({
       </div>
 
       {/* Right: Page buttons */}
-      <div className="flex items-center gap-1">
+      <nav className="flex items-center gap-1" aria-label={t('Pagination')}>
         <button
+          type="button"
+          aria-label={t('First page')}
           className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(0)}
           disabled={page === 0}
         >
-          <ChevronsLeft className="h-4 w-4" />
+          <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button
+          type="button"
+          aria-label={t('Previous page')}
           className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
         </button>
 
         {/* Page numbers */}
@@ -108,6 +113,9 @@ export function DataTablePagination({
           ) : (
             <button
               key={p}
+              type="button"
+              aria-label={t('Page {{number}}', { number: p + 1 })}
+              aria-current={p === page ? 'page' : undefined}
               className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors ${
                 p === page
                   ? 'pointer-events-none bg-[var(--primary)] text-white shadow-sm'
@@ -121,21 +129,25 @@ export function DataTablePagination({
         )}
 
         <button
+          type="button"
+          aria-label={t('Next page')}
           className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button
+          type="button"
+          aria-label={t('Last page')}
           className="border-border bg-background text-muted-foreground hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors disabled:pointer-events-none disabled:opacity-40"
           onClick={() => onPageChange(totalPages - 1)}
           disabled={page >= totalPages - 1}
         >
-          <ChevronsRight className="h-4 w-4" />
+          <ChevronsRight className="h-4 w-4" aria-hidden="true" />
         </button>
-      </div>
+      </nav>
     </div>
   )
 }

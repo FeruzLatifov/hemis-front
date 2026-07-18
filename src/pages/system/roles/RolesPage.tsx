@@ -11,7 +11,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { PAGINATION, UI } from '@/constants'
 import { useRolesList, useDeleteRole } from '@/hooks/useRoles'
-import { useAuthStore } from '@/stores/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { useRolesColumns } from './roles-columns'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -35,9 +35,9 @@ export default function RolesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { permissions } = useAuthStore()
+  const { can } = usePermission()
 
-  const canManage = permissions.includes('roles.manage')
+  const canManage = can('roles.manage')
 
   // ─── URL-driven state ──────────────────────────────────────────────
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)

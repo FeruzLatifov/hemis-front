@@ -18,7 +18,7 @@ import {
   useDeleteUser,
 } from '@/hooks/useUsers'
 import { useUniversities } from '@/hooks/useUniversities'
-import { useAuthStore } from '@/stores/authStore'
+import { usePermission } from '@/hooks/usePermission'
 import { useUsersColumns } from './users-columns'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -53,15 +53,13 @@ export default function UsersPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { permissions } = useAuthStore()
+  const { canAny } = usePermission()
 
   // ─── Granular permissions ─────────────────────────────────────────
-  const canCreate = permissions.includes('users.create') || permissions.includes('users.manage')
-  const canEdit = permissions.includes('users.edit') || permissions.includes('users.manage')
-  const canDelete = permissions.includes('users.delete') || permissions.includes('users.manage')
-  const hasFullAccess =
-    (canEdit || canCreate) &&
-    (permissions.includes('universities.view') || permissions.includes('settings.view'))
+  const canCreate = canAny(['users.create', 'users.manage'])
+  const canEdit = canAny(['users.edit', 'users.manage'])
+  const canDelete = canAny(['users.delete', 'users.manage'])
+  const hasFullAccess = (canEdit || canCreate) && canAny(['universities.view', 'settings.view'])
 
   // ─── URL-driven state ──────────────────────────────────────────────
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)

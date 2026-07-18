@@ -217,8 +217,15 @@ export default function UniversitiesPage() {
     localStorage.setItem('universities-column-visibility', JSON.stringify(columnVisibility))
   }, [columnVisibility])
 
+  // Debounced: columnResizeMode 'onChange' fires columnSizing on every mouse
+  // move during a drag; without debounce that's dozens of synchronous
+  // JSON.stringify + setItem writes per resize. Live width feedback still comes
+  // from header.getSize(); only the persistence is deferred to drag-idle.
   useEffect(() => {
-    localStorage.setItem('universities-column-sizing', JSON.stringify(columnSizing))
+    const id = setTimeout(() => {
+      localStorage.setItem('universities-column-sizing', JSON.stringify(columnSizing))
+    }, 300)
+    return () => clearTimeout(id)
   }, [columnSizing])
 
   useEffect(() => {

@@ -30,6 +30,13 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // ✅ CRITICAL: Enable cookies (HTTPOnly)
+  // ✅ CSRF double-submit: axios reads the XSRF-TOKEN cookie and echoes it in
+  // the X-XSRF-TOKEN header. This is the client half of the defense; it is a
+  // no-op until the backend issues a readable (non-HTTPOnly) XSRF-TOKEN cookie
+  // and validates the header on state-changing requests. See
+  // startup/docs for the required backend + SameSite configuration.
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
 // ✅ SECURITY: Token refresh debouncing to prevent race conditions
@@ -248,6 +255,15 @@ apiClient.interceptors.response.use(
 
       toast.error(errorMessage || i18n.t('Access denied'), {
         description: i18n.t('You do not have permission to perform this action'),
+        duration: 5000,
+      })
+    }
+
+    // ⭐ Business-rule (422, ADR-0013), conflict (409), and bad-request (400).
+    // Backend returns an already-localized message; surface it instead of
+    // failing silently. 404 stays breadcrumb-only (pages handle "not found").
+    if ([400, 409, 422].includes(error.response?.status ?? 0)) {
+      toast.error(errorMessage, {
         duration: 5000,
       })
     }

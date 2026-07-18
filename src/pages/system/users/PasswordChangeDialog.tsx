@@ -25,7 +25,7 @@ function PasswordField({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>
-        {label} <span className="text-red-500">*</span>
+        {label} <span className="text-red-600 dark:text-red-400">*</span>
       </Label>
       <div className="relative">
         <Input
@@ -44,7 +44,7 @@ function PasswordField({
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   )
 }

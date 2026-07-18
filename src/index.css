@@ -3,17 +3,22 @@
 /* ✅ Design tokens are already integrated below */
 @import 'tailwindcss';
 
+/* Wire Tailwind's `dark:` variant to the class-based ThemeProvider toggle.
+   Tailwind v4 defaults `dark:` to `prefers-color-scheme`; without this every
+   `dark:` utility would follow the OS, not the in-app theme switch. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-border: hsl(214.3 31.8% 91.4%);
   --color-input: hsl(214.3 31.8% 91.4%);
-  --color-ring: hsl(221.2 83.2% 53.3%);
+  --color-ring: #2f80ed;
   --color-background: hsl(0 0% 100%);
   --color-foreground: hsl(222.2 84% 4.9%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(222.2 84% 4.9%);
   --color-popover: hsl(0 0% 100%);
   --color-popover-foreground: hsl(222.2 84% 4.9%);
-  --color-primary: hsl(221.2 83.2% 53.3%);
+  --color-primary: #2f80ed;
   --color-primary-foreground: hsl(210 40% 98%);
   --color-secondary: hsl(210 40% 96.1%);
   --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
@@ -53,8 +58,8 @@
 :root {
   --app-bg: #f8fafc;
   --card-bg: #ffffff;
-  --primary: #4f7fe7;
-  --primary-hover: #3b6dd4;
+  --primary: #2f80ed;
+  --primary-hover: #2666be;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --border-color-pro: #e2e8f0;
@@ -96,6 +101,16 @@
   --input-border: #334155;
   --badge-muted-bg: #334155;
   --badge-muted-text: #cbd5e1;
+
+  /* Accent tokens — dark-mode counterparts (previously inherited light values,
+     making the active-sidebar highlight and card shadow near-invisible on dark). */
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --active-bg: rgba(59, 130, 246, 0.18);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --success: #22c55e;
+  --warning: #facc15;
+  --danger: #f87171;
 }
 
 /* Custom Animations for Login Page */
@@ -438,16 +453,16 @@ body {
   color: #f8fafc;
 }
 
-/* Focus visible */
+/* Focus visible — real CSS outline (the previous `ring*` props were Tailwind
+   utility names, not CSS, so only `outline:none` applied and keyboard focus
+   was invisible on all native nav — WCAG 2.4.7). */
 *:focus-visible {
-  outline: none;
-  ring: 2px;
-  ring-color: var(--primary);
-  ring-offset: 2px;
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .dark *:focus-visible {
-  ring-color: #60a5fa;
+  outline-color: #60a5fa;
 }
 
 /* Professional buttons */

@@ -399,19 +399,19 @@ export default function CommandPalette() {
             <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               &darr;
             </kbd>
-            <span>{t('navigatsiya')}</span>
+            <span>{t('Navigate')}</span>
           </div>
           <div className="text-color-secondary flex items-center gap-1.5 text-xs">
             <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               Enter
             </kbd>
-            <span>{t('tanlash')}</span>
+            <span>{t('Select')}</span>
           </div>
           <div className="text-color-secondary flex items-center gap-1.5 text-xs">
             <kbd className="border-color-light inline-flex h-4 items-center rounded border px-1 text-[10px] font-medium">
               Esc
             </kbd>
-            <span>{t('yopish')}</span>
+            <span>{t('Close')}</span>
           </div>
         </div>
       </div>

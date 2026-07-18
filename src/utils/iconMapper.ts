@@ -53,6 +53,11 @@ import {
   RefreshCw,
   List,
   Briefcase,
+  CreditCard,
+  FileBadge,
+  Webhook,
+  Inbox,
+  Shield,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -191,6 +196,21 @@ const iconMap: Record<string, LucideIcon> = {
   // Help
   HelpCircle,
   Help: HelpCircle,
+
+  // =====================================================
+  // Backend menu-seed kebab-case icons (S011/S007/S012/S013)
+  // getIcon() faqat exact + first-letter-capitalize qiladi —
+  // kebab-case kalitlar shu yerda aniq map qilinishi shart.
+  // =====================================================
+  'user-check': UserCheck,
+  'book-open': BookOpen,
+  'dollar-sign': DollarSign,
+  'credit-card': CreditCard,
+  'scroll-text': ScrollText,
+  'file-badge': FileBadge,
+  webhook: Webhook,
+  inbox: Inbox,
+  shield: Shield,
 }
 
 /**

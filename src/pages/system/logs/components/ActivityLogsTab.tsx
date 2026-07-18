@@ -192,7 +192,7 @@ export function ActivityLogsTab({ search, dateFrom, dateTo }: ActivityLogsTabPro
                 ))
               ) : error ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-red-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-red-600 dark:text-red-400">
                     {t('Failed to load data')}
                   </td>
                 </tr>

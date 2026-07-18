@@ -12,7 +12,7 @@ You are an i18n compliance specialist for the HEMIS Ministry frontend (4 languag
 - Config: `src/i18n/config.ts` (`keySeparator: false`, `nsSeparator: false`)
 - Translation files: `src/i18n/translations/{uz,oz,ru,en}.json`
 - Sync: `yarn sync:translations` (backend → JSON)
-- ~479 keys in English (source of truth)
+- ~1097 keys in English (source of truth); 4 files: uz/oz/ru/en (full parity)
 
 ## Detection Strategy
 

@@ -74,6 +74,8 @@ const universitySchema = z.object({
   addForeignStudent: z.boolean(),
   addTransferStudent: z.boolean(),
   addAcademicMobileStudent: z.boolean(),
+  allowAcademicImport: z.boolean(),
+  isFinancialIndependent: z.boolean(),
   activityStatusCode: z.string().optional(),
   belongsToCode: z.string().optional(),
   contractCategoryCode: z.string().optional(),
@@ -117,6 +119,8 @@ const DEFAULT_VALUES: FormData = {
   addForeignStudent: false,
   addTransferStudent: false,
   addAcademicMobileStudent: false,
+  allowAcademicImport: false,
+  isFinancialIndependent: false,
   activityStatusCode: '',
   belongsToCode: '',
   contractCategoryCode: '',
@@ -268,6 +272,8 @@ function UniversityFormPageInner() {
       addForeignStudent: university.addForeignStudent ?? false,
       addTransferStudent: university.addTransferStudent ?? false,
       addAcademicMobileStudent: university.addAcademicMobileStudent ?? false,
+      allowAcademicImport: university.allowAcademicImport ?? false,
+      isFinancialIndependent: university.isFinancialIndependent ?? false,
       // Activity status is a hardcoded enum, not a classifier — resolve against it directly.
       activityStatusCode:
         university.activityStatusCode &&
@@ -470,7 +476,7 @@ function UniversityFormPageInner() {
               <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="code">
-                    {t('Code')} <span className="text-red-500">*</span>
+                    {t('Code')} <span className="text-red-600 dark:text-red-400">*</span>
                   </Label>
                   <Input
                     id="code"
@@ -483,7 +489,11 @@ function UniversityFormPageInner() {
                     className={`${errors.code ? 'border-red-300 focus:border-red-400' : ''} ${isEdit ? 'cursor-not-allowed bg-[var(--table-row-alt)] text-[var(--text-secondary)]' : ''}`}
                   />
                   {errors.code && (
-                    <p id="university-code-error" role="alert" className="text-xs text-red-500">
+                    <p
+                      id="university-code-error"
+                      role="alert"
+                      className="text-xs text-red-600 dark:text-red-400"
+                    >
                       {t('Code is required')}
                     </p>
                   )}
@@ -494,7 +504,7 @@ function UniversityFormPageInner() {
                 </div>
                 <div className="col-span-full space-y-1.5">
                   <Label htmlFor="name">
-                    {t('Name')} <span className="text-red-500">*</span>
+                    {t('Name')} <span className="text-red-600 dark:text-red-400">*</span>
                   </Label>
                   <Input
                     id="name"
@@ -506,7 +516,11 @@ function UniversityFormPageInner() {
                     className={errors.name ? 'border-red-300 focus:border-red-400' : ''}
                   />
                   {errors.name && (
-                    <p id="university-name-error" role="alert" className="text-xs text-red-500">
+                    <p
+                      id="university-name-error"
+                      role="alert"
+                      className="text-xs text-red-600 dark:text-red-400"
+                    >
                       {t('Name is required')}
                     </p>
                   )}
@@ -750,6 +764,11 @@ function UniversityFormPageInner() {
                     {
                       key: 'addAcademicMobileStudent' as const,
                       label: t('Add academic mobile student'),
+                    },
+                    { key: 'allowAcademicImport' as const, label: t('Allow academic import') },
+                    {
+                      key: 'isFinancialIndependent' as const,
+                      label: t('Financially independent'),
                     },
                   ] as const
                 ).map((setting) => (

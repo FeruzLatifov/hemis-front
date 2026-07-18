@@ -34,8 +34,7 @@ import { Badge } from '@/components/ui/badge'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { useStableCallback } from '@/hooks/useStableCallback'
 import { useDebounce } from '@/hooks/useDebounce'
-import { useAuthStore } from '@/stores/authStore'
-import { hasPermission } from '@/services/auth.service'
+import { usePermission } from '@/hooks/usePermission'
 import { PAGINATION, UI } from '@/constants'
 import { toast } from 'sonner'
 import type { AttachedSpecialityRow, SpecialityLevel } from '@/api/attachedSpecialities.api'
@@ -59,10 +58,10 @@ export default function AttachedSpecialitiesPage() {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const permissions = useAuthStore((state) => state.permissions)
-  const canCreate = hasPermission(permissions, 'institutions.attached-specialities.create')
-  const canEdit = hasPermission(permissions, 'institutions.attached-specialities.edit')
-  const canDelete = hasPermission(permissions, 'institutions.attached-specialities.delete')
+  const { can } = usePermission()
+  const canCreate = can('institutions.attached-specialities.create')
+  const canEdit = can('institutions.attached-specialities.edit')
+  const canDelete = can('institutions.attached-specialities.delete')
 
   // URL-driven state
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)

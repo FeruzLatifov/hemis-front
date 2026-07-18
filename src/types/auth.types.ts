@@ -50,4 +50,11 @@ export interface AuthState {
   university: University | null
   permissions: string[] // Permission strings
   isAuthenticated: boolean
+  /**
+   * True until initialize() has resolved the fresh session on app start.
+   * Permissions are NOT persisted (fetched on every initialize), so during
+   * this window a reloaded, permission-gated route must wait instead of
+   * flashing ForbiddenPage. Transient — never persisted.
+   */
+  isInitializing: boolean
 }

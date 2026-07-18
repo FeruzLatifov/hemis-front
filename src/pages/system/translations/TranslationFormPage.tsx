@@ -234,7 +234,7 @@ export default function TranslationFormPage() {
             {/* Category */}
             <div>
               <label className="text-foreground mb-2 block text-sm font-medium">
-                {t('Category')} <span className="text-red-500">*</span>
+                {t('Category')} <span className="text-red-600 dark:text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -253,7 +253,7 @@ export default function TranslationFormPage() {
             {/* Message Key */}
             <div>
               <label className="text-foreground mb-2 block text-sm font-medium">
-                {t('Key')} <span className="text-red-500">*</span>
+                {t('Key')} <span className="text-red-600 dark:text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -278,7 +278,7 @@ export default function TranslationFormPage() {
             {/* Uzbek (Latin) - Required */}
             <div className="mb-6">
               <label htmlFor="messageUz" className="text-foreground mb-2 block text-sm font-medium">
-                🇺🇿 O'zbek (lotin) <span className="text-red-500">*</span>
+                🇺🇿 O'zbek (lotin) <span className="text-red-600 dark:text-red-400">*</span>
               </label>
               <textarea
                 id="messageUz"

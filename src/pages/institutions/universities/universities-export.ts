@@ -140,6 +140,8 @@ function buildUniversityCsv(
     t('Add foreign student'),
     t('Add transfer student'),
     t('Add academic mobile student'),
+    t('Allow academic import'),
+    t('Financially independent'),
     t('Bank info'),
     t('Accreditation info'),
   ]
@@ -176,6 +178,8 @@ function buildUniversityCsv(
     boolLabel(row.addForeignStudent),
     boolLabel(row.addTransferStudent),
     boolLabel(row.addAcademicMobileStudent),
+    boolLabel(row.allowAcademicImport),
+    boolLabel(row.isFinancialIndependent),
     row.bankInfo || '',
     row.accreditationInfo || '',
   ])

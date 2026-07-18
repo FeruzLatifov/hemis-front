@@ -352,7 +352,7 @@ export default function RoleFormPage() {
                 {!isEdit && (
                   <div className="space-y-1.5">
                     <Label htmlFor="code">
-                      {t('Code')} <span className="text-red-500">*</span>
+                      {t('Code')} <span className="text-red-600 dark:text-red-400">*</span>
                     </Label>
                     <Input
                       id="code"
@@ -364,7 +364,11 @@ export default function RoleFormPage() {
                       {...register('code' as keyof FormData)}
                     />
                     {errors.code && (
-                      <p id="code-error" role="alert" className="text-xs text-red-500">
+                      <p
+                        id="code-error"
+                        role="alert"
+                        className="text-xs text-red-600 dark:text-red-400"
+                      >
                         {errors.code.message ||
                           t('Code must be uppercase letters, digits, and underscores')}
                       </p>
@@ -374,7 +378,7 @@ export default function RoleFormPage() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="name">
-                    {t('Name')} <span className="text-red-500">*</span>
+                    {t('Name')} <span className="text-red-600 dark:text-red-400">*</span>
                   </Label>
                   <Input
                     id="name"
@@ -385,7 +389,11 @@ export default function RoleFormPage() {
                     {...register('name')}
                   />
                   {errors.name && (
-                    <p id="name-error" role="alert" className="text-xs text-red-500">
+                    <p
+                      id="name-error"
+                      role="alert"
+                      className="text-xs text-red-600 dark:text-red-400"
+                    >
                       {t('Name must be 2-100 characters')}
                     </p>
                   )}

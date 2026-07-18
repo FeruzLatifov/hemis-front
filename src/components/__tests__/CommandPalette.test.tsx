@@ -295,9 +295,9 @@ describe('CommandPalette', () => {
     render(<CommandPalette />)
     openPalette()
 
-    expect(screen.getByText('navigatsiya')).toBeInTheDocument()
-    expect(screen.getByText('tanlash')).toBeInTheDocument()
-    expect(screen.getByText('yopish')).toBeInTheDocument()
+    expect(screen.getByText('Navigate')).toBeInTheDocument()
+    expect(screen.getByText('Select')).toBeInTheDocument()
+    expect(screen.getByText('Close')).toBeInTheDocument()
   })
 
   it('toggles open/closed on repeated Ctrl+K', () => {

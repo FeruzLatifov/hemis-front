@@ -70,7 +70,7 @@ function PasswordField({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>
-        {label} <span className="text-red-500">*</span>
+        {label} <span className="text-red-600 dark:text-red-400">*</span>
       </Label>
       <div className="relative">
         <Input
@@ -89,7 +89,7 @@ function PasswordField({
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   )
 }
@@ -235,7 +235,7 @@ export default function UserFormPage() {
                 {!isEdit && (
                   <div className="space-y-1.5">
                     <Label htmlFor="username">
-                      {t('Username')} <span className="text-red-500">*</span>
+                      {t('Username')} <span className="text-red-600 dark:text-red-400">*</span>
                     </Label>
                     <Input
                       id="username"
@@ -247,7 +247,11 @@ export default function UserFormPage() {
                       {...register('username' as keyof FormData)}
                     />
                     {errors.username && (
-                      <p id="username-error" role="alert" className="text-xs text-red-500">
+                      <p
+                        id="username-error"
+                        role="alert"
+                        className="text-xs text-red-600 dark:text-red-400"
+                      >
                         {errors.username.message ||
                           t('Username must be 3-50 characters, letters, digits, _, ., -')}
                       </p>
@@ -272,7 +276,11 @@ export default function UserFormPage() {
                     {...register('email')}
                   />
                   {errors.email && (
-                    <p id="email-error" role="alert" className="text-xs text-red-500">
+                    <p
+                      id="email-error"
+                      role="alert"
+                      className="text-xs text-red-600 dark:text-red-400"
+                    >
                       {errors.email.message || t('Invalid email format')}
                     </p>
                   )}
@@ -290,7 +298,11 @@ export default function UserFormPage() {
                     {...register('phone')}
                   />
                   {errors.phone && (
-                    <p id="phone-error" role="alert" className="text-xs text-red-500">
+                    <p
+                      id="phone-error"
+                      role="alert"
+                      className="text-xs text-red-600 dark:text-red-400"
+                    >
                       {t('Phone number must be in format +998XXXXXXXXX')}
                     </p>
                   )}

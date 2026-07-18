@@ -134,6 +134,14 @@ export const queryKeys = {
     dictionaries: ['university-specialities', 'dictionaries'] as const,
   },
 
+  speciality: {
+    all: ['speciality-classifier'] as const,
+    tree: (educationLevel?: string) => ['speciality-classifier', 'tree', educationLevel] as const,
+    list: (filters?: Record<string, unknown>) =>
+      ['speciality-classifier', 'list', filters] as const,
+    byId: (id: string) => ['speciality-classifier', id] as const,
+  },
+
   dissertationDefense: {
     all: ['dissertation-defense'] as const,
     list: (filters?: Record<string, unknown>) => ['dissertation-defense', 'list', filters] as const,
@@ -252,6 +260,10 @@ export const queryKeys = {
     list: ['webhooks', 'list'] as const,
     byId: (id: string) => ['webhooks', id] as const,
     byUniversity: (code: string) => ['webhooks', 'by-university', code] as const,
+    // Prefix key (no filter slot) — use for invalidation so it matches every
+    // filtered deliveries query. Invalidating with deliveries(id) alone leaves
+    // a trailing `undefined` that never prefix-matches deliveries(id, {...}).
+    deliveriesFor: (id: string) => ['webhooks', id, 'deliveries'] as const,
     deliveries: (id: string, filters?: Record<string, unknown>) =>
       ['webhooks', id, 'deliveries', filters] as const,
     deliveriesByEvent: (eventId: string) => ['webhooks', 'events', eventId, 'deliveries'] as const,
