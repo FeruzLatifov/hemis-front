@@ -29,7 +29,15 @@
   --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(210 40% 98%);
 
-  --radius: 0.75rem;
+  /* Canonical 6px corner. --radius was previously 0.75rem (12px) but was dead —
+     Tailwind v4 rounded-* utilities read --radius-sm/md/lg/xl, not --radius. We now
+     wire those to a single 6px base so every rounded-md/lg/xl collapses to the
+     documented 6px card radius without editing individual page files. */
+  --radius: 0.375rem;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
 }
 
 .dark {

@@ -49,7 +49,11 @@ export default function MainLayout() {
         <Breadcrumb />
 
         <main id="main-content" className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-6" tabIndex={-1}>
-          <Outlet />
+          {/* Cap content width so tables/dashboards don't stretch edge-to-edge on
+              ultrawide monitors; forms keep their own inner max-w and stay centered. */}
+          <div className="mx-auto w-full max-w-[1600px]">
+            <Outlet />
+          </div>
         </main>
       </div>
 
