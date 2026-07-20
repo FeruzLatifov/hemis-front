@@ -1,7 +1,15 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, RefreshCw, List, FolderTree, GraduationCap, Loader2 } from 'lucide-react'
+import {
+  Search,
+  List,
+  FolderTree,
+  GraduationCap,
+  Loader2,
+  ChevronsDownUp,
+  ChevronsUpDown,
+} from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -31,6 +39,11 @@ import type { EducationLevel, ReviewStatus } from '@/api/speciality.api'
 import { UI } from '@/constants'
 import { SpecialityTree } from './SpecialityTree'
 import SpecialityDetailDrawer from './SpecialityDetailDrawer'
+import {
+  sortSpecialityNodes,
+  filterSpecialityNodes,
+  collectExpandableIds,
+} from './speciality-tree.util'
 
 type ViewMode = 'list' | 'tree'
 type StatusFilter = 'all' | ReviewStatus
@@ -51,6 +64,7 @@ export default function SpecialityClassifierPage() {
   const [searchInput, setSearchInput] = useState(qFromUrl)
   const debouncedSearch = useDebounce(searchInput, UI.SEARCH_DEBOUNCE)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set())
 
   const setParams = (updates: Record<string, string | undefined>) => {
     setSearchParams((prev) => {
@@ -77,6 +91,30 @@ export default function SpecialityClassifierPage() {
   const total = listQuery.data?.totalElements ?? 0
   const totalPages = listQuery.data?.totalPages ?? 0
 
+  // Backend returns tree nodes in string order — sort to the canonical
+  // year-desc → numeric-code order, then filter client-side for tree search.
+  const sortedTree = useMemo(() => sortSpecialityNodes(treeQuery.data ?? []), [treeQuery.data])
+  const searching = debouncedSearch.trim().length > 0
+  const treeNodes = useMemo(
+    () => filterSpecialityNodes(sortedTree, debouncedSearch),
+    [sortedTree, debouncedSearch],
+  )
+  // While searching, force every matched branch open so hits stay visible.
+  const effectiveOpen = useMemo(
+    () => (searching ? new Set(collectExpandableIds(treeNodes)) : openIds),
+    [searching, treeNodes, openIds],
+  )
+
+  const toggleNode = (id: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  const expandAll = () => setOpenIds(new Set(collectExpandableIds(sortedTree)))
+  const collapseAll = () => setOpenIds(new Set())
+
   const levelBadge = (lvl: EducationLevel) =>
     lvl === 'BACHELOR' ? (
       <Badge variant="default">{t('Bachelor')}</Badge>
@@ -86,11 +124,17 @@ export default function SpecialityClassifierPage() {
 
   const statusBadge = (s: ReviewStatus) =>
     s === 'NEEDS_REVIEW' ? (
-      <Badge variant="outline" className="border-[#F2C94C] bg-[#FEF7E0] text-[#B7791F]">
+      <Badge
+        variant="outline"
+        className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400"
+      >
         {t('Needs review')}
       </Badge>
     ) : (
-      <Badge variant="outline" className="border-[#27AE60] bg-[#E9F9EF] text-[#1E8449]">
+      <Badge
+        variant="outline"
+        className="border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+      >
         {t('Approved')}
       </Badge>
     )
@@ -98,27 +142,14 @@ export default function SpecialityClassifierPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <GraduationCap className="text-primary h-7 w-7" />
-          <div>
-            <h1 className="font-display text-2xl">{t('Speciality classifier')}</h1>
-            <p className="text-muted-foreground text-sm">
-              {t('Unified bachelor and master speciality classifier')}
-            </p>
-          </div>
+      <div className="flex items-center gap-3">
+        <GraduationCap className="text-primary h-6 w-6" />
+        <div>
+          <h1 className="font-display text-lg">{t('Speciality classifier')}</h1>
+          <p className="text-muted-foreground text-sm">
+            {t('Unified bachelor and master speciality classifier')}
+          </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            listQuery.refetch()
-            treeQuery.refetch()
-          }}
-        >
-          <RefreshCw className="h-4 w-4" />
-          {t('Refresh')}
-        </Button>
       </div>
 
       {/* Level tabs */}
@@ -178,7 +209,18 @@ export default function SpecialityClassifierPage() {
           <span className="text-muted-foreground text-sm">
             {t('{{count}} found', { count: total })}
           </span>
-        ) : null}
+        ) : (
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="sm" onClick={expandAll} disabled={searching}>
+              <ChevronsUpDown className="h-4 w-4" aria-hidden="true" />
+              {t('Expand all')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={collapseAll} disabled={searching}>
+              <ChevronsDownUp className="h-4 w-4" aria-hidden="true" />
+              {t('Collapse all')}
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* Content */}
@@ -213,7 +255,7 @@ export default function SpecialityClassifierPage() {
                       className="cursor-pointer"
                       onClick={() => setSelectedId(row.id)}
                     >
-                      <TableCell className="font-mono text-xs text-[#6B7280]">
+                      <TableCell className="text-muted-foreground font-mono text-xs">
                         {row.code ?? '-'}
                       </TableCell>
                       <TableCell className="max-w-md truncate">{row.nameUz}</TableCell>
@@ -252,8 +294,16 @@ export default function SpecialityClassifierPage() {
             <div className="p-8 text-center text-red-600">{t('Failed to load data')}</div>
           ) : !treeQuery.data || treeQuery.data.length === 0 ? (
             <div className="text-muted-foreground p-8 text-center">{t('No data')}</div>
+          ) : treeNodes.length === 0 ? (
+            <div className="text-muted-foreground p-8 text-center">{t('No results found')}</div>
           ) : (
-            <SpecialityTree nodes={treeQuery.data} onSelect={setSelectedId} />
+            <SpecialityTree
+              nodes={treeNodes}
+              openIds={effectiveOpen}
+              onToggle={toggleNode}
+              onSelect={setSelectedId}
+              query={searching ? debouncedSearch : undefined}
+            />
           )}
         </Card>
       )}
