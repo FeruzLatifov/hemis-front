@@ -3,6 +3,7 @@ import {
   sortSpecialityNodes,
   filterSpecialityNodes,
   collectExpandableIds,
+  findNodePath,
 } from '../speciality-tree.util'
 import type { SpecialityNode } from '@/api/speciality.api'
 
@@ -101,6 +102,47 @@ describe('filterSpecialityNodes', () => {
 
   it('returns an empty array when nothing matches', () => {
     expect(filterSpecialityNodes(tree, 'zzz-nomatch')).toEqual([])
+  })
+})
+
+describe('findNodePath', () => {
+  const tree = [
+    node({
+      id: 'l1',
+      code: '100000',
+      children: [
+        node({
+          id: 'l2',
+          code: '110000',
+          children: [
+            node({
+              id: 'folder',
+              code: '60110100',
+              children: [node({ id: 'leaf', code: '60110100' })],
+            }),
+          ],
+        }),
+      ],
+    }),
+    node({ id: 'other', code: '200000' }),
+  ]
+
+  it('returns the full root→node chain (inclusive)', () => {
+    expect(findNodePath(tree, 'leaf').map((n) => n.id)).toEqual(['l1', 'l2', 'folder', 'leaf'])
+  })
+
+  it('disambiguates a code repeated across levels by its unique path', () => {
+    // folder and leaf share code 60110100 but resolve to different paths
+    expect(findNodePath(tree, 'folder').map((n) => n.id)).toEqual(['l1', 'l2', 'folder'])
+    expect(findNodePath(tree, 'leaf').map((n) => n.id)).toEqual(['l1', 'l2', 'folder', 'leaf'])
+  })
+
+  it('returns a single-element chain for a root node', () => {
+    expect(findNodePath(tree, 'other').map((n) => n.id)).toEqual(['other'])
+  })
+
+  it('returns an empty array when the id is absent', () => {
+    expect(findNodePath(tree, 'zzz')).toEqual([])
   })
 })
 

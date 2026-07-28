@@ -67,6 +67,49 @@ export function filterSpecialityNodes(nodes: SpecialityNode[], query: string): S
   return result
 }
 
+/**
+ * Prunes the tree to a single edition `year`: keeps a leaf whose `years` include it,
+ * and any ancestor of such a leaf (so the path stays reachable). Empty branches drop out.
+ * Mirrors the backend `retainYearBranches` — only leaves carry years, so a branch survives
+ * solely through kept descendants. Returns a NEW tree; composes with the text filter.
+ */
+export function filterSpecialityNodesByYear(
+  nodes: SpecialityNode[],
+  year: number,
+): SpecialityNode[] {
+  const result: SpecialityNode[] = []
+  for (const node of nodes) {
+    const kids =
+      node.children && node.children.length > 0
+        ? filterSpecialityNodesByYear(node.children, year)
+        : []
+    const selfMatches = node.years?.includes(year) ?? false
+    if (kids.length > 0) {
+      result.push({ ...node, children: kids })
+    } else if (selfMatches) {
+      result.push(node)
+    }
+  }
+  return result
+}
+
+/**
+ * Root→…→node chain for `id` (inclusive), or `[]` when absent. Walks the nested
+ * tree once. Powers the detail-panel breadcrumb — the only reliable way to tell
+ * apart a code that repeats across levels (e.g. `60110100` on a folder and its
+ * leaves), since name+code alone are ambiguous but the ancestry path is unique.
+ */
+export function findNodePath(nodes: SpecialityNode[], id: string): SpecialityNode[] {
+  for (const node of nodes) {
+    if (node.id === id) return [node]
+    if (node.children && node.children.length > 0) {
+      const sub = findNodePath(node.children, id)
+      if (sub.length > 0) return [node, ...sub]
+    }
+  }
+  return []
+}
+
 /** IDs of every node that has children (for expand-all). */
 export function collectExpandableIds(nodes: SpecialityNode[]): string[] {
   const ids: string[] = []

@@ -61,6 +61,8 @@ export interface SpecialityListParams {
   educationLevel?: EducationLevel
   reviewStatus?: ReviewStatus
   q?: string
+  /** Keep only rows carrying this edition year. */
+  year?: number
   page?: number
   size?: number
   sort?: string
@@ -93,6 +95,15 @@ export const specialityApi = {
     return response.data.data
   },
 
+  /** Distinct edition years present in the classifier (newest first) — year-filter options. */
+  years: async (educationLevel?: EducationLevel, signal?: AbortSignal): Promise<number[]> => {
+    const response = await apiClient.get<Wrapped<number[]>>(`${BASE_URL}/years`, {
+      params: { educationLevel },
+      signal,
+    })
+    return response.data.data
+  },
+
   getById: async (id: string, signal?: AbortSignal): Promise<SpecialityNode> => {
     const response = await apiClient.get<Wrapped<SpecialityNode>>(`${BASE_URL}/${id}`, { signal })
     return response.data.data
@@ -101,5 +112,17 @@ export const specialityApi = {
   update: async (id: string, payload: SpecialityUpdatePayload): Promise<SpecialityNode> => {
     const response = await apiClient.put<Wrapped<SpecialityNode>>(`${BASE_URL}/${id}`, payload)
     return response.data.data
+  },
+
+  /**
+   * Full classifier for one level as an .xlsx (tree order); returns the file blob.
+   * When {@code year} is supplied the workbook is pruned to that edition, matching the filtered view.
+   */
+  exportXlsx: async (educationLevel?: EducationLevel, year?: number): Promise<Blob> => {
+    const response = await apiClient.get(`${BASE_URL}/export`, {
+      params: { educationLevel, year },
+      responseType: 'blob',
+    })
+    return response.data as Blob
   },
 }

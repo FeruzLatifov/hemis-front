@@ -1,5 +1,6 @@
+import { useEffect, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
+import { ChevronRight, Folder, FolderOpen, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { SpecialityNode } from '@/api/speciality.api'
 
@@ -7,25 +8,155 @@ interface SpecialityTreeProps {
   nodes: SpecialityNode[]
   /** Ids of expanded parents (controlled by the page). */
   openIds: Set<string>
+  /** Id of the currently selected row — its detail shows in the side panel. */
+  selectedId: string | null
   onToggle: (id: string) => void
+  /** Select a row (drives the highlight + keyboard navigation). */
   onSelect: (id: string) => void
+  /** Open the "Ko'rish / Tahrirlash" detail modal for a row. */
+  onOpenDetail: (id: string) => void
+  /** Gates the action label: "Ko'rish / Tahrirlash" vs "Ko'rish". */
+  canEdit: boolean
   /** Active search term — used to highlight matched text. */
   query?: string
 }
 
-/** Recursive, controlled-expansion classifier tree (parent_id hierarchy). */
-export function SpecialityTree({ nodes, openIds, onToggle, onSelect, query }: SpecialityTreeProps) {
+// Level-differentiated typography: depth is encoded with weight/size/tint, not
+// just indentation — so the 4 levels read as a hierarchy and a code that repeats
+// across levels (e.g. 60110100 on a folder and its leaves) is distinguishable.
+const NAME_CLASS = [
+  'text-sm font-semibold uppercase tracking-wide', // L1
+  'text-sm font-medium', // L2
+  'text-[13px]', // L3
+  'text-[13px] text-foreground/80', // L4+
+]
+const CHIP_CLASS = [
+  'border border-primary/30 bg-primary/5 text-primary', // L1
+  'bg-muted text-foreground', // L2
+  'bg-muted text-muted-foreground', // L3
+  'bg-transparent text-muted-foreground/70', // L4+
+]
+const levelClass = (arr: string[], depth: number) => arr[Math.min(depth, arr.length - 1)]
+
+interface FlatNode {
+  id: string
+  depth: number
+  hasChildren: boolean
+  open: boolean
+}
+
+/** Currently-visible nodes in display order — the model keyboard nav walks. */
+function flattenVisible(
+  nodes: SpecialityNode[],
+  openIds: Set<string>,
+  depth = 0,
+  acc: FlatNode[] = [],
+): FlatNode[] {
+  for (const node of nodes) {
+    const hasChildren = !!(node.children && node.children.length > 0)
+    const open = hasChildren && openIds.has(node.id)
+    acc.push({ id: node.id, depth, hasChildren, open })
+    if (open) flattenVisible(node.children, openIds, depth + 1, acc)
+  }
+  return acc
+}
+
+/**
+ * Recursive, controlled-expansion classifier tree (parent_id hierarchy) with
+ * roving keyboard navigation over the visible rows: ↑/↓ move the selection,
+ * →/← expand/collapse (or step into child / up to parent), Home/End jump to the
+ * ends. The selected row is always scrolled into view (keyboard or breadcrumb).
+ */
+export function SpecialityTree({
+  nodes,
+  openIds,
+  selectedId,
+  onToggle,
+  onSelect,
+  onOpenDetail,
+  canEdit,
+  query,
+}: SpecialityTreeProps) {
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    if (!selectedId) return
+    document.getElementById(`spec-node-${selectedId}`)?.scrollIntoView({ block: 'nearest' })
+  }, [selectedId])
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
+    // Enter / Space open the detail modal for the selected row. Always swallow
+    // Space so a keyboard user on a freshly-focused tree (nothing selected yet)
+    // never scrolls the page — the browser's default Space-scroll would otherwise
+    // fire on this focusable <ul>.
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      if (selectedId) onOpenDetail(selectedId)
+      return
+    }
+    const keys = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End']
+    if (!keys.includes(e.key)) return
+    const flat = flattenVisible(nodes, openIds)
+    if (flat.length === 0) return
+    e.preventDefault()
+    const idx = flat.findIndex((n) => n.id === selectedId)
+    const cur = idx >= 0 ? flat[idx] : undefined
+
+    switch (e.key) {
+      case 'ArrowDown':
+        onSelect(flat[idx < 0 ? 0 : Math.min(idx + 1, flat.length - 1)].id)
+        break
+      case 'ArrowUp':
+        onSelect(flat[idx < 0 ? 0 : Math.max(idx - 1, 0)].id)
+        break
+      case 'Home':
+        onSelect(flat[0].id)
+        break
+      case 'End':
+        onSelect(flat[flat.length - 1].id)
+        break
+      case 'ArrowRight':
+        if (!cur) onSelect(flat[0].id)
+        else if (cur.hasChildren && !cur.open) onToggle(cur.id)
+        else if (cur.hasChildren && cur.open && idx + 1 < flat.length) onSelect(flat[idx + 1].id)
+        break
+      case 'ArrowLeft':
+        if (!cur) break
+        if (cur.hasChildren && cur.open) {
+          onToggle(cur.id) // collapse
+        } else {
+          for (let i = idx - 1; i >= 0; i--) {
+            if (flat[i].depth === cur.depth - 1) {
+              onSelect(flat[i].id) // step up to parent
+              break
+            }
+          }
+        }
+        break
+    }
+  }
+
   return (
-    <ul className="space-y-0.5">
+    <ul
+      role="tree"
+      tabIndex={0}
+      aria-label={t('Speciality classifier')}
+      aria-activedescendant={selectedId ? `spec-node-${selectedId}` : undefined}
+      onKeyDown={handleKeyDown}
+      className="focus-visible:ring-ring space-y-0.5 rounded focus-visible:ring-2 focus-visible:outline-none"
+    >
       {nodes.map((node) => (
         <TreeNodeRow
           key={node.id}
           node={node}
-          nested={false}
+          depth={0}
           isLast={false}
           openIds={openIds}
+          selectedId={selectedId}
           onToggle={onToggle}
           onSelect={onSelect}
+          onOpenDetail={onOpenDetail}
+          canEdit={canEdit}
           query={query}
         />
       ))}
@@ -35,29 +166,49 @@ export function SpecialityTree({ nodes, openIds, onToggle, onSelect, query }: Sp
 
 function TreeNodeRow({
   node,
-  nested,
+  depth,
   isLast,
   openIds,
+  selectedId,
   onToggle,
   onSelect,
+  onOpenDetail,
+  canEdit,
   query,
 }: {
   node: SpecialityNode
-  /** True for every node below the root — draws the ├─/└─ connector. */
-  nested: boolean
+  /** 0 at the root; drives level typography, aria-level, and the ├─/└─ connector. */
+  depth: number
   /** Last sibling → the vertical guide stops at the elbow (└─ instead of ├─). */
   isLast: boolean
   openIds: Set<string>
+  selectedId: string | null
   onToggle: (id: string) => void
   onSelect: (id: string) => void
+  onOpenDetail: (id: string) => void
+  canEdit: boolean
   query?: string
 }) {
   const { t } = useTranslation()
   const hasChildren = node.children && node.children.length > 0
   const open = hasChildren && openIds.has(node.id)
+  const isSelected = selectedId === node.id
+  const nested = depth > 0
+
+  // Single click selects the row; a folder also expands/collapses. Double-click
+  // opens the detail modal (a folder's two toggles cancel out — net-zero flicker).
+  const handleClick = () => {
+    onSelect(node.id)
+    if (hasChildren) onToggle(node.id)
+  }
 
   return (
     <li
+      id={`spec-node-${node.id}`}
+      role="treeitem"
+      aria-level={depth + 1}
+      aria-selected={isSelected}
+      aria-expanded={hasChildren ? open : undefined}
       className={cn(
         // Vertical guide + horizontal elbow, drawn with pseudo-elements so the
         // last sibling gets a proper └─ (guide clipped to the row) not a ├─.
@@ -69,14 +220,21 @@ function TreeNodeRow({
         ],
       )}
     >
-      <div className="group hover:bg-muted flex items-center gap-1.5 rounded-md py-1 pr-2 transition-colors">
+      <div
+        className={cn(
+          // Reserve the left accent (transparent) on every row so selecting one
+          // never shifts the layout; the active row fills it + a soft background.
+          'group flex items-center gap-1.5 rounded-md border-l-2 py-1 pr-2 transition-colors',
+          isSelected ? 'border-primary bg-primary/10' : 'hover:bg-muted border-transparent',
+        )}
+      >
         {hasChildren ? (
           <button
             type="button"
+            tabIndex={-1}
             onClick={() => onToggle(node.id)}
             className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded"
             aria-label={open ? t('Collapse') : t('Expand')}
-            aria-expanded={open}
           >
             <ChevronRight
               className={`h-4 w-4 transition-transform ${open ? 'rotate-90' : ''}`}
@@ -102,15 +260,22 @@ function TreeNodeRow({
 
         <button
           type="button"
-          onClick={() => onSelect(node.id)}
+          tabIndex={-1}
+          onClick={handleClick}
+          onDoubleClick={() => onOpenDetail(node.id)}
           className="flex min-w-0 flex-1 items-center gap-2 rounded py-0.5 text-left focus-visible:outline-none"
         >
           {node.code ? (
-            <span className="bg-muted text-muted-foreground shrink-0 rounded px-1.5 py-0.5 font-mono text-[11px]">
+            <span
+              className={cn(
+                'shrink-0 rounded px-1.5 py-0.5 font-mono text-[11px]',
+                levelClass(CHIP_CLASS, depth),
+              )}
+            >
               {node.code}
             </span>
           ) : null}
-          <span className="text-foreground truncate text-sm">
+          <span className={cn('truncate', levelClass(NAME_CLASS, depth))}>
             <Highlight text={node.nameUz} query={query} />
           </span>
           {hasChildren ? (
@@ -131,19 +296,35 @@ function TreeNodeRow({
             />
           ) : null}
         </button>
+
+        {/* Per-row action — labelled + always visible (quiet at rest, emphasised on
+            row hover) so it is discoverable. Double-click the row, or Enter/Space on
+            the selected row (roving-tabindex tree), open the same modal. */}
+        <button
+          type="button"
+          tabIndex={-1}
+          onClick={() => onOpenDetail(node.id)}
+          className="text-primary border-primary/20 bg-primary/5 hover:bg-primary hover:text-primary-foreground hover:border-primary flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium opacity-90 transition-all group-hover:opacity-100 hover:shadow-sm"
+        >
+          <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="whitespace-nowrap">{canEdit ? t('View / Edit') : t('View')}</span>
+        </button>
       </div>
 
       {open && hasChildren ? (
-        <ul className="ml-3 pl-3">
+        <ul role="group" className="ml-3 pl-3">
           {node.children.map((child, i) => (
             <TreeNodeRow
               key={child.id}
               node={child}
-              nested
+              depth={depth + 1}
               isLast={i === node.children.length - 1}
               openIds={openIds}
+              selectedId={selectedId}
               onToggle={onToggle}
               onSelect={onSelect}
+              onOpenDetail={onOpenDetail}
+              canEdit={canEdit}
               query={query}
             />
           ))}

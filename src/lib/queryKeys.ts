@@ -139,6 +139,7 @@ export const queryKeys = {
     tree: (educationLevel?: string) => ['speciality-classifier', 'tree', educationLevel] as const,
     list: (filters?: Record<string, unknown>) =>
       ['speciality-classifier', 'list', filters] as const,
+    years: (educationLevel?: string) => ['speciality-classifier', 'years', educationLevel] as const,
     byId: (id: string) => ['speciality-classifier', id] as const,
   },
 

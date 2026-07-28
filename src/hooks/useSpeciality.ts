@@ -21,11 +21,12 @@ export function useSpecialityTree(educationLevel?: EducationLevel, enabled = tru
   })
 }
 
-/** Paginated flat curation grid — education-level + review-status + text filters. */
+/** Paginated flat curation grid — education-level + review-status + year + text filters. */
 export function useSpecialityList(params: {
   educationLevel?: EducationLevel
   reviewStatus?: ReviewStatus
   q?: string
+  year?: number
   page?: number
   size?: number
 }) {
@@ -37,11 +38,21 @@ export function useSpecialityList(params: {
           educationLevel: params.educationLevel,
           reviewStatus: params.reviewStatus,
           q: params.q || undefined,
+          year: params.year,
           page: params.page,
           size: params.size ?? PAGINATION.DEFAULT_PAGE_SIZE,
         },
         signal,
       ),
+  })
+}
+
+/** Distinct edition years for the year-filter dropdown (newest first), scoped to the level. */
+export function useSpecialityYears(educationLevel?: EducationLevel) {
+  return useQuery({
+    queryKey: queryKeys.speciality.years(educationLevel),
+    queryFn: ({ signal }) => specialityApi.years(educationLevel, signal),
+    staleTime: CACHE.LONG,
   })
 }
 
