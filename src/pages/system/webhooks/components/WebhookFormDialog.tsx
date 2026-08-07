@@ -122,7 +122,7 @@ export default function WebhookFormDialog({ mode, initial, onClose, onCreated }:
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('Andijon davlat universiteti')}
+              placeholder={t('e.g. university full name')}
               maxLength={255}
             />
             {errors.description && (

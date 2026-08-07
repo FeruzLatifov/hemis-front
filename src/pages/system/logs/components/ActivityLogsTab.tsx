@@ -82,7 +82,7 @@ export function ActivityLogsTab({ search, dateFrom, dateTo }: ActivityLogsTabPro
     },
     {
       key: 'webhook',
-      label: t('Webhook targets'),
+      label: t('Webhook Targets'),
       entityType: 'WebhookTarget',
       action: 'all',
     },

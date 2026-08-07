@@ -53,3 +53,6 @@ test-results/
 
 # Build info
 tsconfig.tsbuildinfo
+
+# Serena MCP local project cache/config (LSP artifacts, not source)
+.serena/

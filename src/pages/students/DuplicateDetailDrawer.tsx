@@ -94,7 +94,7 @@ export default function DuplicateDetailDrawer({ pinfl, onClose }: DuplicateDetai
             <h3 className="text-xl font-semibold text-[var(--text-primary)]">{detail.fullName}</h3>
             <p className="text-sm text-[var(--text-secondary)]">
               {detail.count} {t('records')}, {detail.universityCount} {t('universities')},{' '}
-              {detail.activeCount} {t('active')}
+              {detail.activeCount} {t('Active')}
             </p>
           </div>
 

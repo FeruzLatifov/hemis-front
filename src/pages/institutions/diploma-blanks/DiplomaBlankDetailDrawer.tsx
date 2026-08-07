@@ -117,7 +117,7 @@ export default function DiplomaBlankDetailDrawer({
             />
             <Field
               icon={<Calendar className="h-4 w-4" />}
-              label={t('Academic year')}
+              label={t('academic year')}
               value={blank.academicYear}
             />
             <Field

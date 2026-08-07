@@ -201,8 +201,8 @@ export default function StudentDuplicatesPage() {
   const getActiveLabel = (group: DuplicateGroup): string => {
     const inactive = group.count - group.activeCount
     if (group.activeCount === 0) return t('No active records')
-    if (inactive === 0) return `${group.activeCount} ${t('active')}`
-    return `${group.activeCount} ${t('active')}, ${inactive} ${t('inactive')}`
+    if (inactive === 0) return `${group.activeCount} ${t('Active')}`
+    return `${group.activeCount} ${t('Active')}, ${inactive} ${t('Inactive')}`
   }
 
   // =====================================================

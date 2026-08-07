@@ -37,7 +37,7 @@ export function LogsStatsCards({ data, isLoading }: LogsStatsCardsProps) {
     {
       label: t('Top user'),
       value: data?.topUsers?.[0]?.username ?? '-',
-      subtitle: data?.topUsers?.[0] ? `${data.topUsers[0].count} ${t('actions')}` : undefined,
+      subtitle: data?.topUsers?.[0] ? `${data.topUsers[0].count} ${t('Actions')}` : undefined,
       icon: Users,
       color: 'text-purple-600',
       bg: 'bg-purple-50',

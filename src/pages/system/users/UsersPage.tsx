@@ -563,12 +563,12 @@ export default function UsersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {dialog.type === 'toggle' && dialog.user.enabled ? t('Disable') : t('Enable')}{' '}
-              {t('user')}
+              {t('User')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {dialog.type === 'toggle'
                 ? t('Are you sure you want to {{action}} user "{{username}}"?', {
-                    action: dialog.user.enabled ? t('disable') : t('enable'),
+                    action: dialog.user.enabled ? t('Disable') : t('Enable'),
                     username: dialog.user.username,
                   })
                 : ''}
@@ -597,7 +597,7 @@ export default function UsersPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t('Unlock')} {t('user')}
+              {t('Unlock')} {t('User')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {dialog.type === 'unlock'
