@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronRight, Folder, FolderOpen, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { SpecialityNode } from '@/api/speciality.api'
+import { specialityLevelKey } from './speciality-tree.util'
 
 interface SpecialityTreeProps {
   nodes: SpecialityNode[]
@@ -13,10 +14,8 @@ interface SpecialityTreeProps {
   onToggle: (id: string) => void
   /** Select a row (drives the highlight + keyboard navigation). */
   onSelect: (id: string) => void
-  /** Open the "Ko'rish / Tahrirlash" detail modal for a row. */
+  /** Open the "Ko'rish" detail+edit modal for a row. */
   onOpenDetail: (id: string) => void
-  /** Gates the action label: "Ko'rish / Tahrirlash" vs "Ko'rish". */
-  canEdit: boolean
   /** Active search term — used to highlight matched text. */
   query?: string
 }
@@ -74,7 +73,6 @@ export function SpecialityTree({
   onToggle,
   onSelect,
   onOpenDetail,
-  canEdit,
   query,
 }: SpecialityTreeProps) {
   const { t } = useTranslation()
@@ -156,7 +154,6 @@ export function SpecialityTree({
           onToggle={onToggle}
           onSelect={onSelect}
           onOpenDetail={onOpenDetail}
-          canEdit={canEdit}
           query={query}
         />
       ))}
@@ -173,7 +170,6 @@ function TreeNodeRow({
   onToggle,
   onSelect,
   onOpenDetail,
-  canEdit,
   query,
 }: {
   node: SpecialityNode
@@ -186,7 +182,6 @@ function TreeNodeRow({
   onToggle: (id: string) => void
   onSelect: (id: string) => void
   onOpenDetail: (id: string) => void
-  canEdit: boolean
   query?: string
 }) {
   const { t } = useTranslation()
@@ -194,6 +189,11 @@ function TreeNodeRow({
   const open = hasChildren && openIds.has(node.id)
   const isSelected = selectedId === node.id
   const nested = depth > 0
+  // Taxonomy step for this row — prefer the authoritative stored level, fall back
+  // to tree depth (they align: a root is level 1). Names the row's place in the
+  // 4-level hierarchy (Bilim sohasi → Ta'lim sohasi → Yo'nalish → Ichki yo'nalish).
+  const rowLevel = node.hierarchyLevel ?? depth + 1
+  const levelKey = specialityLevelKey(rowLevel)
 
   // Single click selects the row; a folder also expands/collapses. Double-click
   // opens the detail modal (a folder's two toggles cancel out — net-zero flicker).
@@ -250,7 +250,9 @@ function TreeNodeRow({
           </span>
         )}
 
-        {hasChildren ? (
+        {/* Folder icon only on the top two taxonomy levels (Bilim sohasi, Ta'lim sohasi); levels 3+
+            (Yo'nalish / Ichki yo'nalish) drop it so their code column aligns cleanly on one line. */}
+        {hasChildren && rowLevel <= 2 ? (
           open ? (
             <FolderOpen className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
           ) : (
@@ -275,7 +277,7 @@ function TreeNodeRow({
               {node.code}
             </span>
           ) : null}
-          <span className={cn('truncate', levelClass(NAME_CLASS, depth))}>
+          <span className={cn('truncate', levelClass(NAME_CLASS, depth))} title={node.nameUz}>
             <Highlight text={node.nameUz} query={query} />
           </span>
           {hasChildren ? (
@@ -297,17 +299,32 @@ function TreeNodeRow({
           ) : null}
         </button>
 
+        {/* Taxonomy-level name — fills the row's open right area on wide screens
+            (gated at lg so it never crushes the primary name at narrow/medium
+            widths, where indentation + the level-tinted code chip already convey
+            rank). bg-foreground/10 keeps the pill visible in BOTH themes — plain
+            bg-muted equals the card in dark mode, so it would vanish there. */}
+        {levelKey ? (
+          <span
+            className="bg-foreground/10 text-muted-foreground ml-2 hidden shrink-0 rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap lg:inline-block"
+            title={t('Hierarchy level')}
+          >
+            {t(levelKey)}
+          </span>
+        ) : null}
+
         {/* Per-row action — labelled + always visible (quiet at rest, emphasised on
             row hover) so it is discoverable. Double-click the row, or Enter/Space on
             the selected row (roving-tabindex tree), open the same modal. */}
         <button
           type="button"
           tabIndex={-1}
+          aria-label={`${t('View')} — ${node.nameUz}`}
           onClick={() => onOpenDetail(node.id)}
           className="text-primary border-primary/20 bg-primary/5 hover:bg-primary hover:text-primary-foreground hover:border-primary flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium opacity-90 transition-all group-hover:opacity-100 hover:shadow-sm"
         >
           <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-          <span className="whitespace-nowrap">{canEdit ? t('View / Edit') : t('View')}</span>
+          <span className="whitespace-nowrap">{t('View')}</span>
         </button>
       </div>
 
@@ -324,7 +341,6 @@ function TreeNodeRow({
               onToggle={onToggle}
               onSelect={onSelect}
               onOpenDetail={onOpenDetail}
-              canEdit={canEdit}
               query={query}
             />
           ))}

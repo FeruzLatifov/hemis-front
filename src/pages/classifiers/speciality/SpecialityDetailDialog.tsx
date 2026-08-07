@@ -9,8 +9,9 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { useSpecialityDetail } from '@/hooks/useSpeciality'
-import type { SpecialityNode } from '@/api/speciality.api'
+import type { SpecialityNode, SpecialityRow } from '@/api/speciality.api'
 import { SpecialityDetailContent } from './SpecialityDetailContent'
+import { specialityLevelKey } from './speciality-tree.util'
 
 /**
  * Centered "Ko'rish / Tahrirlash" modal for a single speciality — opened from the
@@ -25,7 +26,9 @@ export function SpecialityDetailDialog({
   specialityId,
   canEdit,
   path,
+  headerFallback,
   onNavigate,
+  onEdit,
   onOpenChange,
 }: {
   /** Node to show; `null` keeps the dialog closed. */
@@ -33,8 +36,13 @@ export function SpecialityDetailDialog({
   canEdit: boolean
   /** Root→shown chain (from the in-memory tree) — drives the breadcrumb. */
   path: SpecialityNode[]
+  /** Instant header data when `path` is empty (list view — the tree isn't loaded);
+   *  the fetched detail replaces it once ready, avoiding a placeholder-header flash. */
+  headerFallback?: SpecialityRow
   /** Jump to an ancestor from the breadcrumb (swaps content, stays open). */
   onNavigate: (id: string) => void
+  /** Open the dedicated edit form for the currently shown node. */
+  onEdit: (id: string) => void
   onOpenChange: (open: boolean) => void
 }) {
   const { t } = useTranslation()
@@ -42,8 +50,9 @@ export function SpecialityDetailDialog({
   // fallback while the detail query loads. Deduped by TanStack — no extra request.
   const { data: detail } = useSpecialityDetail(specialityId)
 
-  const node = detail ?? path[path.length - 1]
+  const node = detail ?? path[path.length - 1] ?? headerFallback
   const ancestors = path.slice(0, -1)
+  const levelKey = specialityLevelKey(node?.hierarchyLevel)
 
   return (
     <Dialog open={specialityId != null} onOpenChange={onOpenChange}>
@@ -60,8 +69,9 @@ export function SpecialityDetailDialog({
               </DialogDescription>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 {node ? (
-                  <Badge variant={node.educationLevel === 'BACHELOR' ? 'default' : 'secondary'}>
-                    {node.educationLevel === 'BACHELOR' ? t('Bachelor') : t('Master')}
+                  <Badge variant={node.educationType === '11' ? 'default' : 'secondary'}>
+                    {node.educationTypeName ??
+                      (node.educationType === '11' ? t('Bachelor') : t('Master'))}
                   </Badge>
                 ) : null}
                 {node ? (
@@ -74,6 +84,11 @@ export function SpecialityDetailDialog({
                     }
                   >
                     {node.reviewStatus === 'NEEDS_REVIEW' ? t('Needs review') : t('Approved')}
+                  </Badge>
+                ) : null}
+                {levelKey ? (
+                  <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
+                    {t(levelKey)}
                   </Badge>
                 ) : null}
               </div>
@@ -110,6 +125,7 @@ export function SpecialityDetailDialog({
             key={specialityId}
             specialityId={specialityId}
             canEdit={canEdit}
+            onEdit={() => onEdit(specialityId)}
             hideStatusCard
           />
         ) : null}

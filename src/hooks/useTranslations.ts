@@ -130,7 +130,7 @@ export function useRegeneratePropertiesFiles() {
     onSuccess: (result) => {
       invalidate()
       toast.success(
-        `${result.totalFiles} ${i18n.t('files created')} (${result.totalTranslations} ${i18n.t('translations')})`,
+        `${result.totalFiles} ${i18n.t('files created')} (${result.totalTranslations} ${i18n.t('Translations')})`,
         { duration: 4000, position: 'bottom-right' },
       )
     },

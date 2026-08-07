@@ -2,8 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import {
   specialityApi,
-  type EducationLevel,
+  type EducationTypeCode,
   type ReviewStatus,
+  type SpecialityCreatePayload,
+  type SpecialityDuplicateParams,
   type SpecialityUpdatePayload,
 } from '@/api/speciality.api'
 import { toast } from 'sonner'
@@ -11,31 +13,38 @@ import i18n from '@/i18n/config'
 import { PAGINATION, UI } from '@/constants'
 import { CACHE } from '@/constants/cache'
 
-/** Hierarchical tree for one education level (bachelor/master), or all levels when omitted. */
-export function useSpecialityTree(educationLevel?: EducationLevel, enabled = true) {
+/** Hierarchical tree for one education type (bachelor/master), or all types when omitted. */
+export function useSpecialityTree(educationType?: EducationTypeCode, enabled = true) {
   return useQuery({
-    queryKey: queryKeys.speciality.tree(educationLevel),
-    queryFn: ({ signal }) => specialityApi.tree(educationLevel, signal),
+    queryKey: queryKeys.speciality.tree(educationType),
+    queryFn: ({ signal }) => specialityApi.tree(educationType, signal),
     staleTime: CACHE.LONG,
     enabled,
   })
 }
 
-/** Paginated flat curation grid — education-level + review-status + year + text filters. */
-export function useSpecialityList(params: {
-  educationLevel?: EducationLevel
-  reviewStatus?: ReviewStatus
-  q?: string
-  year?: number
-  page?: number
-  size?: number
-}) {
+/**
+ * Paginated flat curation grid — education-level + review-status + year + text filters.
+ * `enabled` gates the fetch so the list query stays idle while the Tree view is active
+ * (Tree is the default landing view — no point fetching the flat grid nobody is looking at).
+ */
+export function useSpecialityList(
+  params: {
+    educationType?: EducationTypeCode
+    reviewStatus?: ReviewStatus
+    q?: string
+    year?: number
+    page?: number
+    size?: number
+  },
+  enabled = true,
+) {
   return useQuery({
     queryKey: queryKeys.speciality.list(params),
     queryFn: ({ signal }) =>
       specialityApi.list(
         {
-          educationLevel: params.educationLevel,
+          educationType: params.educationType,
           reviewStatus: params.reviewStatus,
           q: params.q || undefined,
           year: params.year,
@@ -44,15 +53,26 @@ export function useSpecialityList(params: {
         },
         signal,
       ),
+    enabled,
   })
 }
 
-/** Distinct edition years for the year-filter dropdown (newest first), scoped to the level. */
-export function useSpecialityYears(educationLevel?: EducationLevel) {
+/** Distinct edition years for the year-filter dropdown (newest first), scoped to the type. */
+export function useSpecialityYears(educationType?: EducationTypeCode) {
   return useQuery({
-    queryKey: queryKeys.speciality.years(educationLevel),
-    queryFn: ({ signal }) => specialityApi.years(educationLevel, signal),
+    queryKey: queryKeys.speciality.years(educationType),
+    queryFn: ({ signal }) => specialityApi.years(educationType, signal),
     staleTime: CACHE.LONG,
+  })
+}
+
+/** Advisory duplicate check for the add form — existing rows with the same code/name. */
+export function useSpecialityDuplicates(params: SpecialityDuplicateParams, enabled: boolean) {
+  return useQuery({
+    queryKey: [...queryKeys.speciality.all, 'duplicates', params],
+    queryFn: ({ signal }) => specialityApi.duplicates(params, signal),
+    enabled,
+    staleTime: 0,
   })
 }
 
@@ -75,6 +95,22 @@ export function useUpdateSpeciality() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.speciality.all })
       toast.success(i18n.t('Saved successfully'), { duration: UI.TOAST_DURATION })
+    },
+  })
+}
+
+/** Manually add a new speciality (born NEEDS_REVIEW; promote later via update). */
+export function useCreateSpeciality() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: SpecialityCreatePayload) => specialityApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.speciality.all })
+      toast.success(i18n.t('Speciality created'), { duration: UI.TOAST_DURATION })
+    },
+    onError: () => {
+      toast.error(i18n.t('Failed to create speciality'), { duration: UI.TOAST_DURATION })
     },
   })
 }

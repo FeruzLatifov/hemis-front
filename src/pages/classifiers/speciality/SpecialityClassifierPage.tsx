@@ -1,16 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  Search,
-  List,
-  FolderTree,
-  GraduationCap,
-  Loader2,
-  ChevronsDownUp,
-  ChevronsUpDown,
-  Download,
-} from 'lucide-react'
+import { Search, List, FolderTree, GraduationCap, Loader2, Download, Eye, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -19,6 +10,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
@@ -43,30 +36,43 @@ import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usePermission } from '@/hooks/usePermission'
 import { useSpecialityList, useSpecialityTree, useSpecialityYears } from '@/hooks/useSpeciality'
-import { specialityApi, type EducationLevel, type ReviewStatus } from '@/api/speciality.api'
+import { specialityApi, type EducationTypeCode, type ReviewStatus } from '@/api/speciality.api'
+import { shortToBcp47 } from '@/i18n/config'
 import { UI } from '@/constants'
 import { SpecialityTree } from './SpecialityTree'
-import SpecialityDetailDrawer from './SpecialityDetailDrawer'
 import { SpecialityDetailDialog } from './SpecialityDetailDialog'
+import { SpecialityCreateDialog } from './SpecialityCreateDialog'
+import { SpecialityEditDialog } from './SpecialityEditDialog'
 import {
   sortSpecialityNodes,
   filterSpecialityNodes,
   filterSpecialityNodesByYear,
+  filterSpecialityNodesByStatus,
   collectExpandableIds,
   findNodePath,
+  specialityLevelKey,
 } from './speciality-tree.util'
 
 type ViewMode = 'list' | 'tree'
 type StatusFilter = 'all' | ReviewStatus
 
 export default function SpecialityClassifierPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { can } = usePermission()
   const canEdit = can('classifiers.speciality.edit')
+  // Manual "add" is a dedicated, ministry-only permission (not the reused .edit, which
+  // machine roles like OTM_API hold) — gates the create button + form.
+  const canCreate = can('classifiers.speciality.create')
+  // Promoting NEEDS_REVIEW → APPROVED (triggers OTM distribution) is a separate ministry-only
+  // capability — gates the "Approved" option in the edit modal (the backend also enforces it).
+  const canApprove = can('classifiers.speciality.approve')
 
   const [searchParams, setSearchParams] = useSearchParams()
-  const level = (searchParams.get('level') as EducationLevel) || 'BACHELOR'
-  const view = (searchParams.get('view') as ViewMode) || 'list'
+  // Education-type tab: a hemishe_h_education_type code — '11'=Bakalavr, '12'=Magistr (URL ?educationType=).
+  const level = (searchParams.get('educationType') as EducationTypeCode) || '11'
+  // Tree is the default landing view — the classifier reads far more naturally as a hierarchy
+  // than a flat grid, so first entry (no ?view=) opens the tree.
+  const view = (searchParams.get('view') as ViewMode) || 'tree'
   const status = (searchParams.get('status') as StatusFilter) || 'all'
   const yearParam = searchParams.get('year') || 'all'
   const qFromUrl = (searchParams.get('q') || '').slice(0, 200)
@@ -75,14 +81,18 @@ export default function SpecialityClassifierPage() {
 
   const [searchInput, setSearchInput] = useState(qFromUrl)
   const debouncedSearch = useDebounce(searchInput, UI.SEARCH_DEBOUNCE)
-  // Selected speciality — drives the tree row highlight + keyboard navigation
-  // (tree view) and the slide-over drawer (list view).
+  // Selected speciality — row highlight in both views, plus keyboard navigation
+  // in the tree. Selection alone never opens the modal.
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  // Id whose "Ko'rish / Tahrirlash" modal is open (tree view) — separate from
-  // selectedId so navigating the tree never pops the dialog on its own.
+  // Id whose detail modal is open — shared by both views, kept separate from
+  // selectedId so navigating/selecting a row never pops the dialog on its own.
   const [detailId, setDetailId] = useState<string | null>(null)
+  // Id whose dedicated edit form is open. Opening it closes the detail modal (never stacked).
+  const [editId, setEditId] = useState<string | null>(null)
   const [openIds, setOpenIds] = useState<Set<string>>(new Set())
   const [exporting, setExporting] = useState(false)
+  // "Add speciality" modal — pre-fills the parent from the highlighted row (selectedId).
+  const [createOpen, setCreateOpen] = useState(false)
 
   const setParams = (updates: Record<string, string | undefined>) => {
     setSearchParams((prev) => {
@@ -100,14 +110,17 @@ export default function SpecialityClassifierPage() {
   const yearFilter: number | undefined =
     yearParam === 'all' || Number.isNaN(parsedYear) ? undefined : parsedYear
 
-  const listQuery = useSpecialityList({
-    educationLevel: level,
-    reviewStatus,
-    q: debouncedSearch || undefined,
-    year: yearFilter,
-    page,
-    size,
-  })
+  const listQuery = useSpecialityList(
+    {
+      educationType: level,
+      reviewStatus,
+      q: debouncedSearch || undefined,
+      year: yearFilter,
+      page,
+      size,
+    },
+    view === 'list', // idle while the Tree view is active (the default)
+  )
   const treeQuery = useSpecialityTree(level, view === 'tree')
   const yearsQuery = useSpecialityYears(level)
 
@@ -118,22 +131,35 @@ export default function SpecialityClassifierPage() {
   // year-desc → numeric-code order, then filter client-side for tree search.
   const sortedTree = useMemo(() => sortSpecialityNodes(treeQuery.data ?? []), [treeQuery.data])
   const searching = debouncedSearch.trim().length > 0
-  const filtering = searching || yearFilter != null
-  // Year prune first (mirrors the backend), then the existing text filter — they compose.
+  // Status prune first (so "Needs review" scopes the tree, not just the list), then the year
+  // prune (mirrors the backend), then the existing text filter — all three compose.
   const treeNodes = useMemo(() => {
-    const byYear =
-      yearFilter != null ? filterSpecialityNodesByYear(sortedTree, yearFilter) : sortedTree
+    const byStatus = reviewStatus
+      ? filterSpecialityNodesByStatus(sortedTree, reviewStatus)
+      : sortedTree
+    const byYear = yearFilter != null ? filterSpecialityNodesByYear(byStatus, yearFilter) : byStatus
     return filterSpecialityNodes(byYear, debouncedSearch)
-  }, [sortedTree, debouncedSearch, yearFilter])
-  // While filtering (text or year), force every surviving branch open so hits stay visible.
-  const effectiveOpen = useMemo(
-    () => (filtering ? new Set(collectExpandableIds(treeNodes)) : openIds),
-    [filtering, treeNodes, openIds],
-  )
+  }, [sortedTree, reviewStatus, debouncedSearch, yearFilter])
+  // Reveal matching branches on a TEXT search OR a status filter so the hits are visible — surfacing
+  // the (few) NEEDS_REVIEW rows buried in collapsed folders is the whole point of the status filter.
+  // A year filter only scopes the tree and never forces the open state — there expand/collapse stays
+  // under the user's control.
+  useEffect(() => {
+    if (searching || reviewStatus) {
+      setOpenIds(new Set(collectExpandableIds(treeNodes)))
+    }
+  }, [searching, reviewStatus, treeNodes])
   // Root→shown chain for the detail-modal breadcrumb (client-side, no backend).
   const detailPath = useMemo(
     () => (detailId ? findNodePath(sortedTree, detailId) : []),
     [sortedTree, detailId],
+  )
+  // Instant header data for the modal opened from the LIST (the tree isn't loaded
+  // there, so detailPath is empty) — the row is already in hand, so the dialog can
+  // render the name/code/badges immediately instead of flashing a placeholder.
+  const detailRow = useMemo(
+    () => (detailId ? listQuery.data?.content.find((r) => r.id === detailId) : undefined),
+    [detailId, listQuery.data],
   )
 
   const toggleNode = (id: string) =>
@@ -143,25 +169,48 @@ export default function SpecialityClassifierPage() {
       else next.add(id)
       return next
     })
-  const expandAll = () => setOpenIds(new Set(collectExpandableIds(sortedTree)))
-  const collapseAll = () => setOpenIds(new Set())
 
-  // Export the classifier as an .xlsx in backend tree order, honoring the active year filter.
-  // `lvl` undefined ⇒ both levels (Bakalavr + Magistr) as two sheets in one file.
-  const handleExport = async (lvl?: EducationLevel) => {
+  // Open the centered detail/edit modal — shared by tree (double-click / Ko'rish /
+  // Enter) and list (double-click / Ko'rish). Selecting keeps the row highlighted.
+  const openDetail = (id: string) => {
+    setSelectedId(id)
+    setDetailId(id)
+  }
+
+  // Export the classifier as a professional .xlsx. `mode='whole'` ⇒ the entire classifier
+  // (no filters); `mode='view'` ⇒ the current grid — active year/status/search applied, so the
+  // file mirrors what's on screen. `lvl` undefined ⇒ both levels as two sheets. Labels follow the
+  // active UI language. The workbook is built server-side in-memory; nothing is persisted.
+  const handleExport = async (mode: 'whole' | 'view', lvl?: EducationTypeCode) => {
     setExporting(true)
     try {
-      const blob = await specialityApi.exportXlsx(lvl, yearFilter)
+      // The export endpoint keys its column/label text by the backend's region locale
+      // (uz-UZ / ru-RU / …), not i18next's short code (uz / ru / …). Normalize it — otherwise
+      // the headers fall back to the default language and every export misses the warm i18n cache.
+      const lang = shortToBcp47[i18n.language] ?? i18n.language
+      const blob = await specialityApi.exportXlsx(
+        mode === 'view'
+          ? {
+              educationType: lvl,
+              year: yearFilter,
+              reviewStatus,
+              q: debouncedSearch.trim() || undefined,
+              lang,
+            }
+          : { educationType: lvl, lang },
+      )
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const levelSuffix = lvl ? `_${lvl.toLowerCase()}` : ''
-      const yearSuffix = yearFilter != null ? `_${yearFilter}` : ''
-      a.download = `mutaxassislik_klassifikatori${levelSuffix}${yearSuffix}.xlsx`
+      const levelSuffix = lvl === '11' ? '_bakalavr' : lvl === '12' ? '_magistr' : ''
+      const scopeSuffix = mode === 'view' ? '_filtrlangan' : ''
+      const dateSuffix = `_${new Date().toISOString().slice(0, 10)}`
+      a.download = `mutaxassislik_klassifikatori${levelSuffix}${scopeSuffix}${dateSuffix}.xlsx`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
+      toast.success(t('Export completed'))
     } catch {
       toast.error(t('Export failed'))
     } finally {
@@ -169,8 +218,8 @@ export default function SpecialityClassifierPage() {
     }
   }
 
-  const levelBadge = (lvl: EducationLevel) =>
-    lvl === 'BACHELOR' ? (
+  const levelBadge = (code: string) =>
+    code === '11' ? (
       <Badge variant="default">{t('Bachelor')}</Badge>
     ) : (
       <Badge variant="secondary">{t('Master')}</Badge>
@@ -206,53 +255,27 @@ export default function SpecialityClassifierPage() {
             </p>
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={exporting}>
-              {exporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Download className="h-4 w-4" aria-hidden="true" />
-              )}
-              {t('Download Excel')}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleExport(level)}>
-              {level === 'BACHELOR' ? t('Bachelor') : t('Master')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport(undefined)}>
-              {t('Bachelor')} + {t('Master')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Level tabs */}
       <Tabs
         value={level}
-        onValueChange={(v) => setParams({ level: v, page: undefined, year: undefined })}
+        onValueChange={(v) => {
+          setParams({ educationType: v, page: undefined, year: undefined })
+          // Drop the highlight — a selected row from the old type must not pre-fill
+          // the create form's parent on the new type (would be a cross-type parent).
+          setSelectedId(null)
+        }}
       >
         <TabsList>
-          <TabsTrigger value="BACHELOR">{t('Bachelor')}</TabsTrigger>
-          <TabsTrigger value="MASTER">{t('Master')}</TabsTrigger>
+          <TabsTrigger value="11">{t('Bachelor')}</TabsTrigger>
+          <TabsTrigger value="12">{t('Master')}</TabsTrigger>
         </TabsList>
       </Tabs>
 
       {/* Toolbar */}
       <Card className="flex flex-wrap items-center gap-3 p-3">
         <div className="flex items-center rounded-md border p-0.5">
-          <Button
-            variant={view === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              setParams({ view: 'list' })
-              setSelectedId(null)
-            }}
-          >
-            <List className="h-4 w-4" />
-            {t('List')}
-          </Button>
           <Button
             variant={view === 'tree' ? 'default' : 'ghost'}
             size="sm"
@@ -263,6 +286,17 @@ export default function SpecialityClassifierPage() {
           >
             <FolderTree className="h-4 w-4" />
             {t('Tree')}
+          </Button>
+          <Button
+            variant={view === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => {
+              setParams({ view: 'list' })
+              setSelectedId(null)
+            }}
+          >
+            <List className="h-4 w-4" />
+            {t('List')}
           </Button>
         </div>
 
@@ -311,18 +345,44 @@ export default function SpecialityClassifierPage() {
           <span className="text-muted-foreground text-sm">
             {t('{{count}} found', { count: total })}
           </span>
-        ) : (
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" onClick={expandAll} disabled={filtering}>
-              <ChevronsUpDown className="h-4 w-4" aria-hidden="true" />
-              {t('Expand all')}
+        ) : null}
+
+        {/* Primary actions live in the toolbar, next to the filters — far less pointer travel than
+            the top-right corner (Fitts's law). Export is secondary (outline); Add is the one primary CTA. */}
+        <div className="ml-auto flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={exporting}>
+                {exporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                )}
+                {t('Export')}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuLabel>{t('Whole classifier')}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleExport('whole', level)}>
+                {level === '11' ? t('Bachelor') : t('Master')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('whole', undefined)}>
+                {t('Bachelor')} + {t('Master')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>{t('Current view')}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleExport('view', level)}>
+                {level === '11' ? t('Bachelor') : t('Master')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {canCreate ? (
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {t('Add')}
             </Button>
-            <Button variant="outline" size="sm" onClick={collapseAll} disabled={filtering}>
-              <ChevronsDownUp className="h-4 w-4" aria-hidden="true" />
-              {t('Collapse all')}
-            </Button>
-          </div>
-        )}
+          ) : null}
+        </div>
       </Card>
 
       {/* Content */}
@@ -345,29 +405,63 @@ export default function SpecialityClassifierPage() {
                   <TableRow>
                     <TableHead className="w-32">{t('Code')}</TableHead>
                     <TableHead>{t('Name')}</TableHead>
+                    <TableHead className="w-40">{t('Hierarchy level')}</TableHead>
                     <TableHead className="w-28">{t('Level')}</TableHead>
                     <TableHead className="w-36">{t('Status')}</TableHead>
                     <TableHead className="w-40">{t('Years')}</TableHead>
+                    <TableHead className="w-24 text-right">{t('Actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {listQuery.data?.content.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      className="cursor-pointer"
-                      onClick={() => setSelectedId(row.id)}
-                    >
-                      <TableCell className="text-muted-foreground font-mono text-xs">
-                        {row.code ?? '-'}
-                      </TableCell>
-                      <TableCell className="max-w-md truncate">{row.nameUz}</TableCell>
-                      <TableCell>{levelBadge(row.educationLevel)}</TableCell>
-                      <TableCell>{statusBadge(row.reviewStatus)}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {row.years && row.years.length > 0 ? row.years.join(', ') : '-'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {listQuery.data?.content.map((row) => {
+                    const levelKey = specialityLevelKey(row.hierarchyLevel)
+                    // Single click only highlights; the detail modal opens on
+                    // double-click or the explicit Ko'rish button (mirrors the tree).
+                    return (
+                      <TableRow
+                        key={row.id}
+                        data-state={selectedId === row.id ? 'selected' : undefined}
+                        className="cursor-pointer select-none"
+                        onClick={() => setSelectedId(row.id)}
+                        onDoubleClick={() => openDetail(row.id)}
+                      >
+                        <TableCell className="text-muted-foreground font-mono text-xs">
+                          {row.code ?? '-'}
+                        </TableCell>
+                        <TableCell className="max-w-md truncate" title={row.nameUz}>
+                          {row.nameUz}
+                        </TableCell>
+                        <TableCell>
+                          {levelKey ? (
+                            <span className="bg-foreground/10 text-muted-foreground inline-block rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap">
+                              {t(levelKey)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>{levelBadge(row.educationType)}</TableCell>
+                        <TableCell>{statusBadge(row.reviewStatus)}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {row.years && row.years.length > 0 ? row.years.join(', ') : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <button
+                            type="button"
+                            aria-label={`${t('View')} — ${row.nameUz}`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openDetail(row.id)
+                            }}
+                            className="text-primary border-primary/20 bg-primary/5 hover:bg-primary hover:text-primary-foreground hover:border-primary inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition-all hover:shadow-sm"
+                          >
+                            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                            <span className="whitespace-nowrap">{t('View')}</span>
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
               <div className="border-t p-3">
@@ -413,39 +507,78 @@ export default function SpecialityClassifierPage() {
           ) : (
             <SpecialityTree
               nodes={treeNodes}
-              openIds={effectiveOpen}
+              openIds={openIds}
               selectedId={selectedId}
               onToggle={toggleNode}
               onSelect={setSelectedId}
-              onOpenDetail={(id) => {
-                setSelectedId(id)
-                setDetailId(id)
-              }}
-              canEdit={canEdit}
+              onOpenDetail={openDetail}
               query={searching ? debouncedSearch : undefined}
             />
           )}
         </Card>
       )}
 
-      {view === 'list' && selectedId ? (
-        <SpecialityDetailDrawer
-          specialityId={selectedId}
-          canEdit={canEdit}
-          onClose={() => setSelectedId(null)}
-        />
-      ) : null}
-
-      {/* Tree view "Ko'rish / Tahrirlash" modal (self-closing when detailId is null). */}
+      {/* Centered detail/edit modal — shared by tree & list views (self-closing
+          when detailId is null). In list view detailPath is [] (tree not loaded),
+          so no breadcrumb shows and the dialog falls back to its own detail fetch. */}
       <SpecialityDetailDialog
         specialityId={detailId}
         canEdit={canEdit}
         path={detailPath}
+        headerFallback={detailRow}
         onNavigate={setDetailId}
+        onEdit={(id) => {
+          // Swap the detail modal for the dedicated edit form (never two stacked dialogs).
+          setDetailId(null)
+          setEditId(id)
+        }}
         onOpenChange={(open) => {
           if (!open) setDetailId(null)
         }}
       />
+
+      {canEdit ? (
+        <SpecialityEditDialog
+          open={editId != null}
+          specialityId={editId}
+          canApprove={canApprove}
+          onOpenChange={(open) => {
+            if (!open) setEditId(null)
+          }}
+          onSaved={(id) => {
+            // Re-show the record so the admin sees the saved values (the update hook already
+            // invalidated the tree/list/detail queries, so the reopened detail is fresh).
+            setEditId(null)
+            setSelectedId(id)
+            setDetailId(id)
+          }}
+        />
+      ) : null}
+
+      {canCreate ? (
+        <SpecialityCreateDialog
+          open={createOpen}
+          educationType={level}
+          parentIdDefault={selectedId}
+          onOpenChange={setCreateOpen}
+          onCreated={(created) => {
+            // Reveal the new row wherever it landed, in either view: switch to its education level
+            // (the admin may have changed it in the dialog), drop the status/year filters that would
+            // hide a NEEDS_REVIEW / year-less row, and search by its code (or name) — the list then
+            // filters to it and the tree auto-expands the matching branch. Highlight the exact row.
+            const term = created.code || created.nameUz
+            setSearchInput(term)
+            setParams({
+              educationType: created.educationType,
+              status: undefined,
+              year: undefined,
+              q: term,
+              page: undefined,
+            })
+            setSelectedId(created.id)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

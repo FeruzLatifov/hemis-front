@@ -1,7 +1,9 @@
 // Unified Speciality Classifier API Client (bachelor + master, tree + curation grid)
 import apiClient from './client'
 
-export type EducationLevel = 'BACHELOR' | 'MASTER'
+/** Education-type code (hemishe_h_education_type): '11' = Bakalavr, '12' = Magistr. The two
+ *  discriminator values this classifier admits (bachelor + master). */
+export type EducationTypeCode = '11' | '12'
 export type ReviewStatus = 'APPROVED' | 'NEEDS_REVIEW'
 
 /** Flat list row (curation grid). */
@@ -9,13 +11,17 @@ export interface SpecialityRow {
   id: string
   code?: string
   nameUz: string
+  /** oz-UZ (Uzbek Cyrillic) — the authoritative source script; NULL where the source had none. */
+  nameOz?: string
   nameRu?: string
   nameEn?: string
-  educationLevel: EducationLevel
+  /** Education-type code — FK into hemishe_h_education_type ('11'=Bakalavr, '12'=Magistr). */
+  educationType: string
+  /** Resolved education-type label from the classifier (e.g. "Bakalavr" / "Magistr"). */
+  educationTypeName?: string
   reviewStatus: ReviewStatus
   parentId?: string
   hierarchyLevel?: number
-  eduForm?: string
   active: boolean
   years: number[]
 }
@@ -25,13 +31,15 @@ export interface SpecialityNode {
   id: string
   code?: string
   nameUz: string
+  /** oz-UZ (Uzbek Cyrillic) — the authoritative source script; NULL where the source had none. */
+  nameOz?: string
   nameRu?: string
   nameEn?: string
-  educationLevel: EducationLevel
+  educationType: string
+  educationTypeName?: string
   reviewStatus: ReviewStatus
   parentId?: string
   hierarchyLevel?: number
-  eduForm?: string
   active: boolean
   isChecked: boolean
   years: number[]
@@ -41,12 +49,64 @@ export interface SpecialityNode {
 export interface SpecialityUpdatePayload {
   code?: string
   nameUz: string
+  /** oz-UZ (Uzbek Cyrillic) — the authoritative source script; NULL where the source had none. */
+  nameOz?: string
   nameRu?: string
   nameEn?: string
-  educationLevel?: EducationLevel
+  /** Education-type code ('11'=Bakalavr, '12'=Magistr). */
+  educationType?: EducationTypeCode
   reviewStatus?: ReviewStatus
-  eduForm?: string
   years?: number[]
+}
+
+/** Manual-add payload. The new row is born NEEDS_REVIEW server-side; `parentId`
+ *  null (or omitted) creates a top-level node, else a child of that parent. */
+export interface SpecialityCreatePayload {
+  code?: string
+  nameUz: string
+  /** oz-UZ (Uzbek Cyrillic) — the authoritative source script; NULL where the source had none. */
+  nameOz?: string
+  nameRu?: string
+  nameEn?: string
+  /** Education-type code ('11'=Bakalavr, '12'=Magistr) — required for a new row. */
+  educationType: EducationTypeCode
+  parentId?: string | null
+  years?: number[]
+}
+
+/** One existing row matching the add form's code/name — element of {@link SpecialityDuplicateCheck}. */
+export interface SpecialityDuplicateItem {
+  id: string
+  code?: string
+  nameUz: string
+  educationType: string
+  educationTypeName?: string
+  reviewStatus: ReviewStatus
+  hierarchyLevel?: number
+  /** Admission years attached to this row (newest first). */
+  years?: number[]
+  codeMatch: boolean
+  nameMatch: boolean
+  sameParent: boolean
+}
+
+/**
+ * "Already exists" result. Code-only / name-only overlaps stay advisory (code is intentionally
+ * non-unique). `exactDuplicate` — a literal twin (same type + code + name) already exists — is the
+ * one case the form blocks; the create endpoint enforces it too (409).
+ */
+export interface SpecialityDuplicateCheck {
+  codeExists: boolean
+  nameExists: boolean
+  exactDuplicate: boolean
+  matches: SpecialityDuplicateItem[]
+}
+
+export interface SpecialityDuplicateParams {
+  code?: string
+  name?: string
+  educationType?: EducationTypeCode
+  parentId?: string | null
 }
 
 export interface PageResponse<T> {
@@ -58,7 +118,7 @@ export interface PageResponse<T> {
 }
 
 export interface SpecialityListParams {
-  educationLevel?: EducationLevel
+  educationType?: EducationTypeCode
   reviewStatus?: ReviewStatus
   q?: string
   /** Keep only rows carrying this edition year. */
@@ -74,11 +134,11 @@ const BASE_URL = '/api/v1/web/classifiers/speciality'
 
 export const specialityApi = {
   tree: async (
-    educationLevel?: EducationLevel,
+    educationType?: EducationTypeCode,
     signal?: AbortSignal,
   ): Promise<SpecialityNode[]> => {
     const response = await apiClient.get<Wrapped<SpecialityNode[]>>(`${BASE_URL}/tree`, {
-      params: { educationLevel },
+      params: { educationType },
       signal,
     })
     return response.data.data
@@ -96,9 +156,9 @@ export const specialityApi = {
   },
 
   /** Distinct edition years present in the classifier (newest first) — year-filter options. */
-  years: async (educationLevel?: EducationLevel, signal?: AbortSignal): Promise<number[]> => {
+  years: async (educationType?: EducationTypeCode, signal?: AbortSignal): Promise<number[]> => {
     const response = await apiClient.get<Wrapped<number[]>>(`${BASE_URL}/years`, {
-      params: { educationLevel },
+      params: { educationType },
       signal,
     })
     return response.data.data
@@ -114,13 +174,48 @@ export const specialityApi = {
     return response.data.data
   },
 
+  /** Manually add a new speciality (born NEEDS_REVIEW). Returns the created node. */
+  create: async (payload: SpecialityCreatePayload): Promise<SpecialityNode> => {
+    const response = await apiClient.post<Wrapped<SpecialityNode>>(BASE_URL, payload)
+    return response.data.data
+  },
+
+  /** Advisory duplicate check for the add form — existing rows with the same code/name. */
+  duplicates: async (
+    params: SpecialityDuplicateParams,
+    signal?: AbortSignal,
+  ): Promise<SpecialityDuplicateCheck> => {
+    const response = await apiClient.get<Wrapped<SpecialityDuplicateCheck>>(
+      `${BASE_URL}/duplicates`,
+      {
+        params,
+        signal,
+      },
+    )
+    return response.data.data
+  },
+
   /**
-   * Full classifier for one level as an .xlsx (tree order); returns the file blob.
-   * When {@code year} is supplied the workbook is pruned to that edition, matching the filtered view.
+   * Classifier as a professional .xlsx (provenance band + frozen auto-filtered header +
+   * collapsible tree grouping). Every filter is applied with ancestor retention, so a filtered
+   * export mirrors the grid; omit all filters for the whole classifier. `lang` localizes labels.
+   * Returns the file blob (generated in-memory server-side — no file is persisted).
    */
-  exportXlsx: async (educationLevel?: EducationLevel, year?: number): Promise<Blob> => {
+  exportXlsx: async (opts: {
+    educationType?: EducationTypeCode
+    year?: number
+    reviewStatus?: ReviewStatus
+    q?: string
+    lang?: string
+  }): Promise<Blob> => {
     const response = await apiClient.get(`${BASE_URL}/export`, {
-      params: { educationLevel, year },
+      params: {
+        educationType: opts.educationType,
+        year: opts.year,
+        reviewStatus: opts.reviewStatus,
+        q: opts.q,
+        lang: opts.lang,
+      },
       responseType: 'blob',
     })
     return response.data as Blob

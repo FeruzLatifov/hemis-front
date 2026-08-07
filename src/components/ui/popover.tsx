@@ -9,9 +9,16 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+    /**
+     * Portal target. Pass the dialog content node when this popover lives inside a modal Dialog, so
+     * it renders WITHIN the dialog's react-remove-scroll subtree — otherwise (portaled to body) the
+     * scroll lock swallows mouse-wheel scrolling inside the popover (only scrollbar-drag works).
+     */
+    container?: HTMLElement | null
+  }
+>(({ className, align = 'center', sideOffset = 4, container, ...props }, ref) => (
+  <PopoverPrimitive.Portal container={container ?? undefined}>
     <PopoverPrimitive.Content
       ref={ref}
       align={align}

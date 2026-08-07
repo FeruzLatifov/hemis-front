@@ -1,31 +1,12 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { GraduationCap, Hash, Calendar, Network, Info, Pencil, Save } from 'lucide-react'
+import { GraduationCap, Hash, Calendar, Network, Info, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useSpecialityDetail, useUpdateSpeciality } from '@/hooks/useSpeciality'
-import type { EducationLevel, ReviewStatus } from '@/api/speciality.api'
-
-interface EditState {
-  code: string
-  nameUz: string
-  nameRu: string
-  nameEn: string
-  educationLevel: EducationLevel
-  reviewStatus: ReviewStatus
-  years: string
-}
+import { useSpecialityDetail } from '@/hooks/useSpeciality'
+import { specialityLevelKey } from './speciality-tree.util'
 
 function Field({ icon, label, value }: { icon: ReactNode; label: string; value?: ReactNode }) {
   return (
@@ -40,101 +21,45 @@ function Field({ icon, label, value }: { icon: ReactNode; label: string; value?:
 }
 
 /**
- * View + edit body for a single speciality — shared by the SpecialityDetailDialog
- * (tree view) and the slide-over drawer (list view). Works for ANY hierarchy level
- * (L1–L4): editing is gated only by `canEdit`, never by level.
+ * Read-only detail body for a single speciality — rendered inside the SpecialityDetailDialog
+ * (opened from both the tree and list views). Works for ANY hierarchy level (L1–L4).
+ *
+ * <p>Editing no longer happens inline here: the Edit button calls {@link onEdit}, which opens the
+ * dedicated {@link SpecialityEditDialog} form (mirrors the Add form). Edit is gated by `canEdit`.</p>
  */
 export function SpecialityDetailContent({
   specialityId,
   canEdit,
+  onEdit,
   hideStatusCard = false,
 }: {
   specialityId: string
   canEdit: boolean
+  /** Open the dedicated edit form for this row. */
+  onEdit: () => void
   /** The dialog renders level/status in its identity header, so it hides the
-   *  redundant status card here; the drawer (no such header) keeps it. */
+   *  redundant status card here. */
   hideStatusCard?: boolean
 }) {
   const { t } = useTranslation()
   const { data: node, isLoading, error } = useSpecialityDetail(specialityId)
-  const updateMutation = useUpdateSpeciality()
 
-  const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<EditState | null>(null)
-
-  useEffect(() => {
-    if (node && editing && !form) {
-      setForm({
-        code: node.code ?? '',
-        nameUz: node.nameUz,
-        nameRu: node.nameRu ?? '',
-        nameEn: node.nameEn ?? '',
-        educationLevel: node.educationLevel,
-        reviewStatus: node.reviewStatus,
-        years: (node.years ?? []).join(', '),
-      })
-    }
-  }, [node, editing, form])
-
-  const startEdit = () => {
-    setEditing(true)
-    setForm(null)
-  }
-
-  const cancelEdit = () => {
-    setEditing(false)
-    setForm(null)
-  }
-
-  const handleSave = async () => {
-    if (!form) return
-    const years = form.years
-      .split(',')
-      .map((y) => parseInt(y.trim(), 10))
-      .filter((y) => !Number.isNaN(y))
-    await updateMutation.mutateAsync({
-      id: specialityId,
-      payload: {
-        code: form.code.trim() || undefined,
-        nameUz: form.nameUz.trim(),
-        nameRu: form.nameRu.trim() || undefined,
-        nameEn: form.nameEn.trim() || undefined,
-        educationLevel: form.educationLevel,
-        reviewStatus: form.reviewStatus,
-        years,
-      },
-    })
-    setEditing(false)
-    setForm(null)
-  }
-
-  const set = (patch: Partial<EditState>) => setForm((f) => (f ? { ...f, ...patch } : f))
+  // Level number + its taxonomy name (e.g. "1 — Bilim sohasi") — a bare number is
+  // opaque, so we spell out the step when it's one of the known 1–4 levels.
+  const levelKey = specialityLevelKey(node?.hierarchyLevel)
 
   return (
-    <div className="animate-fade-in space-y-4">
-      {/* Action toolbar — Edit for any level, Save/Cancel while editing. */}
+    // min-w-0: this is a grid item of DialogContent (display:grid). Without it the item's
+    // min-width:auto lets a wide unbreakable child (a `truncate`/nowrap sub-speciality name)
+    // expand the whole modal, pushing the justify-end Edit toolbar past the right edge.
+    <div className="animate-fade-in min-w-0 space-y-4">
+      {/* Action toolbar — a single Edit button; the form opens as a dedicated dialog. */}
       {canEdit && node ? (
-        <div className="flex justify-end gap-2">
-          {editing ? (
-            <>
-              <Button variant="outline" size="sm" onClick={cancelEdit}>
-                {t('Cancel')}
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={updateMutation.isPending || !form?.nameUz.trim()}
-              >
-                <Save className="h-4 w-4" />
-                {t('Save')}
-              </Button>
-            </>
-          ) : (
-            <Button size="sm" onClick={startEdit}>
-              <Pencil className="h-4 w-4" />
-              {t('Edit')}
-            </Button>
-          )}
+        <div className="flex justify-end">
+          <Button size="sm" onClick={onEdit}>
+            <Pencil className="h-4 w-4" />
+            {t('Edit')}
+          </Button>
         </div>
       ) : null}
 
@@ -160,8 +85,9 @@ export function SpecialityDetailContent({
                 <span className="text-muted-foreground text-sm font-medium">{t('Status')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant={node.educationLevel === 'BACHELOR' ? 'default' : 'secondary'}>
-                  {node.educationLevel === 'BACHELOR' ? t('Bachelor') : t('Master')}
+                <Badge variant={node.educationType === '11' ? 'default' : 'secondary'}>
+                  {node.educationTypeName ??
+                    (node.educationType === '11' ? t('Bachelor') : t('Master'))}
                 </Badge>
                 <Badge
                   variant="outline"
@@ -177,105 +103,48 @@ export function SpecialityDetailContent({
             </Card>
           ) : null}
 
-          {editing && form ? (
-            <Card className="space-y-4 p-4">
-              <h3 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
-                {t('Edit')}
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label>{t('Code')}</Label>
-                  <Input value={form.code} onChange={(e) => set({ code: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label>{t('Education level')}</Label>
-                  <Select
-                    value={form.educationLevel}
-                    onValueChange={(v) => set({ educationLevel: v as EducationLevel })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BACHELOR">{t('Bachelor')}</SelectItem>
-                      <SelectItem value="MASTER">{t('Master')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label>{t('Name')} (UZ)</Label>
-                <Input value={form.nameUz} onChange={(e) => set({ nameUz: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label>{t('Name')} (RU)</Label>
-                  <Input value={form.nameRu} onChange={(e) => set({ nameRu: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label>{t('Name')} (EN)</Label>
-                  <Input value={form.nameEn} onChange={(e) => set({ nameEn: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label>{t('Years')}</Label>
-                  <Input
-                    value={form.years}
-                    placeholder="2023, 2024, 2025"
-                    onChange={(e) => set({ years: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>{t('Review status')}</Label>
-                  <Select
-                    value={form.reviewStatus}
-                    onValueChange={(v) => set({ reviewStatus: v as ReviewStatus })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="APPROVED">{t('Approved')}</SelectItem>
-                      <SelectItem value="NEEDS_REVIEW">{t('Needs review')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-          ) : (
-            <Card className="space-y-4 p-4">
-              <h3 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
-                {t('Basic information')}
-              </h3>
-              <Field icon={<Hash className="h-4 w-4" />} label={t('Code')} value={node.code} />
-              <Field
-                icon={<GraduationCap className="h-4 w-4" />}
-                label={`${t('Name')} (UZ)`}
-                value={node.nameUz}
-              />
-              <Field
-                icon={<Info className="h-4 w-4" />}
-                label={`${t('Name')} (RU)`}
-                value={node.nameRu}
-              />
-              <Field
-                icon={<Info className="h-4 w-4" />}
-                label={`${t('Name')} (EN)`}
-                value={node.nameEn}
-              />
-              <Field
-                icon={<Calendar className="h-4 w-4" />}
-                label={t('Years')}
-                value={node.years && node.years.length > 0 ? node.years.join(', ') : '-'}
-              />
-              <Field
-                icon={<Network className="h-4 w-4" />}
-                label={t('Hierarchy level')}
-                value={node.hierarchyLevel ?? '-'}
-              />
-            </Card>
-          )}
+          <Card className="space-y-4 p-4">
+            <h3 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
+              {t('Basic information')}
+            </h3>
+            <Field icon={<Hash className="h-4 w-4" />} label={t('Code')} value={node.code} />
+            <Field
+              icon={<GraduationCap className="h-4 w-4" />}
+              label={`${t('Name')} (UZ)`}
+              value={node.nameUz}
+            />
+            <Field
+              icon={<Info className="h-4 w-4" />}
+              label={`${t('Name')} (OZ)`}
+              value={node.nameOz}
+            />
+            <Field
+              icon={<Info className="h-4 w-4" />}
+              label={`${t('Name')} (RU)`}
+              value={node.nameRu}
+            />
+            <Field
+              icon={<Info className="h-4 w-4" />}
+              label={`${t('Name')} (EN)`}
+              value={node.nameEn}
+            />
+            <Field
+              icon={<Calendar className="h-4 w-4" />}
+              label={t('Years')}
+              value={node.years && node.years.length > 0 ? node.years.join(', ') : '-'}
+            />
+            <Field
+              icon={<Network className="h-4 w-4" />}
+              label={t('Hierarchy level')}
+              value={
+                node.hierarchyLevel != null
+                  ? levelKey
+                    ? `${node.hierarchyLevel} — ${t(levelKey)}`
+                    : node.hierarchyLevel
+                  : '-'
+              }
+            />
+          </Card>
 
           {node.children && node.children.length > 0 ? (
             <Card className="space-y-2 p-4">
@@ -284,11 +153,11 @@ export function SpecialityDetailContent({
               </h3>
               <ul className="space-y-1">
                 {node.children.map((c) => (
-                  <li key={c.id} className="flex items-center gap-2 text-sm">
+                  <li key={c.id} className="flex min-w-0 items-center gap-2 text-sm">
                     {c.code ? (
-                      <span className="font-mono text-xs text-[#6B7280]">{c.code}</span>
+                      <span className="shrink-0 font-mono text-xs text-[#6B7280]">{c.code}</span>
                     ) : null}
-                    <span className="truncate">{c.nameUz}</span>
+                    <span className="min-w-0 truncate">{c.nameUz}</span>
                   </li>
                 ))}
               </ul>
