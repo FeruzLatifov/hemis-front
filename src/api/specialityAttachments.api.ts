@@ -17,6 +17,8 @@ export interface SpecialityAttachmentRow {
   readonly hierarchyLevel?: number | null
   /** Parent speciality (the direction a sub-direction belongs to); null for a root/direction. */
   readonly parentName?: string | null
+  /** Code (Shifr) of the parent speciality — shown next to parentName; null for a root/direction. */
+  readonly parentCode?: string | null
   readonly educationType?: string | null
   readonly educationTypeName?: string | null
   readonly educationForm?: string | null

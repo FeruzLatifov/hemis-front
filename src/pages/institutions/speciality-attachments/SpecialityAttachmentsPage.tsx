@@ -391,7 +391,12 @@ export default function SpecialityAttachmentsPage() {
                       <div className="text-[var(--text-primary)]">{row.specialityName || '-'}</div>
                       {row.parentName ? (
                         <div className="text-xs text-[var(--text-secondary)]">
-                          ↳ {row.parentName}
+                          ↳{' '}
+                          {row.parentCode ? (
+                            <span className="tabular-nums">{row.parentCode}</span>
+                          ) : null}
+                          {row.parentCode ? ' · ' : ''}
+                          {row.parentName}
                         </div>
                       ) : null}
                     </td>
