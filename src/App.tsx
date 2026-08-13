@@ -128,9 +128,9 @@ const FacultiesPage = lazyWithRetry(() =>
 const DepartmentsPage = lazyWithRetry(() =>
   import('./pages/institutions/departments').then((m) => ({ default: m.DepartmentsPage })),
 )
-const AttachedSpecialitiesPage = lazyWithRetry(() =>
-  import('./pages/institutions/attached-specialities').then((m) => ({
-    default: m.AttachedSpecialitiesPage,
+const SpecialityAttachmentsPage = lazyWithRetry(() =>
+  import('./pages/institutions/speciality-attachments').then((m) => ({
+    default: m.SpecialityAttachmentsPage,
   })),
 )
 const DiplomaBlanksPage = lazyWithRetry(() =>
@@ -354,11 +354,11 @@ function App() {
                       }
                     />
                     <Route
-                      path="attached-specialities"
+                      path="speciality-attachments"
                       element={
-                        <ProtectedRoute permission="institutions.attached-specialities.view">
+                        <ProtectedRoute permission="institutions.speciality-attachments.view">
                           <RouteErrorBoundary>
-                            <AttachedSpecialitiesPage />
+                            <SpecialityAttachmentsPage />
                           </RouteErrorBoundary>
                         </ProtectedRoute>
                       }

@@ -109,8 +109,9 @@ export function useCreateSpeciality() {
       queryClient.invalidateQueries({ queryKey: queryKeys.speciality.all })
       toast.success(i18n.t('Speciality created'), { duration: UI.TOAST_DURATION })
     },
-    onError: () => {
-      toast.error(i18n.t('Failed to create speciality'), { duration: UI.TOAST_DURATION })
-    },
+    // No onError toast: a duplicate create returns 409 with the specific backend message
+    // ("…same code and name already exists for the given year(s)…"), which the global axios
+    // interceptor (client.ts) already surfaces for 400/409/422. A generic fallback here would
+    // just stack a second, less-informative toast on top. Mirrors useUpdateSpeciality.
   })
 }
