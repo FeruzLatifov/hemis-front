@@ -36,7 +36,12 @@ import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usePermission } from '@/hooks/usePermission'
 import { useSpecialityList, useSpecialityTree, useSpecialityYears } from '@/hooks/useSpeciality'
-import { specialityApi, type EducationTypeCode, type ReviewStatus } from '@/api/speciality.api'
+import {
+  specialityApi,
+  type EducationTypeCode,
+  type ReviewStatus,
+  type SpecialityNode,
+} from '@/api/speciality.api'
 import { shortToBcp47 } from '@/i18n/config'
 import { UI } from '@/constants'
 import { SpecialityTree } from './SpecialityTree'
@@ -121,7 +126,9 @@ export default function SpecialityClassifierPage() {
     },
     view === 'list', // idle while the Tree view is active (the default)
   )
-  const treeQuery = useSpecialityTree(level, view === 'tree')
+  // Always load the tree (even in list view): the "Jami yo'nalish" (level-3 count) is derived
+  // from it, and it must show in both views. One cached query — the tree is the default view anyway.
+  const treeQuery = useSpecialityTree(level, true)
   const yearsQuery = useSpecialityYears(level)
 
   const total = listQuery.data?.totalElements ?? 0
@@ -140,6 +147,25 @@ export default function SpecialityClassifierPage() {
     const byYear = yearFilter != null ? filterSpecialityNodesByYear(byStatus, yearFilter) : byStatus
     return filterSpecialityNodes(byYear, debouncedSearch)
   }, [sortedTree, reviewStatus, debouncedSearch, yearFilter])
+
+  // "Jami yo'nalish" — number of level-3 (Yo'nalish) nodes in scope, honoring the year + status
+  // filters (a node counts if its OWN years include the selected year, matching the backend, so the
+  // Bakalavr 2026 count reads exactly 236). Not search-scoped: it's a summary, not a search result.
+  const yonalishCount = useMemo(() => {
+    let n = 0
+    const walk = (nodes: SpecialityNode[]) => {
+      for (const node of nodes) {
+        if (node.hierarchyLevel === 3) {
+          const yearOk = yearFilter == null || (node.years?.includes(yearFilter) ?? false)
+          const statusOk = reviewStatus == null || node.reviewStatus === reviewStatus
+          if (yearOk && statusOk) n += 1
+        }
+        if (node.children.length) walk(node.children)
+      }
+    }
+    walk(sortedTree)
+    return n
+  }, [sortedTree, yearFilter, reviewStatus])
   // Reveal matching branches on a TEXT search OR a status filter so the hits are visible — surfacing
   // the (few) NEEDS_REVIEW rows buried in collapsed folders is the whole point of the status filter.
   // A year filter only scopes the tree and never forces the open state — there expand/collapse stays
@@ -350,6 +376,12 @@ export default function SpecialityClassifierPage() {
         {/* Primary actions live in the toolbar, next to the filters — far less pointer travel than
             the top-right corner (Fitts's law). Export is secondary (outline); Add is the one primary CTA. */}
         <div className="ml-auto flex items-center gap-2">
+          {/* Level-3 (Yo'nalish) count for the current tab + year/status filters — e.g. Bakalavr
+              2026 reads 236. Shown just before Export so the user sees the scope at a glance. */}
+          <span className="text-muted-foreground text-sm whitespace-nowrap">
+            {t('Total')} {t('Direction').toLowerCase()}:{' '}
+            <span className="text-foreground font-semibold tabular-nums">{yonalishCount}</span>
+          </span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" disabled={exporting}>
