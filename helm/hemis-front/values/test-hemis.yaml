@@ -1,0 +1,11 @@
+# test-hemis overlay — 2-domen test muhiti.
+# Frontend test.hemis.uz'da, backend api-test.hemis.uz'da. Base values.yaml ustiga qo'llanadi
+# (Jenkinsfile: -f values.yaml -f values/test-hemis.yaml). Runtime config (config.js) — rebuild kerak emas.
+config:
+  apiUrl: "https://api-test.hemis.uz"
+  appName: "HEMIS Ministry (test)"
+  sentryEnabled: "false"
+  sentryEnvironment: "test"
+
+ingress:
+  host: test.hemis.uz
