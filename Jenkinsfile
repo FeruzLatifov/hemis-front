@@ -42,7 +42,7 @@ pipeline {
                     //   akkaunt projectAdmin bo'lsa ham. O'chirilganda oddiy bitta manifest → push toza ishlaydi.
                     sh '''
                         echo "$HARBOR_PASS" | docker login harbor.e-edu.uz -u "$HARBOR_USER" --password-stdin
-                        docker build --no-cache --provenance=false --sbom=false -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker build --provenance=false --sbom=false -t ${IMAGE_NAME}:${IMAGE_TAG} .
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         docker logout harbor.e-edu.uz
                     '''
