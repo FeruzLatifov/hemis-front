@@ -36,9 +36,13 @@ pipeline {
                     usernameVariable: 'HARBOR_USER',
                     passwordVariable: 'HARBOR_PASS'
                 )]) {
+                    // --provenance=false --sbom=false: BuildKit default provenance attestation'ni O'CHIRADI.
+                    //   Attestation bilan `docker build` OCI manifest-LIST (index) yasaydi; uni `docker push`
+                    //   qilganda ma'lum Docker bug'i "no basic auth credentials" beradi — login to'g'ri va
+                    //   akkaunt projectAdmin bo'lsa ham. O'chirilganda oddiy bitta manifest → push toza ishlaydi.
                     sh '''
                         echo "$HARBOR_PASS" | docker login harbor.e-edu.uz -u "$HARBOR_USER" --password-stdin
-                        docker build --no-cache -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker build --no-cache --provenance=false --sbom=false -t ${IMAGE_NAME}:${IMAGE_TAG} .
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         docker logout harbor.e-edu.uz
                     '''
