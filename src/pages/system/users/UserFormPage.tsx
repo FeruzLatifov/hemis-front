@@ -5,13 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SearchableSelect, ALL_VALUE } from '@/components/filters/SearchableSelect'
 import {
   ArrowLeft,
   Loader2,
@@ -314,28 +308,20 @@ export default function UserFormPage() {
             {hasFullAccess && (
               <FormSection title={t('University')} icon={<Building2 className="h-4 w-4" />}>
                 <div className="max-w-sm space-y-1.5">
-                  <Select
-                    value={watch('universityCode') || '__none__'}
-                    onValueChange={(val) =>
-                      setValue('universityCode', val === '__none__' ? '' : val, {
+                  <SearchableSelect
+                    className="w-full"
+                    value={watch('universityCode') || ALL_VALUE}
+                    onChange={(val) =>
+                      setValue('universityCode', val === ALL_VALUE ? '' : val, {
                         shouldValidate: true,
                       })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('Select university')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">
-                        {t('Leave empty for system administrators')}
-                      </SelectItem>
-                      {universities.map((u) => (
-                        <SelectItem key={u.code} value={u.code}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={universities.map((u) => ({ code: u.code, name: u.name }))}
+                    placeholder={t('Select university')}
+                    allLabel={t('Leave empty for system administrators')}
+                    searchPlaceholder={t('Search')}
+                    emptyLabel={t('No data found')}
+                  />
                   <p className="text-xs text-[var(--text-secondary)]">
                     {t('Leave empty for system administrators')}
                   </p>
