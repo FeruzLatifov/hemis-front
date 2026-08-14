@@ -1,26 +1,23 @@
+// Professional Continuous Delivery pipeline (hemis-front)
+// Oqim: bitta image QURILADI → staging (test.hemis.uz)'ga deploy → inson TASDIQLAYDI →
+//        AYNI image prod'ga (qayta build YO'Q). "build once, promote the same artifact".
+// Trigger: main'ga har merge (GitHub webhook). Feature branch → PR → main.
 pipeline {
     agent any
 
-    parameters {
-        choice(
-            name: 'DEPLOY_ENV',
-            choices: ['new-ministry', 'test-hemis'],
-            description: 'Deploy target: new-ministry (asosiy) yoki test-hemis (2-domen test: test.hemis.uz → api-test.hemis.uz)'
-        )
-    }
-
     options {
-        timeout(time: 20, unit: 'MINUTES')
+        timeout(time: 25, unit: 'MINUTES')
         disableConcurrentBuilds()
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(numToKeepStr: '15'))
     }
 
     environment {
-        IMAGE_NAME    = 'harbor.e-edu.uz/ministry-front/hemis-front'
+        IMAGE_NAME    = 'harbor.e-edu.uz/central_hemis-front/hemis-front'
         RELEASE_NAME  = 'hemis-front'
         CHART_DIR     = 'helm/hemis-front'
         KUBECONFIG    = '/home/jenkins/.kube/config'
-        // NAMESPACE va VALUES_ARGS — DEPLOY_ENV parametridan Checkout'da o'rnatiladi
+        STAGING_NS    = 'test-hemis'      // test.hemis.uz
+        PROD_NS       = 'new-ministry'    // asosiy domen
     }
 
     stages {
@@ -28,74 +25,73 @@ pipeline {
             steps {
                 checkout scm
                 script {
+                    // Immutable tag = build raqami + git SHA. AYNI shu tag staging va prod'da ishlatiladi.
                     env.IMAGE_TAG = "${env.BUILD_NUMBER}-${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"
-                    env.NAMESPACE = params.DEPLOY_ENV
-                    // Base values.yaml har doim; test-hemis uchun qo'shimcha overlay (apiUrl + ingress host)
-                    if (params.DEPLOY_ENV == 'new-ministry') {
-                        env.VALUES_ARGS = "-f ${CHART_DIR}/values.yaml"
-                    } else {
-                        env.VALUES_ARGS = "-f ${CHART_DIR}/values.yaml -f ${CHART_DIR}/values/${params.DEPLOY_ENV}.yaml"
-                    }
-                    echo "Deploy target: namespace=${env.NAMESPACE}, tag=${env.IMAGE_TAG}"
+                    echo "Artifact: ${IMAGE_NAME}:${env.IMAGE_TAG}"
                 }
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build --no-cache -t ${IMAGE_NAME}:${IMAGE_TAG} .'
-            }
-        }
-
-        stage('Push to Harbor') {
+        stage('Build & Push (1 marta)') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'harbor-ministry-front',
+                    credentialsId: 'harbor-central-front',
                     usernameVariable: 'HARBOR_USER',
                     passwordVariable: 'HARBOR_PASS'
                 )]) {
-                    sh """
-                        echo \$HARBOR_PASS | docker login harbor.e-edu.uz -u \$HARBOR_USER --password-stdin
+                    sh '''
+                        echo "$HARBOR_PASS" | docker login harbor.e-edu.uz -u "$HARBOR_USER" --password-stdin
+                        docker build --no-cache -t ${IMAGE_NAME}:${IMAGE_TAG} .
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
-                        docker push ${IMAGE_NAME}:latest
                         docker logout harbor.e-edu.uz
-                    """
+                    '''
                 }
             }
         }
 
-        stage('Deploy to K8s') {
+        stage('Deploy -> Staging (test.hemis.uz)') {
             steps {
-                sh """
+                sh '''
                     helm upgrade --install ${RELEASE_NAME} ${CHART_DIR} \
-                        --namespace ${NAMESPACE} --create-namespace \
-                        ${VALUES_ARGS} \
+                        --namespace ${STAGING_NS} --create-namespace \
+                        -f ${CHART_DIR}/values.yaml -f ${CHART_DIR}/values/test-hemis.yaml \
                         --set image.repository=${IMAGE_NAME} \
                         --set image.tag=${IMAGE_TAG} \
-                        --wait \
-                        --timeout 3m
-                """
+                        --wait --timeout 4m
+                    kubectl rollout status deployment/${RELEASE_NAME} --namespace ${STAGING_NS} --timeout=3m
+                '''
             }
         }
 
-        stage('Verify') {
+        stage('Approve -> Production') {
             steps {
-                sh """
-                    kubectl rollout status deployment/${RELEASE_NAME} \
-                        --namespace ${NAMESPACE} \
-                        --timeout=2m
-                """
+                timeout(time: 1, unit: 'DAYS') {
+                    input(
+                        message: "Staging (test.hemis.uz) tekshirildi. Prod'ga (${PROD_NS}) AYNI image chiqaraymi?",
+                        ok: "Prod'ga chiqar"
+                    )
+                }
+            }
+        }
+
+        stage('Deploy -> Production (AYNI image)') {
+            steps {
+                sh '''
+                    helm upgrade --install ${RELEASE_NAME} ${CHART_DIR} \
+                        --namespace ${PROD_NS} --create-namespace \
+                        -f ${CHART_DIR}/values.yaml \
+                        --set image.repository=${IMAGE_NAME} \
+                        --set image.tag=${IMAGE_TAG} \
+                        --wait --timeout 4m
+                    kubectl rollout status deployment/${RELEASE_NAME} --namespace ${PROD_NS} --timeout=3m
+                '''
             }
         }
     }
 
     post {
-        failure {
-            sh "helm rollback ${RELEASE_NAME} 0 --namespace ${NAMESPACE} --wait || true"
-        }
         always {
-            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true"
+            sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
             cleanWs()
         }
     }

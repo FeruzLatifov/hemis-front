@@ -9,12 +9,12 @@ config:
 replicaCount: 2
 
 image:
-  repository: harbor.e-edu.uz/ministry-front/hemis-front
+  repository: harbor.e-edu.uz/central_hemis-front/hemis-front
   tag: latest
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
-  - name: new-ministry-pull-front
+  - name: central-hemis-pull-front
 
 service:
   type: ClusterIP
