@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, GraduationCap, Download, Loader2 } from 'lucide-react'
+import { RefreshCw, GraduationCap, Download, Loader2, Plus, Trash2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -19,16 +19,31 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { SearchableSelect } from '@/components/filters/SearchableSelect'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { PAGINATION } from '@/constants'
 import { toast } from 'sonner'
+import { usePermission } from '@/hooks/usePermission'
 import {
   useSpecialityAttachments,
   useSpecialityAttachmentFilterOptions,
+  useDeleteSpecialityAttachment,
 } from '@/hooks/useSpecialityAttachments'
 import { specialityAttachmentsApi } from '@/api/specialityAttachments.api'
+import type { SpecialityAttachmentRow } from '@/api/specialityAttachments.api'
 import { specialityLevelKey } from '@/pages/classifiers/speciality/speciality-tree.util'
+import { SpecialityAttachmentCreateDialog } from './SpecialityAttachmentCreateDialog'
 
 // Attachment status → human-readable i18n key (mirrors how /classifiers/speciality localizes its
 // reviewStatus). 'Active'/'Suspended' keys already exist; a REVOKED row does not currently occur.
@@ -40,8 +55,16 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function SpecialityAttachmentsPage() {
   const { t } = useTranslation()
+  const { canAny } = usePermission()
+  const canCreate = canAny(['institutions.speciality-attachments.create'])
+  const canDelete = canAny(['institutions.speciality-attachments.delete'])
   const [searchParams, setSearchParams] = useSearchParams()
   const [exporting, setExporting] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<SpecialityAttachmentRow | null>(null)
+  const deleteMutation = useDeleteSpecialityAttachment()
+  // Column count varies with the delete-action column (gated by permission).
+  const colCount = canDelete ? 9 : 8
 
   // URL-driven state
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)
@@ -248,6 +271,14 @@ export default function SpecialityAttachmentsPage() {
 
           <div className="h-5 w-px bg-[var(--border-color-pro)]" />
 
+          {/* Assign — attach a speciality to an OTM (ministry-managed create) */}
+          {canCreate && (
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" />
+              {t('Assign speciality')}
+            </Button>
+          )}
+
           {/* Export (whole / current view) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -318,6 +349,11 @@ export default function SpecialityAttachmentsPage() {
                 <th className="w-24 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                   {t('Status')}
                 </th>
+                {canDelete && (
+                  <th className="w-16 bg-[var(--table-header-bg)] px-3 py-2.5 text-right text-sm font-medium text-[var(--text-secondary)]">
+                    {t('Actions')}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -327,7 +363,7 @@ export default function SpecialityAttachmentsPage() {
                     key={`skeleton-${i}`}
                     className={i % 2 === 1 ? 'bg-[var(--table-row-alt)]' : ''}
                   >
-                    {Array.from({ length: 8 }).map((__, j) => (
+                    {Array.from({ length: colCount }).map((__, j) => (
                       <td key={j} className="px-3 py-2">
                         <Skeleton className="h-4 w-full rounded" />
                       </td>
@@ -336,7 +372,7 @@ export default function SpecialityAttachmentsPage() {
                 ))
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center">
+                  <td colSpan={colCount} className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <GraduationCap className="h-8 w-8 text-[var(--text-secondary)]" />
                       <div>
@@ -417,6 +453,19 @@ export default function SpecialityAttachmentsPage() {
                         {t(STATUS_LABEL[row.status] ?? row.status)}
                       </Badge>
                     </td>
+                    {canDelete && (
+                      <td className="px-3 py-2 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title={t('Delete')}
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => setDeleteTarget(row)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
@@ -436,6 +485,40 @@ export default function SpecialityAttachmentsPage() {
           />
         </div>
       </div>
+
+      {/* Assign (create) dialog */}
+      <SpecialityAttachmentCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      {/* Detach (delete) confirm */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Delete')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget
+                ? `${deleteTarget.universityName || deleteTarget.universityCode} — ${
+                    deleteTarget.specialityName || deleteTarget.specialityCode || ''
+                  }`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>{t('Cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (deleteTarget)
+                  deleteMutation.mutate(deleteTarget.id, {
+                    onSuccess: () => setDeleteTarget(null),
+                  })
+              }}
+            >
+              {t('Delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

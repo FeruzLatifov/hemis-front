@@ -239,6 +239,12 @@ export const queryKeys = {
     rolePermissions: (id: string) => ['users', 'roles', id, 'permissions'] as const,
   },
 
+  oauthClients: {
+    all: ['oauth-clients'] as const,
+    list: (filters?: Record<string, unknown>) => ['oauth-clients', 'list', filters] as const,
+    byId: (id: string) => ['oauth-clients', id] as const,
+  },
+
   roles: {
     all: ['roles'] as const,
     list: (filters?: Record<string, unknown>) => ['roles', 'list', filters] as const,

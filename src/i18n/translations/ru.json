@@ -1047,6 +1047,11 @@
   "Valid to": "Действует до",
   "Search in external database": "Поиск во внешней базе",
   "Speciality": "Специальность",
+  "Assign speciality": "Прикрепить специальность",
+  "Select speciality": "Выберите специальность",
+  "Kunduzgi": "Дневная",
+  "Kechki": "Вечерняя",
+  "Masofaviy": "Дистанционная",
   "Failed to update university": "Не удалось обновить ВУЗ",
   "Send reset link": "Отправить ссылку",
   "Total publications": "Всего публикаций",
@@ -1337,5 +1342,9 @@
   "Total": "Итого",
   "Faculty list report": "Список факультетов",
   "Scientific report": "Научный отчёт",
-  "Scientific registry": "Научный реестр"
+  "Scientific registry": "Научный реестр",
+  "Integration accounts": "Учётные записи интеграций",
+  "Client ID": "Client ID",
+  "Client secret": "Секретный ключ (пароль)",
+  "Last used": "Последнее использование"
 }

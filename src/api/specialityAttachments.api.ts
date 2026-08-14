@@ -109,4 +109,20 @@ export const specialityAttachmentsApi = {
     })
     return response.data as Blob
   },
+
+  /** Attach a speciality to a university (create). */
+  create: async (payload: {
+    universityCode: string
+    specialityId: string
+    educationForm: string
+    eduYear?: number
+  }): Promise<SpecialityAttachmentRow> => {
+    const response = await apiClient.post<Wrapped<SpecialityAttachmentRow>>(BASE_URL, payload)
+    return response.data.data
+  },
+
+  /** Detach a speciality from a university (soft delete). */
+  remove: async (id: string): Promise<void> => {
+    await apiClient.delete(`${BASE_URL}/${id}`)
+  },
 }

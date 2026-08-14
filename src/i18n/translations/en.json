@@ -1047,6 +1047,11 @@
   "Valid to": "Valid to",
   "Search in external database": "Search in external database",
   "Speciality": "Speciality",
+  "Assign speciality": "Assign speciality",
+  "Select speciality": "Select speciality",
+  "Kunduzgi": "Full-time",
+  "Kechki": "Evening",
+  "Masofaviy": "Distance",
   "Failed to update university": "Failed to update university",
   "Send reset link": "Send reset link",
   "Total publications": "Total publications",
@@ -1337,5 +1342,9 @@
   "Total": "Total",
   "Faculty list report": "Faculty list report",
   "Scientific report": "Scientific report",
-  "Scientific registry": "Scientific registry"
+  "Scientific registry": "Scientific registry",
+  "Integration accounts": "Integration accounts",
+  "Client ID": "Client ID",
+  "Client secret": "Client secret",
+  "Last used": "Last used"
 }

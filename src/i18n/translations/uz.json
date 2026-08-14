@@ -1047,6 +1047,11 @@
   "Valid to": "Amal qilish oxiri",
   "Search in external database": "Tashqi bazada qidirish",
   "Speciality": "Mutaxassislik",
+  "Assign speciality": "Mutaxassislik biriktirish",
+  "Select speciality": "Mutaxassislikni tanlang",
+  "Kunduzgi": "Kunduzgi",
+  "Kechki": "Kechki",
+  "Masofaviy": "Masofaviy",
   "Failed to update university": "OTM yangilanmadi",
   "Send reset link": "Tiklash havolasini yuborish",
   "Total publications": "Jami nashrlar",
@@ -1337,5 +1342,9 @@
   "Total": "Jami",
   "Faculty list report": "Fakultetlar ro'yxati",
   "Scientific report": "Ilmiy hisobot",
-  "Scientific registry": "Ilmiy reestr"
+  "Scientific registry": "Ilmiy reestr",
+  "Integration accounts": "Integratsiya hisoblari",
+  "Client ID": "Client ID",
+  "Client secret": "Maxfiy kalit (parol)",
+  "Last used": "Oxirgi ishlatilgan"
 }

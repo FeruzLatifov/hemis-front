@@ -1,9 +1,12 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import {
   specialityAttachmentsApi,
   type SpecialityAttachmentsParams,
 } from '@/api/specialityAttachments.api'
 import { queryKeys } from '@/lib/queryKeys'
+import { toast } from 'sonner'
+import i18n from '@/i18n/config'
+import { extractApiErrorMessage } from '@/utils/error.util'
 
 /**
  * Paginated list of modern speciality→OTM attachments (h_speciality_attachment).
@@ -31,5 +34,36 @@ export function useSpecialityAttachmentFilterOptions() {
     queryKey: queryKeys.specialityAttachments.filterOptions,
     queryFn: ({ signal }) => specialityAttachmentsApi.filterOptions(signal),
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+/** Attach a speciality to a university. Invalidates the list + filter options on success. */
+export function useCreateSpecialityAttachment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: {
+      universityCode: string
+      specialityId: string
+      educationForm: string
+      eduYear?: number
+    }) => specialityAttachmentsApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.specialityAttachments.all })
+      toast.success(i18n.t('Successfully created'))
+    },
+    onError: (error) => toast.error(extractApiErrorMessage(error)),
+  })
+}
+
+/** Detach a speciality from a university (soft delete). */
+export function useDeleteSpecialityAttachment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => specialityAttachmentsApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.specialityAttachments.all })
+      toast.success(i18n.t('Successfully deleted'))
+    },
+    onError: (error) => toast.error(extractApiErrorMessage(error)),
   })
 }

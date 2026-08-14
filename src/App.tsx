@@ -112,6 +112,9 @@ const UsersPage = lazyWithRetry(() =>
 const UserFormPage = lazyWithRetry(() =>
   import('./pages/system/users').then((m) => ({ default: m.UserFormPage })),
 )
+const OAuthClientsPage = lazyWithRetry(() =>
+  import('./pages/system/oauth-clients').then((m) => ({ default: m.OAuthClientsPage })),
+)
 const UniversitiesPage = lazyWithRetry(() =>
   import('./pages/institutions/universities').then((m) => ({ default: m.UniversitiesPage })),
 )
@@ -757,6 +760,16 @@ function App() {
                         <ProtectedRoute permission="users.view">
                           <RouteErrorBoundary>
                             <UserFormPage />
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="oauth-clients"
+                      element={
+                        <ProtectedRoute permission="oauth-clients.view">
+                          <RouteErrorBoundary>
+                            <OAuthClientsPage />
                           </RouteErrorBoundary>
                         </ProtectedRoute>
                       }

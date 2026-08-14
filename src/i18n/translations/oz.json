@@ -1047,6 +1047,11 @@
   "Valid to": "Амал қилиш охири",
   "Search in external database": "Ташқи базада қидириш",
   "Speciality": "Мутахассислик",
+  "Assign speciality": "Мутахассислик бириктириш",
+  "Select speciality": "Мутахассисликни танланг",
+  "Kunduzgi": "Кундузги",
+  "Kechki": "Кечки",
+  "Masofaviy": "Масофавий",
   "Failed to update university": "ОТМ янгиланмади",
   "Send reset link": "Тиклаш ҳаволасини юбориш",
   "Total publications": "Жами нашрлар",
@@ -1337,5 +1342,9 @@
   "Total": "Жами",
   "Faculty list report": "Факультетлар рўйхати",
   "Scientific report": "Илмий ҳисобот",
-  "Scientific registry": "Илмий реестр"
+  "Scientific registry": "Илмий реестр",
+  "Integration accounts": "Integratsiya hisoblari",
+  "Client ID": "Client ID",
+  "Client secret": "Махфий калит (парол)",
+  "Last used": "Охирги ишлатилган"
 }
