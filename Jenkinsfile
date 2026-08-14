@@ -1,7 +1,6 @@
-// Professional Continuous Delivery pipeline (hemis-front)
-// Oqim: bitta image QURILADI → staging (test.hemis.uz)'ga deploy → inson TASDIQLAYDI →
-//        AYNI image prod'ga (qayta build YO'Q). "build once, promote the same artifact".
-// Trigger: main'ga har merge (GitHub webhook). Feature branch → PR → main.
+// CD pipeline (hemis-front) — HOZIRCHA faqat STAGING (test.hemis.uz).
+// Oqim: main'ga merge → bitta image QURILADI (:<build>-<sha>) + Harbor push → staging deploy.
+// PROD hali tayyor emas — keyin "Approve gate → prod" bosqichlari qo'shiladi (build-once, ayni image).
 pipeline {
     agent any
 
@@ -17,7 +16,6 @@ pipeline {
         CHART_DIR     = 'helm/hemis-front'
         KUBECONFIG    = '/home/jenkins/.kube/config'
         STAGING_NS    = 'test-hemis'      // test.hemis.uz
-        PROD_NS       = 'new-ministry'    // asosiy domen
     }
 
     stages {
@@ -25,7 +23,6 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    // Immutable tag = build raqami + git SHA. AYNI shu tag staging va prod'da ishlatiladi.
                     env.IMAGE_TAG = "${env.BUILD_NUMBER}-${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"
                     echo "Artifact: ${IMAGE_NAME}:${env.IMAGE_TAG}"
                 }
@@ -59,31 +56,6 @@ pipeline {
                         --set image.tag=${IMAGE_TAG} \
                         --wait --timeout 4m
                     kubectl rollout status deployment/${RELEASE_NAME} --namespace ${STAGING_NS} --timeout=3m
-                '''
-            }
-        }
-
-        stage('Approve -> Production') {
-            steps {
-                timeout(time: 1, unit: 'DAYS') {
-                    input(
-                        message: "Staging (test.hemis.uz) tekshirildi. Prod'ga (${PROD_NS}) AYNI image chiqaraymi?",
-                        ok: "Prod'ga chiqar"
-                    )
-                }
-            }
-        }
-
-        stage('Deploy -> Production (AYNI image)') {
-            steps {
-                sh '''
-                    helm upgrade --install ${RELEASE_NAME} ${CHART_DIR} \
-                        --namespace ${PROD_NS} --create-namespace \
-                        -f ${CHART_DIR}/values.yaml \
-                        --set image.repository=${IMAGE_NAME} \
-                        --set image.tag=${IMAGE_TAG} \
-                        --wait --timeout 4m
-                    kubectl rollout status deployment/${RELEASE_NAME} --namespace ${PROD_NS} --timeout=3m
                 '''
             }
         }
