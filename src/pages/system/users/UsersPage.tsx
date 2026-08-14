@@ -88,11 +88,14 @@ export default function UsersPage() {
   })
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    // University is empty for SYSTEM/MINISTRY users (most of the list) — hide it by default
+    // to reduce clutter. The user can re-show it any time via the column-visibility menu.
+    const DEFAULT_VISIBILITY: VisibilityState = { universityName: false }
     try {
       const saved = localStorage.getItem('users-column-visibility')
-      return saved ? JSON.parse(saved) : {}
+      return saved ? JSON.parse(saved) : DEFAULT_VISIBILITY
     } catch {
-      return {}
+      return DEFAULT_VISIBILITY
     }
   })
 
