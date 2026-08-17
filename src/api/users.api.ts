@@ -6,6 +6,7 @@ import type {
   ChangePasswordRequest,
   RoleSummary,
   UsersParams,
+  GovPerson,
 } from '@/types/user.types'
 import type { PagedResponse } from '@/api/universities.api'
 
@@ -33,6 +34,24 @@ export const usersApi = {
     const response = await apiClient.post<{ success: boolean; data: UserAdmin }>(
       '/api/v1/web/admin/users',
       data,
+    )
+    return response.data.data
+  },
+
+  /**
+   * Resolve person data (name, birth date, passport, address, ...) from the GUVD/api_mspd
+   * gateway to autofill the person-create form. Returns null when not found.
+   */
+  async personLookup(
+    pinfl: string,
+    document?: string,
+    birthDate?: string,
+  ): Promise<GovPerson | null> {
+    // POST (not GET): PINFL + passport are PII — the backend takes them in the body so they
+    // never reach the URL query-string (which nginx/proxies log). Read-only despite POST.
+    const response = await apiClient.post<{ success: boolean; data: GovPerson | null }>(
+      '/api/v1/web/admin/users/person-lookup',
+      { pinfl, document: document || undefined, birthDate: birthDate || undefined },
     )
     return response.data.data
   },

@@ -271,22 +271,23 @@ export default function SpecialityAttachmentsPage() {
 
           <div className="h-5 w-px bg-[var(--border-color-pro)]" />
 
-          {/* Assign — attach a speciality to an OTM (ministry-managed create) */}
-          {canCreate && (
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" />
-              {t('Assign speciality')}
-            </Button>
-          )}
+          {/* Refresh — icon-only, compact (mirrors the /institutions/universities toolbar) */}
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            title={t('Refresh')}
+            className="rounded-lg p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)] disabled:opacity-40"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
 
-          {/* Export (whole / current view) */}
+          {/* Export (whole / current view) — emerald "Eksport", matches /institutions/universities */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              {/* Emerald "Eksport" — matches the /institutions/universities + diploma-blanks toolbars. */}
               <button
                 type="button"
                 disabled={exporting}
-                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
               >
                 {exporting ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -306,14 +307,21 @@ export default function SpecialityAttachmentsPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            {t('Refresh')}
-          </button>
+          {/* Assign — attach a speciality to an OTM (primary action, rightmost). Blue-soft styling
+              mirrors the /institutions/universities "Add" button. */}
+          {canCreate && (
+            <>
+              <div className="h-5 w-px bg-[var(--border-color-pro)]" />
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
+              >
+                <Plus className="h-4 w-4" />
+                {t('Attach')}
+              </button>
+            </>
+          )}
         </div>
 
         {(isLoading || isPlaceholderData) && (

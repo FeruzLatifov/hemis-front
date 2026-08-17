@@ -25,6 +25,7 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { useUniversities } from '@/hooks/useUniversities'
 import { useSpecialityList, useSpecialityYears } from '@/hooks/useSpeciality'
 import { useCreateSpecialityAttachment } from '@/hooks/useSpecialityAttachments'
+import { specialityLevelKey } from '@/pages/classifiers/speciality/speciality-tree.util'
 import type { EducationTypeCode, SpecialityRow } from '@/api/speciality.api'
 
 // Fixed classifier values for this feature (mirrors the DTO's @Pattern constraints):
@@ -64,9 +65,19 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
   const [pickerOpen, setPickerOpen] = useState(false)
   const [specQuery, setSpecQuery] = useState('')
   const debouncedQuery = useDebounce(specQuery, 300)
+  const yearNum = Number(eduYear)
+  const hasQuery = debouncedQuery.trim().length > 0
+  // Speciality search is scoped to BOTH the academic year AND the education type. It NEVER bulk-loads
+  // the whole year+type set (could be hundreds) — the request stays idle until the user types a code
+  // or name (server-side search by code + name), then returns at most 50 matches. Keeps it light.
   const { data: specData, isFetching: specLoading } = useSpecialityList(
-    { educationType, q: debouncedQuery, size: 30 },
-    open && pickerOpen,
+    {
+      educationType,
+      year: Number.isFinite(yearNum) ? yearNum : undefined,
+      q: debouncedQuery,
+      size: 50,
+    },
+    open && pickerOpen && !!educationType && !!eduYear && hasQuery,
   )
   const specResults = specData?.content ?? []
 
@@ -80,9 +91,9 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
     [uniData?.content],
   )
 
-  // Academic years present in OUR classifier for the chosen education type (newest first), so an
-  // attachment year always maps to a year the speciality actually exists in — not a free-typed number.
-  const { data: yearsRaw } = useSpecialityYears(educationType)
+  // Academic years present in OUR classifier (newest first). The year is the FIRST/primary filter,
+  // so it is type-independent (all years); the speciality search then narrows by year + type.
+  const { data: yearsRaw } = useSpecialityYears()
   const years = useMemo(() => [...(yearsRaw ?? [])].sort((a, b) => b - a), [yearsRaw])
   // Default to the newest year; re-default when the education type (→ its year set) changes.
   useEffect(() => {
@@ -107,9 +118,13 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
     onOpenChange(o)
   }
 
-  const yearNum = Number(eduYear)
   const canSubmit =
-    !!universityCode && !!specialityId && !!educationForm && !!eduYear && Number.isFinite(yearNum)
+    !!universityCode &&
+    !!educationType &&
+    !!eduYear &&
+    Number.isFinite(yearNum) &&
+    !!specialityId &&
+    !!educationForm
 
   const submit = () => {
     createMutation.mutate(
@@ -126,15 +141,17 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] w-[95vw] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t('Assign speciality')}</DialogTitle>
+          <DialogTitle>{t('Attach')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           {/* University (searchable by code OR name) */}
           <div className="space-y-1.5">
-            <Label>{t('University')}</Label>
+            <Label>
+              {t('University')} <span className="text-red-500">*</span>
+            </Label>
             <SearchableSelect
               className="w-full"
               value={universityCode || ALL_VALUE}
@@ -147,9 +164,38 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
             />
           </div>
 
-          {/* Education type — narrows the speciality search below */}
+          {/* Academic year FIRST (primary filter — the speciality list is checked against it) */}
           <div className="space-y-1.5">
-            <Label>{t('Education type')}</Label>
+            <Label>
+              {t('Education year')} <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={eduYear}
+              onValueChange={(v) => {
+                setEduYear(v)
+                setSpecialityId('')
+                setSpecialityLabel('')
+                setSpecQuery('')
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('Education year')} />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {`${y}-${y + 1}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Education type */}
+          <div className="space-y-1.5">
+            <Label>
+              {t('Education type')} <span className="text-red-500">*</span>
+            </Label>
             <Select
               value={educationType}
               onValueChange={(v) => {
@@ -174,12 +220,15 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
 
           {/* Speciality picker (server-side search) */}
           <div className="space-y-1.5">
-            <Label>{t('Speciality')}</Label>
+            <Label>
+              {t('Speciality')} <span className="text-red-500">*</span>
+            </Label>
             <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-2 rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--hover-bg)]"
+                  disabled={!eduYear || !educationType}
+                  className="flex w-full items-center justify-between gap-2 rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--hover-bg)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span
                     className={
@@ -199,12 +248,16 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
                     autoFocus
                     value={specQuery}
                     onChange={(e) => setSpecQuery(e.target.value)}
-                    placeholder={t('Search')}
+                    placeholder={t('Search by code or name')}
                     className="pl-9"
                   />
                 </div>
                 <ScrollArea className="h-64">
-                  {specLoading ? (
+                  {!hasQuery ? (
+                    <div className="flex items-center justify-center gap-2 py-6 text-sm text-[var(--text-secondary)]">
+                      <Search className="h-4 w-4" /> {t('Search by code or name')}
+                    </div>
+                  ) : specLoading ? (
                     <div className="flex items-center justify-center py-6 text-sm text-[var(--text-secondary)]">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('Loading...')}
                     </div>
@@ -226,55 +279,63 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
                               specialityId === row.id ? 'opacity-100' : 'opacity-0'
                             }`}
                           />
-                          <span>
-                            {row.code ? (
-                              <span className="text-[var(--text-secondary)] tabular-nums">
-                                {row.code} ·{' '}
-                              </span>
-                            ) : null}
-                            {row.nameUz}
+                          <span className="flex min-w-0 flex-col">
+                            <span>
+                              {row.code ? (
+                                <span className="text-[var(--text-secondary)] tabular-nums">
+                                  {row.code} ·{' '}
+                                </span>
+                              ) : null}
+                              {row.nameUz}
+                            </span>
+                            <span className="text-xs text-[var(--text-secondary)]">
+                              {specialityLevelKey(row.hierarchyLevel) ? (
+                                <span className="font-medium text-[var(--primary)]">
+                                  {t(specialityLevelKey(row.hierarchyLevel) as string)}
+                                </span>
+                              ) : null}
+                              {specialityLevelKey(row.hierarchyLevel) && row.years?.length
+                                ? ' · '
+                                : ''}
+                              {row.years?.length ? (
+                                <span className="tabular-nums">
+                                  {t('Education year')}:{' '}
+                                  {[...row.years].sort((a, b) => a - b).join(', ')}
+                                </span>
+                              ) : null}
+                            </span>
                           </span>
                         </button>
                       ))}
                     </div>
                   )}
                 </ScrollArea>
+                {specResults.length >= 50 && (
+                  <div className="border-t border-[var(--border-color-pro)] px-3 py-1.5 text-center text-xs text-[var(--text-secondary)]">
+                    {t('Refine your search to see more')}
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
           </div>
 
-          {/* Education form + academic year */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t('Education form')}</Label>
-              <Select value={educationForm} onValueChange={setEducationForm}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {EDUCATION_FORMS.map((f) => (
-                    <SelectItem key={f.code} value={f.code}>
-                      {t(f.labelKey)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t('Education year')}</Label>
-              <Select value={eduYear} onValueChange={setEduYear}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('Education year')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((y) => (
-                    <SelectItem key={y} value={String(y)}>
-                      {`${y}-${y + 1}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Education form */}
+          <div className="space-y-1.5">
+            <Label>
+              {t('Education form')} <span className="text-red-500">*</span>
+            </Label>
+            <Select value={educationForm} onValueChange={setEducationForm}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EDUCATION_FORMS.map((f) => (
+                  <SelectItem key={f.code} value={f.code}>
+                    {t(f.labelKey)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -284,7 +345,7 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
           </Button>
           <Button onClick={submit} disabled={!canSubmit || createMutation.isPending}>
             {createMutation.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-            {t('Assign speciality')}
+            {t('Attach')}
           </Button>
         </DialogFooter>
       </DialogContent>

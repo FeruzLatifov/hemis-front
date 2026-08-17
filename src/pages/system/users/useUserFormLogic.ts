@@ -17,22 +17,45 @@ import {
 import { useUniversities } from '@/hooks/useUniversities'
 import { useAuthStore } from '@/stores/authStore'
 import { extractApiErrorMessage, getErrorStatus } from '@/utils/error.util'
-import type { RoleSummary } from '@/types/user.types'
+import { usersApi } from '@/api/users.api'
+import type { RoleSummary, AccountType, GovPerson } from '@/types/user.types'
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 export type TabValue = 'general' | 'roles' | 'security'
 
+// ─── Person lookup ─────────────────────────────────────────────────────────
+export type LookupStatus = 'idle' | 'loading' | 'found' | 'notfound' | 'error'
+
+/** Person fields carried into the payload but not shown as dedicated inputs. */
+interface PersonMeta {
+  firstName?: string
+  lastName?: string
+  middleName?: string
+  birthPlace?: string
+  passportGivePlace?: string
+  passportIssuedDate?: string
+  passportExpiryDate?: string
+  photo?: string
+}
+
 // ─── Schemas ─────────────────────────────────────────────────────────────────
+// Create schema is account-type aware (superRefine): PERSON → PINFL is the login;
+// UNIVERSITY_LOGIN → manual username + university are required.
 const createSchema = z
   .object({
-    username: z
-      .string()
-      .min(3)
-      .max(50)
-      .regex(/^[a-zA-Z0-9_.-]+$/),
+    accountType: z.enum(['PERSON', 'UNIVERSITY_LOGIN']),
+    // PERSON
+    pinfl: z.string().optional().or(z.literal('')),
+    passport: z.string().max(16).optional().or(z.literal('')),
+    // UNIVERSITY_LOGIN
+    username: z.string().optional().or(z.literal('')),
+    // common
     password: z.string().min(6).max(100),
-    confirmPassword: z.string().min(1),
     fullName: z.string().max(255).optional().or(z.literal('')),
+    birthDate: z.string().optional().or(z.literal('')),
+    gender: z.string().max(10).optional().or(z.literal('')),
+    nationality: z.string().max(64).optional().or(z.literal('')),
+    address: z.string().max(512).optional().or(z.literal('')),
     email: z.string().email().max(255).optional().or(z.literal('')),
     phone: z
       .string()
@@ -41,11 +64,29 @@ const createSchema = z
       .optional(),
     universityCode: z.string().max(255).optional().or(z.literal('')),
     roleIds: z.array(z.string()).min(1),
-    enabled: z.boolean(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
+  .superRefine((data, ctx) => {
+    if (data.accountType === 'PERSON') {
+      if (!/^\d{14}$/.test(data.pinfl ?? '')) {
+        ctx.addIssue({ code: 'custom', path: ['pinfl'], message: 'PINFL must be 14 digits' })
+      }
+    } else {
+      const u = data.username ?? ''
+      if (u.length < 3 || u.length > 50 || !/^[a-zA-Z0-9_.-]+$/.test(u)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['username'],
+          message: 'Username must be 3-50 characters',
+        })
+      }
+      if (!data.universityCode) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['universityCode'],
+          message: 'University is required',
+        })
+      }
+    }
   })
 
 const editSchema = z.object({
@@ -79,15 +120,20 @@ export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
 
 // ─── Field → Tab mapping (for validation-driven tab switching) ───────────────
 const FIELD_TAB_MAP: Record<string, TabValue> = {
+  accountType: 'general',
+  pinfl: 'general',
+  passport: 'general',
   username: 'general',
   fullName: 'general',
   email: 'general',
   phone: 'general',
+  birthDate: 'general',
+  gender: 'general',
+  nationality: 'general',
+  address: 'general',
   universityCode: 'general',
   roleIds: 'roles',
   password: 'security',
-  confirmPassword: 'security',
-  enabled: 'security',
 }
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
@@ -143,17 +189,87 @@ export function useUserFormLogic() {
     defaultValues: isEdit
       ? { fullName: '', email: '', phone: '', universityCode: '', roleIds: [] }
       : {
+          accountType: 'PERSON',
+          pinfl: '',
+          passport: '',
           username: '',
           password: '',
-          confirmPassword: '',
           fullName: '',
+          birthDate: '',
+          gender: '',
+          nationality: '',
+          address: '',
           email: '',
           phone: '',
           universityCode: '',
           roleIds: [],
-          enabled: true,
         },
   })
+
+  const accountType = (watch('accountType') as AccountType) ?? 'PERSON'
+
+  const setAccountType = useCallback(
+    (next: AccountType) => {
+      setValue('accountType', next, { shouldValidate: false })
+    },
+    [setValue],
+  )
+
+  // ─── Person lookup (GUVD/api_mspd autofill) ──────────────────────────
+  const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle')
+  const [personMeta, setPersonMeta] = useState<PersonMeta>({})
+  const [personPhoto, setPersonPhoto] = useState<string | undefined>(undefined)
+
+  const runPersonLookup = useCallback(async () => {
+    const pinfl = ((watch('pinfl') as string) ?? '').trim()
+    const passport = ((watch('passport') as string) ?? '').trim()
+    if (!/^\d{14}$/.test(pinfl)) {
+      setError('pinfl' as keyof FormData, { message: t('PINFL must be 14 digits') })
+      return
+    }
+    if (!passport && !((watch('birthDate') as string) ?? '').trim()) {
+      toast.error(t('Enter passport or birth date to fetch person data'))
+      return
+    }
+    setLookupStatus('loading')
+    try {
+      const birthDate = ((watch('birthDate') as string) ?? '').trim()
+      const person: GovPerson | null = await usersApi.personLookup(
+        pinfl,
+        passport || undefined,
+        birthDate || undefined,
+      )
+      if (!person) {
+        setLookupStatus('notfound')
+        toast.error(t('Person not found'))
+        return
+      }
+      // Autofill visible fields
+      setValue('fullName', person.fullName ?? '', { shouldValidate: true })
+      if (person.birthDate) setValue('birthDate', person.birthDate, { shouldValidate: false })
+      if (person.passport) setValue('passport', person.passport, { shouldValidate: false })
+      if (person.gender) setValue('gender', person.gender, { shouldValidate: false })
+      if (person.nationality) setValue('nationality', person.nationality, { shouldValidate: false })
+      if (person.address) setValue('address', person.address, { shouldValidate: false })
+      // Carry the rest into the payload
+      setPersonMeta({
+        firstName: person.firstName ?? undefined,
+        lastName: person.lastName ?? undefined,
+        middleName: person.middleName ?? undefined,
+        birthPlace: person.birthPlace ?? undefined,
+        passportGivePlace: person.passportGivePlace ?? undefined,
+        passportIssuedDate: person.passportIssuedDate ?? undefined,
+        passportExpiryDate: person.passportExpiryDate ?? undefined,
+        photo: person.photo ?? undefined,
+      })
+      setPersonPhoto(person.photo ?? undefined)
+      setLookupStatus('found')
+      toast.success(t('Person data loaded'))
+    } catch {
+      setLookupStatus('error')
+      toast.error(t('Failed to fetch person data'))
+    }
+  }, [watch, setValue, setError, t])
 
   // ─── Change password form (edit only) ────────────────────────────────
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -171,7 +287,6 @@ export function useUserFormLogic() {
 
   // ─── Create mode password visibility ─────────────────────────────────
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
 
   // ─── Populate form when user data loads ──────────────────────────────
   useEffect(() => {
@@ -237,7 +352,8 @@ export function useUserFormLogic() {
   // ─── Form submit ─────────────────────────────────────────────────────
   const onSubmit = useCallback(
     (data: FormData) => {
-      const clean = (val: unknown) => (typeof val === 'string' && val.trim() ? val : undefined)
+      const clean = (val: unknown) =>
+        typeof val === 'string' && val.trim() ? val.trim() : undefined
 
       if (isEdit && id) {
         const updateData = {
@@ -261,31 +377,66 @@ export function useUserFormLogic() {
             },
           },
         )
-      } else {
-        const createData = {
-          username: (data as CreateFormData).username,
-          password: (data as CreateFormData).password,
-          fullName: clean(data.fullName),
-          email: clean(data.email),
-          phone: clean(data.phone),
-          universityCode: clean(data.universityCode),
-          roleIds: data.roleIds,
-          enabled: (data as CreateFormData).enabled,
-        }
-        createMutation.mutate(createData, {
-          onSuccess: () => navigate('/system/users'),
-          onError: (error) => {
-            const status = getErrorStatus(error)
-            const message = extractApiErrorMessage(error, '')
-            if (status === 409 || message.toLowerCase().includes('username')) {
-              setError('username' as keyof FormData, { message: t('Username already exists') })
-              setActiveTab('general')
-            }
-          },
-        })
+        return
       }
+
+      const d = data as CreateFormData
+      const isUniversityLogin = d.accountType === 'UNIVERSITY_LOGIN'
+
+      const createData = isUniversityLogin
+        ? {
+            accountType: 'UNIVERSITY_LOGIN' as AccountType,
+            username: (d.username ?? '').trim(),
+            password: d.password,
+            fullName: clean(d.fullName),
+            email: clean(d.email),
+            phone: clean(d.phone),
+            universityCode: clean(d.universityCode),
+            roleIds: d.roleIds,
+          }
+        : {
+            accountType: 'PERSON' as AccountType,
+            username: (d.pinfl ?? '').trim(), // login = PINFL
+            password: d.password,
+            pinfl: (d.pinfl ?? '').trim(),
+            passport: clean(d.passport),
+            fullName: clean(d.fullName),
+            firstName: clean(personMeta.firstName),
+            lastName: clean(personMeta.lastName),
+            middleName: clean(personMeta.middleName),
+            birthDate: clean(d.birthDate),
+            birthPlace: clean(personMeta.birthPlace),
+            passportGivePlace: clean(personMeta.passportGivePlace),
+            passportIssuedDate: clean(personMeta.passportIssuedDate),
+            passportExpiryDate: clean(personMeta.passportExpiryDate),
+            gender: clean(d.gender),
+            nationality: clean(d.nationality),
+            address: clean(d.address),
+            photo: personMeta.photo,
+            email: clean(d.email),
+            phone: clean(d.phone),
+            universityCode: clean(d.universityCode),
+            roleIds: d.roleIds,
+          }
+
+      createMutation.mutate(createData, {
+        onSuccess: () => navigate('/system/users'),
+        onError: (error) => {
+          const status = getErrorStatus(error)
+          const message = extractApiErrorMessage(error, '').toLowerCase()
+          if (status === 409 || message.includes('pinfl')) {
+            setError('pinfl' as keyof FormData, {
+              message: t('A user with this PINFL already exists'),
+            })
+            setActiveTab('general')
+          } else if (message.includes('username')) {
+            setError('username' as keyof FormData, { message: t('Username already exists') })
+            setActiveTab('general')
+          }
+        },
+      })
     },
-    [isEdit, id, updateMutation, createMutation, navigate, setError, t],
+    [isEdit, id, updateMutation, createMutation, navigate, setError, t, personMeta],
   )
 
   // ─── Tab-aware validation: switch to first tab with error ────────────
@@ -303,8 +454,6 @@ export function useUserFormLogic() {
   )
 
   // ─── Change password handler (edit security tab) ─────────────────────
-  // NOTE: Direct getValues() approach — react-hook-form handleSubmit
-  // doesn't work reliably inside an outer <form>
   const onChangePassword = useCallback(() => {
     if (!id) return
     const values = getPasswordValues()
@@ -363,6 +512,13 @@ export function useUserFormLogic() {
     groupedRoles,
     selectedRoleIds,
 
+    // account type + person lookup
+    accountType,
+    setAccountType,
+    lookupStatus,
+    runPersonLookup,
+    personPhoto,
+
     // main form
     register,
     handleSubmit,
@@ -390,8 +546,6 @@ export function useUserFormLogic() {
     // create mode password visibility
     showPassword,
     setShowPassword,
-    showConfirm,
-    setShowConfirm,
 
     // status / unlock
     toggleStatusMutation,
