@@ -37,6 +37,30 @@ export function useSpecialityAttachmentFilterOptions() {
   })
 }
 
+/**
+ * All education forms from the modern h_education_form classifier — the attach/edit form picker
+ * (Kunduzgi, Kechki, Sirtqi, Masofaviy, ...). A reference set that changes rarely, so cached long.
+ */
+export function useEducationForms() {
+  return useQuery({
+    queryKey: queryKeys.specialityAttachments.educationForms,
+    queryFn: ({ signal }) => specialityAttachmentsApi.educationForms(signal),
+    staleTime: 30 * 60 * 1000,
+  })
+}
+
+/**
+ * All education types from the modern h_education_type classifier — the attach-picker's Ta'lim turi
+ * (Bakalavr, Magistr, Ordinatura, Doktorantura PhD/DSc). Reference set, cached long.
+ */
+export function useEducationTypes() {
+  return useQuery({
+    queryKey: queryKeys.specialityAttachments.educationTypes,
+    queryFn: ({ signal }) => specialityAttachmentsApi.educationTypes(signal),
+    staleTime: 30 * 60 * 1000,
+  })
+}
+
 /** Attach a speciality to a university. Invalidates the list + filter options on success. */
 export function useCreateSpecialityAttachment() {
   const queryClient = useQueryClient()

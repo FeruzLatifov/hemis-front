@@ -255,11 +255,13 @@ export default function SpecialityClassifierPage() {
     }
   }
 
-  const levelBadge = (code: string) =>
+  // Show the resolved classifier name (h_education_type) when present; the code only drives the
+  // badge variant. Falls back to Bachelor/Master labels for the (current) 2-type classifier.
+  const levelBadge = (code: string, name?: string) =>
     code === '11' ? (
-      <Badge variant="default">{t('Bachelor')}</Badge>
+      <Badge variant="default">{name || t('Bachelor')}</Badge>
     ) : (
-      <Badge variant="secondary">{t('Master')}</Badge>
+      <Badge variant="secondary">{name || t('Master')}</Badge>
     )
 
   const statusBadge = (s: ReviewStatus) =>
@@ -486,7 +488,9 @@ export default function SpecialityClassifierPage() {
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
-                        <TableCell>{levelBadge(row.educationType)}</TableCell>
+                        <TableCell>
+                          {levelBadge(row.educationType, row.educationTypeName)}
+                        </TableCell>
                         <TableCell>{statusBadge(row.reviewStatus)}</TableCell>
                         <TableCell className="text-muted-foreground font-mono text-xs">
                           v{row.version}

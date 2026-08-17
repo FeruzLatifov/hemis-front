@@ -136,17 +136,18 @@ export default function Dashboard() {
     },
   ]
 
-  // Map education types with icons
+  // Map education types with icons — keyed by CODE (locale-invariant). Keying by the localized
+  // name broke in ru/en (the map missed and every card fell to the gray fallback).
   const educationTypeIcons: Record<string, LucideIcon> = {
-    Bakalavr: BookOpen,
-    Magistr: Target,
-    Ordinatura: Sparkles,
+    '11': BookOpen, // Bakalavr
+    '12': Target, // Magistr
+    '13': Sparkles, // Ordinatura
   }
 
   const educationTypeColors: Record<string, string> = {
-    Bakalavr: 'bg-blue-500',
-    Magistr: 'bg-blue-600',
-    Ordinatura: 'bg-blue-400',
+    '11': 'bg-blue-500',
+    '12': 'bg-blue-600',
+    '13': 'bg-blue-400',
   }
 
   const totalStudents = dashboardData?.overview.activeStudents || 1 // Only active students for percentages
@@ -155,8 +156,8 @@ export default function Dashboard() {
       name: et.name,
       count: et.count,
       percent: Math.round((et.count / totalStudents) * 100),
-      color: educationTypeColors[et.name] || 'bg-gray-500',
-      icon: educationTypeIcons[et.name] || BookOpen,
+      color: educationTypeColors[et.code] || 'bg-gray-500',
+      icon: educationTypeIcons[et.code] || BookOpen,
     })) || []
 
   const topUniversities = dashboardData?.topUniversities || []

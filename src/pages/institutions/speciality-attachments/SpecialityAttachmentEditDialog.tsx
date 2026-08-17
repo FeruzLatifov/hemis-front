@@ -23,16 +23,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { SearchableSelect, ALL_VALUE } from '@/components/filters/SearchableSelect'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useSpecialityList, useSpecialityYears } from '@/hooks/useSpeciality'
-import { useUpdateSpecialityAttachment } from '@/hooks/useSpecialityAttachments'
+import { useUpdateSpecialityAttachment, useEducationForms } from '@/hooks/useSpecialityAttachments'
 import { specialityLevelKey } from '@/pages/classifiers/speciality/speciality-tree.util'
 import type { EducationTypeCode, SpecialityRow } from '@/api/speciality.api'
+import { classifierLabel } from '@/api/specialityAttachments.api'
 import type { SpecialityAttachmentRow } from '@/api/specialityAttachments.api'
 
-const EDUCATION_FORMS: { code: string; labelKey: string }[] = [
-  { code: '11', labelKey: 'Kunduzgi' },
-  { code: '12', labelKey: 'Kechki' },
-  { code: '16', labelKey: 'Masofaviy' },
-]
+// Education form is NOT hard-coded — loaded from the h_education_form classifier (useEducationForms).
 // Faol/Nofaol toggle → the entity status. ACTIVE = Faol, SUSPENDED = Nofaol (REVOKED is folded into Nofaol).
 const STATUSES: { code: string; labelKey: string }[] = [
   { code: 'ACTIVE', labelKey: 'Active' },
@@ -52,8 +49,13 @@ interface Props {
  * (Faol/Nofaol). On success the parent list refetches.
  */
 export function SpecialityAttachmentEditDialog({ row, onOpenChange }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const updateMutation = useUpdateSpecialityAttachment()
+  const { data: educationForms = [] } = useEducationForms()
+  const educationFormOptions = useMemo(
+    () => educationForms.map((f) => ({ code: f.code, name: classifierLabel(f, i18n.language) })),
+    [educationForms, i18n.language],
+  )
 
   const open = !!row
   // Fixed on an existing row — the speciality search is scoped to this education type.
@@ -136,13 +138,7 @@ export function SpecialityAttachmentEditDialog({ row, onOpenChange }: Props) {
           {/* Education type — READ-ONLY (fixed; scopes the speciality search) */}
           <div className="space-y-1.5">
             <Label>{t('Education type')}</Label>
-            <Input
-              value={
-                row?.educationTypeName || (educationType === '11' ? t('Bachelor') : t('Master'))
-              }
-              disabled
-              readOnly
-            />
+            <Input value={row?.educationTypeName || row?.educationType || ''} disabled readOnly />
           </div>
 
           {/* Education year — editable (searchable) */}
@@ -259,18 +255,16 @@ export function SpecialityAttachmentEditDialog({ row, onOpenChange }: Props) {
             <Label>
               {t('Education form')} <span className="text-red-500">*</span>
             </Label>
-            <Select value={educationForm} onValueChange={setEducationForm}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EDUCATION_FORMS.map((f) => (
-                  <SelectItem key={f.code} value={f.code}>
-                    {t(f.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              className="w-full"
+              value={educationForm || ALL_VALUE}
+              onChange={(v) => setEducationForm(v === ALL_VALUE ? '' : v)}
+              options={educationFormOptions}
+              placeholder={t('Education form')}
+              allLabel={t('Education form')}
+              searchPlaceholder={t('Search')}
+              emptyLabel={t('No data found')}
+            />
           </div>
 
           {/* Status (Faol / Nofaol) — editable */}

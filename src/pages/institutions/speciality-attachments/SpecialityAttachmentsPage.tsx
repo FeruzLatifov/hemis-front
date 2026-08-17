@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, GraduationCap, Download, Loader2, Plus, Trash2, Pencil } from 'lucide-react'
@@ -39,8 +39,9 @@ import {
   useSpecialityAttachments,
   useSpecialityAttachmentFilterOptions,
   useDeleteSpecialityAttachment,
+  useEducationForms,
 } from '@/hooks/useSpecialityAttachments'
-import { specialityAttachmentsApi } from '@/api/specialityAttachments.api'
+import { specialityAttachmentsApi, classifierLabel } from '@/api/specialityAttachments.api'
 import type { SpecialityAttachmentRow } from '@/api/specialityAttachments.api'
 import { specialityLevelKey } from '@/pages/classifiers/speciality/speciality-tree.util'
 import { SpecialityAttachmentCreateDialog } from './SpecialityAttachmentCreateDialog'
@@ -55,7 +56,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function SpecialityAttachmentsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { canAny } = usePermission()
   const canCreate = canAny(['institutions.speciality-attachments.create'])
   const canDelete = canAny(['institutions.speciality-attachments.delete'])
@@ -131,8 +132,18 @@ export default function SpecialityAttachmentsPage() {
   const { data: filterOptions } = useSpecialityAttachmentFilterOptions()
   const universities = filterOptions?.universities ?? []
   const educationTypes = filterOptions?.educationTypes ?? []
-  const educationForms = filterOptions?.educationForms ?? []
   const years = filterOptions?.years ?? []
+  // Education-form filter shows the FULL classifier (all 13 forms), not just the present-in-data
+  // set — so any form is filterable, matching the create/edit picker. Localized label.
+  const { data: educationFormClassifier = [] } = useEducationForms()
+  const educationForms = useMemo(
+    () =>
+      educationFormClassifier.map((f) => ({
+        code: f.code,
+        name: classifierLabel(f, i18n.language),
+      })),
+    [educationFormClassifier, i18n.language],
+  )
 
   const listParams = {
     universityCode: universityFromUrl !== 'all' ? universityFromUrl : undefined,
@@ -233,23 +244,17 @@ export default function SpecialityAttachmentsPage() {
             </SelectContent>
           </Select>
 
-          {/* Education form filter (Kunduzgi / Kechki / Masofaviy) */}
-          <Select
+          {/* Education form filter — searchable, ALL classifier forms (like the University filter) */}
+          <SearchableSelect
             value={eduFormFromUrl}
-            onValueChange={(v) => handleFilterChange('educationForm', v)}
-          >
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder={t('Education form')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('Education form')}</SelectItem>
-              {educationForms.map((e) => (
-                <SelectItem key={e.code} value={e.code}>
-                  {e.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(v) => handleFilterChange('educationForm', v)}
+            options={educationForms}
+            placeholder={t('Education form')}
+            allLabel={t('All')}
+            searchPlaceholder={t('Search')}
+            emptyLabel={t('No data found')}
+            className="w-[200px]"
+          />
 
           {/* Academic-year filter — options come from the data (grows as future years are seeded),
               newest first; label is the span (2026-2027), value is the start year. */}

@@ -110,6 +110,8 @@ export const queryKeys = {
       ['speciality-attachments', 'list', filters] as const,
     byId: (id: string) => ['speciality-attachments', id] as const,
     filterOptions: ['speciality-attachments', 'filter-options'] as const,
+    educationForms: ['speciality-attachments', 'education-forms'] as const,
+    educationTypes: ['speciality-attachments', 'education-types'] as const,
   },
 
   diplomaBlanks: {

@@ -56,6 +56,21 @@ export interface SpecialityAttachmentFilterOptions {
   readonly years: AttachmentFilterOption[]
 }
 
+/** One classifier option (code + multilingual name) from a modern h_* reference table. */
+export interface ClassifierOption {
+  readonly code: string
+  readonly name: string
+  readonly nameRu?: string | null
+  readonly nameEn?: string | null
+}
+
+/** Locale-aware display label for a classifier option (falls back to the uz name). */
+export function classifierLabel(f: ClassifierOption, lang?: string): string {
+  if (lang?.startsWith('ru')) return f.nameRu || f.name
+  if (lang?.startsWith('en')) return f.nameEn || f.name
+  return f.name
+}
+
 export interface PageResponse<T> {
   content: T[]
   totalElements: number
@@ -91,6 +106,24 @@ export const specialityAttachmentsApi = {
   filterOptions: async (signal?: AbortSignal): Promise<SpecialityAttachmentFilterOptions> => {
     const response = await apiClient.get<Wrapped<SpecialityAttachmentFilterOptions>>(
       `${BASE_URL}/filter-options`,
+      { signal },
+    )
+    return response.data.data
+  },
+
+  /** ALL education forms from the h_education_form classifier (attach/edit picker — not hard-coded). */
+  educationForms: async (signal?: AbortSignal): Promise<ClassifierOption[]> => {
+    const response = await apiClient.get<Wrapped<ClassifierOption[]>>(
+      `${BASE_URL}/education-forms`,
+      { signal },
+    )
+    return response.data.data
+  },
+
+  /** ALL education types from the h_education_type classifier (attach picker — not hard-coded). */
+  educationTypes: async (signal?: AbortSignal): Promise<ClassifierOption[]> => {
+    const response = await apiClient.get<Wrapped<ClassifierOption[]>>(
+      `${BASE_URL}/education-types`,
       { signal },
     )
     return response.data.data

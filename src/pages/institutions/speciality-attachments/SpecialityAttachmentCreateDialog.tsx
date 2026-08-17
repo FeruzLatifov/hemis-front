@@ -24,21 +24,17 @@ import { SearchableSelect, ALL_VALUE } from '@/components/filters/SearchableSele
 import { useDebounce } from '@/hooks/useDebounce'
 import { useUniversities } from '@/hooks/useUniversities'
 import { useSpecialityList, useSpecialityYears } from '@/hooks/useSpeciality'
-import { useCreateSpecialityAttachment } from '@/hooks/useSpecialityAttachments'
+import {
+  useCreateSpecialityAttachment,
+  useEducationForms,
+  useEducationTypes,
+} from '@/hooks/useSpecialityAttachments'
 import { specialityLevelKey } from '@/pages/classifiers/speciality/speciality-tree.util'
 import type { EducationTypeCode, SpecialityRow } from '@/api/speciality.api'
+import { classifierLabel } from '@/api/specialityAttachments.api'
 
-// Fixed classifier values for this feature (mirrors the DTO's @Pattern constraints):
-// education type 11=Bakalavr / 12=Magistr; education form 11=Kunduzgi / 12=Kechki / 16=Masofaviy.
-const EDUCATION_TYPES: { code: EducationTypeCode; labelKey: string }[] = [
-  { code: '11', labelKey: 'Bachelor' },
-  { code: '12', labelKey: 'Master' },
-]
-const EDUCATION_FORMS: { code: string; labelKey: string }[] = [
-  { code: '11', labelKey: 'Kunduzgi' },
-  { code: '12', labelKey: 'Kechki' },
-  { code: '16', labelKey: 'Masofaviy' },
-]
+// Education type + education form are NOT hard-coded — both come from their modern classifiers
+// (h_education_type / h_education_form) via useEducationTypes / useEducationForms.
 // Faol/Nofaol toggle → the entity status. ACTIVE = Faol, SUSPENDED = Nofaol.
 const STATUSES: { code: string; labelKey: string }[] = [
   { code: 'ACTIVE', labelKey: 'Active' },
@@ -56,11 +52,21 @@ interface Props {
  * registry (not just OTMs that already have attachments). On success the parent list refetches.
  */
 export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const createMutation = useCreateSpecialityAttachment()
+  const { data: educationForms = [] } = useEducationForms()
+  const educationFormOptions = useMemo(
+    () => educationForms.map((f) => ({ code: f.code, name: classifierLabel(f, i18n.language) })),
+    [educationForms, i18n.language],
+  )
+  const { data: educationTypes = [] } = useEducationTypes()
+  const educationTypeOptions = useMemo(
+    () => educationTypes.map((tp) => ({ code: tp.code, name: classifierLabel(tp, i18n.language) })),
+    [educationTypes, i18n.language],
+  )
 
   const [universityCode, setUniversityCode] = useState('')
-  const [educationType, setEducationType] = useState<EducationTypeCode>('11')
+  const [educationType, setEducationType] = useState<string>('11')
   const [specialityId, setSpecialityId] = useState('')
   const [specialityLabel, setSpecialityLabel] = useState('')
   const [educationForm, setEducationForm] = useState('11')
@@ -78,7 +84,7 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
   // or name (server-side search by code + name), then returns at most 50 matches. Keeps it light.
   const { data: specData, isFetching: specLoading } = useSpecialityList(
     {
-      educationType,
+      educationType: educationType as EducationTypeCode,
       year: Number.isFinite(yearNum) ? yearNum : undefined,
       q: debouncedQuery,
       size: 50,
@@ -175,31 +181,26 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
             />
           </div>
 
-          {/* Education type FIRST (before the year) */}
+          {/* Education type FIRST (before the year) — searchable, all classifier types (h_education_type) */}
           <div className="space-y-1.5">
             <Label>
               {t('Education type')} <span className="text-red-500">*</span>
             </Label>
-            <Select
-              value={educationType}
-              onValueChange={(v) => {
-                setEducationType(v as EducationTypeCode)
+            <SearchableSelect
+              className="w-full"
+              value={educationType || ALL_VALUE}
+              onChange={(v) => {
+                setEducationType(v === ALL_VALUE ? '' : v)
                 setSpecialityId('')
                 setSpecialityLabel('')
                 setSpecQuery('')
               }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EDUCATION_TYPES.map((e) => (
-                  <SelectItem key={e.code} value={e.code}>
-                    {t(e.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={educationTypeOptions}
+              placeholder={t('Education type')}
+              allLabel={t('Education type')}
+              searchPlaceholder={t('Search')}
+              emptyLabel={t('No data found')}
+            />
           </div>
 
           {/* Academic year (the speciality list is checked against it + the education type) — searchable */}
@@ -325,23 +326,21 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
             </Popover>
           </div>
 
-          {/* Education form */}
+          {/* Education form — searchable (like University / academic year), 13 classifier forms */}
           <div className="space-y-1.5">
             <Label>
               {t('Education form')} <span className="text-red-500">*</span>
             </Label>
-            <Select value={educationForm} onValueChange={setEducationForm}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EDUCATION_FORMS.map((f) => (
-                  <SelectItem key={f.code} value={f.code}>
-                    {t(f.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              className="w-full"
+              value={educationForm || ALL_VALUE}
+              onChange={(v) => setEducationForm(v === ALL_VALUE ? '' : v)}
+              options={educationFormOptions}
+              placeholder={t('Education form')}
+              allLabel={t('Education form')}
+              searchPlaceholder={t('Search')}
+              emptyLabel={t('No data found')}
+            />
           </div>
 
           {/* Status (Faol / Nofaol) — a new attachment defaults to Faol (ACTIVE) */}
