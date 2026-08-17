@@ -110,14 +110,32 @@ export const specialityAttachmentsApi = {
     return response.data as Blob
   },
 
-  /** Attach a speciality to a university (create). */
+  /** Attach a speciality to a university (create). Status defaults to ACTIVE when omitted. */
   create: async (payload: {
     universityCode: string
     specialityId: string
     educationForm: string
     eduYear?: number
+    status?: string
   }): Promise<SpecialityAttachmentRow> => {
     const response = await apiClient.post<Wrapped<SpecialityAttachmentRow>>(BASE_URL, payload)
+    return response.data.data
+  },
+
+  /** Edit an existing attachment — speciality/form/year/status. University + education type are fixed. */
+  update: async (
+    id: string,
+    payload: {
+      specialityId: string
+      educationForm: string
+      eduYear: number
+      status: string
+    },
+  ): Promise<SpecialityAttachmentRow> => {
+    const response = await apiClient.put<Wrapped<SpecialityAttachmentRow>>(
+      `${BASE_URL}/${id}`,
+      payload,
+    )
     return response.data.data
   },
 

@@ -46,10 +46,30 @@ export function useCreateSpecialityAttachment() {
       specialityId: string
       educationForm: string
       eduYear?: number
+      status?: string
     }) => specialityAttachmentsApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.specialityAttachments.all })
       toast.success(i18n.t('Successfully created'))
+    },
+    onError: (error) => toast.error(extractApiErrorMessage(error)),
+  })
+}
+
+/** Edit an attachment (speciality/form/year/status). Invalidates the list + filter options on success. */
+export function useUpdateSpecialityAttachment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string
+      payload: { specialityId: string; educationForm: string; eduYear: number; status: string }
+    }) => specialityAttachmentsApi.update(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.specialityAttachments.all })
+      toast.success(i18n.t('Successfully updated'))
     },
     onError: (error) => toast.error(extractApiErrorMessage(error)),
   })

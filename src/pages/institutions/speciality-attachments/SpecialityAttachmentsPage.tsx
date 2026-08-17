@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, GraduationCap, Download, Loader2, Plus, Trash2 } from 'lucide-react'
+import { RefreshCw, GraduationCap, Download, Loader2, Plus, Trash2, Pencil } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -44,13 +44,14 @@ import { specialityAttachmentsApi } from '@/api/specialityAttachments.api'
 import type { SpecialityAttachmentRow } from '@/api/specialityAttachments.api'
 import { specialityLevelKey } from '@/pages/classifiers/speciality/speciality-tree.util'
 import { SpecialityAttachmentCreateDialog } from './SpecialityAttachmentCreateDialog'
+import { SpecialityAttachmentEditDialog } from './SpecialityAttachmentEditDialog'
 
 // Attachment status → human-readable i18n key (mirrors how /classifiers/speciality localizes its
 // reviewStatus). 'Active'/'Suspended' keys already exist; a REVOKED row does not currently occur.
 const STATUS_LABEL: Record<string, string> = {
   ACTIVE: 'Active',
-  SUSPENDED: 'Suspended',
-  REVOKED: 'Revoked',
+  SUSPENDED: 'Inactive',
+  REVOKED: 'Inactive',
 }
 
 export default function SpecialityAttachmentsPage() {
@@ -58,13 +59,17 @@ export default function SpecialityAttachmentsPage() {
   const { canAny } = usePermission()
   const canCreate = canAny(['institutions.speciality-attachments.create'])
   const canDelete = canAny(['institutions.speciality-attachments.delete'])
+  // Edit reuses the create (write) permission — there is no separate `.edit` grant.
+  const canEdit = canCreate
+  const hasActions = canEdit || canDelete
   const [searchParams, setSearchParams] = useSearchParams()
   const [exporting, setExporting] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<SpecialityAttachmentRow | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SpecialityAttachmentRow | null>(null)
   const deleteMutation = useDeleteSpecialityAttachment()
-  // Column count varies with the delete-action column (gated by permission).
-  const colCount = canDelete ? 9 : 8
+  // The actions column appears when the user can edit and/or delete.
+  const colCount = hasActions ? 9 : 8
 
   // URL-driven state
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)
@@ -357,8 +362,8 @@ export default function SpecialityAttachmentsPage() {
                 <th className="w-24 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                   {t('Status')}
                 </th>
-                {canDelete && (
-                  <th className="w-16 bg-[var(--table-header-bg)] px-3 py-2.5 text-right text-sm font-medium text-[var(--text-secondary)]">
+                {hasActions && (
+                  <th className="w-24 bg-[var(--table-header-bg)] px-3 py-2.5 text-right text-sm font-medium text-[var(--text-secondary)]">
                     {t('Actions')}
                   </th>
                 )}
@@ -461,17 +466,31 @@ export default function SpecialityAttachmentsPage() {
                         {t(STATUS_LABEL[row.status] ?? row.status)}
                       </Badge>
                     </td>
-                    {canDelete && (
+                    {hasActions && (
                       <td className="px-3 py-2 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title={t('Delete')}
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => setDeleteTarget(row)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          {canEdit && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={t('Edit')}
+                              onClick={() => setEditTarget(row)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={t('Delete')}
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => setDeleteTarget(row)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -496,6 +515,12 @@ export default function SpecialityAttachmentsPage() {
 
       {/* Assign (create) dialog */}
       <SpecialityAttachmentCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      {/* Edit dialog */}
+      <SpecialityAttachmentEditDialog
+        row={editTarget}
+        onOpenChange={(o) => !o && setEditTarget(null)}
+      />
 
       {/* Detach (delete) confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
