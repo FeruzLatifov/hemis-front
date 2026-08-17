@@ -1,0 +1,11 @@
+# central-hemis overlay — PROD muhiti (2-domen).
+# Frontend central.hemis.uz'da, backend api-central.hemis.uz'da. Base values.yaml ustiga qo'llanadi
+# (Jenkinsfile: -f values.yaml -f values/central.yaml). Runtime config (config.js) — rebuild kerak emas.
+config:
+  apiUrl: "https://api-central.hemis.uz"
+  appName: "HEMIS Vazirlik portali"
+  sentryEnabled: "false"
+  sentryEnvironment: "production"
+
+ingress:
+  host: central.hemis.uz

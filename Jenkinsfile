@@ -1,11 +1,11 @@
-// CD pipeline (hemis-front) — HOZIRCHA faqat STAGING (test.hemis.uz).
-// Oqim: main'ga merge → bitta image QURILADI (:<build>-<sha>) + Harbor push → staging deploy.
-// PROD hali tayyor emas — keyin "Approve gate → prod" bosqichlari qo'shiladi (build-once, ayni image).
+// CD pipeline (hemis-front) — main'ga merge → 1 marta BUILD → STAGING (test.hemis.uz)
+//   → Approve gate → PROD (central.hemis.uz). Build-once: prodga aynan test qilingan IMAGE
+//   chiqadi (qayta build YO'Q; API URL runtime config.js orqali per-namespace). Har deploy --atomic.
 pipeline {
     agent any
 
     options {
-        timeout(time: 25, unit: 'MINUTES')
+        timeout(time: 90, unit: 'MINUTES')   // Approve gate kutishi (60m) + build/deploy
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '15'))
     }
@@ -15,7 +15,8 @@ pipeline {
         RELEASE_NAME  = 'hemis-front'
         CHART_DIR     = 'helm/hemis-front'
         KUBECONFIG    = '/home/jenkins/.kube/config'
-        STAGING_NS    = 'test-hemis'      // test.hemis.uz
+        STAGING_NS    = 'test-hemis'       // test.hemis.uz
+        PROD_NS       = 'central-hemis'    // central.hemis.uz
     }
 
     stages {
@@ -36,10 +37,7 @@ pipeline {
                     usernameVariable: 'HARBOR_USER',
                     passwordVariable: 'HARBOR_PASS'
                 )]) {
-                    // --provenance=false --sbom=false: BuildKit default provenance attestation'ni O'CHIRADI.
-                    //   Attestation bilan `docker build` OCI manifest-LIST (index) yasaydi; uni `docker push`
-                    //   qilganda ma'lum Docker bug'i "no basic auth credentials" beradi — login to'g'ri va
-                    //   akkaunt projectAdmin bo'lsa ham. O'chirilganda oddiy bitta manifest → push toza ishlaydi.
+                    // --provenance=false --sbom=false: BuildKit default provenance attestation'ni O'CHIRADI (Harbor push bug'i).
                     sh '''
                         echo "$HARBOR_PASS" | docker login harbor.e-edu.uz -u "$HARBOR_USER" --password-stdin
                         docker build --provenance=false --sbom=false -t ${IMAGE_NAME}:${IMAGE_TAG} .
@@ -58,8 +56,31 @@ pipeline {
                         -f ${CHART_DIR}/values.yaml -f ${CHART_DIR}/values/test-hemis.yaml \
                         --set image.repository=${IMAGE_NAME} \
                         --set image.tag=${IMAGE_TAG} \
-                        --wait --timeout 4m
+                        --atomic --timeout 4m
                     kubectl rollout status deployment/${RELEASE_NAME} --namespace ${STAGING_NS} --timeout=3m
+                '''
+            }
+        }
+
+        stage('Approve -> Production') {
+            steps {
+                timeout(time: 60, unit: 'MINUTES') {
+                    input message: "PRODUCTION (central.hemis.uz) ga ${IMAGE_NAME}:${env.IMAGE_TAG} deploy qilinsinmi? (staging test qilingan aynan shu image)", ok: 'Deploy PROD'
+                }
+            }
+        }
+
+        stage('Deploy -> Production (central.hemis.uz)') {
+            steps {
+                // Ayni IMAGE_TAG — qayta build YO'Q. API URL prod config (values/central.yaml -> config.js) orqali.
+                sh '''
+                    helm upgrade --install ${RELEASE_NAME} ${CHART_DIR} \
+                        --namespace ${PROD_NS} --create-namespace \
+                        -f ${CHART_DIR}/values.yaml -f ${CHART_DIR}/values/central.yaml \
+                        --set image.repository=${IMAGE_NAME} \
+                        --set image.tag=${IMAGE_TAG} \
+                        --atomic --timeout 4m
+                    kubectl rollout status deployment/${RELEASE_NAME} --namespace ${PROD_NS} --timeout=3m
                 '''
             }
         }
