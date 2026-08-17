@@ -1,6 +1,8 @@
 import { useEffect, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Folder, FolderOpen, Eye } from 'lucide-react'
+import { ChevronRight, Folder, FolderOpen, Eye, Copy } from 'lucide-react'
+import { toast } from 'sonner'
+import { copyToClipboard } from '@/lib/clipboard'
 import { cn } from '@/lib/utils'
 import type { SpecialityNode } from '@/api/speciality.api'
 import { specialityLevelKey } from './speciality-tree.util'
@@ -298,6 +300,45 @@ function TreeNodeRow({
             />
           ) : null}
         </button>
+
+        {/* Version + active state — inline metadata so the user reads them straight off
+            the row (no need to open the detail). Compact chips, right-aligned before the
+            level pill: a muted mono "v{n}" and a green/red active pill. */}
+        <span
+          className="bg-muted text-muted-foreground ml-1 shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px]"
+          title={t('Version')}
+        >
+          v{node.version}
+        </span>
+        {/* UUID — short prefix + copy icon; click copies the FULL id (stopPropagation so
+            it never toggles/selects the row). Tooltip shows the whole UUID. */}
+        <button
+          type="button"
+          tabIndex={-1}
+          onClick={(e) => {
+            e.stopPropagation()
+            void copyToClipboard(node.id).then((ok) =>
+              ok ? toast.success(t('Copied')) : toast.error(t('Copy failed')),
+            )
+          }}
+          title={node.id}
+          aria-label={`${t('Copy')} — ${node.id}`}
+          className="text-muted-foreground/80 hover:text-foreground hover:bg-muted flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px]"
+        >
+          <span>{node.id}</span>
+          <Copy className="h-3 w-3 shrink-0" aria-hidden="true" />
+        </button>
+        <span
+          className={cn(
+            'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap',
+            node.active
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400',
+          )}
+          title={node.active ? t('Active') : t('Inactive')}
+        >
+          {node.active ? t('Active') : t('Inactive')}
+        </span>
 
         {/* Taxonomy-level name — fills the row's open right area on wide screens
             (gated at lg so it never crushes the primary name at narrow/medium

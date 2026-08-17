@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, List, FolderTree, GraduationCap, Loader2, Download, Eye, Plus } from 'lucide-react'
+import {
+  Search,
+  List,
+  FolderTree,
+  GraduationCap,
+  Loader2,
+  Download,
+  Eye,
+  Plus,
+  Copy,
+} from 'lucide-react'
 import { toast } from 'sonner'
+import { copyToClipboard } from '@/lib/clipboard'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -362,7 +373,7 @@ export default function SpecialityClassifierPage() {
               setSearchInput(e.target.value)
               setParams({ q: e.target.value || undefined, page: undefined })
             }}
-            placeholder={t('Search by name or code')}
+            placeholder={t('Search by name, code or UUID')}
             className="pl-9"
           />
         </div>
@@ -440,6 +451,9 @@ export default function SpecialityClassifierPage() {
                     <TableHead className="w-40">{t('Hierarchy level')}</TableHead>
                     <TableHead className="w-28">{t('Level')}</TableHead>
                     <TableHead className="w-36">{t('Status')}</TableHead>
+                    <TableHead className="w-16">{t('Version')}</TableHead>
+                    <TableHead className="w-24">{t('Active')}</TableHead>
+                    <TableHead className="min-w-[280px]">{t('UUID')}</TableHead>
                     <TableHead className="w-40">{t('Years')}</TableHead>
                     <TableHead className="w-24 text-right">{t('Actions')}</TableHead>
                   </TableRow>
@@ -474,6 +488,37 @@ export default function SpecialityClassifierPage() {
                         </TableCell>
                         <TableCell>{levelBadge(row.educationType)}</TableCell>
                         <TableCell>{statusBadge(row.reviewStatus)}</TableCell>
+                        <TableCell className="text-muted-foreground font-mono text-xs">
+                          v{row.version}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                              row.active
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                            }`}
+                          >
+                            {row.active ? t('Active') : t('Inactive')}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              void copyToClipboard(row.id).then((ok) =>
+                                ok ? toast.success(t('Copied')) : toast.error(t('Copy failed')),
+                              )
+                            }}
+                            title={row.id}
+                            aria-label={`${t('Copy')} — ${row.id}`}
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px]"
+                          >
+                            <span>{row.id}</span>
+                            <Copy className="h-3 w-3 shrink-0" aria-hidden="true" />
+                          </button>
+                        </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
                           {row.years && row.years.length > 0 ? row.years.join(', ') : '-'}
                         </TableCell>

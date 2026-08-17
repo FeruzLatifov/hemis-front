@@ -16,6 +16,7 @@ function node(partial: Partial<SpecialityNode> & { id: string }): SpecialityNode
     reviewStatus: 'APPROVED',
     active: true,
     isChecked: false,
+    version: 1,
     years: [],
     children: [],
     ...partial,

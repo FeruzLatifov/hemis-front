@@ -23,6 +23,8 @@ export interface SpecialityRow {
   parentId?: string
   hierarchyLevel?: number
   active: boolean
+  /** Optimistic-lock version — bumps on every edit (OTM cache-bust = SUM(version)). */
+  version: number
   years: number[]
 }
 
@@ -42,6 +44,8 @@ export interface SpecialityNode {
   hierarchyLevel?: number
   active: boolean
   isChecked: boolean
+  /** Optimistic-lock version — bumps on every edit (OTM cache-bust = SUM(version)). */
+  version: number
   years: number[]
   children: SpecialityNode[]
 }

@@ -55,10 +55,10 @@ export function sortSpecialityNodes(nodes: SpecialityNode[]): SpecialityNode[] {
     )
 }
 
-/** True when the node's name (uz/ru/en) or code contains the lowercased query. */
+/** True when the node's name (uz/ru/en), code, or UUID contains the lowercased query. */
 function nodeMatches(node: SpecialityNode, q: string): boolean {
   const haystack =
-    `${node.nameUz} ${node.nameRu ?? ''} ${node.nameEn ?? ''} ${node.code ?? ''}`.toLowerCase()
+    `${node.nameUz} ${node.nameRu ?? ''} ${node.nameEn ?? ''} ${node.code ?? ''} ${node.id}`.toLowerCase()
   return haystack.includes(q)
 }
 

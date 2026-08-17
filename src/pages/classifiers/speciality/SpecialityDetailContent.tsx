@@ -1,6 +1,15 @@
 import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { GraduationCap, Hash, Calendar, Network, Info, Pencil } from 'lucide-react'
+import {
+  GraduationCap,
+  Hash,
+  Calendar,
+  Network,
+  Info,
+  Pencil,
+  Fingerprint,
+  Tag,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -143,6 +152,12 @@ export function SpecialityDetailContent({
                     : node.hierarchyLevel
                   : '-'
               }
+            />
+            <Field icon={<Tag className="h-4 w-4" />} label={t('Version')} value={node.version} />
+            <Field
+              icon={<Fingerprint className="h-4 w-4" />}
+              label={t('UUID')}
+              value={<span className="font-mono text-xs break-all">{node.id}</span>}
             />
           </Card>
 
