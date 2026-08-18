@@ -29,9 +29,20 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useSpecialityDetail, useSpecialityYears, useUpdateSpeciality } from '@/hooks/useSpeciality'
+import {
+  useSpecialityDetail,
+  useSpecialityYears,
+  useSpecialityEducationTypes,
+  useUpdateSpeciality,
+} from '@/hooks/useSpeciality'
+import { classifierLabel } from '@/api/speciality.api'
 import type { EducationTypeCode, ReviewStatus } from '@/api/speciality.api'
 import { YearMultiSelect } from './YearMultiSelect'
+import { SpecialityParentPicker } from './SpecialityParentPicker'
+import { specialityLevelKey } from './speciality-tree.util'
+
+/** The classifier is a fixed 4-level taxonomy (Bilim sohasi → … → Ichki yo'nalish). */
+const LEVELS = [1, 2, 3, 4]
 
 interface EditForm {
   code: string
@@ -41,6 +52,10 @@ interface EditForm {
   nameEn: string
   educationType: EducationTypeCode
   reviewStatus: ReviewStatus
+  /** Chosen depth (1-4) — mirrors the create form; drives the parent picker + re-placement. */
+  level: number
+  /** Parent for a level 2-4 row. Empty for a top-level (level 1) row. */
+  parentId: string
   years: Set<number>
 }
 
@@ -50,10 +65,10 @@ interface EditForm {
  * edit that was crammed into the detail dialog. Opened from the detail modal's Edit button.
  *
  * <p>Edits the same fields the API's update endpoint accepts: code, education type, the four names,
- * admission years, and review status. Parent/hierarchy placement is NOT editable here (the backend
- * update() keeps placement fixed — re-parenting is not a supported operation). Promoting
- * NEEDS_REVIEW → APPROVED needs the dedicated `.approve` permission (`canApprove`); the backend
- * enforces it too.</p>
+ * admission years, review status, and — for a level 2-4 row — its parent (a same-depth re-parent that
+ * fixes a misplaced node without changing its level or cascading to descendants). The row's DEPTH is
+ * fixed (only parents one level above are offered). Promoting NEEDS_REVIEW → APPROVED needs the
+ * dedicated `.approve` permission (`canApprove`); the backend enforces it too.</p>
  */
 export function SpecialityEditDialog({
   open,
@@ -71,14 +86,22 @@ export function SpecialityEditDialog({
   /** Called after a successful save with the edited id (so the page can re-show it). */
   onSaved?: (id: string) => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const uid = useId()
   const fieldId = (name: string) => `${uid}-${name}`
   const { data: node } = useSpecialityDetail(specialityId)
   const { data: yearOptions, isLoading: yearsLoading } = useSpecialityYears()
   const updateMutation = useUpdateSpeciality()
+  // Ta'lim turi options from the h_education_type classifier (Bakalavr/Magistr) — mirrors the create
+  // form. The endpoint already scopes to the two codes this classifier admits.
+  const { data: eduTypeOptions = [] } = useSpecialityEducationTypes()
 
   const [form, setForm] = useState<EditForm | null>(null)
+  // Selected education-type option (for the never-blank trigger label; falls back to Bachelor/Master).
+  const selectedEduType = eduTypeOptions.find((o) => o.code === form?.educationType)
+  // Placement mirrors the create form: the chosen depth (form.level) decides whether a parent is
+  // required (level 2-4) and which level the parent picker offers (form.level - 1).
+  const needsParent = (form?.level ?? 1) > 1
   // Portal target for the year picker popover — rendering inside the dialog keeps wheel-scroll working.
   const [dialogNode, setDialogNode] = useState<HTMLElement | null>(null)
   // Confirm step: changing years is a full replace (delete-then-insert server-side), so we ask first.
@@ -103,6 +126,8 @@ export function SpecialityEditDialog({
         nameEn: node.nameEn ?? '',
         educationType: node.educationType as EducationTypeCode,
         reviewStatus: node.reviewStatus,
+        level: node.hierarchyLevel ?? 1,
+        parentId: node.parentId ?? '',
         years: new Set(node.years ?? []),
       })
     }
@@ -128,9 +153,14 @@ export function SpecialityEditDialog({
     return { added, removed, changed: added.length > 0 || removed.length > 0 }
   }, [node, form])
 
-  // Years are mandatory now (backend enforces @NotEmpty) — a row can't be saved year-less.
+  // Years are mandatory now (backend enforces @NotEmpty) — a row can't be saved year-less. A level 2-4
+  // row must keep a parent (blank only happens after switching education type — force a re-pick).
   const canSubmit =
-    !!form && form.nameUz.trim().length > 0 && form.years.size > 0 && !updateMutation.isPending
+    !!form &&
+    form.nameUz.trim().length > 0 &&
+    form.years.size > 0 &&
+    (!needsParent || !!form.parentId) &&
+    !updateMutation.isPending
 
   const doSave = () => {
     if (!canSubmit || !specialityId || !form) return
@@ -145,6 +175,10 @@ export function SpecialityEditDialog({
           nameEn: form.nameEn.trim() || undefined,
           educationType: form.educationType,
           reviewStatus: form.reviewStatus,
+          // Placement — same shape as create: depth + parent (parent omitted for a level-1 root).
+          // Backend re-derives depth, cascades any change to descendants, and no-ops if unchanged.
+          hierarchyLevel: form.level,
+          parentId: needsParent ? form.parentId : undefined,
           years: [...form.years],
         },
       },
@@ -170,7 +204,7 @@ export function SpecialityEditDialog({
           overflow-visible so the year popover can float past the edge instead of stretching it. */}
       <DialogContent
         ref={(el) => setDialogNode(el)}
-        className="flex max-h-[85vh] max-w-lg flex-col overflow-visible"
+        className="flex max-h-[90vh] w-[95vw] flex-col overflow-visible sm:max-w-2xl"
       >
         <DialogHeader className="shrink-0">
           <div className="flex items-start gap-2 pr-6">
@@ -192,28 +226,67 @@ export function SpecialityEditDialog({
             }}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
-              {/* Education type — segmented, mirrors the create form. */}
+            {/* Uniform 2-column grid (single column on mobile), mirroring the create form. */}
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-4 gap-y-4 overflow-y-auto pr-1 sm:grid-cols-2">
+              {/* Education type — dropdown fed by the h_education_type classifier, mirrors create. */}
               <div className="space-y-1">
-                <Label htmlFor={fieldId('eduLevel')}>{t('Education type')} *</Label>
-                <div id={fieldId('eduLevel')} className="grid grid-cols-2 gap-2">
-                  {(['11', '12'] as const).map((lv) => (
-                    <Button
-                      key={lv}
-                      type="button"
-                      variant={form.educationType === lv ? 'default' : 'outline'}
-                      aria-pressed={form.educationType === lv}
-                      onClick={() => set({ educationType: lv })}
-                    >
-                      {lv === '11' ? t('Bachelor') : t('Master')}
-                    </Button>
-                  ))}
-                </div>
+                <Label htmlFor={fieldId('eduType')}>{t('Education type')} *</Label>
+                <Select
+                  value={form.educationType}
+                  onValueChange={(v) =>
+                    // Switching type moves the row to the other tree — its old parent is now invalid,
+                    // so drop it and force a re-pick from the new type's parents.
+                    set({ educationType: v as EducationTypeCode, parentId: '' })
+                  }
+                >
+                  <SelectTrigger id={fieldId('eduType')} className="w-full">
+                    {/* Render the label ourselves so the trigger is never a blank box before the
+                        options load, or if the classifier has no active 11/12 row. */}
+                    <SelectValue placeholder={t('Education type')}>
+                      {selectedEduType
+                        ? classifierLabel(selectedEduType, i18n.language)
+                        : form.educationType === '11'
+                          ? t('Bachelor')
+                          : t('Master')}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eduTypeOptions.map((o) => (
+                      <SelectItem key={o.code} value={o.code}>
+                        {classifierLabel(o, i18n.language)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Hierarchy level — same selector as the create form. Changing the depth re-derives the
+                  valid parents (one level above) and drops the current parent for a fresh pick. */}
+              <div className="space-y-1">
+                <Label htmlFor={fieldId('level')}>{t('Hierarchy level')} *</Label>
+                <Select
+                  value={String(form.level)}
+                  onValueChange={(v) => set({ level: Number(v), parentId: '' })}
+                >
+                  <SelectTrigger id={fieldId('level')} className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LEVELS.map((n) => {
+                      const k = specialityLevelKey(n)
+                      return (
+                        <SelectItem key={n} value={String(n)}>
+                          {k ? `${n} — ${t(k)}` : n}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Review status — promoting to APPROVED is a ministry-only .approve capability
                   (backend also enforces it 403); already-approved rows keep the option enabled. */}
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('reviewStatus')}>{t('Review status')}</Label>
                 <Select
                   value={form.reviewStatus}
@@ -234,7 +307,27 @@ export function SpecialityEditDialog({
                 </Select>
               </div>
 
-              {/* Code, then Years stacked under it (full width each) — same as create. */}
+              {/* Parent — the nodes one level above the chosen depth (mirrors create). Fixes a
+                  misplaced row; the backend cascades any depth change to descendants. Level 1 is a
+                  root with no parent. */}
+              {needsParent ? (
+                <div className="space-y-1 sm:col-span-2">
+                  <Label htmlFor={fieldId('parent')}>{t('Parent speciality')} *</Label>
+                  <SpecialityParentPicker
+                    id={fieldId('parent')}
+                    educationType={form.educationType}
+                    childLevel={form.level}
+                    value={form.parentId || null}
+                    onChange={(pid) => set({ parentId: pid })}
+                    container={dialogNode}
+                    enabled={open}
+                  />
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-xs sm:col-span-2">{t('Top level')}</p>
+              )}
+
+              {/* Code and Years share a row — same grid as create. */}
               <div className="space-y-1">
                 <Label htmlFor={fieldId('code')}>{t('Code')}</Label>
                 <Input
@@ -261,8 +354,9 @@ export function SpecialityEditDialog({
                 ) : null}
               </div>
 
-              {/* Names — UZ, OZ, RU, EN each full width, stacked. */}
-              <div className="space-y-1">
+              {/* Names — each FULL WIDTH (own row): speciality names run long, so a half-width column
+                  would crop them. Short fields above stay paired; only the names span both columns. */}
+              <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('nameUz')}>{t('Name')} (UZ) *</Label>
                 <Input
                   id={fieldId('nameUz')}
@@ -273,7 +367,7 @@ export function SpecialityEditDialog({
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('nameOz')}>{t('Name')} (OZ)</Label>
                 <Input
                   id={fieldId('nameOz')}
@@ -282,7 +376,7 @@ export function SpecialityEditDialog({
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('nameRu')}>{t('Name')} (RU)</Label>
                 <Input
                   id={fieldId('nameRu')}
@@ -291,7 +385,7 @@ export function SpecialityEditDialog({
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('nameEn')}>{t('Name')} (EN)</Label>
                 <Input
                   id={fieldId('nameEn')}

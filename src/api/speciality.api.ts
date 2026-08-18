@@ -1,5 +1,12 @@
 // Unified Speciality Classifier API Client (bachelor + master, tree + curation grid)
 import apiClient from './client'
+import { classifierLabel } from './specialityAttachments.api'
+import type { ClassifierOption } from './specialityAttachments.api'
+
+// Re-exported so the classifier feature (dialogs, hooks) depends only on this module for the
+// education-type option shape + its locale-aware label, not on the registry attachments module.
+export { classifierLabel }
+export type { ClassifierOption }
 
 /** Education-type code (hemishe_h_education_type): '11' = Bakalavr, '12' = Magistr. The two
  *  discriminator values this classifier admits (bachelor + master). */
@@ -60,6 +67,10 @@ export interface SpecialityUpdatePayload {
   /** Education-type code ('11'=Bakalavr, '12'=Magistr). */
   educationType?: EducationTypeCode
   reviewStatus?: ReviewStatus
+  /** Target depth (1-4). Omit = leave placement unchanged; when set, drives re-placement + cascade. */
+  hierarchyLevel?: number
+  /** New parent (null for a level-1 row). Paired with hierarchyLevel; ignored when it is omitted. */
+  parentId?: string
   years?: number[]
 }
 
@@ -165,6 +176,19 @@ export const specialityApi = {
       params: { educationType },
       signal,
     })
+    return response.data.data
+  },
+
+  /**
+   * Education types this classifier admits (Bakalavr/Magistr) from the h_education_type classifier —
+   * the Ta'lim turi dropdown source for the Create/Edit dialogs. Served under the classifier's own
+   * `classifiers.speciality.view` permission (no cross-feature dependency on speciality-attachments).
+   */
+  educationTypes: async (signal?: AbortSignal): Promise<ClassifierOption[]> => {
+    const response = await apiClient.get<Wrapped<ClassifierOption[]>>(
+      `${BASE_URL}/education-types`,
+      { signal },
+    )
     return response.data.data
   },
 

@@ -66,6 +66,18 @@ export function useSpecialityYears(educationType?: EducationTypeCode) {
   })
 }
 
+/**
+ * Education types the classifier admits (Bakalavr/Magistr) — the Ta'lim turi dropdown source for the
+ * Create/Edit dialogs. Reference data, cached long. Served under the classifier's own permission.
+ */
+export function useSpecialityEducationTypes() {
+  return useQuery({
+    queryKey: queryKeys.speciality.educationTypes,
+    queryFn: ({ signal }) => specialityApi.educationTypes(signal),
+    staleTime: CACHE.LONG,
+  })
+}
+
 /** Advisory duplicate check for the add form — existing rows with the same code/name. */
 export function useSpecialityDuplicates(params: SpecialityDuplicateParams, enabled: boolean) {
   return useQuery({

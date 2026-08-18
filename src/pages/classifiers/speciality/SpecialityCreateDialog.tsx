@@ -24,11 +24,13 @@ import { cn } from '@/lib/utils'
 import {
   useSpecialityTree,
   useSpecialityYears,
+  useSpecialityEducationTypes,
   useCreateSpeciality,
   useSpecialityDuplicates,
 } from '@/hooks/useSpeciality'
 import { YearMultiSelect } from './YearMultiSelect'
 import { useDebounce } from '@/hooks/useDebounce'
+import { classifierLabel } from '@/api/speciality.api'
 import type { EducationTypeCode, SpecialityNode } from '@/api/speciality.api'
 import {
   sortSpecialityNodes,
@@ -69,7 +71,7 @@ export function SpecialityCreateDialog({
   /** Called after a successful create with the new node (so the page can reveal it). */
   onCreated?: (created: SpecialityNode) => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const uid = useId()
   const fieldId = (name: string) => `${uid}-${name}`
   const createMutation = useCreateSpeciality()
@@ -77,6 +79,10 @@ export function SpecialityCreateDialog({
   const [eduLevel, setEduLevel] = useState<EducationTypeCode>(educationType)
   // Load the chosen type's tree only while the dialog is open — it feeds the parent picker.
   const { data: tree, isLoading: treeLoading } = useSpecialityTree(eduLevel, open)
+  // Ta'lim turi options come from the h_education_type classifier (Bakalavr/Magistr) — not hard-coded.
+  // The endpoint already scopes to the two codes this classifier admits, under classifiers.speciality.view.
+  const { data: eduTypeOptions = [] } = useSpecialityEducationTypes()
+  const selectedEduType = eduTypeOptions.find((o) => o.code === eduLevel)
 
   const [nameUz, setNameUz] = useState('')
   const [nameOz, setNameOz] = useState('')
@@ -284,7 +290,7 @@ export function SpecialityCreateDialog({
           (not auto) lets the in-dialog popovers float past the modal edge instead of stretching it. */}
       <DialogContent
         ref={(el) => setDialogNode(el)}
-        className="flex max-h-[85vh] max-w-lg flex-col overflow-visible"
+        className="flex max-h-[90vh] w-[95vw] flex-col overflow-visible sm:max-w-2xl"
       >
         <DialogHeader className="shrink-0">
           <div className="flex items-start gap-2 pr-6">
@@ -292,7 +298,11 @@ export function SpecialityCreateDialog({
             <div className="min-w-0 flex-1">
               <DialogTitle>{t('Add speciality')}</DialogTitle>
               <DialogDescription className="mt-0.5">
-                {eduLevel === '11' ? t('Bachelor') : t('Master')}
+                {selectedEduType
+                  ? classifierLabel(selectedEduType, i18n.language)
+                  : eduLevel === '11'
+                    ? t('Bachelor')
+                    : t('Master')}
               </DialogDescription>
             </div>
           </div>
@@ -305,11 +315,13 @@ export function SpecialityCreateDialog({
           }}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+          {/* Uniform 2-column grid (single column on mobile): short fields sit side-by-side, wide
+              ones (duplicate warning, parent picker, top-level note) span both columns. */}
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-4 gap-y-4 overflow-y-auto pr-1 sm:grid-cols-2">
             {/* Advisory duplicate warning — the code/name already exists. Never blocks; the admin
                 decides (code is intentionally non-unique in the classifier). */}
             {hasDup && dup ? (
-              <div className={cn('rounded-md border p-3', dupTone.box)}>
+              <div className={cn('rounded-md border p-3 sm:col-span-2', dupTone.box)}>
                 <p className={cn('text-sm font-medium', dupTone.head)}>
                   {dup.codeExists && dup.nameExists
                     ? t('This code and name already exist')
@@ -351,23 +363,33 @@ export function SpecialityCreateDialog({
               </div>
             ) : null}
 
-            {/* Education type — pre-set to the active tab; the admin may switch before saving.
-                Whichever tab the dialog was opened from is auto-selected here. */}
+            {/* Education type — a dropdown fed by the h_education_type classifier (Bakalavr/Magistr),
+                pre-set to the active tab. Switching reloads the parent tree for the other level. */}
             <div className="space-y-1">
-              <Label htmlFor={fieldId('eduLevel')}>{t('Education type')} *</Label>
-              <div id={fieldId('eduLevel')} className="grid grid-cols-2 gap-2">
-                {(['11', '12'] as const).map((lv) => (
-                  <Button
-                    key={lv}
-                    type="button"
-                    variant={eduLevel === lv ? 'default' : 'outline'}
-                    aria-pressed={eduLevel === lv}
-                    onClick={() => changeEduLevel(lv)}
-                  >
-                    {lv === '11' ? t('Bachelor') : t('Master')}
-                  </Button>
-                ))}
-              </div>
+              <Label htmlFor={fieldId('eduType')}>{t('Education type')} *</Label>
+              <Select
+                value={eduLevel}
+                onValueChange={(v) => changeEduLevel(v as EducationTypeCode)}
+              >
+                <SelectTrigger id={fieldId('eduType')} className="w-full">
+                  {/* Render the label ourselves (same fallback as the header) so the trigger is never a
+                      blank box before the options load, or if the classifier has no active 11/12 row. */}
+                  <SelectValue placeholder={t('Education type')}>
+                    {selectedEduType
+                      ? classifierLabel(selectedEduType, i18n.language)
+                      : eduLevel === '11'
+                        ? t('Bachelor')
+                        : t('Master')}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {eduTypeOptions.map((o) => (
+                    <SelectItem key={o.code} value={o.code}>
+                      {classifierLabel(o, i18n.language)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Level selector — marks which of the 4 taxonomy levels the new row is. */}
@@ -393,7 +415,7 @@ export function SpecialityCreateDialog({
             {/* Parent — required for level 2–4, filtered to the level directly above.
                 Level 1 (Bilim sohasi) is a root, so it has no parent. */}
             {needsParent ? (
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('parent')}>{t('Parent speciality')} *</Label>
                 <Popover open={parentOpen} onOpenChange={setParentOpen}>
                   <PopoverTrigger asChild>
@@ -482,10 +504,10 @@ export function SpecialityCreateDialog({
                 </Popover>
               </div>
             ) : (
-              <p className="text-muted-foreground text-xs">{t('Top level')}</p>
+              <p className="text-muted-foreground text-xs sm:col-span-2">{t('Top level')}</p>
             )}
 
-            {/* Code first, then Years stacked directly under it (full width each). */}
+            {/* Code and Years share a row; Names pair up (UZ/OZ, RU/EN) on the next rows. */}
             <div className="space-y-1">
               <Label htmlFor={fieldId('code')}>{t('Code')}</Label>
               <Input id={fieldId('code')} value={code} onChange={(e) => setCode(e.target.value)} />
@@ -508,8 +530,9 @@ export function SpecialityCreateDialog({
               ) : null}
             </div>
 
-            {/* Names — UZ, OZ, RU, EN each full width, stacked (long names stay readable). */}
-            <div className="space-y-1">
+            {/* Names — each FULL WIDTH (own row): speciality names run long, so a half-width column
+                would crop them. Short fields above stay paired; only the names span both columns. */}
+            <div className="space-y-1 sm:col-span-2">
               <Label htmlFor={fieldId('nameUz')}>{t('Name')} (UZ) *</Label>
               <Input
                 id={fieldId('nameUz')}
@@ -520,7 +543,7 @@ export function SpecialityCreateDialog({
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <Label htmlFor={fieldId('nameOz')}>{t('Name')} (OZ)</Label>
               <Input
                 id={fieldId('nameOz')}
@@ -529,7 +552,7 @@ export function SpecialityCreateDialog({
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <Label htmlFor={fieldId('nameRu')}>{t('Name')} (RU)</Label>
               <Input
                 id={fieldId('nameRu')}
@@ -538,7 +561,7 @@ export function SpecialityCreateDialog({
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <Label htmlFor={fieldId('nameEn')}>{t('Name')} (EN)</Label>
               <Input
                 id={fieldId('nameEn')}

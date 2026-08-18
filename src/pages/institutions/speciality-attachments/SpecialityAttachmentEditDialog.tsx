@@ -86,14 +86,15 @@ export function SpecialityAttachmentEditDialog({ row, onOpenChange }: Props) {
   const debouncedQuery = useDebounce(specQuery, 300)
   const yearNum = Number(eduYear)
   const hasQuery = debouncedQuery.trim().length > 0
+  // Speciality search is scoped to the education type ONLY — not the year (year-independent picker).
+  // Stays idle until a code/name is typed (server-side, ≤50 matches) — never bulk-loads the set.
   const { data: specData, isFetching: specLoading } = useSpecialityList(
     {
       educationType,
-      year: Number.isFinite(yearNum) ? yearNum : undefined,
       q: debouncedQuery,
       size: 50,
     },
-    open && pickerOpen && !!eduYear && hasQuery,
+    open && pickerOpen && hasQuery,
   )
   const specResults = specData?.content ?? []
 
@@ -168,7 +169,6 @@ export function SpecialityAttachmentEditDialog({ row, onOpenChange }: Props) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  disabled={!eduYear}
                   className="flex w-full items-center justify-between gap-2 rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--hover-bg)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span

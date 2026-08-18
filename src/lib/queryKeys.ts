@@ -150,6 +150,7 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) =>
       ['speciality-classifier', 'list', filters] as const,
     years: (educationType?: string) => ['speciality-classifier', 'years', educationType] as const,
+    educationTypes: ['speciality-classifier', 'education-types'] as const,
     byId: (id: string) => ['speciality-classifier', id] as const,
   },
 

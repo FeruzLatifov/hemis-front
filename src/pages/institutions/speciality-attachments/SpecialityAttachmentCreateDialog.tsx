@@ -81,17 +81,16 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
   const debouncedQuery = useDebounce(specQuery, 300)
   const yearNum = Number(eduYear)
   const hasQuery = debouncedQuery.trim().length > 0
-  // Speciality search is scoped to BOTH the academic year AND the education type. It NEVER bulk-loads
-  // the whole year+type set (could be hundreds) — the request stays idle until the user types a code
-  // or name (server-side search by code + name), then returns at most 50 matches. Keeps it light.
+  // Speciality search is scoped to the education type ONLY — NOT the academic year. A speciality is
+  // offered independently of the attachment's year (the year is saved on the row, it does not filter
+  // the picker). Idle until the user types a code or name (server-side search), then returns ≤50.
   const { data: specData, isFetching: specLoading } = useSpecialityList(
     {
       educationType: educationType as EducationTypeCode,
-      year: Number.isFinite(yearNum) ? yearNum : undefined,
       q: debouncedQuery,
       size: 50,
     },
-    open && pickerOpen && !!educationType && !!eduYear && hasQuery,
+    open && pickerOpen && !!educationType && hasQuery,
   )
   const specResults = specData?.content ?? []
 
@@ -105,8 +104,8 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
     [uniData?.content],
   )
 
-  // Academic years present in OUR classifier (newest first). The year is the FIRST/primary filter,
-  // so it is type-independent (all years); the speciality search then narrows by year + type.
+  // Academic years present in OUR classifier (newest first). The year is stored on the attachment
+  // but does NOT scope the speciality search (specialities are year-independent here).
   const { data: yearsRaw } = useSpecialityYears()
   const years = useMemo(() => [...(yearsRaw ?? [])].sort((a, b) => b - a), [yearsRaw])
   const yearOptions = useMemo(
@@ -212,7 +211,8 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
             />
           </div>
 
-          {/* Academic year (the speciality list is checked against it + the education type) — searchable */}
+          {/* Academic year — saved on the attachment row; does NOT filter the speciality picker
+              (specialities are offered independently of the year), so changing it keeps the pick. */}
           <div className="space-y-1.5">
             <Label>
               {t('Education year')} <span className="text-red-500">*</span>
@@ -220,12 +220,7 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
             <SearchableSelect
               className="w-full"
               value={eduYear || ALL_VALUE}
-              onChange={(v) => {
-                setEduYear(v === ALL_VALUE ? '' : v)
-                setSpecialityId('')
-                setSpecialityLabel('')
-                setSpecQuery('')
-              }}
+              onChange={(v) => setEduYear(v === ALL_VALUE ? '' : v)}
               options={yearOptions}
               placeholder={t('Education year')}
               allLabel={t('Education year')}
@@ -243,7 +238,7 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  disabled={!eduYear || !educationType}
+                  disabled={!educationType}
                   className="flex w-full items-center justify-between gap-2 rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--hover-bg)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span

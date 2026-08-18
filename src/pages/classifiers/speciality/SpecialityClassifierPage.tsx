@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
   SelectContent,
@@ -46,9 +45,15 @@ import {
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usePermission } from '@/hooks/usePermission'
-import { useSpecialityList, useSpecialityTree, useSpecialityYears } from '@/hooks/useSpeciality'
+import {
+  useSpecialityList,
+  useSpecialityTree,
+  useSpecialityYears,
+  useSpecialityEducationTypes,
+} from '@/hooks/useSpeciality'
 import {
   specialityApi,
+  classifierLabel,
   type EducationTypeCode,
   type ReviewStatus,
   type SpecialityNode,
@@ -84,8 +89,11 @@ export default function SpecialityClassifierPage() {
   const canApprove = can('classifiers.speciality.approve')
 
   const [searchParams, setSearchParams] = useSearchParams()
-  // Education-type tab: a hemishe_h_education_type code — '11'=Bakalavr, '12'=Magistr (URL ?educationType=).
+  // Education type: a code — '11'=Bakalavr, '12'=Magistr (URL ?educationType=). Selected via the
+  // toolbar "Ta'lim turi" dropdown (was a tab bar). Options + labels come from the classifier table.
   const level = (searchParams.get('educationType') as EducationTypeCode) || '11'
+  const { data: eduTypeOptions = [] } = useSpecialityEducationTypes()
+  const selectedEduType = eduTypeOptions.find((o) => o.code === level)
   // Tree is the default landing view — the classifier reads far more naturally as a hierarchy
   // than a flat grid, so first entry (no ?view=) opens the tree.
   const view = (searchParams.get('view') as ViewMode) || 'tree'
@@ -296,22 +304,6 @@ export default function SpecialityClassifierPage() {
         </div>
       </div>
 
-      {/* Level tabs */}
-      <Tabs
-        value={level}
-        onValueChange={(v) => {
-          setParams({ educationType: v, page: undefined, year: undefined })
-          // Drop the highlight — a selected row from the old type must not pre-fill
-          // the create form's parent on the new type (would be a cross-type parent).
-          setSelectedId(null)
-        }}
-      >
-        <TabsList>
-          <TabsTrigger value="11">{t('Bachelor')}</TabsTrigger>
-          <TabsTrigger value="12">{t('Master')}</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
       {/* Toolbar */}
       <Card className="flex flex-wrap items-center gap-3 p-3">
         <div className="flex items-center rounded-md border p-0.5">
@@ -338,6 +330,34 @@ export default function SpecialityClassifierPage() {
             {t('List')}
           </Button>
         </div>
+
+        {/* Ta'lim turi — Bakalavr/Magistr selector (was a tab bar). Options + labels from the
+            h_education_type classifier. Switching resets the year filter + drops the row highlight
+            (a cross-type parent must not pre-fill the create form). */}
+        <Select
+          value={level}
+          onValueChange={(v) => {
+            setParams({ educationType: v, page: undefined, year: undefined })
+            setSelectedId(null)
+          }}
+        >
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder={t('Education type')}>
+              {selectedEduType
+                ? classifierLabel(selectedEduType, i18n.language)
+                : level === '11'
+                  ? t('Bachelor')
+                  : t('Master')}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {eduTypeOptions.map((o) => (
+              <SelectItem key={o.code} value={o.code}>
+                {classifierLabel(o, i18n.language)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <Select value={status} onValueChange={(v) => setParams({ status: v, page: undefined })}>
           <SelectTrigger className="w-52">
@@ -646,7 +666,7 @@ export default function SpecialityClassifierPage() {
             // Reveal the new row wherever it landed, in either view: switch to its education level
             // (the admin may have changed it in the dialog), drop the status/year filters that would
             // hide a NEEDS_REVIEW / year-less row, and search by its code (or name) — the list then
-            // filters to it and the tree auto-expands the matching branch. Highlight the exact row.
+            // filters to it and the tree auto-expands the matching branch.
             const term = created.code || created.nameUz
             setSearchInput(term)
             setParams({
@@ -656,7 +676,11 @@ export default function SpecialityClassifierPage() {
               q: term,
               page: undefined,
             })
-            setSelectedId(created.id)
+            // Select the new row's PARENT (not the row itself), so the next "Add" defaults to a
+            // SIBLING of what was just added — never a child of it (which would silently nest each
+            // new row under the previous one). The search above still reveals the new row; a
+            // top-level create (no parent) clears the selection → next add is top-level.
+            setSelectedId(created.parentId ?? null)
           }}
         />
       ) : null}
