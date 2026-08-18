@@ -347,6 +347,7 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
               onChange={setSelectedForms}
               placeholder={t('Education form')}
               searchPlaceholder={t('Search')}
+              searchable={false}
             />
           </div>
 

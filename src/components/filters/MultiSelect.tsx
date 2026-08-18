@@ -27,6 +27,7 @@ export function MultiSelect({
   onChange,
   placeholder,
   searchPlaceholder,
+  searchable = true,
   loading = false,
   disabled = false,
 }: {
@@ -38,6 +39,8 @@ export function MultiSelect({
   onChange: (next: string[]) => void
   placeholder?: string
   searchPlaceholder?: string
+  /** Show the search input. Default true; pass false for short lists that need no type-to-search. */
+  searchable?: boolean
   loading?: boolean
   disabled?: boolean
 }) {
@@ -63,9 +66,10 @@ export function MultiSelect({
 
   // Focus the search when the popover opens; reset the query when it closes.
   useEffect(() => {
-    if (open) searchRef.current?.focus()
-    else setQuery('')
-  }, [open])
+    if (open) {
+      if (searchable) searchRef.current?.focus()
+    } else setQuery('')
+  }, [open, searchable])
 
   const toggle = (value: string) => {
     const next = new Set(selectedSet)
@@ -108,17 +112,19 @@ export function MultiSelect({
         collisionPadding={8}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="relative shrink-0 border-b p-2">
-          <Search className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
-          <Input
-            ref={searchRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={searchPlaceholder ?? t('Search')}
-            aria-label={t('Search')}
-            className="h-9 pl-8"
-          />
-        </div>
+        {searchable ? (
+          <div className="relative shrink-0 border-b p-2">
+            <Search className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
+            <Input
+              ref={searchRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={searchPlaceholder ?? t('Search')}
+              aria-label={t('Search')}
+              className="h-9 pl-8"
+            />
+          </div>
+        ) : null}
         <div className="flex shrink-0 items-center justify-between border-b px-2 py-1.5 text-xs">
           <button
             type="button"

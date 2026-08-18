@@ -23,6 +23,8 @@ interface SearchableSelectProps {
   /** Shown when the search matches nothing. */
   emptyLabel?: string
   className?: string
+  /** Show the search input. Default true; pass false for short lists that need no type-to-search. */
+  searchable?: boolean
 }
 
 export const ALL_VALUE = 'all'
@@ -45,6 +47,7 @@ export function SearchableSelect({
   searchPlaceholder,
   emptyLabel,
   className,
+  searchable = true,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -53,10 +56,11 @@ export function SearchableSelect({
   useEffect(() => {
     if (!open) return
     setSearch('')
+    if (!searchable) return
     // Focus the search field when the picker opens — typing is its whole purpose.
     const id = window.setTimeout(() => searchRef.current?.focus(), 0)
     return () => window.clearTimeout(id)
-  }, [open])
+  }, [open, searchable])
 
   const selected = value !== ALL_VALUE ? options.find((o) => o.code === value) : undefined
 
@@ -95,17 +99,19 @@ export function SearchableSelect({
         collisionPadding={8}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="relative shrink-0 border-b p-2">
-          <Search className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
-          <Input
-            ref={searchRef}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={searchPlaceholder}
-            aria-label={searchPlaceholder}
-            className="h-9 pl-8"
-          />
-        </div>
+        {searchable ? (
+          <div className="relative shrink-0 border-b p-2">
+            <Search className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
+            <Input
+              ref={searchRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder}
+              className="h-9 pl-8"
+            />
+          </div>
+        ) : null}
         <ul role="listbox" className="min-h-0 flex-1 overflow-y-auto p-1">
           <li>
             <button

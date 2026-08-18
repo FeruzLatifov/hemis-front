@@ -221,8 +221,50 @@ export default function SpecialityAttachmentsPage() {
 
   return (
     <div className="space-y-3 p-4">
+      {/* Page action bar — between the breadcrumb and the table, on the light page background
+          (--app-bg #f8fafc, not white) so the coloured buttons sit clear of the white table card. */}
+      <div className="flex items-center justify-end gap-2">
+        {/* Export (whole / current view) — emerald "Eksport" */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              disabled={exporting}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Download className="h-4 w-4" aria-hidden="true" />
+              )}
+              {t('Export')}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>{t('Export')}</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => handleExport('all')}>{t('All')}</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleExport('view')}>
+              {t('Current view')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Attach — primary action */}
+        {canCreate && (
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
+          >
+            <Plus className="h-4 w-4" />
+            {t('Attach')}
+          </button>
+        )}
+      </div>
+
       <div className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        {/* Toolbar */}
+        {/* Toolbar — filters + total + refresh (all table-scoped) */}
         <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
           {/* University filter — searchable by code OR name (~98 OTMs). Trigger shows the filter
               name ("Universitet") until an OTM is picked; "Barchasi" at the top clears it. */}
@@ -255,7 +297,7 @@ export default function SpecialityAttachmentsPage() {
             </SelectContent>
           </Select>
 
-          {/* Education form filter — searchable, ALL classifier forms (like the University filter) */}
+          {/* Education form filter — short list (present forms), so no search box */}
           <SearchableSelect
             value={eduFormFromUrl}
             onChange={(v) => handleFilterChange('educationForm', v)}
@@ -265,6 +307,7 @@ export default function SpecialityAttachmentsPage() {
             searchPlaceholder={t('Search')}
             emptyLabel={t('No data found')}
             className="w-[200px]"
+            searchable={false}
           />
 
           {/* Academic-year filter — options come from the data (grows as future years are seeded),
@@ -299,14 +342,14 @@ export default function SpecialityAttachmentsPage() {
 
           <div className="flex-1" />
 
-          <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+          <span className="text-sm text-[var(--text-secondary)] tabular-nums">
             {t('Total')}:{' '}
             <span className="font-semibold text-[var(--text-primary)]">{totalElements}</span>
           </span>
 
           <div className="h-5 w-px bg-[var(--border-color-pro)]" />
 
-          {/* Refresh — icon-only, compact (mirrors the /institutions/universities toolbar) */}
+          {/* Refresh — icon-only (table-scoped) */}
           <button
             onClick={handleRefresh}
             disabled={isLoading}
@@ -315,48 +358,6 @@ export default function SpecialityAttachmentsPage() {
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
-
-          {/* Export (whole / current view) — emerald "Eksport", matches /institutions/universities */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                disabled={exporting}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
-              >
-                {exporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <Download className="h-4 w-4" aria-hidden="true" />
-                )}
-                {t('Export')}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>{t('Export')}</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handleExport('all')}>{t('All')}</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleExport('view')}>
-                {t('Current view')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Assign — attach a speciality to an OTM (primary action, rightmost). Blue-soft styling
-              mirrors the /institutions/universities "Add" button. */}
-          {canCreate && (
-            <>
-              <div className="h-5 w-px bg-[var(--border-color-pro)]" />
-              <button
-                type="button"
-                onClick={() => setCreateOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
-              >
-                <Plus className="h-4 w-4" />
-                {t('Attach')}
-              </button>
-            </>
-          )}
         </div>
 
         {(isLoading || isPlaceholderData) && (
