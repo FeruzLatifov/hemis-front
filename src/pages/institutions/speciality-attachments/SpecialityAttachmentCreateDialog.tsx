@@ -110,7 +110,8 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
   const { data: yearsRaw } = useSpecialityYears()
   const years = useMemo(() => [...(yearsRaw ?? [])].sort((a, b) => b - a), [yearsRaw])
   const yearOptions = useMemo(
-    () => years.map((y) => ({ code: String(y), name: `${y}-${y + 1}` })),
+    // Show the academic-year span in parentheses next to the start year: "2026 (2026-2027)".
+    () => years.map((y) => ({ code: String(y), name: `(${y}-${y + 1})` })),
     [years],
   )
   // Default to the newest year; re-default when the education type (→ its year set) changes.
