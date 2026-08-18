@@ -1288,6 +1288,8 @@
   "Tree": "Дарахт",
   "University structure": "ОТМ тузилмаси",
   "Attached speciality deleted": "Бириктирилган мутахассислик ўчирилди",
+  "{{n}} attached": "{{n}} та бириктирилди",
+  "{{n}} already attached, skipped": "{{n}} таси аллақачон бириктирилган, ўтказиб юборилди",
   "Financially independent": "Молиявий мустақил",
   "Facebook": "Facebook",
   "{{count}} students found_few": "{{count}} та талаба топилди",

@@ -2,7 +2,9 @@
  * Unsaved Changes Hook
  *
  * Warns users when they try to navigate away from a page with unsaved changes.
- * Handles both browser navigation (beforeunload) and React Router navigation.
+ * Handles both browser navigation (beforeunload: tab close / refresh) and in-app React
+ * Router navigation (useBlocker). `useBlocker` requires a *data* router — App.tsx mounts
+ * `createBrowserRouter` via `RouterProvider`, which provides it.
  *
  * @example
  * function EditForm() {
@@ -57,7 +59,7 @@ export function useUnsavedChanges({
     isDirtyRef.current = isDirty
   }, [isDirty])
 
-  // Handle browser's beforeunload event (tab close, refresh)
+  // Handle browser's beforeunload event (tab close, refresh, external navigation)
   useBeforeUnload(
     useCallback(
       (event) => {
@@ -72,20 +74,18 @@ export function useUnsavedChanges({
     { capture: true },
   )
 
-  // Handle React Router navigation
+  // Handle in-app React Router navigation (requires the data router — see file header).
   const blockerFn: BlockerFunction = useCallback(
-    ({ currentLocation, nextLocation }) => {
+    ({ currentLocation, nextLocation }) =>
       // Only block if dirty and navigating to a different path
-      return isDirtyRef.current && currentLocation.pathname !== nextLocation.pathname
-    },
-    [], // No dependencies needed - we use ref
+      isDirtyRef.current && currentLocation.pathname !== nextLocation.pathname,
+    [], // No dependencies needed - we use the ref
   )
   const blocker = useBlocker(blockerFn)
 
   // Handle blocker state changes
   useEffect(() => {
     if (blocker.state === 'blocked') {
-      // Show confirmation dialog
       const confirmed = window.confirm(message)
       if (confirmed) {
         onConfirm?.()

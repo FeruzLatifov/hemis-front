@@ -1288,6 +1288,8 @@
   "Tree": "Дерево",
   "University structure": "Структура вуза",
   "Attached speciality deleted": "Прикреплённая специальность удалена",
+  "{{n}} attached": "Прикреплено: {{n}}",
+  "{{n}} already attached, skipped": "{{n}} уже прикреплено, пропущено",
   "Financially independent": "Финансово независимый",
   "Facebook": "Facebook",
   "{{count}} students found_few": "Найдено {{count}} студента",

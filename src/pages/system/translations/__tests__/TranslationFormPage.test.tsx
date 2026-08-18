@@ -27,7 +27,7 @@ vi.mock('react-i18next', () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
-// Mock react-router-dom (useBlocker needs data router - mock it directly)
+// Mock react-router-dom (useBlocker is data-router-only; stub it so the hook runs in the test)
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {

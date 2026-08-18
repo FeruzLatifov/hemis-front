@@ -1288,6 +1288,8 @@
   "Tree": "Daraxt",
   "University structure": "OTM tuzilmasi",
   "Attached speciality deleted": "Biriktirilgan mutaxassislik o'chirildi",
+  "{{n}} attached": "{{n}} ta biriktirildi",
+  "{{n}} already attached, skipped": "{{n}} tasi allaqachon biriktirilgan, o'tkazib yuborildi",
   "Financially independent": "Moliyaviy mustaqil",
   "Facebook": "Facebook",
   "{{count}} students found_few": "{{count}} ta talaba topildi",

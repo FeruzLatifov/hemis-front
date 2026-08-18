@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useFormDirtyState } from '@/hooks/useUnsavedChanges'
 
-// Mock react-router-dom
+// Mock react-router-dom (useBlocker + useBeforeUnload — the two hooks useUnsavedChanges uses)
 const mockBlockerState = { state: 'unblocked' as string, proceed: vi.fn(), reset: vi.fn() }
 vi.mock('react-router-dom', () => ({
   useBlocker: () => mockBlockerState,

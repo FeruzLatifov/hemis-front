@@ -21,11 +21,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SearchableSelect, ALL_VALUE } from '@/components/filters/SearchableSelect'
+import { MultiSelect } from '@/components/filters/MultiSelect'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useUniversities } from '@/hooks/useUniversities'
 import { useSpecialityList, useSpecialityYears } from '@/hooks/useSpeciality'
 import {
-  useCreateSpecialityAttachment,
+  useBulkCreateSpecialityAttachments,
   useEducationForms,
   useEducationTypes,
 } from '@/hooks/useSpecialityAttachments'
@@ -53,7 +54,7 @@ interface Props {
  */
 export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) {
   const { t, i18n } = useTranslation()
-  const createMutation = useCreateSpecialityAttachment()
+  const bulkMutation = useBulkCreateSpecialityAttachments()
   const { data: educationForms = [] } = useEducationForms()
   const educationFormOptions = useMemo(
     () => educationForms.map((f) => ({ code: f.code, name: classifierLabel(f, i18n.language) })),
@@ -69,7 +70,8 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
   const [educationType, setEducationType] = useState<string>('11')
   const [specialityId, setSpecialityId] = useState('')
   const [specialityLabel, setSpecialityLabel] = useState('')
-  const [educationForm, setEducationForm] = useState('11')
+  // Multi-select: one attachment row is created per ticked education form. Defaults to Kunduzgi (11).
+  const [selectedForms, setSelectedForms] = useState<string[]>(['11'])
   const [eduYear, setEduYear] = useState('')
   const [status, setStatus] = useState('ACTIVE')
 
@@ -123,7 +125,7 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
     setEducationType('11')
     setSpecialityId('')
     setSpecialityLabel('')
-    setEducationForm('11')
+    setSelectedForms(['11'])
     setEduYear('')
     setStatus('ACTIVE')
     setSpecQuery('')
@@ -141,14 +143,20 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
     !!eduYear &&
     Number.isFinite(yearNum) &&
     !!specialityId &&
-    !!educationForm
+    selectedForms.length > 0
 
   const submit = () => {
-    createMutation.mutate(
-      { universityCode, specialityId, educationForm, eduYear: yearNum, status },
+    bulkMutation.mutate(
+      { universityCode, specialityId, educationForms: selectedForms, eduYear: yearNum, status },
       { onSuccess: () => handleClose(false) },
     )
   }
+
+  // Education forms as generic {value,label} options for the multi-select.
+  const educationFormMultiOptions = useMemo(
+    () => educationFormOptions.map((f) => ({ value: f.code, label: f.name })),
+    [educationFormOptions],
+  )
 
   const selectSpeciality = (row: SpecialityRow) => {
     setSpecialityId(row.id)
@@ -326,20 +334,19 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
             </Popover>
           </div>
 
-          {/* Education form — searchable (like University / academic year), 13 classifier forms */}
+          {/* Education form — MULTI-select: tick every form; one attachment row is created per form. */}
           <div className="space-y-1.5">
             <Label>
               {t('Education form')} <span className="text-red-500">*</span>
             </Label>
-            <SearchableSelect
-              className="w-full"
-              value={educationForm || ALL_VALUE}
-              onChange={(v) => setEducationForm(v === ALL_VALUE ? '' : v)}
-              options={educationFormOptions}
+            {/* Multi-select (same look as the classifier's Yillar picker): tick every form —
+                one attachment row is created per form on submit. */}
+            <MultiSelect
+              options={educationFormMultiOptions}
+              selected={selectedForms}
+              onChange={setSelectedForms}
               placeholder={t('Education form')}
-              allLabel={t('Education form')}
               searchPlaceholder={t('Search')}
-              emptyLabel={t('No data found')}
             />
           </div>
 
@@ -367,8 +374,8 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
           <Button variant="outline" onClick={() => handleClose(false)}>
             {t('Cancel')}
           </Button>
-          <Button onClick={submit} disabled={!canSubmit || createMutation.isPending}>
-            {createMutation.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+          <Button onClick={submit} disabled={!canSubmit || bulkMutation.isPending}>
+            {bulkMutation.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
             {t('Attach')}
           </Button>
         </DialogFooter>

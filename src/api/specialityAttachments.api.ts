@@ -71,6 +71,18 @@ export function classifierLabel(f: ClassifierOption, lang?: string): string {
   return f.name
 }
 
+/** One education form that a bulk-attach skipped because it was already attached. */
+export interface SkippedForm {
+  readonly educationForm: string
+  readonly educationFormName: string
+}
+
+/** Result of a bulk attach — the rows created (one per new form) and the forms skipped as duplicates. */
+export interface SpecialityAttachmentBulkResult {
+  readonly created: SpecialityAttachmentRow[]
+  readonly skipped: SkippedForm[]
+}
+
 export interface PageResponse<T> {
   content: T[]
   totalElements: number
@@ -152,6 +164,24 @@ export const specialityAttachmentsApi = {
     status?: string
   }): Promise<SpecialityAttachmentRow> => {
     const response = await apiClient.post<Wrapped<SpecialityAttachmentRow>>(BASE_URL, payload)
+    return response.data.data
+  },
+
+  /**
+   * Attach one speciality to one university across SEVERAL education forms at once. One row is
+   * created per form; forms already attached (same speciality + year) come back under `skipped`.
+   */
+  createBulk: async (payload: {
+    universityCode: string
+    specialityId: string
+    educationForms: string[]
+    eduYear?: number
+    status?: string
+  }): Promise<SpecialityAttachmentBulkResult> => {
+    const response = await apiClient.post<Wrapped<SpecialityAttachmentBulkResult>>(
+      `${BASE_URL}/bulk`,
+      payload,
+    )
     return response.data.data
   },
 

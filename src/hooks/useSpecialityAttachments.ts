@@ -80,6 +80,33 @@ export function useCreateSpecialityAttachment() {
   })
 }
 
+/**
+ * Bulk-attach one speciality to one university across several education forms. Reports how many
+ * rows were created and how many forms were already attached (skipped), then invalidates the list.
+ */
+export function useBulkCreateSpecialityAttachments() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: {
+      universityCode: string
+      specialityId: string
+      educationForms: string[]
+      eduYear?: number
+      status?: string
+    }) => specialityAttachmentsApi.createBulk(payload),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.specialityAttachments.all })
+      const created = result.created.length
+      const skipped = result.skipped.length
+      if (created > 0) toast.success(i18n.t('{{n}} attached', { n: created }))
+      if (skipped > 0) toast.info(i18n.t('{{n}} already attached, skipped', { n: skipped }))
+      // Neither created nor skipped (empty selection guarded in the UI) — a defensive fallback.
+      if (created === 0 && skipped === 0) toast.success(i18n.t('Successfully created'))
+    },
+    onError: (error) => toast.error(extractApiErrorMessage(error)),
+  })
+}
+
 /** Edit an attachment (speciality/form/year/status). Invalidates the list + filter options on success. */
 export function useUpdateSpecialityAttachment() {
   const queryClient = useQueryClient()

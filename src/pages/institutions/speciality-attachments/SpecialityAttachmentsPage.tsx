@@ -69,8 +69,8 @@ export default function SpecialityAttachmentsPage() {
   const [editTarget, setEditTarget] = useState<SpecialityAttachmentRow | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SpecialityAttachmentRow | null>(null)
   const deleteMutation = useDeleteSpecialityAttachment()
-  // The actions column appears when the user can edit and/or delete.
-  const colCount = hasActions ? 9 : 8
+  // Columns: № + University + Code + Speciality + Education + Year + Status (+ Actions).
+  const colCount = hasActions ? 8 : 7
 
   // URL-driven state
   const currentPage = Math.max(0, parseInt(searchParams.get('page') || '0', 10) || 0)
@@ -86,6 +86,7 @@ export default function SpecialityAttachmentsPage() {
   const eduTypeFromUrl = searchParams.get('educationType') || 'all'
   const eduFormFromUrl = searchParams.get('educationForm') || 'all'
   const eduYearFromUrl = searchParams.get('eduYear') || 'all'
+  const statusFromUrl = searchParams.get('status') || 'all'
   // Numeric year for the API — guards a hand-tampered ?eduYear=abc from sending NaN (→ 400).
   const eduYearNum =
     eduYearFromUrl !== 'all' && Number.isFinite(Number(eduYearFromUrl))
@@ -133,16 +134,23 @@ export default function SpecialityAttachmentsPage() {
   const universities = filterOptions?.universities ?? []
   const educationTypes = filterOptions?.educationTypes ?? []
   const years = filterOptions?.years ?? []
-  // Education-form filter shows the FULL classifier (all 13 forms), not just the present-in-data
-  // set — so any form is filterable, matching the create/edit picker. Localized label.
+  // Education-form filter shows only the forms that ACTUALLY occur in attachments (like the
+  // University / Education-type / Education-year filters) — a filter never offers a zero-result
+  // choice. The label is taken from the h_education_form classifier (multilingual name/nameRu/
+  // nameEn) when available, falling back to the backend's uz name. (The create/edit picker keeps
+  // the FULL classifier — any form is attachable; only the FILTER is narrowed to present forms.)
   const { data: educationFormClassifier = [] } = useEducationForms()
+  const formLabelByCode = useMemo(
+    () => new Map(educationFormClassifier.map((f) => [f.code, classifierLabel(f, i18n.language)])),
+    [educationFormClassifier, i18n.language],
+  )
   const educationForms = useMemo(
     () =>
-      educationFormClassifier.map((f) => ({
-        code: f.code,
-        name: classifierLabel(f, i18n.language),
+      (filterOptions?.educationForms ?? []).map((o) => ({
+        code: o.code,
+        name: formLabelByCode.get(o.code) ?? o.name,
       })),
-    [educationFormClassifier, i18n.language],
+    [filterOptions, formLabelByCode],
   )
 
   const listParams = {
@@ -150,6 +158,7 @@ export default function SpecialityAttachmentsPage() {
     educationType: eduTypeFromUrl !== 'all' ? eduTypeFromUrl : undefined,
     educationForm: eduFormFromUrl !== 'all' ? eduFormFromUrl : undefined,
     eduYear: eduYearNum,
+    status: statusFromUrl !== 'all' ? statusFromUrl : undefined,
     page: currentPage,
     size: pageSize,
   }
@@ -164,7 +173,8 @@ export default function SpecialityAttachmentsPage() {
     universityFromUrl !== 'all' ||
     eduTypeFromUrl !== 'all' ||
     eduFormFromUrl !== 'all' ||
-    eduYearFromUrl !== 'all'
+    eduYearFromUrl !== 'all' ||
+    statusFromUrl !== 'all'
 
   const handleRefresh = useCallback(() => {
     refetch()
@@ -181,6 +191,7 @@ export default function SpecialityAttachmentsPage() {
               educationType: eduTypeFromUrl !== 'all' ? eduTypeFromUrl : undefined,
               educationForm: eduFormFromUrl !== 'all' ? eduFormFromUrl : undefined,
               eduYear: eduYearNum,
+              status: statusFromUrl !== 'all' ? statusFromUrl : undefined,
             }
           : {},
       )
@@ -272,6 +283,20 @@ export default function SpecialityAttachmentsPage() {
             </SelectContent>
           </Select>
 
+          {/* Status filter (Faol / Nofaol) — ACTIVE vs. SUSPENDED (a fixed 2-state set, mirroring
+              the edit dialog: any non-ACTIVE row is "Nofaol"). A fixed set, not present-in-data,
+              so "Nofaol" stays selectable to surface deactivated attachments even when there are none. */}
+          <Select value={statusFromUrl} onValueChange={(v) => handleFilterChange('status', v)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder={t('Status')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('Status')}</SelectItem>
+              <SelectItem value="ACTIVE">{t('Active')}</SelectItem>
+              <SelectItem value="SUSPENDED">{t('Inactive')}</SelectItem>
+            </SelectContent>
+          </Select>
+
           <div className="flex-1" />
 
           <span className="text-xs text-[var(--text-secondary)] tabular-nums">
@@ -338,28 +363,26 @@ export default function SpecialityAttachmentsPage() {
           <div className="progress-indeterminate h-0.5 w-full" />
         )}
 
-        {/* Table */}
+        {/* Table — fills the (now full-width) container on large screens; keeps a sane min-width
+            so columns never crush on small screens (the wrapper scrolls horizontally instead). */}
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[960px]">
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-[var(--border-color-pro)]">
+                <th className="w-12 bg-[var(--table-header-bg)] px-3 py-2.5 text-right text-sm font-medium text-[var(--text-secondary)]">
+                  №
+                </th>
                 <th className="bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                   {t('University')}
                 </th>
-                <th className="w-32 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
+                <th className="w-36 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                   {t('Code')}
                 </th>
                 <th className="bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                   {t('Speciality')}
                 </th>
-                <th className="w-36 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
-                  {t('Type')}
-                </th>
-                <th className="w-40 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
-                  {t('Education type')}
-                </th>
-                <th className="w-40 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
-                  {t('Education form')}
+                <th className="w-44 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
+                  {t('Education')}
                 </th>
                 <th className="w-24 bg-[var(--table-header-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--text-secondary)]">
                   {t('Education year')}
@@ -411,6 +434,7 @@ export default function SpecialityAttachmentsPage() {
                               educationType: undefined,
                               educationForm: undefined,
                               eduYear: undefined,
+                              status: undefined,
                               page: undefined,
                             })
                           }
@@ -430,6 +454,9 @@ export default function SpecialityAttachmentsPage() {
                       idx % 2 === 1 ? 'bg-[var(--table-row-alt)]' : 'bg-[var(--card-bg)]'
                     }`}
                   >
+                    <td className="px-3 py-2 text-right text-sm text-[var(--text-secondary)] tabular-nums">
+                      {currentPage * pageSize + idx + 1}
+                    </td>
                     <td className="px-3 py-2 text-sm">
                       <div className="font-medium text-[var(--text-primary)]">
                         {row.universityName || row.universityCode}
@@ -438,8 +465,15 @@ export default function SpecialityAttachmentsPage() {
                         {row.universityCode}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-sm text-[var(--text-secondary)] tabular-nums">
-                      {row.specialityCode || '-'}
+                    <td className="px-3 py-2 text-sm">
+                      <div className="text-[var(--text-secondary)] tabular-nums">
+                        {row.specialityCode || '-'}
+                      </div>
+                      {row.hierarchyLevel != null ? (
+                        <div className="text-xs text-[var(--text-secondary)]">
+                          {levelLabel(row.hierarchyLevel)}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-3 py-2 text-sm">
                       <div className="text-[var(--text-primary)]">{row.specialityName || '-'}</div>
@@ -454,14 +488,13 @@ export default function SpecialityAttachmentsPage() {
                         </div>
                       ) : null}
                     </td>
-                    <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
-                      {levelLabel(row.hierarchyLevel)}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
-                      {row.educationTypeName || row.educationType || '-'}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-[var(--text-secondary)]">
-                      {row.educationFormName || row.educationForm || '-'}
+                    <td className="px-3 py-2 text-sm">
+                      <div className="text-[var(--text-primary)]">
+                        {row.educationTypeName || row.educationType || '-'}
+                      </div>
+                      <div className="text-xs text-[var(--text-secondary)]">
+                        {row.educationFormName || row.educationForm || '-'}
+                      </div>
                     </td>
                     <td className="px-3 py-2 text-sm text-[var(--text-secondary)] tabular-nums">
                       {row.eduYear ? `${row.eduYear}-${row.eduYear + 1}` : '-'}
