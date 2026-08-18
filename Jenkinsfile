@@ -5,7 +5,7 @@ pipeline {
     agent any
 
     options {
-        timeout(time: 90, unit: 'MINUTES')   // Approve gate kutishi (60m) + build/deploy
+        timeout(time: 9, unit: 'HOURS')   // Approve gate kutishi (8h) + build/deploy sig'sin
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '15'))
     }
@@ -38,10 +38,11 @@ pipeline {
                     passwordVariable: 'HARBOR_PASS'
                 )]) {
                     // --provenance=false --sbom=false: BuildKit default provenance attestation'ni O'CHIRADI (Harbor push bug'i).
+                    // buildx --push: build + push BITTA buildkit qadamda — credential ishonchli uzatiladi
+                    // (alohida "docker push" containerd image-store'da gohida "no basic auth credentials" berardi).
                     sh '''
                         echo "$HARBOR_PASS" | docker login harbor.e-edu.uz -u "$HARBOR_USER" --password-stdin
-                        docker build --provenance=false --sbom=false -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker buildx build --provenance=false --sbom=false -t ${IMAGE_NAME}:${IMAGE_TAG} --push .
                         docker logout harbor.e-edu.uz
                     '''
                 }
@@ -64,7 +65,7 @@ pipeline {
 
         stage('Approve -> Production') {
             steps {
-                timeout(time: 60, unit: 'MINUTES') {
+                timeout(time: 8, unit: 'HOURS') {
                     input message: "PRODUCTION (central.hemis.uz) ga ${IMAGE_NAME}:${env.IMAGE_TAG} deploy qilinsinmi? (staging test qilingan aynan shu image)", ok: 'Deploy PROD'
                 }
             }
