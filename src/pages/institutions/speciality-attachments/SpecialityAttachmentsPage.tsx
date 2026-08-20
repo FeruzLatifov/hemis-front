@@ -212,56 +212,20 @@ export default function SpecialityAttachmentsPage() {
       specialityIdFromUrl
     : null
 
-  // One chip per applied filter. The toolbar renders them and calls back to clear a single one;
-  // the list length doubles as the count on the "Filtrlar" button (one chip == one applied filter).
-  const chips = useMemo(() => {
-    const list: DataTableToolbarChip[] = []
-    const push = (key: string, label: string, value: string) =>
-      list.push({ key, label, value, onRemove: () => handleFilterChange(key, 'all') })
-
-    if (universityFromUrl !== 'all')
-      push(
-        'universityCode',
-        t('University'),
-        universities.find((u) => u.code === universityFromUrl)?.name ?? universityFromUrl,
-      )
-    if (eduTypeFromUrl !== 'all')
-      push(
-        'educationType',
-        t('Education type'),
-        educationTypes.find((e) => e.code === eduTypeFromUrl)?.name ?? eduTypeFromUrl,
-      )
-    if (eduFormFromUrl !== 'all')
-      push(
-        'educationForm',
-        t('Education form'),
-        educationForms.find((f) => f.code === eduFormFromUrl)?.name ?? eduFormFromUrl,
-      )
-    if (eduYearFromUrl !== 'all')
-      push(
-        'eduYear',
-        t('Education year'),
-        years.find((y) => y.code === eduYearFromUrl)?.name ?? eduYearFromUrl,
-      )
-    if (statusFromUrl !== 'all')
-      push('status', t('Status'), t(STATUS_LABEL[statusFromUrl] ?? statusFromUrl))
-    if (specialityChipValue) push('specialityId', t('Speciality'), specialityChipValue)
-
-    return list
-  }, [
-    handleFilterChange,
-    t,
-    universityFromUrl,
-    universities,
-    eduTypeFromUrl,
-    educationTypes,
-    eduFormFromUrl,
-    educationForms,
-    eduYearFromUrl,
-    years,
-    statusFromUrl,
-    specialityChipValue,
-  ])
+  // A chip ONLY for a filter with no control of its own — currently just specialityId, which
+  // arrives by URL from the classifier's delete dialog. Every other filter has an open dropdown
+  // on the second row already showing its value, so a chip would repeat what sits next to it.
+  const chips = useMemo<DataTableToolbarChip[]>(() => {
+    if (!specialityChipValue) return []
+    return [
+      {
+        key: 'specialityId',
+        label: t('Speciality'),
+        value: specialityChipValue,
+        onRemove: () => handleFilterChange('specialityId', 'all'),
+      },
+    ]
+  }, [handleFilterChange, t, specialityChipValue])
 
   const handleRefresh = useCallback(() => {
     refetch()
@@ -418,7 +382,9 @@ export default function SpecialityAttachmentsPage() {
             </>
           }
           chips={chips}
-          onClearAll={handleClearFilters}
+          // "Tozalash" only when there is something to clear — with five open dropdowns and a
+          // search box, clearing them one by one is the tedious case it exists for.
+          onClearAll={hasFilters ? handleClearFilters : undefined}
           total={totalElements}
           onRefresh={handleRefresh}
           refreshing={isLoading}
