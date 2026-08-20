@@ -1381,6 +1381,7 @@
   "Only a speciality with the \"Needs review\" status can be deleted": "Only a speciality with the \"Not approved\" status can be deleted",
   "Move": "Move",
   "Speciality deleted": "Speciality deleted",
+  "Speciality years": "Speciality years",
   "Attached to universities": "Attached to universities",
   "This speciality is attached to universities. Remove those attachments first.": "This speciality is attached to universities. Remove those attachments first.",
   "Revoked attachments also block deletion": "Revoked attachments also block deletion",

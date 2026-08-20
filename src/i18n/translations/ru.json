@@ -1381,6 +1381,7 @@
   "Only a speciality with the \"Needs review\" status can be deleted": "Удалить можно только специальность со статусом «Не подтверждено»",
   "Move": "Переместить",
   "Speciality deleted": "Специальность удалена",
+  "Speciality years": "Годы специальности",
   "Attached to universities": "Закреплена за вузами",
   "This speciality is attached to universities. Remove those attachments first.": "Эта специальность закреплена за вузами. Сначала снимите эти закрепления.",
   "Revoked attachments also block deletion": "Отменённые закрепления также препятствуют удалению",

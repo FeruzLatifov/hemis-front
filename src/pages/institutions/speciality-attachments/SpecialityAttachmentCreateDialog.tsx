@@ -312,8 +312,12 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
                                 ? ' · '
                                 : ''}
                               {row.years?.length ? (
+                                // The speciality's own validity years (h_speciality_year) — NOT the
+                                // attachment's academic year picked above. Both used to read
+                                // "O'quv yili", which made the row look like it contradicted the
+                                // year field two controls up.
                                 <span className="tabular-nums">
-                                  {t('Education year')}:{' '}
+                                  {t('Speciality years')}:{' '}
                                   {[...row.years].sort((a, b) => a - b).join(', ')}
                                 </span>
                               ) : null}

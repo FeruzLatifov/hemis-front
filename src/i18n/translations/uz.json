@@ -1381,6 +1381,7 @@
   "Only a speciality with the \"Needs review\" status can be deleted": "Faqat \"Tasdiqlanmagan\" holatidagi mutaxassislikni o'chirish mumkin",
   "Move": "Ko'chirish",
   "Speciality deleted": "Mutaxassislik o'chirildi",
+  "Speciality years": "Mutaxassislik yillari",
   "Attached to universities": "OTMlarga biriktirilgan",
   "This speciality is attached to universities. Remove those attachments first.": "Bu mutaxassislik OTMlarga biriktirilgan. Avval o'sha biriktirishlarni bekor qiling.",
   "Revoked attachments also block deletion": "Bekor qilingan biriktirishlar ham o'chirishga to'sqinlik qiladi",
