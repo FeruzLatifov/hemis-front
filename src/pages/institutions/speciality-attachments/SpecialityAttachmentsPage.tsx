@@ -283,20 +283,6 @@ export default function SpecialityAttachmentsPage() {
       <div className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         {/* Toolbar — search + filter popover + refresh + page actions on one line */}
         <DataTableToolbar
-          leadingFilter={
-            /* University leads the toolbar: with ~98 OTMs and 8k+ rows this is the filter almost
-               every visit starts from, so it costs no click. Searchable by code OR name. */
-            <SearchableSelect
-              value={universityFromUrl}
-              onChange={(v) => handleFilterChange('universityCode', v)}
-              options={universities}
-              placeholder={t('University')}
-              allLabel={t('University')}
-              searchPlaceholder={t('Search')}
-              emptyLabel={t('No data found')}
-              className="w-[210px]"
-            />
-          }
           search={{
             value: searchInput,
             onChange: (v) => {
@@ -307,6 +293,23 @@ export default function SpecialityAttachmentsPage() {
           }}
           filters={
             <>
+              {/* University first and widest: it is the filter most visits start from (~98 OTMs,
+                  8k+ rows) and its values are long ("302 — Alisher Navoiy nomidagi Toshkent davlat
+                  o'zbek tili va adabiyoti universiteti"), so it takes the free space the four
+                  fixed-width dropdowns leave. Searchable by code OR name; full value on hover. */}
+              <div className="min-w-[280px] flex-1 basis-[320px]">
+                <SearchableSelect
+                  value={universityFromUrl}
+                  onChange={(v) => handleFilterChange('universityCode', v)}
+                  options={universities}
+                  placeholder={t('University')}
+                  allLabel={t('University')}
+                  searchPlaceholder={t('Search')}
+                  emptyLabel={t('No data found')}
+                  className="w-full"
+                />
+              </div>
+
               {/* Education type filter (Bakalavr / Magistr) */}
               <div className="w-[180px]">
                 <Select

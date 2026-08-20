@@ -16,9 +16,6 @@ export interface DataTableToolbarChip {
 }
 
 interface DataTableToolbarProps {
-  /** Rendered BEFORE the search box — the one filter used on nearly every visit, so it is the
-   *  first thing on the row. Everything rarer goes to {@link filters}. */
-  leadingFilter?: ReactNode
   /** Search box (omit to hide it entirely). */
   search?: { value: string; onChange: (v: string) => void; placeholder?: string }
   /** The remaining filters — rendered OPEN on the second row, not hidden behind a button.
@@ -37,20 +34,19 @@ interface DataTableToolbarProps {
 }
 
 /**
- * Two-row table toolbar. First row: the leading filter, the search box, the row count and the page
- * actions. Second row: the remaining filters, plus a chip for anything filtered without a control
- * of its own. Replaces the three stacked bars (filters / actions / total) list pages grow into.
+ * Two-row table toolbar. First row: the search box, the row count and the page actions. Second
+ * row: the filters, plus a chip for anything filtered without a control of its own. Replaces the
+ * three stacked bars (filters / actions / total) list pages grow into.
  *
  * <p>Why two rows and not one with a filter popover: this grid is filtered on nearly every visit,
  * and a control behind a button is a control the user has to remember exists. The count moved up
  * to the first row precisely so the second one never becomes a third.</p>
  *
- * <p>The page keeps owning its filter state: it passes the controls as {@code leadingFilter} /
- * {@code filters} and one {@link DataTableToolbarChip} per applied filter, so no filter logic
+ * <p>The page keeps owning its filter state: it passes the controls as {@code filters} and one
+ * {@link DataTableToolbarChip} per filter that has no control of its own, so no filter logic
  * moves in here.</p>
  */
 export function DataTableToolbar({
-  leadingFilter,
   search,
   filters,
   chips = [],
@@ -70,9 +66,7 @@ export function DataTableToolbar({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
-        {leadingFilter ? <div className="shrink-0">{leadingFilter}</div> : null}
-
-        {/* Search takes the free space; the leading filter (if any) sits to its left */}
+        {/* Search leads and takes the free space — every filter lives on the second row */}
         {search ? (
           <div className="relative min-w-[200px] flex-1">
             <Search

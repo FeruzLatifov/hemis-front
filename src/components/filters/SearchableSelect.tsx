@@ -87,7 +87,13 @@ export function SearchableSelect({
           aria-expanded={open}
           className={cn('justify-between font-normal', className)}
         >
-          <span className={cn('truncate', !selected && 'text-muted-foreground')}>
+          {/* title: a selected name can be far longer than any sane trigger width (some OTM names
+              run 70+ chars), so the full value stays reachable on hover instead of only in the
+              open list. */}
+          <span
+            className={cn('truncate', !selected && 'text-muted-foreground')}
+            title={selected ? `${selected.code} — ${selected.name}` : undefined}
+          >
             {selected ? `${selected.code} — ${selected.name}` : placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
