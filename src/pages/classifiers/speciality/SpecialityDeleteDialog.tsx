@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, ExternalLink, Info, Loader2 } from 'lucide-react'
+import { AlertTriangle, ExternalLink, Loader2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,8 +60,6 @@ export function SpecialityDeleteDialog({
     attachmentsEnabled,
   )
   const universities = attached ?? []
-  // Some OTM holds a revoked attachment — worth a footnote, because "0 live" still blocks.
-  const hasRevoked = universities.some((u) => u.total > u.live)
   // Everything must be true at once — a loaded, NEEDS_REVIEW, childless, unattached row. While
   // the attachment lookup is in flight the blocker is still unknown, so no Delete button yet.
   // A failed lookup leaves the list empty and lets the attempt through: the server guards it.
@@ -175,15 +173,9 @@ export function SpecialityDeleteDialog({
                     <span className="min-w-0 flex-1 truncate" title={u.universityName}>
                       {u.universityName}
                     </span>
-                    {/* live / total — one number when they agree, else both: the gap is the
-                        revoked rows, which the FK counts just the same. */}
-                    <span
-                      className="text-muted-foreground shrink-0 text-xs tabular-nums"
-                      title={
-                        u.total > u.live ? t('Revoked attachments also block deletion') : undefined
-                      }
-                    >
-                      {u.total > u.live ? `${u.live} / ${u.total}` : u.total}
+                    {/* Live attachment rows at this OTM — one per education form / academic year. */}
+                    <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+                      {u.count}
                     </span>
                     {/* Per-OTM jump — the registry filtered to this speciality AND this OTM.
                         Ghost button so the row balances the "Move" action in the children list. */}
@@ -200,12 +192,6 @@ export function SpecialityDeleteDialog({
                   </li>
                 ))}
               </ul>
-              {hasRevoked ? (
-                <p className="text-muted-foreground flex items-start gap-1.5 pt-1 text-xs">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  {t('Revoked attachments also block deletion')}
-                </p>
-              ) : null}
             </div>
           </div>
         ) : (

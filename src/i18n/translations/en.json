@@ -1383,5 +1383,7 @@
   "Speciality deleted": "Speciality deleted",
   "Attached to universities": "Attached to universities",
   "This speciality is attached to universities. Remove those attachments first.": "This speciality is attached to universities. Remove those attachments first.",
-  "Revoked attachments also block deletion": "Revoked attachments also block deletion"
+  "Revoked attachments also block deletion": "Revoked attachments also block deletion",
+
+  "Remove {{label}} filter": "Remove {{label}} filter"
 }

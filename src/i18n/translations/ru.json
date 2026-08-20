@@ -1383,5 +1383,7 @@
   "Speciality deleted": "Специальность удалена",
   "Attached to universities": "Закреплена за вузами",
   "This speciality is attached to universities. Remove those attachments first.": "Эта специальность закреплена за вузами. Сначала снимите эти закрепления.",
-  "Revoked attachments also block deletion": "Отменённые закрепления также препятствуют удалению"
+  "Revoked attachments also block deletion": "Отменённые закрепления также препятствуют удалению",
+
+  "Remove {{label}} filter": "Удалить фильтр {{label}}"
 }

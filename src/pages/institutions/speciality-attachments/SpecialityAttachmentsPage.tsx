@@ -1,17 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  RefreshCw,
-  GraduationCap,
-  Download,
-  Loader2,
-  Plus,
-  Trash2,
-  Pencil,
-  Search,
-  X,
-} from 'lucide-react'
+import { GraduationCap, Download, Loader2, Plus, Trash2, Pencil } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -40,9 +30,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { SearchableSelect } from '@/components/filters/SearchableSelect'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
+import { DataTableToolbar, type DataTableToolbarChip } from '@/components/tables/DataTableToolbar'
 import { PAGINATION, UI } from '@/constants'
 import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -149,9 +140,10 @@ export default function SpecialityAttachmentsPage() {
   // Filter options: only OTMs / education types / forms that ACTUALLY occur in attachments
   // (never the full classifier), so a dropdown never offers a choice that returns zero rows.
   const { data: filterOptions } = useSpecialityAttachmentFilterOptions()
-  const universities = filterOptions?.universities ?? []
-  const educationTypes = filterOptions?.educationTypes ?? []
-  const years = filterOptions?.years ?? []
+  // Memoised so the chip list below keeps a stable identity between renders.
+  const universities = useMemo(() => filterOptions?.universities ?? [], [filterOptions])
+  const educationTypes = useMemo(() => filterOptions?.educationTypes ?? [], [filterOptions])
+  const years = useMemo(() => filterOptions?.years ?? [], [filterOptions])
   // Education-form filter shows only the forms that ACTUALLY occur in attachments (like the
   // University / Education-type / Education-year filters) — a filter never offers a zero-result
   // choice. The label is taken from the h_education_form classifier (multilingual name/nameRu/
@@ -213,12 +205,64 @@ export default function SpecialityAttachmentsPage() {
   }, [updateSearchParams])
 
   // The ?specialityId= filter has no dropdown of its own, so without a visible marker a narrowed
-  // table reads as "empty/broken". Show it as a removable chip instead; the label comes from the
-  // first row (every row in scope shares the speciality) and falls back while the page is empty.
-  const specialityChipLabel = specialityIdFromUrl
+  // table reads as "empty/broken". Show it as a removable chip instead; the value comes from the
+  // first row (every row in scope shares the speciality) and falls back to the raw id while the
+  // page is still empty.
+  const specialityChipValue = specialityIdFromUrl
     ? [rows[0]?.specialityCode, rows[0]?.specialityName].filter(Boolean).join(' — ') ||
-      t('Speciality')
+      specialityIdFromUrl
     : null
+
+  // One chip per applied filter. The toolbar renders them and calls back to clear a single one;
+  // the list length doubles as the count on the "Filtrlar" button (one chip == one applied filter).
+  const chips = useMemo(() => {
+    const list: DataTableToolbarChip[] = []
+    const push = (key: string, label: string, value: string) =>
+      list.push({ key, label, value, onRemove: () => handleFilterChange(key, 'all') })
+
+    if (universityFromUrl !== 'all')
+      push(
+        'universityCode',
+        t('University'),
+        universities.find((u) => u.code === universityFromUrl)?.name ?? universityFromUrl,
+      )
+    if (eduTypeFromUrl !== 'all')
+      push(
+        'educationType',
+        t('Education type'),
+        educationTypes.find((e) => e.code === eduTypeFromUrl)?.name ?? eduTypeFromUrl,
+      )
+    if (eduFormFromUrl !== 'all')
+      push(
+        'educationForm',
+        t('Education form'),
+        educationForms.find((f) => f.code === eduFormFromUrl)?.name ?? eduFormFromUrl,
+      )
+    if (eduYearFromUrl !== 'all')
+      push(
+        'eduYear',
+        t('Education year'),
+        years.find((y) => y.code === eduYearFromUrl)?.name ?? eduYearFromUrl,
+      )
+    if (statusFromUrl !== 'all')
+      push('status', t('Status'), t(STATUS_LABEL[statusFromUrl] ?? statusFromUrl))
+    if (specialityChipValue) push('specialityId', t('Speciality'), specialityChipValue)
+
+    return list
+  }, [
+    handleFilterChange,
+    t,
+    universityFromUrl,
+    universities,
+    eduTypeFromUrl,
+    educationTypes,
+    eduFormFromUrl,
+    educationForms,
+    eduYearFromUrl,
+    years,
+    statusFromUrl,
+    specialityChipValue,
+  ])
 
   const handleRefresh = useCallback(() => {
     refetch()
@@ -267,177 +311,165 @@ export default function SpecialityAttachmentsPage() {
 
   return (
     <div className="space-y-3 p-4">
-      {/* Page action bar — between the breadcrumb and the table, on the light page background
-          (--app-bg #f8fafc, not white) so the coloured buttons sit clear of the white table card. */}
-      <div className="flex items-center justify-end gap-2">
-        {/* Export (whole / current view) — emerald "Eksport" */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              disabled={exporting}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
-            >
-              {exporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Download className="h-4 w-4" aria-hidden="true" />
-              )}
-              {t('Export')}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>{t('Export')}</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => handleExport('all')}>{t('All')}</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleExport('view')}>
-              {t('Current view')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Attach — primary action */}
-        {canCreate && (
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
-          >
-            <Plus className="h-4 w-4" />
-            {t('Attach')}
-          </button>
-        )}
-      </div>
-
       <div className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        {/* Toolbar — filters + total + refresh (all table-scoped) */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
-          {/* University filter — searchable by code OR name (~98 OTMs). Trigger shows the filter
-              name ("Universitet") until an OTM is picked; "Barchasi" at the top clears it. */}
-          <SearchableSelect
-            value={universityFromUrl}
-            onChange={(v) => handleFilterChange('universityCode', v)}
-            options={universities}
-            placeholder={t('University')}
-            allLabel={t('All')}
-            searchPlaceholder={t('Search')}
-            emptyLabel={t('No data found')}
-            className="w-[340px]"
-          />
+        {/* Toolbar — search + filter popover + refresh + page actions on one line */}
+        <DataTableToolbar
+          search={{
+            value: searchInput,
+            onChange: (v) => {
+              setSearchInput(v)
+              updateSearchParams({ q: v || undefined, page: undefined })
+            },
+            placeholder: t('Search by name, code or UUID'),
+          }}
+          filterContent={
+            <>
+              {/* University filter — searchable by code OR name (~98 OTMs); "Barchasi" clears it */}
+              <div className="space-y-1.5">
+                <Label>{t('University')}</Label>
+                <SearchableSelect
+                  value={universityFromUrl}
+                  onChange={(v) => handleFilterChange('universityCode', v)}
+                  options={universities}
+                  placeholder={t('All')}
+                  allLabel={t('All')}
+                  searchPlaceholder={t('Search')}
+                  emptyLabel={t('No data found')}
+                  className="w-full"
+                />
+              </div>
 
-          {/* Education type filter (Bakalavr / Magistr) */}
-          <Select
-            value={eduTypeFromUrl}
-            onValueChange={(v) => handleFilterChange('educationType', v)}
-          >
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder={t('Education type')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('Education type')}</SelectItem>
-              {educationTypes.map((e) => (
-                <SelectItem key={e.code} value={e.code}>
-                  {e.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              {/* Education type filter (Bakalavr / Magistr) */}
+              <div className="space-y-1.5">
+                <Label>{t('Education type')}</Label>
+                <Select
+                  value={eduTypeFromUrl}
+                  onValueChange={(v) => handleFilterChange('educationType', v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('All')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('All')}</SelectItem>
+                    {educationTypes.map((e) => (
+                      <SelectItem key={e.code} value={e.code}>
+                        {e.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Education form filter — short list (present forms), so no search box */}
-          <SearchableSelect
-            value={eduFormFromUrl}
-            onChange={(v) => handleFilterChange('educationForm', v)}
-            options={educationForms}
-            placeholder={t('Education form')}
-            allLabel={t('All')}
-            searchPlaceholder={t('Search')}
-            emptyLabel={t('No data found')}
-            className="w-[200px]"
-            searchable={false}
-          />
+              {/* Education form filter — short list (present forms), so no search box */}
+              <div className="space-y-1.5">
+                <Label>{t('Education form')}</Label>
+                <SearchableSelect
+                  value={eduFormFromUrl}
+                  onChange={(v) => handleFilterChange('educationForm', v)}
+                  options={educationForms}
+                  placeholder={t('All')}
+                  allLabel={t('All')}
+                  searchPlaceholder={t('Search')}
+                  emptyLabel={t('No data found')}
+                  className="w-full"
+                  searchable={false}
+                />
+              </div>
 
-          {/* Academic-year filter — options come from the data (grows as future years are seeded),
-              newest first; label is the span (2026-2027), value is the start year. */}
-          <Select value={eduYearFromUrl} onValueChange={(v) => handleFilterChange('eduYear', v)}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder={t('Education year')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('Education year')}</SelectItem>
-              {years.map((y) => (
-                <SelectItem key={y.code} value={y.code}>
-                  {y.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              {/* Academic-year filter — options come from the data (grows as future years are
+                  seeded), newest first; label is the span (2026-2027), value is the start year. */}
+              <div className="space-y-1.5">
+                <Label>{t('Education year')}</Label>
+                <Select
+                  value={eduYearFromUrl}
+                  onValueChange={(v) => handleFilterChange('eduYear', v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('All')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('All')}</SelectItem>
+                    {years.map((y) => (
+                      <SelectItem key={y.code} value={y.code}>
+                        {y.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Status filter (Faol / Nofaol) — ACTIVE vs. SUSPENDED (a fixed 2-state set, mirroring
-              the edit dialog: any non-ACTIVE row is "Nofaol"). A fixed set, not present-in-data,
-              so "Nofaol" stays selectable to surface deactivated attachments even when there are none. */}
-          <Select value={statusFromUrl} onValueChange={(v) => handleFilterChange('status', v)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={t('Status')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('Status')}</SelectItem>
-              <SelectItem value="ACTIVE">{t('Active')}</SelectItem>
-              <SelectItem value="SUSPENDED">{t('Inactive')}</SelectItem>
-            </SelectContent>
-          </Select>
+              {/* Status filter (Faol / Nofaol) — ACTIVE vs. SUSPENDED (a fixed 2-state set,
+                  mirroring the edit dialog: any non-ACTIVE row is "Nofaol"). A fixed set, not
+                  present-in-data, so "Nofaol" stays selectable to surface deactivated
+                  attachments even when there are none. */}
+              <div className="space-y-1.5">
+                <Label>{t('Status')}</Label>
+                <Select
+                  value={statusFromUrl}
+                  onValueChange={(v) => handleFilterChange('status', v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('All')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('All')}</SelectItem>
+                    <SelectItem value="ACTIVE">{t('Active')}</SelectItem>
+                    <SelectItem value="SUSPENDED">{t('Inactive')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          }
+          activeFilterCount={chips.length}
+          chips={chips}
+          onClearAll={handleClearFilters}
+          total={totalElements}
+          onRefresh={handleRefresh}
+          refreshing={isLoading}
+          actions={
+            <>
+              {/* Export (whole / current view) — emerald "Eksport" */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={exporting}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emerald-border)] bg-[var(--emerald-bg)] px-3 py-1.5 text-sm font-medium text-[var(--emerald-text)] transition-colors hover:opacity-80 disabled:opacity-50"
+                  >
+                    {exporting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                    )}
+                    {t('Export')}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>{t('Export')}</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => handleExport('all')}>
+                    {t('All')}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleExport('view')}>
+                    {t('Current view')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          {/* Active speciality deep-link filter — removable, so the admin can widen the view
-              back to the whole registry without editing the URL. */}
-          {specialityChipLabel ? (
-            <span className="inline-flex max-w-[280px] items-center gap-1.5 rounded-full border border-[var(--border-color-pro)] bg-[var(--hover-bg)] py-1 pr-1 pl-2.5 text-xs text-[var(--text-primary)]">
-              <span className="truncate" title={specialityChipLabel}>
-                {specialityChipLabel}
-              </span>
-              <button
-                type="button"
-                onClick={() => handleFilterChange('specialityId', 'all')}
-                title={t('Clear')}
-                aria-label={`${t('Clear')} — ${specialityChipLabel}`}
-                className="rounded-full p-0.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-bg)] hover:text-[var(--text-primary)]"
-              >
-                <X className="h-3 w-3" aria-hidden="true" />
-              </button>
-            </span>
-          ) : null}
-
-          {/* Free-text speciality search (code / name / UUID) — same behaviour as the classifier
-              page: debounced, URL-backed (?q=), first page on every change. Also the flex filler
-              that keeps the total + refresh pinned to the right. */}
-          <div className="relative min-w-[200px] flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
-            <Input
-              value={searchInput}
-              onChange={(e) => {
-                setSearchInput(e.target.value)
-                updateSearchParams({ q: e.target.value || undefined, page: undefined })
-              }}
-              placeholder={t('Search by name, code or UUID')}
-              className="pl-9"
-            />
-          </div>
-
-          <span className="text-sm text-[var(--text-secondary)] tabular-nums">
-            {t('Total')}:{' '}
-            <span className="font-semibold text-[var(--text-primary)]">{totalElements}</span>
-          </span>
-
-          <div className="h-5 w-px bg-[var(--border-color-pro)]" />
-
-          {/* Refresh — icon-only (table-scoped) */}
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            title={t('Refresh')}
-            className="rounded-lg p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)] disabled:opacity-40"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+              {/* Attach — primary action */}
+              {canCreate && (
+                <button
+                  type="button"
+                  onClick={() => setCreateOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('Attach')}
+                </button>
+              )}
+            </>
+          }
+        />
 
         {(isLoading || isPlaceholderData) && (
           <div className="progress-indeterminate h-0.5 w-full" />

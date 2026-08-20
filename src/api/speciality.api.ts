@@ -124,10 +124,8 @@ export interface SpecialityDuplicateCheck {
 export interface SpecialityAttachedUniversity {
   universityCode: string
   universityName: string
-  /** Every attachment row for this speciality at that OTM — revoked (soft-deleted) ones included. */
-  total: number
-  /** Live rows only. */
-  live: number
+  /** Live attachment rows at that OTM (one per education form / academic year). */
+  count: number
 }
 
 export interface SpecialityDuplicateParams {
@@ -228,8 +226,8 @@ export const specialityApi = {
 
   /**
    * Universities this speciality is attached to, grouped by OTM — the third delete guard made
-   * visible. Revoked (soft-deleted) attachments are counted too: the FK is ON DELETE RESTRICT,
-   * so they block the delete exactly like a live row does.
+   * visible. LIVE attachments only: a revoked one is invisible in the registry and cannot be
+   * detached again, so it is never a blocker (the server purges those rows at delete time).
    */
   attachedUniversities: async (
     id: string,

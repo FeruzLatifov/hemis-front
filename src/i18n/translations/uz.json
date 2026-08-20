@@ -1383,5 +1383,7 @@
   "Speciality deleted": "Mutaxassislik o'chirildi",
   "Attached to universities": "OTMlarga biriktirilgan",
   "This speciality is attached to universities. Remove those attachments first.": "Bu mutaxassislik OTMlarga biriktirilgan. Avval o'sha biriktirishlarni bekor qiling.",
-  "Revoked attachments also block deletion": "Bekor qilingan biriktirishlar ham o'chirishga to'sqinlik qiladi"
+  "Revoked attachments also block deletion": "Bekor qilingan biriktirishlar ham o'chirishga to'sqinlik qiladi",
+
+  "Remove {{label}} filter": "{{label}} filtrini olib tashlash"
 }
