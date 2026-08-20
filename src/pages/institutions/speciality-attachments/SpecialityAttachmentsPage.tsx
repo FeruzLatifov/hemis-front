@@ -30,7 +30,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Label } from '@/components/ui/label'
 import { SearchableSelect } from '@/components/filters/SearchableSelect'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
 import { DataTableToolbar, type DataTableToolbarChip } from '@/components/tables/DataTableToolbar'
@@ -339,17 +338,19 @@ export default function SpecialityAttachmentsPage() {
           filters={
             <>
               {/* Education type filter (Bakalavr / Magistr) */}
-              <div className="w-[180px] space-y-1">
-                <Label className="text-xs">{t('Education type')}</Label>
+              <div className="w-[180px]">
                 <Select
                   value={eduTypeFromUrl}
                   onValueChange={(v) => handleFilterChange('educationType', v)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('All')} />
+                    <SelectValue placeholder={t('Education type')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('All')}</SelectItem>
+                    {/* The "no filter" option carries the filter's NAME, not "Barchasi": with no
+                        label above the control, that name is the only thing telling the user what
+                        this dropdown filters — same as the University select on the row above. */}
+                    <SelectItem value="all">{t('Education type')}</SelectItem>
                     {educationTypes.map((e) => (
                       <SelectItem key={e.code} value={e.code}>
                         {e.name}
@@ -360,14 +361,13 @@ export default function SpecialityAttachmentsPage() {
               </div>
 
               {/* Education form filter — short list (present forms), so no search box */}
-              <div className="w-[180px] space-y-1">
-                <Label className="text-xs">{t('Education form')}</Label>
+              <div className="w-[180px]">
                 <SearchableSelect
                   value={eduFormFromUrl}
                   onChange={(v) => handleFilterChange('educationForm', v)}
                   options={educationForms}
-                  placeholder={t('All')}
-                  allLabel={t('All')}
+                  placeholder={t('Education form')}
+                  allLabel={t('Education form')}
                   searchPlaceholder={t('Search')}
                   emptyLabel={t('No data found')}
                   className="w-full"
@@ -377,17 +377,16 @@ export default function SpecialityAttachmentsPage() {
 
               {/* Academic-year filter — options come from the data (grows as future years are
                   seeded), newest first; label is the span (2026-2027), value is the start year. */}
-              <div className="w-[180px] space-y-1">
-                <Label className="text-xs">{t('Education year')}</Label>
+              <div className="w-[180px]">
                 <Select
                   value={eduYearFromUrl}
                   onValueChange={(v) => handleFilterChange('eduYear', v)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('All')} />
+                    <SelectValue placeholder={t('Education year')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('All')}</SelectItem>
+                    <SelectItem value="all">{t('Education year')}</SelectItem>
                     {years.map((y) => (
                       <SelectItem key={y.code} value={y.code}>
                         {y.name}
@@ -401,17 +400,16 @@ export default function SpecialityAttachmentsPage() {
                   mirroring the edit dialog: any non-ACTIVE row is "Nofaol"). A fixed set, not
                   present-in-data, so "Nofaol" stays selectable to surface deactivated
                   attachments even when there are none. */}
-              <div className="w-[180px] space-y-1">
-                <Label className="text-xs">{t('Status')}</Label>
+              <div className="w-[180px]">
                 <Select
                   value={statusFromUrl}
                   onValueChange={(v) => handleFilterChange('status', v)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('All')} />
+                    <SelectValue placeholder={t('Status')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('All')}</SelectItem>
+                    <SelectItem value="all">{t('Status')}</SelectItem>
                     <SelectItem value="ACTIVE">{t('Active')}</SelectItem>
                     <SelectItem value="SUSPENDED">{t('Inactive')}</SelectItem>
                   </SelectContent>
