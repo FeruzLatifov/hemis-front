@@ -314,6 +314,20 @@ export default function SpecialityAttachmentsPage() {
       <div className="rounded-md border border-[var(--border-color-pro)] bg-[var(--card-bg)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         {/* Toolbar — search + filter popover + refresh + page actions on one line */}
         <DataTableToolbar
+          leadingFilter={
+            /* University leads the toolbar: with ~98 OTMs and 8k+ rows this is the filter almost
+               every visit starts from, so it costs no click. Searchable by code OR name. */
+            <SearchableSelect
+              value={universityFromUrl}
+              onChange={(v) => handleFilterChange('universityCode', v)}
+              options={universities}
+              placeholder={t('University')}
+              allLabel={t('University')}
+              searchPlaceholder={t('Search')}
+              emptyLabel={t('No data found')}
+              className="w-[210px]"
+            />
+          }
           search={{
             value: searchInput,
             onChange: (v) => {
@@ -322,26 +336,11 @@ export default function SpecialityAttachmentsPage() {
             },
             placeholder: t('Search by name, code or UUID'),
           }}
-          filterContent={
+          filters={
             <>
-              {/* University filter — searchable by code OR name (~98 OTMs); "Barchasi" clears it */}
-              <div className="space-y-1.5">
-                <Label>{t('University')}</Label>
-                <SearchableSelect
-                  value={universityFromUrl}
-                  onChange={(v) => handleFilterChange('universityCode', v)}
-                  options={universities}
-                  placeholder={t('All')}
-                  allLabel={t('All')}
-                  searchPlaceholder={t('Search')}
-                  emptyLabel={t('No data found')}
-                  className="w-full"
-                />
-              </div>
-
               {/* Education type filter (Bakalavr / Magistr) */}
-              <div className="space-y-1.5">
-                <Label>{t('Education type')}</Label>
+              <div className="w-[180px] space-y-1">
+                <Label className="text-xs">{t('Education type')}</Label>
                 <Select
                   value={eduTypeFromUrl}
                   onValueChange={(v) => handleFilterChange('educationType', v)}
@@ -361,8 +360,8 @@ export default function SpecialityAttachmentsPage() {
               </div>
 
               {/* Education form filter — short list (present forms), so no search box */}
-              <div className="space-y-1.5">
-                <Label>{t('Education form')}</Label>
+              <div className="w-[180px] space-y-1">
+                <Label className="text-xs">{t('Education form')}</Label>
                 <SearchableSelect
                   value={eduFormFromUrl}
                   onChange={(v) => handleFilterChange('educationForm', v)}
@@ -378,8 +377,8 @@ export default function SpecialityAttachmentsPage() {
 
               {/* Academic-year filter — options come from the data (grows as future years are
                   seeded), newest first; label is the span (2026-2027), value is the start year. */}
-              <div className="space-y-1.5">
-                <Label>{t('Education year')}</Label>
+              <div className="w-[180px] space-y-1">
+                <Label className="text-xs">{t('Education year')}</Label>
                 <Select
                   value={eduYearFromUrl}
                   onValueChange={(v) => handleFilterChange('eduYear', v)}
@@ -402,8 +401,8 @@ export default function SpecialityAttachmentsPage() {
                   mirroring the edit dialog: any non-ACTIVE row is "Nofaol"). A fixed set, not
                   present-in-data, so "Nofaol" stays selectable to surface deactivated
                   attachments even when there are none. */}
-              <div className="space-y-1.5">
-                <Label>{t('Status')}</Label>
+              <div className="w-[180px] space-y-1">
+                <Label className="text-xs">{t('Status')}</Label>
                 <Select
                   value={statusFromUrl}
                   onValueChange={(v) => handleFilterChange('status', v)}
@@ -420,7 +419,6 @@ export default function SpecialityAttachmentsPage() {
               </div>
             </>
           }
-          activeFilterCount={chips.length}
           chips={chips}
           onClearAll={handleClearFilters}
           total={totalElements}

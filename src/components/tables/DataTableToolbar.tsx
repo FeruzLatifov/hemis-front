@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, Search, SlidersHorizontal, X } from 'lucide-react'
+import { RefreshCw, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 export interface DataTableToolbarChip {
   /** Stable id — usually the filter's query-param name. */
@@ -17,16 +16,19 @@ export interface DataTableToolbarChip {
 }
 
 interface DataTableToolbarProps {
+  /** Rendered BEFORE the search box — the one filter used on nearly every visit, so it is the
+   *  first thing on the row. Everything rarer goes to {@link filters}. */
+  leadingFilter?: ReactNode
   /** Search box (omit to hide it entirely). */
   search?: { value: string; onChange: (v: string) => void; placeholder?: string }
-  /** Rendered inside the filter popover — the page passes its own filter controls. */
-  filterContent?: ReactNode
-  /** How many filters are currently applied — shown on the button, drives the popover's reset. */
-  activeFilterCount?: number
+  /** The remaining filters — rendered OPEN on the second row, not hidden behind a button.
+   *  Five controls plus a search box do not fit one line, but two lines with everything visible
+   *  beat one line with the filters a click away: this grid is filtered on almost every visit. */
+  filters?: ReactNode
   /** One chip per applied filter; the page owns the labels and the clearing. */
   chips?: DataTableToolbarChip[]
   onClearAll?: () => void
-  /** Row count shown next to the chips. */
+  /** Row count — sits on the first row, so an unfiltered grid needs no second row at all. */
   total?: number
   onRefresh?: () => void
   refreshing?: boolean
@@ -35,18 +37,22 @@ interface DataTableToolbarProps {
 }
 
 /**
- * Single-row table toolbar: search on the left, a filter popover + refresh in the middle, page
- * actions on the right, and an optional chip row summarising what is currently applied. Replaces
- * the three stacked bars (filters / actions / total) list pages grow into, which stop fitting on
- * one line as soon as a fifth filter is added.
+ * Two-row table toolbar. First row: the leading filter, the search box, the row count and the page
+ * actions. Second row: the remaining filters, plus a chip for anything filtered without a control
+ * of its own. Replaces the three stacked bars (filters / actions / total) list pages grow into.
  *
- * <p>The page keeps owning its filter state: it passes the controls as {@code filterContent} and
- * one {@link DataTableToolbarChip} per applied filter, so no filter logic moves in here.</p>
+ * <p>Why two rows and not one with a filter popover: this grid is filtered on nearly every visit,
+ * and a control behind a button is a control the user has to remember exists. The count moved up
+ * to the first row precisely so the second one never becomes a third.</p>
+ *
+ * <p>The page keeps owning its filter state: it passes the controls as {@code leadingFilter} /
+ * {@code filters} and one {@link DataTableToolbarChip} per applied filter, so no filter logic
+ * moves in here.</p>
  */
 export function DataTableToolbar({
+  leadingFilter,
   search,
-  filterContent,
-  activeFilterCount = 0,
+  filters,
   chips = [],
   onClearAll,
   total,
@@ -57,12 +63,16 @@ export function DataTableToolbar({
   const { t } = useTranslation()
 
   const searchPlaceholder = search?.placeholder ?? t('Search')
-  const showChipRow = chips.length > 0 || total != null
+  // The count now rides on the first row, so the second row exists only for applied
+  // filters — with none, the toolbar is a single line.
+  const showSecondRow = filters != null || chips.length > 0
 
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2.5">
-        {/* Search — the most used control, so it leads and takes the free space */}
+        {leadingFilter ? <div className="shrink-0">{leadingFilter}</div> : null}
+
+        {/* Search takes the free space; the leading filter (if any) sits to its left */}
         {search ? (
           <div className="relative min-w-[200px] flex-1">
             <Search
@@ -77,31 +87,6 @@ export function DataTableToolbar({
               className="pl-9"
             />
           </div>
-        ) : null}
-
-        {filterContent ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button type="button" variant="outline" className="font-normal">
-                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                {activeFilterCount > 0 ? `${t('Filters')} (${activeFilterCount})` : t('Filters')}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              collisionPadding={8}
-              className="max-h-[70vh] w-[300px] space-y-3 overflow-y-auto"
-            >
-              {filterContent}
-              {activeFilterCount > 0 && onClearAll ? (
-                <div className="flex justify-end">
-                  <Button type="button" variant="ghost" size="sm" onClick={onClearAll}>
-                    {t('Clear')}
-                  </Button>
-                </div>
-              ) : null}
-            </PopoverContent>
-          </Popover>
         ) : null}
 
         {onRefresh ? (
@@ -119,12 +104,24 @@ export function DataTableToolbar({
           </Button>
         ) : null}
 
+        {total != null ? (
+          <span className="text-muted-foreground shrink-0 text-sm whitespace-nowrap tabular-nums">
+            {t('Total')}:{' '}
+            <span className="font-semibold text-[var(--text-primary)]">
+              {total.toLocaleString()}
+            </span>
+          </span>
+        ) : null}
+
         {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
       </div>
 
-      {/* Applied filters + row count — the count lives here rather than on a bar of its own */}
-      {showChipRow ? (
+      {/* Second row: the remaining filters, then any chip that has no control of its own
+          (e.g. a speciality picked from another page). Never a third row — the count sits above. */}
+      {showSecondRow ? (
         <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-color-pro)] px-4 py-2">
+          {filters}
+
           {chips.map((chip) => (
             <Badge
               key={chip.key}
@@ -145,22 +142,13 @@ export function DataTableToolbar({
             </Badge>
           ))}
 
-          {total != null ? (
-            <span className="text-muted-foreground ml-auto text-sm tabular-nums">
-              {t('Total')}:{' '}
-              <span className="font-semibold text-[var(--text-primary)]">
-                {total.toLocaleString()}
-              </span>
-            </span>
-          ) : null}
-
-          {chips.length > 0 && onClearAll ? (
+          {onClearAll ? (
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={onClearAll}
-              className={total != null ? '' : 'ml-auto'}
+              className="ml-auto"
             >
               {t('Clear')}
             </Button>
