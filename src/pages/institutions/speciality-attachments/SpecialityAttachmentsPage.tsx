@@ -215,6 +215,12 @@ export default function SpecialityAttachmentsPage() {
   // A chip ONLY for a filter with no control of its own — currently just specialityId, which
   // arrives by URL from the classifier's delete dialog. Every other filter has an open dropdown
   // on the second row already showing its value, so a chip would repeat what sits next to it.
+  // A filter left at "all" shows its own name, and that name must read as a PLACEHOLDER, not as a
+  // chosen value — otherwise "Ta'lim turi" (nothing picked) looks exactly like "Bakalavr" (picked).
+  // SearchableSelect already dims its placeholder; Radix Select renders the "all" item as a normal
+  // value, so the trigger is dimmed by hand to match.
+  const filterTone = (value: string) => (value === 'all' ? 'text-[var(--text-secondary)]' : '')
+
   const chips = useMemo<DataTableToolbarChip[]>(() => {
     if (!specialityChipValue) return []
     return [
@@ -307,7 +313,7 @@ export default function SpecialityAttachmentsPage() {
                   value={eduTypeFromUrl}
                   onValueChange={(v) => handleFilterChange('educationType', v)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full ${filterTone(eduTypeFromUrl)}`}>
                     <SelectValue placeholder={t('Education type')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -346,7 +352,7 @@ export default function SpecialityAttachmentsPage() {
                   value={eduYearFromUrl}
                   onValueChange={(v) => handleFilterChange('eduYear', v)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full ${filterTone(eduYearFromUrl)}`}>
                     <SelectValue placeholder={t('Education year')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -369,7 +375,7 @@ export default function SpecialityAttachmentsPage() {
                   value={statusFromUrl}
                   onValueChange={(v) => handleFilterChange('status', v)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full ${filterTone(statusFromUrl)}`}>
                     <SelectValue placeholder={t('Status')} />
                   </SelectTrigger>
                   <SelectContent>
