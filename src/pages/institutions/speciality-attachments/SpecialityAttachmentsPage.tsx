@@ -1,7 +1,17 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, GraduationCap, Download, Loader2, Plus, Trash2, Pencil } from 'lucide-react'
+import {
+  RefreshCw,
+  GraduationCap,
+  Download,
+  Loader2,
+  Plus,
+  Trash2,
+  Pencil,
+  Search,
+  X,
+} from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -30,10 +40,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Input } from '@/components/ui/input'
 import { SearchableSelect } from '@/components/filters/SearchableSelect'
 import { DataTablePagination } from '@/components/tables/DataTablePagination'
-import { PAGINATION } from '@/constants'
+import { PAGINATION, UI } from '@/constants'
 import { toast } from 'sonner'
+import { useDebounce } from '@/hooks/useDebounce'
 import { usePermission } from '@/hooks/usePermission'
 import {
   useSpecialityAttachments,
@@ -87,11 +99,17 @@ export default function SpecialityAttachmentsPage() {
   const eduFormFromUrl = searchParams.get('educationForm') || 'all'
   const eduYearFromUrl = searchParams.get('eduYear') || 'all'
   const statusFromUrl = searchParams.get('status') || 'all'
+  const qFromUrl = (searchParams.get('q') || '').slice(0, 200)
+  // Deep-link filter: the classifier's delete dialog links here with ?specialityId=<uuid> so the
+  // admin lands on exactly the attachments that block the delete.
+  const specialityIdFromUrl = searchParams.get('specialityId') || undefined
   // Numeric year for the API — guards a hand-tampered ?eduYear=abc from sending NaN (→ 400).
   const eduYearNum =
     eduYearFromUrl !== 'all' && Number.isFinite(Number(eduYearFromUrl))
       ? Number(eduYearFromUrl)
       : undefined
+  const [searchInput, setSearchInput] = useState(qFromUrl)
+  const debouncedSearch = useDebounce(searchInput, UI.SEARCH_DEBOUNCE)
 
   const updateSearchParams = useCallback(
     (updates: Record<string, string | undefined>) => {
@@ -155,6 +173,8 @@ export default function SpecialityAttachmentsPage() {
 
   const listParams = {
     universityCode: universityFromUrl !== 'all' ? universityFromUrl : undefined,
+    specialityId: specialityIdFromUrl,
+    q: debouncedSearch.trim() || undefined,
     educationType: eduTypeFromUrl !== 'all' ? eduTypeFromUrl : undefined,
     educationForm: eduFormFromUrl !== 'all' ? eduFormFromUrl : undefined,
     eduYear: eduYearNum,
@@ -174,7 +194,31 @@ export default function SpecialityAttachmentsPage() {
     eduTypeFromUrl !== 'all' ||
     eduFormFromUrl !== 'all' ||
     eduYearFromUrl !== 'all' ||
-    statusFromUrl !== 'all'
+    statusFromUrl !== 'all' ||
+    qFromUrl.trim() !== '' ||
+    specialityIdFromUrl !== undefined
+
+  const handleClearFilters = useCallback(() => {
+    setSearchInput('')
+    updateSearchParams({
+      universityCode: undefined,
+      specialityId: undefined,
+      q: undefined,
+      educationType: undefined,
+      educationForm: undefined,
+      eduYear: undefined,
+      status: undefined,
+      page: undefined,
+    })
+  }, [updateSearchParams])
+
+  // The ?specialityId= filter has no dropdown of its own, so without a visible marker a narrowed
+  // table reads as "empty/broken". Show it as a removable chip instead; the label comes from the
+  // first row (every row in scope shares the speciality) and falls back while the page is empty.
+  const specialityChipLabel = specialityIdFromUrl
+    ? [rows[0]?.specialityCode, rows[0]?.specialityName].filter(Boolean).join(' — ') ||
+      t('Speciality')
+    : null
 
   const handleRefresh = useCallback(() => {
     refetch()
@@ -188,6 +232,8 @@ export default function SpecialityAttachmentsPage() {
         mode === 'view'
           ? {
               universityCode: universityFromUrl !== 'all' ? universityFromUrl : undefined,
+              specialityId: specialityIdFromUrl,
+              q: debouncedSearch.trim() || undefined,
               educationType: eduTypeFromUrl !== 'all' ? eduTypeFromUrl : undefined,
               educationForm: eduFormFromUrl !== 'all' ? eduFormFromUrl : undefined,
               eduYear: eduYearNum,
@@ -340,7 +386,40 @@ export default function SpecialityAttachmentsPage() {
             </SelectContent>
           </Select>
 
-          <div className="flex-1" />
+          {/* Active speciality deep-link filter — removable, so the admin can widen the view
+              back to the whole registry without editing the URL. */}
+          {specialityChipLabel ? (
+            <span className="inline-flex max-w-[280px] items-center gap-1.5 rounded-full border border-[var(--border-color-pro)] bg-[var(--hover-bg)] py-1 pr-1 pl-2.5 text-xs text-[var(--text-primary)]">
+              <span className="truncate" title={specialityChipLabel}>
+                {specialityChipLabel}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleFilterChange('specialityId', 'all')}
+                title={t('Clear')}
+                aria-label={`${t('Clear')} — ${specialityChipLabel}`}
+                className="rounded-full p-0.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-bg)] hover:text-[var(--text-primary)]"
+              >
+                <X className="h-3 w-3" aria-hidden="true" />
+              </button>
+            </span>
+          ) : null}
+
+          {/* Free-text speciality search (code / name / UUID) — same behaviour as the classifier
+              page: debounced, URL-backed (?q=), first page on every change. Also the flex filler
+              that keeps the total + refresh pinned to the right. */}
+          <div className="relative min-w-[200px] flex-1">
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
+            <Input
+              value={searchInput}
+              onChange={(e) => {
+                setSearchInput(e.target.value)
+                updateSearchParams({ q: e.target.value || undefined, page: undefined })
+              }}
+              placeholder={t('Search by name, code or UUID')}
+              className="pl-9"
+            />
+          </div>
 
           <span className="text-sm text-[var(--text-secondary)] tabular-nums">
             {t('Total')}:{' '}
@@ -429,16 +508,7 @@ export default function SpecialityAttachmentsPage() {
                       </div>
                       {hasFilters && (
                         <button
-                          onClick={() =>
-                            updateSearchParams({
-                              universityCode: undefined,
-                              educationType: undefined,
-                              educationForm: undefined,
-                              eduYear: undefined,
-                              status: undefined,
-                              page: undefined,
-                            })
-                          }
+                          onClick={handleClearFilters}
                           className="mt-1 text-xs text-[var(--primary)] transition-colors hover:underline"
                         >
                           {t('Clear')} {t('Filters').toLowerCase()}

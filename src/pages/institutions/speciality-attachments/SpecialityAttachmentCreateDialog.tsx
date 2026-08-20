@@ -84,9 +84,12 @@ export function SpecialityAttachmentCreateDialog({ open, onOpenChange }: Props) 
   // Speciality search is scoped to the education type ONLY — NOT the academic year. A speciality is
   // offered independently of the attachment's year (the year is saved on the row, it does not filter
   // the picker). Idle until the user types a code or name (server-side search), then returns ≤50.
+  // APPROVED-only: a NEEDS_REVIEW row has not been distributed to the OTMs yet, so it cannot be
+  // attached — the backend refuses it with 422 SPECIALITY_NOT_APPROVED anyway.
   const { data: specData, isFetching: specLoading } = useSpecialityList(
     {
       educationType: educationType as EducationTypeCode,
+      reviewStatus: 'APPROVED',
       q: debouncedQuery,
       size: 50,
     },

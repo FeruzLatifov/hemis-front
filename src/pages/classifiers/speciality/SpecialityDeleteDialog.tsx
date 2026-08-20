@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AlertTriangle, ExternalLink, Info, Loader2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,18 +13,23 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useDeleteSpeciality, useSpecialityDetail } from '@/hooks/useSpeciality'
+import {
+  useDeleteSpeciality,
+  useSpecialityAttachedUniversities,
+  useSpecialityDetail,
+} from '@/hooks/useSpeciality'
 
 /**
- * Delete confirmation for a single speciality — deliberately three-state (blocked by status,
- * blocked by children, or confirmable), because a classifier row is shared reference data and
- * only a NEEDS_REVIEW leaf may ever go.
+ * Delete confirmation for a single speciality — deliberately four-state (blocked by status,
+ * blocked by children, blocked by OTM attachments, or confirmable), because a classifier row is
+ * shared reference data and only a NEEDS_REVIEW leaf nobody is attached to may ever go.
  *
  * <p>The backend re-checks every one of these guards and answers 422, so this is not the
  * enforcement point: it exists so the admin sees WHY a row cannot be deleted and what to do next
- * (delete the sub-directions, or move each one under another parent) without spending a round
- * trip. The node is re-fetched here rather than passed in, so the UI judges the same data the
- * server does — the UI explains up front, the server still has the last word.</p>
+ * (delete the sub-directions, move each one under another parent, or revoke the attachments)
+ * without spending a round trip. The node is re-fetched here rather than passed in, so the UI
+ * judges the same data the server does — the UI explains up front, the server still has the last
+ * word.</p>
  */
 export function SpecialityDeleteDialog({
   specialityId,
@@ -46,9 +52,31 @@ export function SpecialityDeleteDialog({
 
   const children = node?.children ?? []
   const wrongStatus = node != null && node.reviewStatus !== 'NEEDS_REVIEW'
-  // Everything must be true at once — a loaded, NEEDS_REVIEW, childless row.
-  const canConfirm = node != null && !wrongStatus && children.length === 0
+  // Only ask about attachments once the earlier blockers are ruled out — a status/children block
+  // already tells the admin what to do, so the extra request would explain nothing.
+  const attachmentsEnabled = node != null && !wrongStatus && children.length === 0
+  const { data: attached, isLoading: attachedLoading } = useSpecialityAttachedUniversities(
+    specialityId,
+    attachmentsEnabled,
+  )
+  const universities = attached ?? []
+  // Some OTM holds a revoked attachment — worth a footnote, because "0 live" still blocks.
+  const hasRevoked = universities.some((u) => u.total > u.live)
+  // Everything must be true at once — a loaded, NEEDS_REVIEW, childless, unattached row. While
+  // the attachment lookup is in flight the blocker is still unknown, so no Delete button yet.
+  // A failed lookup leaves the list empty and lets the attempt through: the server guards it.
+  const canConfirm = attachmentsEnabled && !attachedLoading && universities.length === 0
   const pending = deleteMutation.isPending
+
+  // Deep link into the attachment registry, pre-filtered to THIS speciality (and, per row, to that
+  // one OTM) — the admin lands on exactly the rows that block the delete instead of the whole
+  // registry. Built from the `specialityId` prop, which is what the dialog is already keyed on.
+  const attachmentsHref = (universityCode?: string) => {
+    const params = new URLSearchParams()
+    if (universityCode) params.set('universityCode', universityCode)
+    if (specialityId) params.set('specialityId', specialityId)
+    return `/institutions/speciality-attachments?${params.toString()}`
+  }
 
   return (
     <AlertDialog open={specialityId != null} onOpenChange={onOpenChange}>
@@ -115,6 +143,69 @@ export function SpecialityDeleteDialog({
                   </li>
                 ))}
               </ul>
+            </div>
+          </div>
+        ) : attachedLoading ? (
+          <p className="text-muted-foreground text-sm">{t('Loading...')}</p>
+        ) : universities.length > 0 ? (
+          <div className="min-w-0 space-y-3">
+            <p className="flex items-start gap-2 rounded-[6px] border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              {t('This speciality is attached to universities. Remove those attachments first.')}
+            </p>
+            <div className="min-w-0 space-y-1">
+              {/* The heading doubles as the way out: attachments are revoked on the registry
+                  page — this jump narrows it to this speciality across every OTM. */}
+              <h3 className="text-sm font-semibold tracking-wide uppercase">
+                <Link
+                  to={attachmentsHref()}
+                  onClick={() => onOpenChange(false)}
+                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
+                >
+                  {t('Attached to universities')} ({universities.length})
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </Link>
+              </h3>
+              <ul className="max-h-56 space-y-1 overflow-y-auto">
+                {universities.map((u) => (
+                  <li key={u.universityCode} className="flex min-w-0 items-center gap-2 text-sm">
+                    <span className="text-muted-foreground shrink-0 font-mono text-xs">
+                      {u.universityCode}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate" title={u.universityName}>
+                      {u.universityName}
+                    </span>
+                    {/* live / total — one number when they agree, else both: the gap is the
+                        revoked rows, which the FK counts just the same. */}
+                    <span
+                      className="text-muted-foreground shrink-0 text-xs tabular-nums"
+                      title={
+                        u.total > u.live ? t('Revoked attachments also block deletion') : undefined
+                      }
+                    >
+                      {u.total > u.live ? `${u.live} / ${u.total}` : u.total}
+                    </span>
+                    {/* Per-OTM jump — the registry filtered to this speciality AND this OTM.
+                        Ghost button so the row balances the "Move" action in the children list. */}
+                    <Button variant="ghost" size="sm" className="shrink-0" asChild>
+                      <Link
+                        to={attachmentsHref(u.universityCode)}
+                        onClick={() => onOpenChange(false)}
+                        title={t('Attached to universities')}
+                        aria-label={`${t('Attached to universities')} — ${u.universityName}`}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              {hasRevoked ? (
+                <p className="text-muted-foreground flex items-start gap-1.5 pt-1 text-xs">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  {t('Revoked attachments also block deletion')}
+                </p>
+              ) : null}
             </div>
           </div>
         ) : (

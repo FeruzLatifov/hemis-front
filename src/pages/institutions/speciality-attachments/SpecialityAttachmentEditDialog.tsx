@@ -88,9 +88,12 @@ export function SpecialityAttachmentEditDialog({ row, onOpenChange }: Props) {
   const hasQuery = debouncedQuery.trim().length > 0
   // Speciality search is scoped to the education type ONLY — not the year (year-independent picker).
   // Stays idle until a code/name is typed (server-side, ≤50 matches) — never bulk-loads the set.
+  // APPROVED-only: a NEEDS_REVIEW row has not been distributed to the OTMs yet, so it cannot be
+  // attached — the backend refuses it with 422 SPECIALITY_NOT_APPROVED anyway.
   const { data: specData, isFetching: specLoading } = useSpecialityList(
     {
       educationType,
+      reviewStatus: 'APPROVED',
       q: debouncedQuery,
       size: 50,
     },

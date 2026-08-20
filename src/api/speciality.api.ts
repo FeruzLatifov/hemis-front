@@ -117,6 +117,19 @@ export interface SpecialityDuplicateCheck {
   matches: SpecialityDuplicateItem[]
 }
 
+/**
+ * One OTM a speciality is attached to — a row of {@link specialityApi.attachedUniversities},
+ * grouped per university.
+ */
+export interface SpecialityAttachedUniversity {
+  universityCode: string
+  universityName: string
+  /** Every attachment row for this speciality at that OTM — revoked (soft-deleted) ones included. */
+  total: number
+  /** Live rows only. */
+  live: number
+}
+
 export interface SpecialityDuplicateParams {
   code?: string
   name?: string
@@ -211,6 +224,22 @@ export const specialityApi = {
   /** Delete a NEEDS_REVIEW speciality (childless + unattached). 422 when a guard blocks it. */
   remove: async (id: string): Promise<void> => {
     await apiClient.delete(`${BASE_URL}/${id}`)
+  },
+
+  /**
+   * Universities this speciality is attached to, grouped by OTM — the third delete guard made
+   * visible. Revoked (soft-deleted) attachments are counted too: the FK is ON DELETE RESTRICT,
+   * so they block the delete exactly like a live row does.
+   */
+  attachedUniversities: async (
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<SpecialityAttachedUniversity[]> => {
+    const response = await apiClient.get<Wrapped<SpecialityAttachedUniversity[]>>(
+      `${BASE_URL}/${id}/attachments`,
+      { signal },
+    )
+    return response.data.data
   },
 
   /** Advisory duplicate check for the add form — existing rows with the same code/name. */

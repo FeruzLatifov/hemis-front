@@ -34,6 +34,8 @@ export interface SpecialityAttachmentsParams {
   sort?: string
   universityCode?: string
   specialityId?: string
+  /** Free-text speciality search — code / uz name (substring) or the full speciality UUID. */
+  q?: string
   status?: string
   educationType?: string
   educationForm?: string

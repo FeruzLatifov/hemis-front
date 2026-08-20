@@ -97,6 +97,21 @@ export function useSpecialityDetail(id: string | null) {
   })
 }
 
+/**
+ * Universities the speciality is attached to (grouped per OTM) — the delete dialog's third
+ * blocker, shown the way the children list is. `enabled` keeps it idle while an earlier blocker
+ * (wrong status / sub-directions) already explains the refusal. Never cached: it gates the
+ * Delete button, and an attachment revoked in another tab must not leave a stale "deletable".
+ */
+export function useSpecialityAttachedUniversities(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.speciality.attachments(id || ''),
+    queryFn: ({ signal }) => specialityApi.attachedUniversities(id!, signal),
+    enabled: !!id && enabled,
+    staleTime: 0,
+  })
+}
+
 /** Curate a speciality (fix + promote NEEDS_REVIEW → APPROVED). */
 export function useUpdateSpeciality() {
   const queryClient = useQueryClient()

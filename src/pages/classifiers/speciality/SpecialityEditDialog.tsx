@@ -235,8 +235,14 @@ export function SpecialityEditDialog({
             }}
             className="flex min-h-0 flex-1 flex-col"
           >
-            {/* Uniform 2-column grid (single column on mobile), mirroring the create form. */}
-            <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-4 gap-y-4 overflow-y-auto pr-1 sm:grid-cols-2">
+            {/* Uniform 2-column grid (single column on mobile): short fields sit side-by-side, wide
+                ones (duplicate warning, parent picker, top-level note) span both columns.
+            
+                -mx-6/px-6 + py-1: a scroll box clips whatever is painted outside it, and a focused
+                field paints a 3px halo outside its border. Bleeding to the dialog's own padding and
+                padding back gives that halo room on every edge — without it the first column's halo
+                was sliced off flat against the left edge. */}
+            <div className="-mx-6 grid min-h-0 flex-1 grid-cols-1 gap-x-4 gap-y-4 overflow-y-auto px-6 py-1 [scrollbar-gutter:stable] sm:grid-cols-2">
               {/* Education type — dropdown fed by the h_education_type classifier, mirrors create. */}
               <div className="space-y-1">
                 <Label htmlFor={fieldId('eduType')}>{t('Education type')} *</Label>
@@ -382,8 +388,9 @@ export function SpecialityEditDialog({
                 ) : null}
               </div>
 
-              {/* Names — each FULL WIDTH (own row): speciality names run long, so a half-width column
-                  would crop them. Short fields above stay paired; only the names span both columns. */}
+              {/* Names: UZ + OZ stay full width — they carry the real name and run long.
+                  RU/EN pair up on one row: they are usually short or empty, and a row each
+                  was what pushed this dialog past the viewport. */}
               <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor={fieldId('nameUz')}>{t('Name')} (UZ) *</Label>
                 <Input
@@ -404,7 +411,7 @@ export function SpecialityEditDialog({
                 />
               </div>
 
-              <div className="space-y-1 sm:col-span-2">
+              <div className="space-y-1">
                 <Label htmlFor={fieldId('nameRu')}>{t('Name')} (RU)</Label>
                 <Input
                   id={fieldId('nameRu')}
@@ -413,7 +420,7 @@ export function SpecialityEditDialog({
                 />
               </div>
 
-              <div className="space-y-1 sm:col-span-2">
+              <div className="space-y-1">
                 <Label htmlFor={fieldId('nameEn')}>{t('Name')} (EN)</Label>
                 <Input
                   id={fieldId('nameEn')}

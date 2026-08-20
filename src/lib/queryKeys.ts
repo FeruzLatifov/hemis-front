@@ -152,6 +152,7 @@ export const queryKeys = {
     years: (educationType?: string) => ['speciality-classifier', 'years', educationType] as const,
     educationTypes: ['speciality-classifier', 'education-types'] as const,
     byId: (id: string) => ['speciality-classifier', id] as const,
+    attachments: (id: string) => ['speciality-classifier', id, 'attachments'] as const,
   },
 
   dissertationDefense: {

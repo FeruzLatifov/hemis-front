@@ -316,8 +316,13 @@ export function SpecialityCreateDialog({
           className="flex min-h-0 flex-1 flex-col"
         >
           {/* Uniform 2-column grid (single column on mobile): short fields sit side-by-side, wide
-              ones (duplicate warning, parent picker, top-level note) span both columns. */}
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-4 gap-y-4 overflow-y-auto pr-1 sm:grid-cols-2">
+              ones (duplicate warning, parent picker, top-level note) span both columns.
+          
+              -mx-6/px-6 + py-1: a scroll box clips whatever is painted outside it, and a focused
+              field paints a 3px halo outside its border. Bleeding to the dialog's own padding and
+              padding back gives that halo room on every edge — without it the first column's halo
+              was sliced off flat against the left edge. */}
+          <div className="-mx-6 grid min-h-0 flex-1 grid-cols-1 gap-x-4 gap-y-4 overflow-y-auto px-6 py-1 [scrollbar-gutter:stable] sm:grid-cols-2">
             {/* Advisory duplicate warning — the code/name already exists. Never blocks; the admin
                 decides (code is intentionally non-unique in the classifier). */}
             {hasDup && dup ? (
@@ -329,7 +334,9 @@ export function SpecialityCreateDialog({
                       ? t('This code already exists')
                       : t('This name already exists')}
                 </p>
-                <ul className="mt-1.5 space-y-1">
+                {/* Capped + scrollable: five wrapping matches used to grow this notice taller than
+                    the form below it, which is the part the user actually came here to fill in. */}
+                <ul className="mt-1.5 max-h-28 space-y-1 overflow-y-auto">
                   {dup.matches.slice(0, 5).map((m) => {
                     const lk = specialityLevelKey(m.hierarchyLevel)
                     return (
@@ -341,7 +348,7 @@ export function SpecialityCreateDialog({
                         )}
                       >
                         {m.code ? <span className="font-mono">{m.code}</span> : null}
-                        <span className="max-w-[220px] truncate">{m.nameUz}</span>
+                        <span className="max-w-[280px] truncate">{m.nameUz}</span>
                         {lk ? <span className="opacity-70">· {t(lk)}</span> : null}
                         {m.years && m.years.length > 0 ? (
                           <span className="opacity-70">· {m.years.join(', ')}</span>
@@ -530,8 +537,9 @@ export function SpecialityCreateDialog({
               ) : null}
             </div>
 
-            {/* Names — each FULL WIDTH (own row): speciality names run long, so a half-width column
-                would crop them. Short fields above stay paired; only the names span both columns. */}
+            {/* Names: UZ + OZ stay full width — they carry the real name and run long.
+                RU/EN pair up on one row: they are usually short or empty, and a row each
+                was what pushed this dialog past the viewport. */}
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor={fieldId('nameUz')}>{t('Name')} (UZ) *</Label>
               <Input
@@ -552,7 +560,7 @@ export function SpecialityCreateDialog({
               />
             </div>
 
-            <div className="space-y-1 sm:col-span-2">
+            <div className="space-y-1">
               <Label htmlFor={fieldId('nameRu')}>{t('Name')} (RU)</Label>
               <Input
                 id={fieldId('nameRu')}
@@ -561,7 +569,7 @@ export function SpecialityCreateDialog({
               />
             </div>
 
-            <div className="space-y-1 sm:col-span-2">
+            <div className="space-y-1">
               <Label htmlFor={fieldId('nameEn')}>{t('Name')} (EN)</Label>
               <Input
                 id={fieldId('nameEn')}
