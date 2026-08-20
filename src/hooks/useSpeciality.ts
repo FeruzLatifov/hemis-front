@@ -127,3 +127,19 @@ export function useCreateSpeciality() {
     // just stack a second, less-informative toast on top. Mirrors useUpdateSpeciality.
   })
 }
+
+/** Delete a NEEDS_REVIEW speciality (childless + unattached — the backend guards all three). */
+export function useDeleteSpeciality() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => specialityApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.speciality.all })
+      toast.success(i18n.t('Speciality deleted'), { duration: UI.TOAST_DURATION })
+    },
+    // No onError toast: a blocked delete returns 422 naming the exact guard (children /
+    // university attachment / already APPROVED), which the global axios interceptor
+    // (client.ts) already surfaces for 400/409/422. Mirrors useCreateSpeciality.
+  })
+}

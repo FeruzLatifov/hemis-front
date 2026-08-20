@@ -64,6 +64,7 @@ import { SpecialityTree } from './SpecialityTree'
 import { SpecialityDetailDialog } from './SpecialityDetailDialog'
 import { SpecialityCreateDialog } from './SpecialityCreateDialog'
 import { SpecialityEditDialog } from './SpecialityEditDialog'
+import { SpecialityDeleteDialog } from './SpecialityDeleteDialog'
 import {
   sortSpecialityNodes,
   filterSpecialityNodes,
@@ -87,6 +88,9 @@ export default function SpecialityClassifierPage() {
   // Promoting NEEDS_REVIEW → APPROVED (triggers OTM distribution) is a separate ministry-only
   // capability — gates the "Approved" option in the edit modal (the backend also enforces it).
   const canApprove = can('classifiers.speciality.approve')
+  // Removing a classifier row is ministry-only too, and even then the backend allows it for a
+  // NEEDS_REVIEW, childless, unattached row only — gates the delete button + confirm dialog.
+  const canDelete = can('classifiers.speciality.delete')
 
   const [searchParams, setSearchParams] = useSearchParams()
   // Education type: a code — '11'=Bakalavr, '12'=Magistr (URL ?educationType=). Selected via the
@@ -113,6 +117,8 @@ export default function SpecialityClassifierPage() {
   const [detailId, setDetailId] = useState<string | null>(null)
   // Id whose dedicated edit form is open. Opening it closes the detail modal (never stacked).
   const [editId, setEditId] = useState<string | null>(null)
+  // Id whose delete confirmation is open. Like editId, it replaces the detail modal (never stacked).
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const [openIds, setOpenIds] = useState<Set<string>>(new Set())
   const [exporting, setExporting] = useState(false)
   // "Add speciality" modal — pre-fills the parent from the highlighted row (selectedId).
@@ -625,6 +631,7 @@ export default function SpecialityClassifierPage() {
       <SpecialityDetailDialog
         specialityId={detailId}
         canEdit={canEdit}
+        canDelete={canDelete}
         path={detailPath}
         headerFallback={detailRow}
         onNavigate={setDetailId}
@@ -632,6 +639,11 @@ export default function SpecialityClassifierPage() {
           // Swap the detail modal for the dedicated edit form (never two stacked dialogs).
           setDetailId(null)
           setEditId(id)
+        }}
+        onDelete={(id) => {
+          // Same rule as onEdit — the confirm replaces the detail modal, never stacks on it.
+          setDetailId(null)
+          setDeleteId(id)
         }}
         onOpenChange={(open) => {
           if (!open) setDetailId(null)
@@ -652,6 +664,28 @@ export default function SpecialityClassifierPage() {
             setEditId(null)
             setSelectedId(id)
             setDetailId(id)
+          }}
+        />
+      ) : null}
+
+      {canDelete ? (
+        <SpecialityDeleteDialog
+          specialityId={deleteId}
+          onOpenChange={(open) => {
+            if (!open) setDeleteId(null)
+          }}
+          onDeleted={() => {
+            // The row is gone — drop every reference to it (a stale selectedId/detailId would
+            // re-open a modal on a 404).
+            setDeleteId(null)
+            setSelectedId(null)
+            setDetailId(null)
+          }}
+          onMoveChild={(childId) => {
+            // "Move under another parent" = edit the CHILD: its level + parent picker live in the
+            // edit form, so re-parenting there clears the blocker without deleting anything.
+            setDeleteId(null)
+            setEditId(childId)
           }}
         />
       ) : null}

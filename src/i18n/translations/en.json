@@ -1182,6 +1182,8 @@
   "{{count}} students found": "{{count}} students found",
   "View": "View",
   "Hierarchy level": "Hierarchy level",
+  "Has sub-directions — move them to another level first to change this level": "Has sub-directions — move them to another level first to change this level",
+  "Moving to another place resets the status to Needs review": "Moving to another place resets the status to Needs review",
   "Additional details": "Additional details",
   "Failed to update webhook target": "Failed to update webhook target",
   "Confirm password": "Confirm password",
@@ -1373,5 +1375,10 @@
   "Person not found": "Person not found",
   "Person data loaded": "Person data loaded",
   "Failed to fetch person data": "Failed to fetch person data",
-  "A user with this PINFL already exists": "A user with this PINFL already exists"
+  "A user with this PINFL already exists": "A user with this PINFL already exists",
+  "Delete speciality": "Delete speciality",
+  "This speciality has sub-directions. Delete them first, or move them under another parent.": "This speciality has sub-directions. Delete them first, or move them under another parent.",
+  "Only a speciality with the \"Needs review\" status can be deleted": "Only a speciality with the \"Needs review\" status can be deleted",
+  "Move": "Move",
+  "Speciality deleted": "Speciality deleted"
 }

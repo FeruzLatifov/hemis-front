@@ -208,6 +208,11 @@ export const specialityApi = {
     return response.data.data
   },
 
+  /** Delete a NEEDS_REVIEW speciality (childless + unattached). 422 when a guard blocks it. */
+  remove: async (id: string): Promise<void> => {
+    await apiClient.delete(`${BASE_URL}/${id}`)
+  },
+
   /** Advisory duplicate check for the add form — existing rows with the same code/name. */
   duplicates: async (
     params: SpecialityDuplicateParams,

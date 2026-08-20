@@ -1182,6 +1182,8 @@
   "{{count}} students found": "Найдено {{count}} студентов",
   "View": "Просмотр",
   "Hierarchy level": "Уровень иерархии",
+  "Has sub-directions — move them to another level first to change this level": "Есть поднаправления — сначала переместите их на другой уровень, чтобы изменить этот уровень",
+  "Moving to another place resets the status to Needs review": "При перемещении в другое место статус меняется на «требует проверки»",
   "Additional details": "Дополнительные детали",
   "Failed to update webhook target": "Не удалось обновить цель webhook",
   "Confirm password": "Подтвердите пароль",
@@ -1373,5 +1375,10 @@
   "Person not found": "Физлицо не найдено",
   "Person data loaded": "Данные физлица загружены",
   "Failed to fetch person data": "Не удалось получить данные физлица",
-  "A user with this PINFL already exists": "Пользователь с таким ПИНФЛ уже существует"
+  "A user with this PINFL already exists": "Пользователь с таким ПИНФЛ уже существует",
+  "Delete speciality": "Удалить специальность",
+  "This speciality has sub-directions. Delete them first, or move them under another parent.": "У этой специальности есть поднаправления. Сначала удалите их или переместите к другому родителю.",
+  "Only a speciality with the \"Needs review\" status can be deleted": "Удалить можно только специальность со статусом «Требует проверки»",
+  "Move": "Переместить",
+  "Speciality deleted": "Специальность удалена"
 }

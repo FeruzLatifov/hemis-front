@@ -7,6 +7,7 @@ import {
   Network,
   Info,
   Pencil,
+  Trash2,
   Fingerprint,
   Tag,
 } from 'lucide-react'
@@ -40,12 +41,17 @@ export function SpecialityDetailContent({
   specialityId,
   canEdit,
   onEdit,
+  canDelete = false,
+  onDelete,
   hideStatusCard = false,
 }: {
   specialityId: string
   canEdit: boolean
   /** Open the dedicated edit form for this row. */
   onEdit: () => void
+  canDelete?: boolean
+  /** Open the delete confirmation for this row. */
+  onDelete?: () => void
   /** The dialog renders level/status in its identity header, so it hides the
    *  redundant status card here. */
   hideStatusCard?: boolean
@@ -57,18 +63,36 @@ export function SpecialityDetailContent({
   // opaque, so we spell out the step when it's one of the known 1–4 levels.
   const levelKey = specialityLevelKey(node?.hierarchyLevel)
 
+  // Delete is offered ONLY for a NEEDS_REVIEW row: an APPROVED one is already distributed to the
+  // 224 OTMs, so removing it centrally would strand references out there (the backend refuses it
+  // with 422 either way — hiding the button keeps the offer honest).
+  const showDelete = canDelete && onDelete != null && node?.reviewStatus === 'NEEDS_REVIEW'
+
   return (
     // min-w-0: this is a grid item of DialogContent (display:grid). Without it the item's
     // min-width:auto lets a wide unbreakable child (a `truncate`/nowrap sub-speciality name)
     // expand the whole modal, pushing the justify-end Edit toolbar past the right edge.
     <div className="animate-fade-in min-w-0 space-y-4">
-      {/* Action toolbar — a single Edit button; the form opens as a dedicated dialog. */}
-      {canEdit && node ? (
-        <div className="flex justify-end">
-          <Button size="sm" onClick={onEdit}>
-            <Pencil className="h-4 w-4" />
-            {t('Edit')}
-          </Button>
+      {/* Action toolbar — Delete then Edit; both open dedicated dialogs. */}
+      {node && (canEdit || showDelete) ? (
+        <div className="flex justify-end gap-2">
+          {showDelete ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/40 dark:text-red-400"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+              {t('Delete')}
+            </Button>
+          ) : null}
+          {canEdit ? (
+            <Button size="sm" onClick={onEdit}>
+              <Pencil className="h-4 w-4" />
+              {t('Edit')}
+            </Button>
+          ) : null}
         </div>
       ) : null}
 
@@ -173,6 +197,14 @@ export function SpecialityDetailContent({
                       <span className="shrink-0 font-mono text-xs text-[#6B7280]">{c.code}</span>
                     ) : null}
                     <span className="min-w-0 truncate">{c.nameUz}</span>
+                    {/* Deactivated children are listed too — they still block a delete or a level
+                        change (the FK does not care about `active`), so hiding them would make the
+                        server's refusal look arbitrary. */}
+                    {!c.active ? (
+                      <Badge variant="outline" className="shrink-0 text-xs">
+                        {t('Inactive')}
+                      </Badge>
+                    ) : null}
                   </li>
                 ))}
               </ul>

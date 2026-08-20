@@ -25,15 +25,18 @@ import { specialityLevelKey } from './speciality-tree.util'
 export function SpecialityDetailDialog({
   specialityId,
   canEdit,
+  canDelete,
   path,
   headerFallback,
   onNavigate,
   onEdit,
+  onDelete,
   onOpenChange,
 }: {
   /** Node to show; `null` keeps the dialog closed. */
   specialityId: string | null
   canEdit: boolean
+  canDelete: boolean
   /** Root→shown chain (from the in-memory tree) — drives the breadcrumb. */
   path: SpecialityNode[]
   /** Instant header data when `path` is empty (list view — the tree isn't loaded);
@@ -43,6 +46,8 @@ export function SpecialityDetailDialog({
   onNavigate: (id: string) => void
   /** Open the dedicated edit form for the currently shown node. */
   onEdit: (id: string) => void
+  /** Open the delete confirmation for the currently shown node. */
+  onDelete: (id: string) => void
   onOpenChange: (open: boolean) => void
 }) {
   const { t } = useTranslation()
@@ -126,6 +131,8 @@ export function SpecialityDetailDialog({
             specialityId={specialityId}
             canEdit={canEdit}
             onEdit={() => onEdit(specialityId)}
+            canDelete={canDelete}
+            onDelete={() => onDelete(specialityId)}
             hideStatusCard
           />
         ) : null}

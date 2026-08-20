@@ -65,10 +65,12 @@ interface EditForm {
  * edit that was crammed into the detail dialog. Opened from the detail modal's Edit button.
  *
  * <p>Edits the same fields the API's update endpoint accepts: code, education type, the four names,
- * admission years, review status, and — for a level 2-4 row — its parent (a same-depth re-parent that
- * fixes a misplaced node without changing its level or cascading to descendants). The row's DEPTH is
- * fixed (only parents one level above are offered). Promoting NEEDS_REVIEW → APPROVED needs the
- * dedicated `.approve` permission (`canApprove`); the backend enforces it too.</p>
+ * admission years, review status, and — mirroring the create form — the row's placement (hierarchy
+ * level + parent), so a misplaced node can be re-placed instead of deleted and recreated. A row that
+ * still has sub-directions has its level LOCKED (its children must be moved out first); a childless
+ * row moves freely. Any successful move drops the row to NEEDS_REVIEW server-side. Promoting
+ * NEEDS_REVIEW → APPROVED needs the dedicated `.approve` permission (`canApprove`); the backend
+ * enforces it too.</p>
  */
 export function SpecialityEditDialog({
   open,
@@ -102,6 +104,12 @@ export function SpecialityEditDialog({
   // Placement mirrors the create form: the chosen depth (form.level) decides whether a parent is
   // required (level 2-4) and which level the parent picker offers (form.level - 1).
   const needsParent = (form?.level ?? 1) > 1
+  // A row that still has sub-directions (active children) can't change its own level — moving it
+  // would drag the whole subtree. The backend blocks it (422, SPECIALITY_HAS_CHILDREN_MOVE_FIRST);
+  // we lock the level selector up front and explain why, so the user re-places the children first
+  // instead of hitting the error. Same-level re-parent stays allowed, so the parent picker is not
+  // touched. `node.children` is the direct-child list the detail endpoint returns.
+  const hasChildren = (node?.children?.length ?? 0) > 0
   // Portal target for the year picker popover — rendering inside the dialog keeps wheel-scroll working.
   const [dialogNode, setDialogNode] = useState<HTMLElement | null>(null)
   // Confirm step: changing years is a full replace (delete-then-insert server-side), so we ask first.
@@ -176,7 +184,8 @@ export function SpecialityEditDialog({
           educationType: form.educationType,
           reviewStatus: form.reviewStatus,
           // Placement — same shape as create: depth + parent (parent omitted for a level-1 root).
-          // Backend re-derives depth, cascades any change to descendants, and no-ops if unchanged.
+          // Backend no-ops if unchanged, else re-places the row and drops it to NEEDS_REVIEW; a level
+          // change on a row with children is rejected (422) — the level control is locked to prevent it.
           hierarchyLevel: form.level,
           parentId: needsParent ? form.parentId : undefined,
           years: [...form.years],
@@ -261,11 +270,14 @@ export function SpecialityEditDialog({
               </div>
 
               {/* Hierarchy level — same selector as the create form. Changing the depth re-derives the
-                  valid parents (one level above) and drops the current parent for a fresh pick. */}
+                  valid parents (one level above) and drops the current parent for a fresh pick. LOCKED
+                  while the row still has sub-directions (hasChildren): the children must be re-placed
+                  first, so we disable the control and say why instead of letting the save 422. */}
               <div className="space-y-1">
                 <Label htmlFor={fieldId('level')}>{t('Hierarchy level')} *</Label>
                 <Select
                   value={String(form.level)}
+                  disabled={hasChildren}
                   onValueChange={(v) => set({ level: Number(v), parentId: '' })}
                 >
                   <SelectTrigger id={fieldId('level')} className="w-full">
@@ -282,6 +294,22 @@ export function SpecialityEditDialog({
                     })}
                   </SelectContent>
                 </Select>
+                {hasChildren ? (
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    {t(
+                      'Has sub-directions — move them to another level first to change this level',
+                    )}
+                  </p>
+                ) : null}
+                {/* Reset hint is INDEPENDENT of hasChildren: a row with children still allows a
+                    same-level re-parent (the parent picker stays enabled), which also demotes an
+                    APPROVED row to NEEDS_REVIEW and retracts it from the OTMs — so warn whenever the
+                    row is currently APPROVED, not only for childless rows. */}
+                {node?.reviewStatus === 'APPROVED' ? (
+                  <p className="text-muted-foreground text-xs">
+                    {t('Moving to another place resets the status to Needs review')}
+                  </p>
+                ) : null}
               </div>
 
               {/* Review status — promoting to APPROVED is a ministry-only .approve capability

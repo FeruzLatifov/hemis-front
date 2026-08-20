@@ -1182,6 +1182,8 @@
   "{{count}} students found": "{{count}} та талаба топилди",
   "View": "Кўриш",
   "Hierarchy level": "Иерархия даражаси",
+  "Has sub-directions — move them to another level first to change this level": "Ички йўналишлари бор — бу даражани ўзгартириш учун аввал уларни бошқа даражага кўчиринг",
+  "Moving to another place resets the status to Needs review": "Бошқа жойга кўчирилса ҳолат қайта кўриб чиқишга ўтади",
   "Additional details": "Қўшимча тафсилотлар",
   "Failed to update webhook target": "Webhook манзилини янгилаб бўлмади",
   "Confirm password": "Паролни тасдиқланг",
@@ -1373,5 +1375,10 @@
   "Person not found": "Шахс топилмади",
   "Person data loaded": "Шахс маълумотлари юкланди",
   "Failed to fetch person data": "Шахс маълумотларини олишда хатолик",
-  "A user with this PINFL already exists": "Бу PINFL билан фойдаланувчи аллақачон мавжуд"
+  "A user with this PINFL already exists": "Бу PINFL билан фойдаланувчи аллақачон мавжуд",
+  "Delete speciality": "Мутахассисликни ўчириш",
+  "This speciality has sub-directions. Delete them first, or move them under another parent.": "Бу мутахассисликда ички йўналишлар бор. Аввал уларни ўчиринг ёки бошқа отага кўчиринг.",
+  "Only a speciality with the \"Needs review\" status can be deleted": "Фақат \"Кўриб чиқиш керак\" ҳолатидаги мутахассисликни ўчириш мумкин",
+  "Move": "Кўчириш",
+  "Speciality deleted": "Мутахассислик ўчирилди"
 }

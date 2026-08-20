@@ -1182,6 +1182,8 @@
   "{{count}} students found": "{{count}} ta talaba topildi",
   "View": "Ko'rish",
   "Hierarchy level": "Ierarxiya darajasi",
+  "Has sub-directions — move them to another level first to change this level": "Ichki yo'nalishlari bor — bu darajani o'zgartirish uchun avval ularni boshqa darajaga ko'chiring",
+  "Moving to another place resets the status to Needs review": "Boshqa joyga ko'chirilsa holat qayta ko'rib chiqishga o'tadi",
   "Additional details": "Qo'shimcha tafsilotlar",
   "Failed to update webhook target": "Webhook manzilini yangilab bo'lmadi",
   "Confirm password": "Parolni tasdiqlang",
@@ -1373,5 +1375,10 @@
   "Person not found": "Shaxs topilmadi",
   "Person data loaded": "Shaxs ma'lumotlari yuklandi",
   "Failed to fetch person data": "Shaxs ma'lumotlarini olishda xatolik",
-  "A user with this PINFL already exists": "Bu PINFL bilan foydalanuvchi allaqachon mavjud"
+  "A user with this PINFL already exists": "Bu PINFL bilan foydalanuvchi allaqachon mavjud",
+  "Delete speciality": "Mutaxassislikni o'chirish",
+  "This speciality has sub-directions. Delete them first, or move them under another parent.": "Bu mutaxassislikda ichki yo'nalishlar bor. Avval ularni o'chiring yoki boshqa otaga ko'chiring.",
+  "Only a speciality with the \"Needs review\" status can be deleted": "Faqat \"Ko'rib chiqish kerak\" holatidagi mutaxassislikni o'chirish mumkin",
+  "Move": "Ko'chirish",
+  "Speciality deleted": "Mutaxassislik o'chirildi"
 }
