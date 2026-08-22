@@ -622,7 +622,7 @@
   "Labor rates": "Меҳнат ставкалари",
   "Dissertation defenses": "Диссертация ҳимоялари",
   "Page {{number}}": "{{number}}-саҳифа",
-  "Student data": "Талаба маълу��отлари",
+  "Student data": "Талаба маълумотлари",
   "SOATO Region": "СОАТО Регион",
   "Bachelor, Master, PhD distribution": "Бакалавр, Магистр, PhD тақсимоти",
   "Distribution by education levels": "Таълим босқичлари бўйича тақсимлаш",
@@ -1385,6 +1385,5 @@
   "Attached to universities": "ОТМларга бириктирилган",
   "This speciality is attached to universities. Remove those attachments first.": "Бу мутахассислик ОТМларга бириктирилган. Аввал ўша бириктиришларни бекор қилинг.",
   "Revoked attachments also block deletion": "Бекор қилинган бириктиришлар ҳам ўчиришга тўсқинлик қилади",
-
   "Remove {{label}} filter": "{{label}} фильтрини олиб ташлаш"
 }
