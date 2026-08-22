@@ -4,7 +4,11 @@ import { queryKeys } from '@/lib/queryKeys'
 import { toast } from 'sonner'
 import i18n from '@/i18n/config'
 import { extractApiErrorMessage } from '@/utils/error.util'
-import type { OAuthClientsParams, OAuthClientCreateRequest } from '@/types/oauthClient.types'
+import type {
+  OAuthClientsParams,
+  OAuthClientCreateRequest,
+  OAuthClientSecretResponse,
+} from '@/types/oauthClient.types'
 
 /** Paginated OTM API-client list. */
 export function useOAuthClients(params: OAuthClientsParams = {}) {
@@ -44,6 +48,22 @@ export function useDeleteOAuthClient() {
       queryClient.invalidateQueries({ queryKey: queryKeys.oauthClients.all })
       toast.success(i18n.t('Successfully deleted'))
     },
+    onError: (error) => toast.error(extractApiErrorMessage(error)),
+  })
+}
+
+/**
+ * Sir rotatsiyasi.
+ *
+ * Muvaffaqiyat toast'i BU YERDA chiqarilmaydi: markaz sir generatsiya qilgan bo'lsa,
+ * sahifa uni bir martalik dialogda ko'rsatadi — toast uni yopib qo'yishi mumkin.
+ */
+export function useRotateOAuthClientSecret() {
+  const queryClient = useQueryClient()
+  return useMutation<OAuthClientSecretResponse, unknown, { id: string; clientSecret?: string }>({
+    mutationFn: ({ id, clientSecret }) =>
+      oauthClientsApi.rotateSecret(id, clientSecret ? { clientSecret } : {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.oauthClients.all }),
     onError: (error) => toast.error(extractApiErrorMessage(error)),
   })
 }

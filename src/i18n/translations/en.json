@@ -1385,6 +1385,25 @@
   "Attached to universities": "Attached to universities",
   "This speciality is attached to universities. Remove those attachments first.": "This speciality is attached to universities. Remove those attachments first.",
   "Revoked attachments also block deletion": "Revoked attachments also block deletion",
-
-  "Remove {{label}} filter": "Remove {{label}} filter"
+  "Remove {{label}} filter": "Remove {{label}} filter",
+  "Rotate secret": "Rotate secret",
+  "Generate automatically": "Generate automatically",
+  "Enter manually": "Enter manually",
+  "New secret": "New secret",
+  "Already-issued tokens stay valid for up to 24 hours. Rotating or disabling only blocks new tokens.": "Already-issued tokens stay valid for up to 24 hours. Rotating or disabling only blocks new tokens.",
+  "New secret — copy now": "New secret — copy now",
+  "Secret changed": "Secret changed",
+  "At least {{n}} characters": "At least {{n}} characters",
+  "Repeat new secret": "Repeat new secret",
+  "Secrets do not match": "Secrets do not match",
+  "Weak": "Weak",
+  "Fair": "Fair",
+  "Strong": "Strong",
+  "Estimated entropy: {{bits}} bits": "Estimated entropy: {{bits}} bits",
+  "Must not contain the Client ID": "Must not contain the Client ID",
+  "Too many repeated characters": "Too many repeated characters",
+  "Avoid sequences like abcd or 1234": "Avoid sequences like abcd or 1234",
+  "Mix letters, digits and symbols": "Mix letters, digits and symbols",
+  "Avoid guessable words like admin, password or test": "Avoid guessable words like admin, password or test",
+  "Not complex enough — make it longer or more random": "Not complex enough — make it longer or more random"
 }

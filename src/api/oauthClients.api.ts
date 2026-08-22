@@ -3,6 +3,8 @@ import type {
   OAuthClientAdmin,
   OAuthClientCreateRequest,
   OAuthClientsParams,
+  OAuthClientSecretRotateRequest,
+  OAuthClientSecretResponse,
 } from '@/types/oauthClient.types'
 import type { PagedResponse } from '@/api/universities.api'
 
@@ -37,6 +39,18 @@ export const oauthClientsApi = {
   async toggleStatus(id: string): Promise<OAuthClientAdmin> {
     const response = await apiClient.patch<{ success: boolean; data: OAuthClientAdmin }>(
       `/api/v1/web/admin/oauth-clients/${id}/status`,
+    )
+    return response.data.data
+  },
+
+  /** Sir rotatsiyasi. Bo'sh tana => markaz kuchli sir generatsiya qiladi. */
+  async rotateSecret(
+    id: string,
+    data: OAuthClientSecretRotateRequest = {},
+  ): Promise<OAuthClientSecretResponse> {
+    const response = await apiClient.post<{ success: boolean; data: OAuthClientSecretResponse }>(
+      `/api/v1/web/admin/oauth-clients/${id}/secret`,
+      data,
     )
     return response.data.data
   },
